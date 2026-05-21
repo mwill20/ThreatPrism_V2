@@ -36,8 +36,8 @@ Build and harden the first ThreatPrism backend slice:
 
 ## Immediate Next Checklist
 
-- [ ] Initialize or sync `C:\Projects\ThreatPrismV2` as the local checkout for `mwill20/ThreatPrism_V2`.
-- [ ] Commit and push the current validated baseline to `main`.
+- [x] Initialize or sync `C:\Projects\ThreatPrismV2` as the local checkout for `mwill20/ThreatPrism_V2`.
+- [x] Commit and push the current validated baseline to `main`.
 - [x] Add or update a user-facing `README.md` with setup, validation, and demo workflow.
 - [x] Add a concise local runbook for starting the FastAPI service.
 - [x] Review docs/specs against the implemented slice and remove remaining stale no-code wording.
@@ -79,10 +79,15 @@ fresh ignored base temp directory.
 
 ## Definition Of Done For The Current Slice
 
-- [ ] Local workspace is connected to `mwill20/ThreatPrism_V2`.
-- [ ] Current baseline is committed and pushed.
+- [x] Local workspace is connected to `mwill20/ThreatPrism_V2`.
+- [x] Current baseline is committed and pushed.
 - [x] README explains setup, test, and demo flow.
 - [x] Guardrail and action-safety test coverage covers failure paths.
 - [x] Specs, limitations, and handoff docs agree with the implemented state.
 - [x] Validation passes from a clean command.
-- [ ] Remaining gaps are documented as next-phase work, not hidden as completed.
+- [x] Remaining gaps are documented as next-phase work, not hidden as completed.
+
+## Published Baseline
+
+- Initial baseline commit: `2ece6dd Build ThreatPrism V2 baseline`.
+- Pushed to `origin/main` for `mwill20/ThreatPrism_V2`.

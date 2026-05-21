@@ -1,0 +1,73 @@
+{
+  "source": "generic_soar",
+  "source_case_id": "SOAR-100245",
+  "organization_context": {
+    "environment": "demo",
+    "business_unit": "internal_soc",
+    "sensitivity": "demo",
+    "operating_model": "mssp_to_internal_soc_transition"
+  },
+  "title": "Suspicious sign-in followed by mailbox rule creation",
+  "description": "Automated closure candidate involving demo.user@example.invalid, source IP 203.0.113.42, and mailbox rule creation.",
+  "created_at": "2026-05-21T18:30:00Z",
+  "alerts": [
+    {
+      "alert_id": "alert-001",
+      "name": "Impossible travel sign-in",
+      "severity": "medium",
+      "source": "identity_provider",
+      "description": "User sign-in from two distant locations within a short interval."
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt-001",
+      "timestamp": "2026-05-21T18:21:00Z",
+      "event_type": "signin",
+      "source": "identity_provider",
+      "description": "Successful sign-in from 203.0.113.42 followed by mailbox rule creation.",
+      "normalized": {
+        "actor": "demo.user@example.invalid",
+        "source_ip": "203.0.113.42"
+      },
+      "provenance": {
+        "source_file": "demo://payloads/generic_soar_case.json",
+        "record_index": 0,
+        "source_event_id": "source-event-001"
+      },
+      "raw_reference": "demo://events/evt-001"
+    }
+  ],
+  "entities": [
+    {
+      "entity_type": "user",
+      "value": "demo.user@example.invalid",
+      "role": "subject"
+    }
+  ],
+  "iocs": [
+    {
+      "ioc_type": "ip",
+      "value": "203.0.113.42",
+      "source": "alert",
+      "confidence": 0.7,
+      "evidence_ids": ["ev-001"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-001",
+      "evidence_type": "log",
+      "summary": "Identity sign-in log shows unfamiliar source IP 203.0.113.42 and mailbox rule creation for demo.user@example.invalid.",
+      "source_uri": "demo://logs/signin/evt-001",
+      "event_ids": ["evt-001"],
+      "excerpt": "Successful sign-in from 203.0.113.42 followed by mailbox rule creation.",
+      "sensitivity": "demo",
+      "provenance": {
+        "source_file": "demo://payloads/generic_soar_case.json",
+        "record_index": 0,
+        "source_event_id": "source-event-001"
+      }
+    }
+  ]
+}

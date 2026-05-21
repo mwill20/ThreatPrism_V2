@@ -1,0 +1,14 @@
+[project]
+name = "threatprism"
+version = "0.1.0"
+description = "ThreatPrism SOC migration accelerator backend"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "pydantic>=2.0.0",
+  "uvicorn>=0.30.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

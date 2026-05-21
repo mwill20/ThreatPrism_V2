@@ -1,0 +1,15 @@
+{
+  "source": "sentinel",
+  "source_case_id": "SENTINEL-DEMO-001",
+  "title": "Demo Sentinel incident export",
+  "description": "Fake Sentinel-style incident payload for adapter demonstration only.",
+  "created_at": "2026-05-21T18:30:00Z",
+  "evidence": [
+    {
+      "evidence_id": "ev-001",
+      "evidence_type": "incident",
+      "summary": "Demo Sentinel incident evidence uses synthetic data only.",
+      "source_uri": "demo://sentinel/incidents/001"
+    }
+  ]
+}

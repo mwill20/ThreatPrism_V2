@@ -1,0 +1,30 @@
+from __future__ import annotations
+
+import json
+import re
+from typing import Any
+
+
+PROHIBITED_PATTERNS = [
+    re.compile(r"\b(I|we)\b.*\b(disabled|isolated|blocked|deleted|revoked|remediated)\b", re.I),
+    re.compile(r"\b(real action executed|containment completed|remediation completed)\b", re.I),
+    re.compile(r"\b(confirmed|certain|guaranteed) that\b", re.I),
+    re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b"),
+]
+
+
+def scan_output_policy(value: Any) -> list[str]:
+    text = json.dumps(value, ensure_ascii=False, default=str)
+    violations: list[str] = []
+    for pattern in PROHIBITED_PATTERNS:
+        if pattern.search(text):
+            violations.append(f"Prohibited output pattern detected: {pattern.pattern}")
+    return violations
+
+
+def enforce_action_safety(value: Any) -> list[str]:
+    text = json.dumps(value, ensure_ascii=False, default=str)
+    issues: list[str] = []
+    if re.search(r'"real_action_executed"\s*:\s*true', text, re.I):
+        issues.append("Real action execution is not allowed in V2.")
+    return issues

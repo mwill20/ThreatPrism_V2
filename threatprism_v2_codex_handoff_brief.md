@@ -25,6 +25,18 @@ Validation result on 2026-05-21:
 13 passed
 ```
 
+Later validation after the healthcare safeguard guardrails slice on 2026-05-22:
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
+```
+
+Result:
+
+```text
+22 passed
+```
+
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
 with a fresh ignored base temp such as `.pytest_tmp_run_verify`.
 
@@ -871,15 +883,17 @@ Analyst submits feedback
 ThreatPrism records disagreement metrics
 ```
 
-The next recommended slice is:
+The healthcare safeguard slice is now implemented. The next recommended slice is:
 
 ```text
-Healthcare Safeguard & Evidence Alignment Guardrails v0.1
-  -> Context-aware potential PHI/ePHI, PII, secret, and security telemetry detection
-  -> Typed tokenization before persistence, model payload creation, reports, logs, or role-based display
-  -> Role-based rendering for analyst, engineer, manager/GRC, legal/privacy, audit/debug, and AI views
-  -> Compliance-language scanner for HIPAA/HITRUST/audit-ready/control-satisfied claims
-  -> Audit events for tokenization, rehydration, denial, guardrail blocks, and report validation
+Operational Read Models & Metrics API v0.1
+  -> Stable GET /metrics aggregate response shape
+  -> Dashboard-ready case list filtering or companion envelope route
+  -> Manager-review and healthcare-review queue behavior
+  -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
+  -> Role-safe rendering on detail and review routes
+  -> Tests proving metrics/read models do not expose raw potential PHI/ePHI,
+     secrets, credentials, or token vault mappings
 ```
 
 ---

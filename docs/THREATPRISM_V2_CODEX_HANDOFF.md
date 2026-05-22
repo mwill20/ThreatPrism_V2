@@ -42,7 +42,8 @@ The current live implementation includes a first backend slice:
   service orchestration.
 - `src/threatprism/soar/generic.py` with generic SOAR payload normalization.
 - `src/threatprism/guardrails/` with prompt firewall, tokenization,
-  output-policy scanning, evidence-grounding checks, and action-safety checks.
+  healthcare safeguard scanning, role-based rendering helpers, output-policy
+  scanning, evidence-grounding checks, and action-safety checks.
 - `src/threatprism/llm/providers.py` with a deterministic demo provider.
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
@@ -50,16 +51,16 @@ The current live implementation includes a first backend slice:
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
 
-Validated on 2026-05-21 with:
+Validated on 2026-05-22 with:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_new
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
 ```
 
 Result:
 
 ```text
-13 passed
+22 passed
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -222,10 +223,9 @@ Never rehydrate secrets, full API keys, or credential-like tokens.
 
 Prefer masked values for analyst views and tokenized values for management/GRC views unless raw values are required.
 
-## First Implementation Slice
+## Completed Implementation Slices
 
-The first vertical slice is now partially implemented. Continue to verify the
-live repo before assuming completion, but the current target remains:
+The first vertical slice is implemented:
 
 ```text
 Generic SOAR webhook payload
@@ -236,6 +236,33 @@ Generic SOAR webhook payload
   -> Return/report status via API
   -> Analyst submits feedback
   -> ThreatPrism records disagreement metrics
+```
+
+Healthcare Safeguard & Evidence Alignment Guardrails v0.1 is also implemented:
+
+```text
+Context-aware potential PHI/ePHI, PII, secret, and security telemetry detection
+  -> Typed tokenization before persistence and model-visible payload creation
+  -> Role-based rendering for AI, analyst, engineer, manager/GRC,
+     legal/privacy, and audit/debug views
+  -> Compliance-language scanner for HIPAA/HITRUST/audit-ready/control claims
+  -> Audit events for tokenization, rehydration approval or denial,
+     role-view policy application, guardrail blocks, and report validation
+```
+
+## Next Implementation Slice
+
+The next recommended slice is:
+
+```text
+Operational Read Models & Metrics API v0.1
+  -> Stable GET /metrics aggregate response shape
+  -> Dashboard-ready case list filtering or companion envelope route
+  -> Manager-review and healthcare-review queue behavior
+  -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
+  -> Role-safe rendering on detail and review routes
+  -> Tests proving metrics/read models do not expose raw potential PHI/ePHI,
+     secrets, credentials, or token vault mappings
 ```
 
 Do not implement:
@@ -380,6 +407,7 @@ docs/specs/12_IMPLEMENTATION_ROADMAP.md
 docs/specs/13_ACCEPTANCE_CRITERIA.md
 docs/specs/14_DEMO_PLAN.md
 docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md
+docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -411,7 +439,8 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue the first implementation slice using a clean V2 architecture with selective V1 module porting.
+Continue with Operational Read Models & Metrics API v0.1 using a clean V2
+architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
 
@@ -419,11 +448,12 @@ Start by inspecting `docs/specs/`, `src/threatprism/`, `tests/`,
 `examples/soar_payloads/`, `pyproject.toml`, `requirements.txt`, and
 `.env.example`. Run:
 
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_new
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
-analyst-controlled, no-real-remediation boundary.
+analyst-controlled, no-real-remediation boundary. Do not build a frontend
+dashboard or add live integrations in this slice.
 
-If the reused `.pytest_tmp_run_new` folder is locked on Windows, rerun with a
-fresh ignored base temp such as `.pytest_tmp_run_verify`.
+If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
+fresh ignored base temp such as `.pytest_tmp_run_metrics`.
 ```

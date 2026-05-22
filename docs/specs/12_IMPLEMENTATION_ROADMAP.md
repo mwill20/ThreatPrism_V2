@@ -183,7 +183,7 @@ Generic SOAR webhook payload
   -> ThreatPrism records disagreement metrics
 ```
 
-## Next Recommended Slice
+## Recently Completed Slice
 
 ```text
 Healthcare Safeguard & Evidence Alignment Guardrails v0.1
@@ -198,6 +198,21 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1
      and report validation
   -> Add tests proving raw sensitive values do not leak into model-visible
      payloads, reports, logs, or manager/GRC views
+```
+
+## Next Recommended Slice
+
+```text
+Operational Read Models & Metrics API v0.1
+  -> Add stable GET /metrics aggregate response shape
+  -> Add dashboard-ready case list filtering or a companion list envelope route
+  -> Add manager-review and healthcare-review queue behavior
+  -> Add safe detail routes for evidence, timeline, MITRE, GRC, and audit events
+  -> Apply role-safe rendering to detail and review routes
+  -> Track guardrail, healthcare safeguard, disagreement, timing, and GRC metrics
+  -> Prove metrics and read models do not expose raw potential PHI/ePHI, secrets,
+     or token vault mappings
+  -> Keep the slice backend-only, fake-data-only, and no-real-remediation
 ```
 
 ## Roadmap Constraints

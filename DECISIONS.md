@@ -206,3 +206,33 @@ ThreatPrism must not claim:
 - That a mapped case proves compliance.
 
 All mappings are advisory, evidence-linked, and require human review.
+
+## D-023 Next Implementation Slice
+
+The next implementation slice after healthcare safeguard guardrails is:
+
+```text
+Operational Read Models & Metrics API v0.1
+```
+
+This slice should add backend-only, dashboard-ready read models before any
+frontend dashboard work.
+
+Required focus:
+
+- Stable `GET /metrics` aggregate response shape.
+- Dashboard-ready case list filtering or a companion envelope route.
+- Manager-review and healthcare-review queue behavior.
+- Safe detail routes for evidence, timeline, MITRE, GRC, and audit events.
+- Role-safe rendering on read/detail routes.
+- Tests proving metrics and read models do not expose raw potential PHI/ePHI,
+  secrets, credentials, or token vault mappings.
+
+Out of scope for this slice:
+
+- Frontend dashboard.
+- Live LLM calls.
+- Live SOAR callbacks.
+- Live enrichment calls.
+- Production authentication and authorization.
+- Real remediation or containment.

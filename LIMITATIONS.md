@@ -27,17 +27,23 @@ Current implemented baseline:
 - GRC mapping code.
 - Demo payload files.
 - API and guardrail tests.
+- Healthcare safeguard guardrails for context-aware potential PHI/ePHI, PII,
+  secret, and security telemetry handling.
+- Role-based rendering helpers for AI, analyst, engineer, manager/GRC,
+  legal/privacy, and audit/debug views.
+- Compliance-language scanner for HIPAA/HITRUST compliance, certification,
+  audit-ready, control-satisfied, and evidence-proves-compliance claims.
 
-Validation command confirmed on 2026-05-21:
+Validation command confirmed on 2026-05-22:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_new
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
 ```
 
 Result:
 
 ```text
-13 passed
+22 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -54,6 +60,8 @@ temp such as `.pytest_tmp_run_verify`.
 - CI/CD.
 - Authentication and authorization beyond demo-mode settings.
 - Production deployment hardening.
+- Operational metrics/read-model APIs for dashboard-ready manager, GRC,
+  legal/privacy, engineer, and audit views.
 
 ## Product Limitations
 
@@ -142,7 +150,7 @@ or audit opinion.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Healthcare Safeguard & Evidence Alignment Guardrails v0.1.
-- Add role-based rendering policies before any non-demo data is used.
+- Implement Operational Read Models & Metrics API v0.1 before building any
+  frontend dashboard.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.

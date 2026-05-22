@@ -110,6 +110,26 @@ Each completed report includes:
 - Audit events are recorded for tokenization, rehydration approval or denial,
   guardrail blocks, and report validation.
 
+## Operational Read Models And Metrics Acceptance Criteria
+
+- `GET /metrics` returns case, triage, guardrail, healthcare safeguard,
+  disagreement, timing, and GRC aggregates.
+- Case-list responses support dashboard-useful filtering or a documented
+  companion envelope route.
+- Manager-review cases can be queried without exposing raw sensitive values.
+- Healthcare-review cases can be queried with exposure metadata and review
+  flags, not raw potential PHI/ePHI.
+- Evidence, timeline, MITRE, GRC, and audit detail routes return stable JSON
+  shapes.
+- Role-aware read routes apply role-safe rendering consistently.
+- Metrics and audit/debug responses do not expose raw potential PHI/ePHI,
+  secrets, credentials, or token vault mappings.
+- GRC detail responses cite evidence IDs and avoid compliance/certification
+  claims.
+- Tests cover aggregation, filtering, manager-review queue behavior,
+  healthcare-review queue behavior, detail routes, role-safe rendering, and
+  sensitive-value non-leakage.
+
 ## GRC Acceptance Criteria
 
 - GRC mapping is category-level only.

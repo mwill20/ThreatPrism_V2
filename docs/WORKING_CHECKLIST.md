@@ -49,7 +49,7 @@ The first ThreatPrism backend slice is complete:
 - [x] Decide whether the next async step stays with in-process FastAPI background tasks or moves to a worker/queue.
 - [x] Decide the demo API auth model before using anything beyond fake demo data.
 
-## Next Active Slice
+## Completed Slice
 
 Healthcare Safeguard & Evidence Alignment Guardrails v0.1:
 
@@ -80,6 +80,33 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1:
 - [x] Add tests proving secrets are never rehydrated.
 - [x] Add tests proving compliance/certification/audit-ready claims are blocked.
 - [x] Add tests proving GRC mappings still cite evidence IDs.
+
+## Next Active Slice
+
+Operational Read Models & Metrics API v0.1:
+
+- [x] Add implementation-ready spec for operational read models and metrics.
+- [ ] Add Pydantic response models for metrics, case-list envelopes, detail
+  route envelopes, and safe audit summaries.
+- [ ] Add `GET /metrics` with case, triage, guardrail, healthcare safeguard,
+  disagreement, timing, and GRC aggregates.
+- [ ] Add dashboard-ready case list filtering for source, status,
+  triage_status, severity, determination, manager review, healthcare review,
+  guardrail block, and created time windows.
+- [ ] Add manager-review queue behavior through filters or a dedicated route.
+- [ ] Add healthcare-review queue behavior through filters or a dedicated
+  route.
+- [ ] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
+  and audit events.
+- [ ] Apply role-safe rendering to detail/read-model routes where case content
+  or security telemetry can appear.
+- [ ] Ensure metrics and read-model routes never expose raw potential PHI/ePHI,
+  secrets, or token vault mappings.
+- [ ] Add tests for metrics aggregation, filtering, manager-review queue,
+  healthcare-review queue, detail routes, role-safe views, and no sensitive
+  value leakage.
+- [ ] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
+  SOAR, enrichment, cloud, or remediation calls.
 
 ## Validation
 
@@ -122,4 +149,5 @@ fresh ignored base temp directory.
 ## Published Baseline
 
 - Initial baseline commit: `2ece6dd Build ThreatPrism V2 baseline`.
+- Healthcare safeguard guardrails commit: `f251d28 Implement healthcare safeguard guardrails`.
 - Pushed to `origin/main` for `mwill20/ThreatPrism_V2`.

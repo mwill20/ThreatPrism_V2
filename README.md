@@ -8,6 +8,10 @@ generic SOAR case intake, case normalization, guardrails, deterministic demo
 triage, SQLite persistence, FastAPI routes, fake SOAR payloads, and initial
 tests.
 
+The latest implemented guardrail slice also includes context-aware healthcare
+safeguards, typed sensitive-data tokens, role-based rendering helpers, and
+compliance-language scanning for healthcare/GRC claims.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -64,7 +68,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 Current known result:
 
 ```text
-13 passed
+22 passed
 ```
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
@@ -122,6 +126,9 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/cases/$($created.case
 
 Track current work in `docs/WORKING_CHECKLIST.md`.
 
-The next planned slice is Healthcare Safeguard & Evidence Alignment Guardrails
-v0.1. See `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
+The completed healthcare safeguard slice is documented in
+`docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
 `docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.
+
+The next active implementation target is Operational Read Models & Metrics API
+v0.1. See `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.

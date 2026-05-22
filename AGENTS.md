@@ -41,12 +41,14 @@ Do not assume the old docs-only baseline is current.
 Current baseline:
 
 - The first backend slice exists under `src/threatprism/`.
+- Healthcare safeguard guardrails and role-based rendering helpers exist under
+  `src/threatprism/guardrails/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - API and guardrail tests exist under `tests/`.
 - The known local validation command is:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_new
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 ```
 
 Before changing code, verify the live repo state directly.
@@ -122,6 +124,14 @@ Reviews pytest scope, guardrail evals, schema validation tests, and action block
 ### Documentation Agent
 
 Reviews consistency across README, specs, runbooks, limitations, architecture, and demo guide.
+
+### Operational Metrics Reviewer Agent
+
+Reviews dashboard-ready metrics, case-list filters, manager-review queues,
+healthcare-review queues, detail read routes, and safe aggregate reporting.
+
+This reviewer must verify that metrics and read models do not expose raw
+potential PHI/ePHI, secrets, credentials, or token vault mappings.
 
 ## Development Rules For Later Phases
 

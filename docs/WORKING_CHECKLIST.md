@@ -58,28 +58,28 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1:
 - [x] Record decision that identifiers are not PHI/ePHI by themselves.
 - [x] Record decision to use safeguard/evidence-alignment language, not
   compliance-certification language.
-- [ ] Implement context-aware detector taxonomy for potential PHI/ePHI, PII,
+- [x] Implement context-aware detector taxonomy for potential PHI/ePHI, PII,
   secrets, and security telemetry.
-- [ ] Add typed replacement tokens such as `[POTENTIAL_PHI:MRN:phi_0001]` and
+- [x] Add typed replacement tokens such as `[POTENTIAL_PHI:MRN:phi_0001]` and
   `[SECRET:API_KEY:secret_0001]`.
-- [ ] Add pre-persistence scanning before model-visible payload creation,
+- [x] Add pre-persistence scanning before model-visible payload creation,
   report rendering, logging, or role-based display.
-- [ ] Add role-based rendering policies for AI, analyst, engineer, manager/GRC,
+- [x] Add role-based rendering policies for AI, analyst, engineer, manager/GRC,
   legal/privacy, and audit/debug views.
-- [ ] Add compliance-language scanner for HIPAA/HITRUST compliance,
+- [x] Add compliance-language scanner for HIPAA/HITRUST compliance,
   certification, audit-ready, control-satisfied, and evidence-proves-compliance
   claims.
-- [ ] Record audit events for tokenization, rehydration approval or denial,
+- [x] Record audit events for tokenization, rehydration approval or denial,
   guardrail blocks, role-view policy application, and report validation.
-- [ ] Add fake fixtures for potential PHI/ePHI contamination, normal security
+- [x] Add fake fixtures for potential PHI/ePHI contamination, normal security
   telemetry, PII, and secrets.
-- [ ] Add tests proving raw potential PHI/ePHI does not appear in model-visible
+- [x] Add tests proving raw potential PHI/ePHI does not appear in model-visible
   payloads, reports, logs, manager/GRC views, or audit/debug views.
-- [ ] Add tests proving security telemetry remains usable for analyst/engineer
+- [x] Add tests proving security telemetry remains usable for analyst/engineer
   response when it is not tied to health context.
-- [ ] Add tests proving secrets are never rehydrated.
-- [ ] Add tests proving compliance/certification/audit-ready claims are blocked.
-- [ ] Add tests proving GRC mappings still cite evidence IDs.
+- [x] Add tests proving secrets are never rehydrated.
+- [x] Add tests proving compliance/certification/audit-ready claims are blocked.
+- [x] Add tests proving GRC mappings still cite evidence IDs.
 
 ## Validation
 
@@ -92,7 +92,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 Current known result:
 
 ```text
-13 passed
+22 passed
 ```
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a

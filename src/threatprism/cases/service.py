@@ -22,9 +22,11 @@ from threatprism.cases.schemas import (
 )
 from threatprism.config import Settings
 from threatprism.guardrails.evidence import validate_report_evidence
+from threatprism.guardrails.healthcare import safeguard_value
 from threatprism.guardrails.policy import enforce_action_safety, scan_output_policy
 from threatprism.guardrails.prompt_firewall import sanitize_text
 from threatprism.guardrails.tokenization import TokenVault, rehydrate_text, tokenize_text
+from threatprism.guardrails.views import RoleViewResult, ViewRole, render_role_view
 from threatprism.ids import new_id
 from threatprism.llm.providers import get_provider
 from threatprism.persistence.sqlite import SQLiteRepository
@@ -41,10 +43,11 @@ class CaseService:
     def create_case(self, payload: dict[str, Any]) -> CaseAcceptedResponse:
         case_create = normalize_soar_payload(payload)
         source_hash = _payload_hash(payload)
+        case_id = new_id("case")
         case = CaseRecord.model_validate(
             {
                 **case_create.model_dump(mode="json", exclude_none=True),
-                "case_id": new_id("case"),
+                "case_id": case_id,
                 "source_payload_hash": f"sha256:{source_hash}",
                 "status": CaseStatus.queued_for_triage,
                 "triage_status": TriageStatus.queued,
@@ -57,6 +60,7 @@ class CaseService:
                 ],
             }
         )
+        case = self._apply_healthcare_safeguards(case)
         for audit_event in case.audit_trail:
             audit_event.case_id = case.case_id
         self.repository.save_case(case)
@@ -75,6 +79,42 @@ class CaseService:
                 "analyst_feedback": f"/cases/{case.case_id}/analyst-feedback",
             },
         )
+
+    def _apply_healthcare_safeguards(self, case: CaseRecord) -> CaseRecord:
+        scan = safeguard_value(case.model_dump(mode="json"), case_id=case.case_id)
+        safeguarded = CaseRecord.model_validate(scan.value)
+        safeguarded.sanitization_records.extend(scan.records)
+        if scan.records:
+            safeguarded.source_metadata["healthcare_safeguard"] = scan.summary
+            safeguarded.audit_trail.append(
+                AuditEvent(
+                    case_id=safeguarded.case_id,
+                    event_type="healthcare_safeguard_applied",
+                    summary="Inbound case content was scanned for accidental healthcare data exposure.",
+                    metadata=scan.summary,
+                )
+            )
+            safeguarded.audit_trail.append(
+                AuditEvent(
+                    case_id=safeguarded.case_id,
+                    event_type="sensitive_data_tokenized",
+                    summary="Sensitive-looking inbound values were replaced with typed tokens.",
+                    metadata=scan.summary,
+                )
+            )
+            if scan.summary.get("secret_exposure_detected"):
+                safeguarded.audit_trail.append(
+                    AuditEvent(
+                        case_id=safeguarded.case_id,
+                        event_type="secret_exposure_detected",
+                        summary="Inbound case content contained a secret-like value and was tokenized.",
+                        metadata={
+                            "detectors": scan.summary.get("detectors", {}),
+                            "field_paths": scan.summary.get("field_paths", []),
+                        },
+                    )
+                )
+        return safeguarded
 
     def run_triage(self, case_id: str) -> None:
         case = self.repository.get_case(case_id)
@@ -111,6 +151,7 @@ class CaseService:
             return
 
         report = self._rehydrate_report(report, vault)
+        self._append_rehydration_audit(case, records)
         report.rendered_report = render_report(report)
 
         case.status = CaseStatus.triage_completed
@@ -140,8 +181,28 @@ class CaseService:
     def get_case(self, case_id: str) -> CaseRecord | None:
         return self.repository.get_case(case_id)
 
+    def get_case_view(self, case_id: str, role: ViewRole) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        result = render_role_view(case, role, case_id=case_id)
+        self._record_role_view_audit(case, result)
+        return _payload_with_role_view_metadata(result.payload, result.metadata)
+
     def get_report(self, case_id: str) -> TriageReport | None:
         return self.repository.get_report(case_id)
+
+    def get_report_view(self, case_id: str, role: ViewRole) -> dict[str, Any] | None:
+        report = self.repository.get_report(case_id)
+        if report is None:
+            return None
+        case = self.repository.get_case(case_id)
+        if case is not None:
+            result = render_role_view(report, role, case_id=case_id)
+            self._record_role_view_audit(case, result)
+            return _payload_with_role_view_metadata(result.payload, result.metadata)
+        result = render_role_view(report, role, case_id=case_id)
+        return _payload_with_role_view_metadata(result.payload, result.metadata)
 
     def submit_feedback(self, case_id: str, feedback_create: AnalystFeedbackCreate) -> FeedbackResponse:
         case = self.repository.get_case(case_id)
@@ -284,6 +345,41 @@ class CaseService:
             reasons=reasons,
         )
 
+    def _append_rehydration_audit(self, case: CaseRecord, records: list[SanitizationRecord]) -> None:
+        approved = [
+            record
+            for record in records
+            if record.operation == "tokenize" and record.token and record.rehydration_allowed
+        ]
+        denied = [
+            record
+            for record in records
+            if record.operation == "tokenize" and record.token and not record.rehydration_allowed
+        ]
+        if approved:
+            case.audit_trail.append(
+                AuditEvent(
+                    case_id=case.case_id,
+                    event_type="rehydration_approved",
+                    summary="Validated report rehydrated approved security telemetry tokens.",
+                    metadata=_token_record_summary(approved),
+                )
+            )
+        if denied:
+            case.audit_trail.append(
+                AuditEvent(
+                    case_id=case.case_id,
+                    event_type="rehydration_denied",
+                    summary="Non-rehydratable tokens remained redacted after report validation.",
+                    metadata=_token_record_summary(denied),
+                )
+            )
+
+    def _record_role_view_audit(self, case: CaseRecord, result: RoleViewResult) -> None:
+        case.audit_trail.extend(result.audit_events)
+        case.updated_at = utc_now()
+        self.repository.save_case(case)
+
     def _summary(self, case: CaseRecord) -> CaseSummary:
         report = case.triage_report
         triage = None
@@ -311,6 +407,26 @@ class CaseService:
 def _payload_hash(payload: dict[str, Any]) -> str:
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _payload_with_role_view_metadata(payload: Any, metadata: dict[str, Any]) -> dict[str, Any]:
+    if isinstance(payload, dict):
+        return {**payload, "role_view": metadata}
+    return {"payload": payload, "role_view": metadata}
+
+
+def _token_record_summary(records: list[SanitizationRecord]) -> dict[str, Any]:
+    token_types: dict[str, int] = {}
+    field_paths: list[str] = []
+    for record in records:
+        token_type = record.token_type or "unknown"
+        token_types[token_type] = token_types.get(token_type, 0) + 1
+        field_paths.append(record.field_path)
+    return {
+        "token_count": len(records),
+        "token_types": token_types,
+        "field_paths": sorted(set(field_paths)),
+    }
 
 
 def _rehydrate_value(value: Any, vault: TokenVault) -> Any:

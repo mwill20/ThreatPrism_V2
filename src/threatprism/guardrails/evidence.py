@@ -14,6 +14,8 @@ def validate_report_evidence(report: TriageReport, valid_evidence_ids: set[str])
             if evidence_id not in valid_evidence_ids:
                 issues.append(f"MITRE mapping {mapping.technique_id} references unknown evidence_id={evidence_id}")
     for control in report.grc_controls:
+        if not control.evidence_ids:
+            issues.append(f"GRC mapping {control.category} must cite at least one evidence_id")
         for evidence_id in control.evidence_ids:
             if evidence_id not in valid_evidence_ids:
                 issues.append(f"GRC mapping {control.category} references unknown evidence_id={evidence_id}")

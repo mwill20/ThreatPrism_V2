@@ -6,12 +6,12 @@ from threatprism import __version__
 from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
     CaseAcceptedResponse,
-    CaseRecord,
     CaseSummary,
     FeedbackResponse,
 )
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
+from threatprism.guardrails.views import ViewRole
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -48,15 +48,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def list_cases(request: Request) -> list[CaseSummary]:
         return _service(request).list_cases()
 
-    @app.get("/cases/{case_id}", response_model=CaseRecord)
-    def get_case(case_id: str, request: Request) -> CaseRecord:
+    @app.get("/cases/{case_id}")
+    def get_case(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
+        if role is not None:
+            view = _service(request).get_case_view(case_id, role)
+            if view is None:
+                raise HTTPException(status_code=404, detail="Case not found")
+            return view
         case = _service(request).get_case(case_id)
         if case is None:
             raise HTTPException(status_code=404, detail="Case not found")
-        return case
+        return case.model_dump(mode="json")
 
     @app.get("/cases/{case_id}/triage-report")
-    def get_triage_report(case_id: str, request: Request) -> dict:
+    def get_triage_report(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         case = _service(request).get_case(case_id)
         if case is None:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -67,6 +72,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "status": case.triage_status,
                 "message": "Triage report is not ready.",
             }
+        if role is not None:
+            view = _service(request).get_report_view(case_id, role)
+            if view is None:
+                raise HTTPException(status_code=404, detail="Triage report not found")
+            return view
         return report.model_dump(mode="json")
 
     @app.post("/cases/{case_id}/analyst-feedback", response_model=FeedbackResponse)

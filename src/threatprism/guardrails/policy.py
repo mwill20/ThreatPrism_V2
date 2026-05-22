@@ -10,6 +10,12 @@ PROHIBITED_PATTERNS = [
     re.compile(r"\b(real action executed|containment completed|remediation completed)\b", re.I),
     re.compile(r"\b(confirmed|certain|guaranteed) that\b", re.I),
     re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b"),
+    re.compile(r"\bHIPAA[- ]?(?:compliant|compliance|certified|certification)\b", re.I),
+    re.compile(r"\bHITRUST[- ]?(?:compliant|compliance|certified|certification)\b", re.I),
+    re.compile(r"\b(?:control(?: is)? satisfied|satisfies (?:a )?control|case satisfies.*control)\b", re.I),
+    re.compile(r"\b(?:audit[- ]?ready|certification[- ]?ready)\b", re.I),
+    re.compile(r"\bevidence proves compliance\b", re.I),
+    re.compile(r"\b(?:diagnose|treat|treatment plan|clinical recommendation)\b", re.I),
 ]
 
 

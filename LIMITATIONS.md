@@ -60,6 +60,7 @@ temp such as `.pytest_tmp_run_verify`.
 - CI/CD.
 - Authentication and authorization beyond demo-mode settings.
 - Production deployment hardening.
+- Access-control enforcement for role-based views.
 - Operational metrics/read-model APIs for dashboard-ready manager, GRC,
   legal/privacy, engineer, and audit views.
 
@@ -140,6 +141,10 @@ The healthcare safeguard guardrails are not a legal determination,
 de-identification certification, HIPAA compliance claim, HITRUST certification,
 or audit opinion.
 
+Role-based views are not authorization controls until identity and
+authorization enforce the effective role. Current role rendering should be
+treated as internal/demo view logic, not a production access-control boundary.
+
 ## Demo Data Limitations
 
 - Demo data must be fake.
@@ -150,7 +155,9 @@ or audit opinion.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Operational Read Models & Metrics API v0.1 before building any
-  frontend dashboard.
+- Implement Access Control & Audit Integrity v0.1 before operational read
+  models, metrics, frontend dashboard work, or non-demo data use.
+- Implement Operational Read Models & Metrics API v0.1 after access control is
+  in place and before building any frontend dashboard.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.

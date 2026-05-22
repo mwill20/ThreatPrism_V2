@@ -130,5 +130,9 @@ The completed healthcare safeguard slice is documented in
 `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
 `docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.
 
-The next active implementation target is Operational Read Models & Metrics API
-v0.1. See `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.
+The next active implementation target is Access Control & Audit Integrity
+v0.1. See `docs/ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md` and
+`docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`.
+
+Operational Read Models & Metrics API v0.1 remains prepped as the follow-on
+backend slice. See `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.

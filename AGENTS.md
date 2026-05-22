@@ -133,6 +133,14 @@ healthcare-review queues, detail read routes, and safe aggregate reporting.
 This reviewer must verify that metrics and read models do not expose raw
 potential PHI/ePHI, secrets, credentials, or token vault mappings.
 
+### Access Control Reviewer Agent
+
+Reviews demo authentication, identity-to-role mapping, authorization policy,
+role escalation denial, and authorization audit events.
+
+This reviewer must enforce that role-based views are not security controls
+until identity and authorization enforce the effective role.
+
 ## Development Rules For Later Phases
 
 - Keep application behavior evidence-first and analyst-controlled.
@@ -143,6 +151,8 @@ potential PHI/ePHI, secrets, credentials, or token vault mappings.
 - Do not classify every identifier as PHI/ePHI by itself.
 - Use healthcare safeguard and evidence-alignment language, not
   compliance-certification language.
+- Do not treat `?role=` as authorization. It is only a view request unless a
+  trusted identity-to-role policy has authorized the effective role.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.

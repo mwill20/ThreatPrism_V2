@@ -255,15 +255,20 @@ Context-aware potential PHI/ePHI, PII, secret, and security telemetry detection
 The next recommended slice is:
 
 ```text
-Operational Read Models & Metrics API v0.1
-  -> Stable GET /metrics aggregate response shape
-  -> Dashboard-ready case list filtering or companion envelope route
-  -> Manager-review and healthcare-review queue behavior
-  -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
-  -> Role-safe rendering on detail and review routes
-  -> Tests proving metrics/read models do not expose raw potential PHI/ePHI,
-     secrets, credentials, or token vault mappings
+Access Control & Audit Integrity v0.1
+  -> Demo authentication using fake/demo credentials only
+  -> Caller identity mapped to an effective role
+  -> ?role= treated as a view request, not authority, outside explicit demo/test
+     override behavior
+  -> Role escalation denied and audited
+  -> Safe audit events for authorization allow and deny decisions
+  -> Tests proving manager/GRC cannot force analyst or engineer views
+  -> Tests proving authorization audit events do not expose raw potential
+     PHI/ePHI, secrets, full credentials, raw payloads, or token vault mappings
 ```
+
+Operational Read Models & Metrics API v0.1 remains prepped as the follow-on
+backend slice after access control is in place.
 
 Do not implement:
 
@@ -408,6 +413,7 @@ docs/specs/13_ACCEPTANCE_CRITERIA.md
 docs/specs/14_DEMO_PLAN.md
 docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md
 docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md
+docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -439,7 +445,7 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Operational Read Models & Metrics API v0.1 using a clean V2
+Continue with Access Control & Audit Integrity v0.1 using a clean V2
 architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
@@ -452,8 +458,9 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
 analyst-controlled, no-real-remediation boundary. Do not build a frontend
-dashboard or add live integrations in this slice.
+dashboard, add live integrations, or add production IdP integration in this
+slice.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
-fresh ignored base temp such as `.pytest_tmp_run_metrics`.
+fresh ignored base temp such as `.pytest_tmp_run_auth`.
 ```

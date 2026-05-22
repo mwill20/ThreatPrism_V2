@@ -209,14 +209,15 @@ All mappings are advisory, evidence-linked, and require human review.
 
 ## D-023 Next Implementation Slice
 
-The next implementation slice after healthcare safeguard guardrails is:
+The originally prepped implementation slice after healthcare safeguard
+guardrails was:
 
 ```text
 Operational Read Models & Metrics API v0.1
 ```
 
-This slice should add backend-only, dashboard-ready read models before any
-frontend dashboard work.
+This slice should still be implemented before any frontend dashboard work, but
+it is no longer the immediate next slice.
 
 Required focus:
 
@@ -235,4 +236,43 @@ Out of scope for this slice:
 - Live SOAR callbacks.
 - Live enrichment calls.
 - Production authentication and authorization.
+- Real remediation or containment.
+
+## D-024 Access Control Before Metrics
+
+Access Control & Audit Integrity v0.1 supersedes Operational Read Models &
+Metrics API v0.1 as the immediate next implementation slice.
+
+Reason:
+
+Role-based rendering is not authorization. A request parameter such as
+`?role=analyst` or `?role=manager_grc` must not be treated as authority unless
+ThreatPrism has a trusted identity-to-role enforcement layer.
+
+Next implementation target:
+
+```text
+Access Control & Audit Integrity v0.1
+```
+
+Required focus:
+
+- Demo authentication using fake/demo credentials only.
+- Caller identity mapped to an effective role.
+- Authorization checks that deny role escalation.
+- `?role=` treated as a view request, not authority, outside explicit demo/test
+  override behavior.
+- Safe audit events for allow and deny decisions.
+- Tests proving manager/GRC cannot force analyst or engineer views.
+- Tests proving authorization audit events do not expose raw potential PHI/ePHI,
+  secrets, full credentials, raw payloads, or token vault mappings.
+
+Out of scope:
+
+- Production IdP integration.
+- OAuth/OIDC/Entra integration.
+- Frontend dashboard.
+- Live LLM calls.
+- Live SOAR calls.
+- Live enrichment calls.
 - Real remediation or containment.

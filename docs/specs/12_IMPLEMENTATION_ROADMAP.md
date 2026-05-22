@@ -122,6 +122,25 @@ Exit criteria:
 - Raw potential PHI/ePHI does not appear in model-visible payloads, reports,
   manager/GRC views, logs, or audit/debug views.
 
+### Phase 8A: Access Control And Audit Integrity
+
+Scope:
+
+- Add demo authentication using fake/demo credentials only.
+- Map caller identity to an effective role.
+- Deny unauthorized role escalation.
+- Treat `?role=` as a view request, not authority, outside explicit demo/test
+  override behavior.
+- Record safe audit events for authorization allow and deny decisions.
+
+Exit criteria:
+
+- Manager/GRC cannot force analyst or engineer views.
+- Missing, unknown, or unauthorized roles fail closed when demo auth is
+  enabled.
+- Authorization audit events do not expose raw potential PHI/ePHI, secrets,
+  full credentials, raw payloads, or token vault mappings.
+
 ### Phase 9: Threat Intel Stubs
 
 Scope:
@@ -200,7 +219,7 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1
      payloads, reports, logs, or manager/GRC views
 ```
 
-## Next Recommended Slice
+## Prepped Follow-On Slice
 
 ```text
 Operational Read Models & Metrics API v0.1
@@ -213,6 +232,26 @@ Operational Read Models & Metrics API v0.1
   -> Prove metrics and read models do not expose raw potential PHI/ePHI, secrets,
      or token vault mappings
   -> Keep the slice backend-only, fake-data-only, and no-real-remediation
+```
+
+This slice remains important and is already specified. It should follow the
+access-control slice so role-safe read models are backed by enforceable
+authorization.
+
+## Next Recommended Slice
+
+```text
+Access Control & Audit Integrity v0.1
+  -> Add demo authentication using fake/demo credentials only
+  -> Map caller identity to an effective role
+  -> Stop treating ?role= as authority outside explicit demo/test override
+  -> Deny role escalation and fail closed for missing or unknown callers
+  -> Harden role-view policy for analyst, engineer, manager/GRC,
+     legal/privacy, audit/debug, and AI views
+  -> Record safe audit events for authorization allow and deny decisions
+  -> Prove manager/GRC cannot force analyst or engineer views
+  -> Prove authorization audit events do not expose raw potential PHI/ePHI,
+     secrets, credentials, raw payloads, or token vault mappings
 ```
 
 ## Roadmap Constraints

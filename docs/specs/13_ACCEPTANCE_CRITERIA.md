@@ -130,6 +130,26 @@ Each completed report includes:
   healthcare-review queue behavior, detail routes, role-safe rendering, and
   sensitive-value non-leakage.
 
+## Access Control And Audit Integrity Acceptance Criteria
+
+- Demo authentication maps fake/demo credentials to a caller identity and
+  effective role.
+- Missing or unknown credentials are denied when demo auth is enabled.
+- `?role=` is not trusted as authority outside explicit demo/test override
+  behavior.
+- Role escalation attempts fail closed.
+- Analyst and engineer views are not available to manager/GRC callers.
+- Manager/GRC, legal/privacy, audit/debug, and AI views remain masked or
+  tokenized according to role policy.
+- Authorization allow decisions create audit events.
+- Authorization deny decisions create audit events.
+- Authorization audit events include caller identity, requested role,
+  effective role, endpoint, decision, reason, timestamp, and case/report ID
+  when available.
+- Authorization audit events do not include raw potential PHI/ePHI, secrets,
+  full credentials, raw request bodies, or token vault mappings.
+- Existing healthcare safeguard leakage tests still pass.
+
 ## GRC Acceptance Criteria
 
 - GRC mapping is category-level only.

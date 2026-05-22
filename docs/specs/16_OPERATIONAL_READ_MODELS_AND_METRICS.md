@@ -30,6 +30,11 @@ reviewers need aggregate metrics and role-safe case views before ThreatPrism
 adds a frontend dashboard, live SOAR callbacks, live LLMs, or production
 integrations.
 
+Update after architect review: this slice remains prepped and important, but
+Access Control & Audit Integrity v0.1 should run first. Role-safe read models
+should be backed by enforceable identity-to-role authorization before the API
+surface expands.
+
 ## In Scope
 
 ### Metrics API

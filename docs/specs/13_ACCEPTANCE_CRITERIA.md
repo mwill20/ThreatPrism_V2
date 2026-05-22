@@ -92,11 +92,31 @@ Each completed report includes:
 - Demo unauthenticated API mode is limited to localhost and fake data.
 - Production-style use requires authentication and authorization before exposing case data.
 
+## Healthcare Safeguard Acceptance Criteria
+
+- SOAR payloads are expected to be security-only, but all inbound payloads are
+  inspected as potentially contaminated.
+- ThreatPrism does not classify every identifier as PHI/ePHI by itself.
+- Identifiers tied to health, patient, care, billing, encounter, or other
+  reasonably identifying context are treated as possible PHI/ePHI exposure.
+- Potential PHI/ePHI is replaced with typed tokens before model-visible payload
+  creation.
+- Raw potential PHI/ePHI does not appear in reports, logs, manager/GRC views, or
+  audit/debug views.
+- Security telemetry remains usable for SOC response through controlled
+  role-based rendering.
+- Secrets are never rehydrated.
+- Compliance/certification/audit-ready claims are blocked.
+- Audit events are recorded for tokenization, rehydration approval or denial,
+  guardrail blocks, and report validation.
+
 ## GRC Acceptance Criteria
 
 - GRC mapping is category-level only.
 - Output uses HITRUST-aligned language only.
 - No compliance or certification claim is present.
+- HIPAA Security Rule references are framed as safeguard themes or evidence
+  alignment only.
 - Each mapping cites evidence.
 - Analyst or GRC review is required.
 

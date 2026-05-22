@@ -603,21 +603,34 @@ This can start as simple rule-based or LLM-assisted mapping, but outputs must be
 
 Add a HITRUST-aligned GRC module.
 
+For healthcare-oriented work, ThreatPrism uses safeguard and evidence-alignment
+language. It does not classify every identifier as PHI/ePHI by itself.
+Identifiers become PHI/ePHI risk when connected to health, patient, care,
+billing, encounter, or similar identifying context.
+
 Important language rules:
 
 Do not claim:
 
+- HIPAA compliance
+- HIPAA certification
 - HITRUST compliance
 - HITRUST certification
 - That the tool implements HITRUST
+- That a control is satisfied
+- That evidence is audit-ready
+- That evidence proves compliance
 
 Use language like:
 
+- HIPAA Security Rule safeguard theme
 - HITRUST-aligned
 - HITRUST-inspired control mapping
+- HITRUST-style framework category
 - GRC-ready evidence organization
 - Control category mapping
 - Evidence-to-control traceability
+- Evidence alignment
 
 Map at the control category level, not specific HITRUST control IDs, unless specific licensed/source material is available and legally usable.
 
@@ -808,6 +821,8 @@ If strict checks would fail due to existing V1 issues, document the gap and star
 - Demo data must be fake.
 - Sanitize prompt-injection-like content.
 - Treat alert/case text as untrusted input.
+- Treat inbound SOAR payloads as potentially contaminated even when SOAR is
+  expected to contain security-only telemetry.
 - Treat LLM output as untrusted until schema-validated.
 - Do not allow real actions.
 - Use `.env.example`, not real `.env` secrets.
@@ -854,6 +869,17 @@ Return/report status via API
 Analyst submits feedback
   ↓
 ThreatPrism records disagreement metrics
+```
+
+The next recommended slice is:
+
+```text
+Healthcare Safeguard & Evidence Alignment Guardrails v0.1
+  -> Context-aware potential PHI/ePHI, PII, secret, and security telemetry detection
+  -> Typed tokenization before persistence, model payload creation, reports, logs, or role-based display
+  -> Role-based rendering for analyst, engineer, manager/GRC, legal/privacy, audit/debug, and AI views
+  -> Compliance-language scanner for HIPAA/HITRUST/audit-ready/control-satisfied claims
+  -> Audit events for tokenization, rehydration, denial, guardrail blocks, and report validation
 ```
 
 ---

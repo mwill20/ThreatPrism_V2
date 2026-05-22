@@ -4,18 +4,40 @@
 
 ThreatPrism may use:
 
+- HIPAA Security Rule safeguard theme.
 - HITRUST-aligned.
 - HITRUST-inspired control mapping.
+- HITRUST-style framework category.
 - GRC-ready evidence organization.
 - Control category mapping.
 - Evidence-to-control traceability.
+- Evidence alignment.
 
 ThreatPrism must not claim:
 
+- HIPAA compliance.
+- HIPAA certification.
 - HITRUST compliance.
 - HITRUST certification.
 - That ThreatPrism implements HITRUST.
 - That a mapped case satisfies a control.
+- That evidence is audit-ready.
+- That evidence proves compliance.
+
+ThreatPrism provides advisory, evidence-linked alignment only. Human review is
+required.
+
+## Healthcare Safeguard Framing
+
+ThreatPrism does not classify every identifier as PHI/ePHI by itself.
+
+Identifiers become PHI/ePHI risk when they are connected to health context,
+patient context, care context, billing context, encounter context, or other data
+that can reasonably identify an individual.
+
+GRC views must default to masked or tokenized display for potential PHI/ePHI,
+PII, and secrets. GRC mappings should explain risk and evidence alignment
+without exposing raw regulated or sensitive values.
 
 ## Mapping Level
 
@@ -160,5 +182,7 @@ The spec pack is allowed to define the content before those top-level docs are c
 
 - Every GRC mapping cites evidence IDs.
 - No compliance or certification claims are present.
+- HIPAA Security Rule references are framed as safeguard themes or evidence
+  alignment only.
 - Mappings are reviewable by analysts or GRC stakeholders.
 - Mapping output includes a clear limitation statement.

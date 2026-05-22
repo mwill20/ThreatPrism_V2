@@ -174,9 +174,17 @@ ThreatPrism must map evidence and findings to HITRUST-aligned control categories
 
 The product must not claim:
 
+- HIPAA compliance.
+- HIPAA certification.
 - HITRUST compliance.
 - HITRUST certification.
 - That ThreatPrism implements HITRUST.
+- That evidence is audit-ready.
+- That evidence proves compliance.
+
+ThreatPrism may support evidence alignment to HIPAA Security Rule safeguard
+themes and HITRUST-style framework categories when the mapping remains
+advisory, evidence-linked, and human-reviewed.
 
 ### PR-011 Dashboard-Ready API
 

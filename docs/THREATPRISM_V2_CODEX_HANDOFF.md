@@ -171,6 +171,13 @@ ThreatPrism V2 must treat all case text, logs, payloads, and source artifacts as
 
 ThreatPrism V2 must treat all LLM output as untrusted until validated.
 
+For healthcare-oriented work, SOAR payloads are expected to be security-only,
+but ThreatPrism must treat inbound payloads as potentially contaminated.
+ThreatPrism does not classify every identifier as PHI/ePHI by itself.
+Identifiers become PHI/ePHI risk when connected to health context, patient
+context, care context, billing context, encounter context, or other data that
+can reasonably identify an individual.
+
 Required safe model boundary:
 
 ```text
@@ -319,17 +326,24 @@ POST /evals/run
 
 Use only:
 
+- HIPAA Security Rule safeguard theme
 - HITRUST-aligned
 - HITRUST-inspired control mapping
+- HITRUST-style framework category
 - GRC-ready evidence organization
 - control category mapping
 - evidence-to-control traceability
+- evidence alignment
 
 Do not claim:
 
+- HIPAA compliance
+- HIPAA certification
 - HITRUST compliance
 - HITRUST certification
 - that ThreatPrism implements HITRUST
+- that evidence is audit-ready
+- that evidence proves compliance
 
 Map only to control categories:
 
@@ -365,6 +379,7 @@ docs/specs/11_EVALUATION_PLAN.md
 docs/specs/12_IMPLEMENTATION_ROADMAP.md
 docs/specs/13_ACCEPTANCE_CRITERIA.md
 docs/specs/14_DEMO_PLAN.md
+docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```

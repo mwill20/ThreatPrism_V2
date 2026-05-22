@@ -121,3 +121,7 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/cases/$($created.case
 ## Active Checklist
 
 Track current work in `docs/WORKING_CHECKLIST.md`.
+
+The next planned slice is Healthcare Safeguard & Evidence Alignment Guardrails
+v0.1. See `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
+`docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.

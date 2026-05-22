@@ -111,10 +111,16 @@ Exit criteria:
 Scope:
 
 - Add prompt firewall, schema validation, output policy scanner, semantic classifier interface, and eval harness.
+- Add healthcare safeguard scanner for context-aware potential PHI/ePHI, PII,
+  secrets, and security telemetry handling.
+- Add compliance-language scanner that blocks HIPAA/HITRUST compliance,
+  certification, audit-ready, and control-satisfied claims.
 
 Exit criteria:
 
 - Prompt-injection, hallucination, unsafe action, schema, and evidence citation evals pass.
+- Raw potential PHI/ePHI does not appear in model-visible payloads, reports,
+  manager/GRC views, logs, or audit/debug views.
 
 ### Phase 9: Threat Intel Stubs
 
@@ -133,6 +139,8 @@ Scope:
 
 - Add structured MITRE mapping.
 - Add HITRUST-aligned GRC category mapping.
+- Add healthcare safeguard evidence-alignment language for HIPAA Security Rule
+  safeguard themes without making compliance claims.
 
 Exit criteria:
 
@@ -173,6 +181,23 @@ Generic SOAR webhook payload
   -> Return/report status via API
   -> Analyst submits feedback
   -> ThreatPrism records disagreement metrics
+```
+
+## Next Recommended Slice
+
+```text
+Healthcare Safeguard & Evidence Alignment Guardrails v0.1
+  -> Treat inbound SOAR payloads as potentially contaminated
+  -> Detect potential PHI/ePHI only when identifiers are tied to health, patient,
+     care, billing, encounter, or similar identifying context
+  -> Tokenize PHI/ePHI, PII, secrets, and security telemetry with typed tokens
+  -> Preserve security telemetry needed for SOC response through controlled
+     role-based rendering
+  -> Block compliance/certification/audit-ready claims
+  -> Record audit events for tokenization, rehydration, denial, guardrail blocks,
+     and report validation
+  -> Add tests proving raw sensitive values do not leak into model-visible
+     payloads, reports, logs, or manager/GRC views
 ```
 
 ## Roadmap Constraints

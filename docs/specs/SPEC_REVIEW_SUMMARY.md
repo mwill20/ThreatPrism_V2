@@ -83,3 +83,16 @@ Implementation prerequisites:
 5. Keep real actions blocked with `ALLOW_REAL_ACTIONS=false`.
 6. Continue adding focused failure-path tests beyond the current guardrail,
    unsupported evidence ID, and unsafe action claim coverage.
+
+## Recommended Next Slice
+
+Healthcare Safeguard & Evidence Alignment Guardrails v0.1.
+
+This slice should add context-aware exposure detection for potential PHI/ePHI,
+PII, secrets, and security telemetry. It must preserve the distinction that
+identifiers are not PHI/ePHI by themselves; they become PHI/ePHI risk when tied
+to health, patient, care, billing, encounter, or similar identifying context.
+
+It should also add role-based rendering, compliance-language scanning, and tests
+that prove raw potential PHI/ePHI does not appear in model-visible payloads,
+reports, logs, manager/GRC views, or audit/debug views.

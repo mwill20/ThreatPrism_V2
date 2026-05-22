@@ -105,6 +105,16 @@ Reviews case lifecycle, analyst feedback, disagreement tracking, and management 
 
 Reviews HITRUST-aligned language, control category mapping, evidence traceability, and compliance-claim avoidance.
 
+### Healthcare Safeguard Reviewer Agent
+
+Reviews context-aware potential PHI/ePHI detection, typed tokenization,
+role-based display policy, compliance-language scanning, and healthcare
+safeguard framing.
+
+This reviewer must enforce the distinction that identifiers are not PHI/ePHI by
+themselves. Identifiers become PHI/ePHI risk when tied to health, patient, care,
+billing, encounter, or other reasonably identifying context.
+
 ### Test And Eval Agent
 
 Reviews pytest scope, guardrail evals, schema validation tests, and action blocking tests.
@@ -118,6 +128,11 @@ Reviews consistency across README, specs, runbooks, limitations, architecture, a
 - Keep application behavior evidence-first and analyst-controlled.
 - Treat source case text and logs as untrusted.
 - Treat LLM output as untrusted until schema and policy validation pass.
+- Treat inbound SOAR payloads as potentially contaminated, even though they are
+  expected to contain security-only telemetry.
+- Do not classify every identifier as PHI/ePHI by itself.
+- Use healthcare safeguard and evidence-alignment language, not
+  compliance-certification language.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.

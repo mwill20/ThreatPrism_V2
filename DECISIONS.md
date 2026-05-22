@@ -174,3 +174,35 @@ Demo mode may use `API_AUTH_MODE=none` only with localhost-style fake demo data.
 
 Any non-demo, shared, or real-data use requires an explicit authentication and
 authorization design before exposing case payloads or reports.
+
+## D-021 Healthcare Safeguard Framing
+
+ThreatPrism does not classify every identifier as PHI or ePHI by itself.
+
+ThreatPrism treats inbound SOAR data as potentially contaminated and applies
+deterministic safeguards to prevent accidental exposure of identifiable health
+information.
+
+Identifiers become PHI/ePHI risk when they are connected to health context,
+patient context, care context, billing context, encounter context, or other data
+that can reasonably identify an individual.
+
+## D-022 Healthcare Evidence Alignment Language
+
+ThreatPrism uses healthcare safeguard language, not compliance-certification
+language.
+
+ThreatPrism may support evidence alignment to HIPAA Security Rule safeguard
+themes and HITRUST-style framework categories.
+
+ThreatPrism must not claim:
+
+- HIPAA compliance.
+- HIPAA certification.
+- HITRUST compliance.
+- HITRUST certification.
+- That a control is satisfied.
+- That evidence is audit-ready.
+- That a mapped case proves compliance.
+
+All mappings are advisory, evidence-linked, and require human review.

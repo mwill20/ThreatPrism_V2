@@ -4,6 +4,15 @@
 
 ThreatPrism uses AI to assist structured triage, not to become an authority. All AI input and output must be constrained, validated, and reviewable.
 
+For healthcare-oriented use, ThreatPrism expects SOAR payloads to be
+security-only. It still treats every inbound payload as potentially
+contaminated until deterministic safeguards inspect it.
+
+ThreatPrism does not classify every identifier as PHI/ePHI by itself.
+Identifiers become PHI/ePHI risk when they are connected to health context,
+patient context, care context, billing context, encounter context, or other data
+that can reasonably identify an individual.
+
 ## Threat Model
 
 Case payloads can contain:
@@ -59,6 +68,8 @@ Tokenization should:
 - Store token mappings outside the model prompt path.
 - Avoid sending raw secrets, API keys, tenant IDs, private hostnames, and unnecessary user identifiers to the LLM.
 - Prefer safe documentation IP ranges and reserved domains in demo data.
+- Preserve the difference between potential PHI/ePHI, PII, secrets, and
+  security telemetry so SOC response does not lose useful IOCs unnecessarily.
 
 Example tokenized input:
 
@@ -125,6 +136,9 @@ Block or mark output containing:
 - Unsupported certainty.
 - Missing evidence citations.
 - Direct disclosure of secrets.
+- HIPAA compliance, HITRUST certification, audit-ready, control satisfied, or
+  similar compliance-certification claims.
+- Clinical diagnosis, treatment, or patient-care recommendations.
 
 ### 8. Strict Structured Output
 
@@ -163,6 +177,8 @@ Rehydration rules:
 
 - Rehydrate only fields needed for analyst review.
 - Never rehydrate secrets, full API keys, or token-like credentials.
+- Never rehydrate potential PHI/ePHI into model-visible payloads, reports,
+  manager/GRC views, or audit/debug views.
 - Prefer partial masking for sensitive values.
 - Preserve the token in audit metadata so model-visible content remains traceable.
 - Keep management and GRC views tokenized or masked unless raw values are necessary.
@@ -218,6 +234,32 @@ When guardrail status is uncertain, the system should:
 - Mark the triage job as `needs_review` or `blocked_by_guardrail`.
 - Preserve enough diagnostic data for review without leaking sensitive content.
 
+### 14. Healthcare Safeguard Scanner
+
+Healthcare-oriented guardrails must detect potential accidental exposure without
+panic-redacting all security identifiers.
+
+Examples:
+
+- IP address in normal endpoint telemetry: security telemetry.
+- IP address tied to patient portal activity or clinical context: possible
+  PHI/ePHI exposure.
+- Email in analyst identity telemetry: security identity data.
+- Email tied to patient, member, billing, appointment, portal, or encounter
+  context: possible PHI/ePHI exposure.
+- File path in a SOC alert: security telemetry.
+- File path containing patient name, MRN, DOB, encounter ID, or clinical terms:
+  possible PHI/ePHI exposure.
+
+Use typed replacement tokens, such as:
+
+```text
+[POTENTIAL_PHI:MRN:phi_0001]
+[POTENTIAL_PII:PHONE:pii_0001]
+[SECURITY_TELEMETRY:IP:ioc_0001]
+[SECRET:API_KEY:secret_0001]
+```
+
 ## Required Pre-LLM To Post-Validation Flow
 
 The safe model boundary must follow this order:
@@ -262,3 +304,5 @@ The system prompt should require:
 - Audit events are written for guardrail decisions.
 - Sensitive values are tokenized before model calls.
 - Rehydration never occurs before validation and policy checks pass.
+- Potential PHI/ePHI never appears in model-visible payloads, default reports,
+  manager/GRC views, logs, or audit/debug views.

@@ -106,12 +106,31 @@ ThreatPrism provides HITRUST-aligned control category mapping only.
 
 It does not provide:
 
+- HIPAA compliance.
+- HIPAA certification.
 - HITRUST compliance.
 - HITRUST certification.
 - Licensed HITRUST control implementation.
 - Audit opinion.
 
 Mappings are evidence organization aids and require review.
+
+## Healthcare Safeguard Limitations
+
+ThreatPrism assumes SOAR payloads should not contain raw PHI or ePHI, but it
+does not trust that assumption as a control.
+
+ThreatPrism must inspect inbound payloads for accidental regulated-data
+contamination before persistence, model-visible payload creation, report
+rendering, or role-based display.
+
+ThreatPrism does not classify every identifier as PHI/ePHI. Identifiers become
+PHI/ePHI risk when connected to health, patient, care, billing, encounter, or
+other reasonably identifying context.
+
+The healthcare safeguard guardrails are not a legal determination,
+de-identification certification, HIPAA compliance claim, HITRUST certification,
+or audit opinion.
 
 ## Demo Data Limitations
 
@@ -122,8 +141,8 @@ Mappings are evidence organization aids and require review.
 ## Known Open Items
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
-- Confirm whether this local workspace should be initialized or synced as the
-  `mwill20/ThreatPrism_V2` Git checkout.
-- Decide whether async jobs start with in-process background tasks or a separate worker.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Decide exact authentication and authorization model for the API before using non-demo case data.
+- Implement Healthcare Safeguard & Evidence Alignment Guardrails v0.1.
+- Add role-based rendering policies before any non-demo data is used.
+- Decide exact authentication, authorization, and future break-glass governance
+  before exposing real case data or raw sensitive values.

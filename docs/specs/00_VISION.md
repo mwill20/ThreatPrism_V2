@@ -36,7 +36,8 @@ ThreatPrism preserves these principles:
 - SOC analyst: reviews triage reports, validates evidence, approves or overrides recommendations, and records feedback.
 - SOC manager: reviews disagreement trends, quality-control outcomes, analyst workload, and closure quality.
 - Detection engineer: reviews missed IOCs, missed MITRE mappings, false positives, false negatives, and automation gaps.
-- GRC or audit stakeholder: reviews evidence-to-control mapping and audit-ready report structure.
+- GRC or audit stakeholder: reviews evidence-to-control mapping and
+  review-ready evidence organization.
 - Platform engineer: integrates ThreatPrism with SOAR, SIEM, API clients, and internal deployment tooling.
 
 ## Primary Use Case
@@ -60,7 +61,8 @@ It helps answer:
 
 ThreatPrism reviews batches of cases already closed or automated away by SOAR.
 
-Primary outcome: catch missed risk, validate automation quality, and create audit evidence for automated closure decisions.
+Primary outcome: catch missed risk, validate automation quality, and create
+reviewable evidence records for automated closure decisions.
 
 ### Evolution 2: Batch Review of Human Analyst Determinations
 
@@ -90,6 +92,7 @@ Primary outcome: SOAR submits a case, ThreatPrism immediately returns a tracking
 - Full frontend dashboard.
 - Multi-tenant MSSP platform.
 - Live production remediation or containment.
-- Claims of HITRUST compliance, certification, or licensed control implementation.
+- Claims of HIPAA compliance, HITRUST compliance, certification, audit
+  readiness, or licensed control implementation.
 - Dependence on a single SOAR, SIEM, LLM, or enrichment provider.
 - Storage of real customer or sensitive production data in demos.

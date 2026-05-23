@@ -156,6 +156,18 @@ class SQLiteRepository:
                 ),
             )
 
+    def list_feedback(self) -> list[AnalystFeedback]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT payload_json FROM analyst_feedback ORDER BY created_at DESC"
+            ).fetchall()
+        return [AnalystFeedback.model_validate_json(row[0]) for row in rows]
+
+    def list_disagreements(self) -> list[DisagreementRecord]:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT payload_json FROM disagreement_records").fetchall()
+        return [DisagreementRecord.model_validate_json(row[0]) for row in rows]
+
     def update_case_status(self, case_id: str, status: CaseStatus, triage_status: TriageStatus) -> CaseRecord | None:
         case = self.get_case(case_id)
         if case is None:

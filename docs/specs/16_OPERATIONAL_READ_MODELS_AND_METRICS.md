@@ -1,5 +1,32 @@
 # 16 Operational Read Models And Metrics
 
+## Status
+
+Implemented on 2026-05-23.
+
+Validation:
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics2
+```
+
+Result:
+
+```text
+34 passed
+```
+
+Implementation files:
+
+- `src/threatprism/cases/read_models.py`
+- `src/threatprism/cases/service.py`
+- `src/threatprism/api/app.py`
+- `src/threatprism/persistence/sqlite.py`
+- `tests/test_operational_read_models.py`
+
+ThreatPrism preserves the existing `GET /cases` list response and adds
+`GET /cases/read-model` as the dashboard-ready envelope route.
+
 ## Slice Name
 
 Operational Read Models & Metrics API v0.1

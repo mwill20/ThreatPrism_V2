@@ -20,7 +20,7 @@ Prerequisites:
 - Explain prompt-injection and guardrail failure labs.
 - Understand healthcare leakage tests.
 - Describe current test gaps.
-- Prepare for Operational Read Models & Metrics API v0.1.
+- Prepare for Evaluation Harness & Defense Labs v0.1.
 
 ## 🔍 What This Component Does
 
@@ -34,13 +34,15 @@ Primary files:
 - `C:\Projects\ThreatPrismV2\tests\test_guardrail_failures.py`
 - `C:\Projects\ThreatPrismV2\tests\test_healthcare_guardrails.py`
 - `C:\Projects\ThreatPrismV2\tests\test_enrichment_stubs.py`
+- `C:\Projects\ThreatPrismV2\tests\test_access_control.py`
+- `C:\Projects\ThreatPrismV2\tests\test_operational_read_models.py`
 - `C:\Projects\ThreatPrismV2\docs\specs\17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
 - `C:\Projects\ThreatPrismV2\docs\specs\16_OPERATIONAL_READ_MODELS_AND_METRICS.md`
 
 Current validated result:
 
 ```text
-29 passed
+34 passed
 ```
 
 ### Recommended (not implemented here)
@@ -59,7 +61,8 @@ The test suite is the SOC exercise range:
 - Normal tests prove routine flow.
 - Guardrail tests prove unsafe content is blocked.
 - Healthcare tests prove sensitive values do not leak.
-- Future access-control tests will prove users cannot force safer roles into unsafe views.
+- Access-control tests prove users cannot force safer roles into unsafe views.
+- Operational read-model tests prove dashboard-ready APIs stay safe.
 
 ## 🔗 Pipeline Context
 
@@ -158,7 +161,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-29 passed
+34 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
@@ -199,13 +202,13 @@ PowerShell:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Operational Read Models & Metrics API v0.1"
+Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Evaluation Harness & Defense Labs v0.1"
 ```
 
 Expected output includes:
 
 ```text
-Operational Read Models & Metrics API v0.1 is now the next backend slice:
+Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
 ```
 
 ## 📚 Interview Prep
@@ -217,18 +220,18 @@ Operational Read Models & Metrics API v0.1 is now the next backend slice:
 **A**: It proves ThreatPrism blocks unsafe provider output instead of saving it: policy violations, unknown evidence references, and real-action claims fail closed.
 
 **Q: What is the most important current test gap?**  
-**A**: Access control exists for role-aware reads. The next major gap is dashboard-ready metrics and read models that preserve authorization, role-safe rendering, and no sensitive-value leakage.
+**A**: The main gap is a fixture-based eval harness that runs repeatable prompt-injection, evidence-grounding, schema, action-safety, healthcare-safeguard, authorization, and leakage checks before live integrations.
 
 **Q: How would you extend the tests for live providers later?**  
 **A**: Keep deterministic provider tests as the baseline, then add contract tests around provider interfaces with fake responses, timeouts, schema failures, and not-configured paths before live credentials are used.
 
 ## 🎯 Key Takeaways
 
-- The current suite covers API flow, SOAR adapters, guardrails, healthcare safeguards, and enrichment stubs.
+- The current suite covers API flow, SOAR adapters, guardrails, healthcare safeguards, enrichment stubs, access control, and operational read models.
 - The defense labs prove unsafe output is blocked.
 - Healthcare tests prove raw sensitive values do not leak.
 - Tests are local and require no live providers.
-- Operational Read Models & Metrics API v0.1 is the next active implementation slice.
+- Evaluation Harness & Defense Labs v0.1 is the next active implementation slice.
 
 ## 📋 Summary Reference Card
 
@@ -240,13 +243,15 @@ Operational Read Models & Metrics API v0.1 is now the next backend slice:
 | `test_guardrail_failures.py` | Policy/evidence/action blocks. |
 | `test_healthcare_guardrails.py` | Context-aware sensitive-data safeguards and role views. |
 | `test_enrichment_stubs.py` | `not_configured` enrichment providers. |
+| `test_access_control.py` | Demo auth, role escalation denial, and safe authorization audit events. |
+| `test_operational_read_models.py` | Metrics, filters, queues, detail routes, auth, and leakage prevention. |
 
 ## 🚀 Where To Go Next
 
 Next implementation target:
 
-- `C:\Projects\ThreatPrismV2\docs\ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
-- `C:\Projects\ThreatPrismV2\docs\specs\17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
+- `C:\Projects\ThreatPrismV2\docs\specs\11_EVALUATION_PLAN.md`
+- `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 
 Optional advanced challenges:
 

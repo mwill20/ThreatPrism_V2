@@ -387,3 +387,39 @@ Recommended fields:
   }
 }
 ```
+
+## Operational Read Models
+
+Operational read models are API response models, not new source-of-truth case
+records.
+
+Implemented Pydantic read models live in:
+
+```text
+src/threatprism/cases/read_models.py
+```
+
+The case-list read-model item includes:
+
+- Case identity and source fields.
+- Case and triage status.
+- Triage determination, severity, disposition, and confidence.
+- Manager-review flag.
+- Healthcare-review flag.
+- Guardrail-blocked flag.
+- Authorization-denied flag.
+- Created and updated timestamps.
+
+The operational metrics model includes:
+
+- Case counts.
+- Triage counts.
+- Report decision counts.
+- Guardrail and healthcare safeguard counts.
+- Authorization allow/deny counts.
+- Disagreement and timing metrics.
+- GRC mapping metrics.
+
+Read models must remain safe derived views. They must not expose raw potential
+PHI/ePHI, secrets, full credentials, raw source payload bodies, or token vault
+mappings.

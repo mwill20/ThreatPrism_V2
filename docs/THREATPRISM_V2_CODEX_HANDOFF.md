@@ -38,8 +38,8 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/api/app.py` with FastAPI routes for health, case intake,
   case listing/detail, triage-report retrieval, and analyst feedback.
 - `src/threatprism/cases/` with Pydantic case, triage report, feedback,
-  disagreement, evidence, GRC, MITRE, action, and audit schemas plus the case
-  service orchestration.
+  disagreement, evidence, GRC, MITRE, action, audit, operational metrics, and
+  read-model schemas plus the case service orchestration.
 - `src/threatprism/soar/generic.py` with generic SOAR payload normalization.
 - `src/threatprism/guardrails/` with prompt firewall, tokenization,
   healthcare safeguard scanning, role-based rendering helpers, output-policy
@@ -52,17 +52,19 @@ The current live implementation includes a first backend slice:
 - `examples/soar_payloads/` with fake demo payloads only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
+- `tests/test_operational_read_models.py` covering metrics, filtered queues,
+  detail routes, authorization, and leakage prevention.
 
-Validated on 2026-05-22 with:
+Validated on 2026-05-23 with:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics2
 ```
 
 Result:
 
 ```text
-29 passed
+34 passed
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -266,19 +268,31 @@ Demo API key
   -> Role-aware case and report reads
 ```
 
-## Next Implementation Slice
-
-The next recommended slice is:
+Operational Read Models & Metrics API v0.1 is implemented:
 
 ```text
 Operational Read Models & Metrics API v0.1
   -> Stable GET /metrics aggregate response shape
-  -> Dashboard-ready case list filtering or companion envelope route
+  -> Dashboard-ready GET /cases/read-model companion envelope route
   -> Manager-review and healthcare-review queue behavior
   -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
   -> Authorization and role-safe rendering on read/detail routes
   -> Tests proving metrics and read models do not expose raw potential PHI/ePHI,
      secrets, credentials, raw payload bodies, or token vault mappings
+```
+
+## Next Implementation Slice
+
+The next recommended slice is:
+
+```text
+Evaluation Harness & Defense Labs v0.1
+  -> Fixture-based dry-run eval datasets
+  -> Prompt-injection, evidence-grounding, schema, action-safety,
+     healthcare-safeguard, authorization, and leakage checks
+  -> Structured eval results without live LLM, SOAR, cloud, or enrichment calls
+  -> Fake demo data only
+  -> ALLOW_REAL_ACTIONS=false
 ```
 
 Do not implement:
@@ -348,20 +362,22 @@ Implement first:
 GET /health
 GET /cases
 POST /cases
+GET /metrics
+GET /cases/read-model
 GET /cases/{case_id}
 GET /cases/{case_id}/triage-report
+GET /cases/{case_id}/evidence
+GET /cases/{case_id}/timeline
+GET /cases/{case_id}/mitre
+GET /cases/{case_id}/grc-controls
+GET /cases/{case_id}/audit-events
 POST /cases/{case_id}/analyst-feedback
 ```
 
 Document or stub later:
 
 ```text
-GET /metrics
-GET /cases/{case_id}/evidence
-GET /cases/{case_id}/timeline
 GET /cases/{case_id}/ioc-enrichment
-GET /cases/{case_id}/mitre
-GET /cases/{case_id}/grc-controls
 POST /evals/run
 ```
 
@@ -435,6 +451,8 @@ Root docs:
 AGENTS.md
 DECISIONS.md
 LIMITATIONS.md
+README.md
+docs/OPERATIONAL_READ_MODELS_AND_METRICS.md
 threatprism_v2_codex_handoff_brief.md
 threatprism_v2_codex_spec_prompt.md
 ```
@@ -443,6 +461,14 @@ Current handoff:
 
 ```text
 docs/THREATPRISM_V2_CODEX_HANDOFF.md
+```
+
+Current operational implementation additions:
+
+```text
+src/threatprism/cases/read_models.py
+tests/test_operational_read_models.py
+Lessons/Lesson10_Operational_Read_Models_And_Metrics.md
 ```
 
 ## Next Session Recommended Prompt
@@ -457,7 +483,7 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Operational Read Models & Metrics API v0.1 using a clean V2
+Continue with Evaluation Harness & Defense Labs v0.1 using a clean V2
 architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
@@ -474,5 +500,5 @@ dashboard, add live integrations, or add production IdP integration in this
 slice.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
-fresh ignored base temp such as `.pytest_tmp_run_metrics`.
+fresh ignored base temp such as `.pytest_tmp_run_evals`.
 ```

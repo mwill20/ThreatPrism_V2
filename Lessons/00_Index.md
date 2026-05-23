@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `29 passed`.
+- The current validated baseline is `34 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -32,6 +32,7 @@ Fake SOAR payload
   -> Controlled rehydration and role view rendering
   -> Deterministic report
   -> SQLite persistence
+  -> Operational metrics and read models
   -> API responses and tests
 ```
 
@@ -49,6 +50,7 @@ Fake SOAR payload
 | ✅ | [Lesson 07](Lesson07_SQLite_Config_And_Identifiers.md) | SQLite, Config, And Identifiers | `src/threatprism/persistence/sqlite.py`, `src/threatprism/config.py`, `src/threatprism/ids.py`, `.env.example` |
 | ✅ | [Lesson 08](Lesson08_Testing_Defense_Labs_And_Next_Slices.md) | Testing, Defense Labs, And Next Slices | `tests/*.py`, `docs/specs/16_*`, `docs/specs/17_*` |
 | ✅ | [Lesson 09](Lesson09_Access_Control_And_Audit_Integrity.md) | Access Control And Audit Integrity | `src/threatprism/auth/demo.py`, `tests/test_access_control.py`, `.env.example` |
+| ✅ | [Lesson 10](Lesson10_Operational_Read_Models_And_Metrics.md) | Operational Read Models And Metrics | `src/threatprism/cases/read_models.py`, `src/threatprism/api/app.py`, `tests/test_operational_read_models.py` |
 
 ## File Coverage Map
 
@@ -61,6 +63,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\cli\main.py` -> Lesson 01
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\schemas.py` -> Lesson 02
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\service.py` -> Lesson 02
+- `C:\Projects\ThreatPrismV2\src\threatprism\cases\read_models.py` -> Lesson 10
 - `C:\Projects\ThreatPrismV2\src\threatprism\soar\generic.py` -> Lesson 03
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\prompt_firewall.py` -> Lesson 04
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\tokenization.py` -> Lesson 04
@@ -82,6 +85,7 @@ Fake SOAR payload
 
 - `C:\Projects\ThreatPrismV2\tests\test_api_flow.py` -> Lessons 01 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_access_control.py` -> Lessons 08 and 09
+- `C:\Projects\ThreatPrismV2\tests\test_operational_read_models.py` -> Lessons 08 and 10
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrail_failures.py` -> Lessons 04 and 08
@@ -109,12 +113,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-29 passed
+34 passed
 ```
 
 ## What To Study Next
 
-After Lesson 09, continue into the next active implementation slice:
+After Lesson 10, continue into the next active implementation slice:
 
-- `C:\Projects\ThreatPrismV2\docs\specs\16_OPERATIONAL_READ_MODELS_AND_METRICS.md`
+- `C:\Projects\ThreatPrismV2\docs\specs\11_EVALUATION_PLAN.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

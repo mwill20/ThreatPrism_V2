@@ -227,7 +227,7 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1
      payloads, reports, logs, or manager/GRC views
 ```
 
-## Prepped Follow-On Slice
+## Recently Completed Slice
 
 ```text
 Operational Read Models & Metrics API v0.1
@@ -242,24 +242,20 @@ Operational Read Models & Metrics API v0.1
   -> Keep the slice backend-only, fake-data-only, and no-real-remediation
 ```
 
-This slice remains important and is already specified. It should follow the
-access-control slice so role-safe read models are backed by enforceable
-authorization.
+This slice is implemented. It preserves the compatibility `GET /cases` list
+route and adds `GET /cases/read-model` as the dashboard-ready envelope route.
 
 ## Next Recommended Slice
 
 ```text
-Access Control & Audit Integrity v0.1
-  -> Add demo authentication using fake/demo credentials only
-  -> Map caller identity to an effective role
-  -> Stop treating ?role= as authority outside explicit demo/test override
-  -> Deny role escalation and fail closed for missing or unknown callers
-  -> Harden role-view policy for analyst, engineer, manager/GRC,
-     legal/privacy, audit/debug, and AI views
-  -> Record safe audit events for authorization allow and deny decisions
-  -> Prove manager/GRC cannot force analyst or engineer views
-  -> Prove authorization audit events do not expose raw potential PHI/ePHI,
-     secrets, credentials, raw payloads, or token vault mappings
+Evaluation Harness & Defense Labs v0.1
+  -> Add fixture-based dry-run eval datasets
+  -> Exercise prompt injection, evidence grounding, schema, action safety,
+     healthcare safeguard, authorization, and leakage controls
+  -> Produce structured eval results without live LLM, SOAR, cloud, or
+     enrichment calls
+  -> Keep ALLOW_REAL_ACTIONS=false and fake data only
+  -> Use eval output as a regression signal before dashboards or live providers
 ```
 
 ## Roadmap Constraints

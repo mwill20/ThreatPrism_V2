@@ -51,7 +51,8 @@ Core routes:
 
 - `GET /health` returns status, service name, version, mode, and `allow_real_actions`.
 - `POST /cases` accepts a generic SOAR payload and returns `case_id`, `tracking_id`, and `triage_status`.
-- `GET /cases` returns paginated case summaries.
+- `GET /cases` returns compatibility case summaries.
+- `GET /cases/read-model` returns the dashboard-ready filtered envelope.
 - `GET /cases/{case_id}` returns normalized case data.
 - `GET /cases/{case_id}/triage-report` returns the latest validated report or a structured not-ready status.
 - `POST /cases/{case_id}/analyst-feedback` records analyst feedback and returns disagreement indicators.
@@ -111,6 +112,8 @@ Each completed report includes:
   guardrail blocks, and report validation.
 
 ## Operational Read Models And Metrics Acceptance Criteria
+
+Status: implemented.
 
 - `GET /metrics` returns case, triage, guardrail, healthcare safeguard,
   disagreement, timing, and GRC aggregates.

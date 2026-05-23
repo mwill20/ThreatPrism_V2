@@ -3,8 +3,24 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
+from datetime import datetime
 from typing import Any
 
+from threatprism.cases.read_models import (
+    CaseCountMetrics,
+    CaseReadModelEnvelope,
+    CaseReadModelItem,
+    DisagreementMetrics,
+    GrcMetrics,
+    GuardrailMetrics,
+    MetricsWindow,
+    OperationalMetrics,
+    ReportDecisionMetrics,
+    SafeAuditEvent,
+    TimingMetrics,
+    TriageReadSummary,
+    TriageStatusMetrics,
+)
 from threatprism.cases.schemas import (
     AnalystFeedback,
     AnalystFeedbackCreate,
@@ -177,6 +193,197 @@ class CaseService:
 
     def list_cases(self) -> list[CaseSummary]:
         return [self._summary(case) for case in self.repository.list_cases()]
+
+    def get_operational_metrics(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> OperationalMetrics:
+        cases = self._cases_in_window(self.repository.list_cases(), start, end)
+        case_ids = {case.case_id for case in cases}
+        feedback = [
+            item
+            for item in self.repository.list_feedback()
+            if item.case_id in case_ids
+        ]
+        disagreements = [
+            item
+            for item in self.repository.list_disagreements()
+            if item.case_id in case_ids
+        ]
+
+        case_counts = CaseCountMetrics(total=len(cases))
+        triage = TriageStatusMetrics()
+        report_decisions = ReportDecisionMetrics()
+        guardrails = GuardrailMetrics()
+        grc = GrcMetrics()
+
+        for case in cases:
+            _increment(case_counts.by_source, _enum_value(case.source))
+            _increment(case_counts.by_status, _enum_value(case.status))
+            setattr(
+                triage,
+                _enum_value(case.triage_status),
+                getattr(triage, _enum_value(case.triage_status)) + 1,
+            )
+
+            report = case.triage_report
+            if report is not None:
+                _increment(report_decisions.determination, _enum_value(report.determination))
+                _increment(report_decisions.severity, _enum_value(report.severity))
+                _increment(report_decisions.disposition, _enum_value(report.disposition))
+                for control in report.grc_controls:
+                    grc.mapping_count += 1
+                    if control.evidence_ids:
+                        grc.mappings_with_evidence_count += 1
+                    if control.review_required:
+                        grc.review_required_count += 1
+
+            if self._case_guardrail_blocked(case):
+                guardrails.blocked_cases += 1
+            healthcare_summary = self._healthcare_safeguard_summary(case)
+            if healthcare_summary.get("privacy_legal_review_required"):
+                guardrails.healthcare_review_required += 1
+            if healthcare_summary.get("potential_sensitive_data_exposure"):
+                guardrails.potential_sensitive_data_exposure += 1
+            if healthcare_summary.get("secret_exposure_detected"):
+                guardrails.secret_exposure_detected += 1
+
+            for event in case.audit_trail:
+                if event.event_type == "rehydration_denied":
+                    guardrails.rehydration_denied_events += 1
+                elif event.event_type == "role_view_policy_applied":
+                    guardrails.role_view_policy_applied_events += 1
+                elif event.event_type == "authorization_decision":
+                    if event.metadata.get("decision") == "allow":
+                        guardrails.authorization_allowed_events += 1
+                    elif event.metadata.get("decision") == "deny":
+                        guardrails.authorization_denied_events += 1
+
+        timing = TimingMetrics(
+            average_time_to_acknowledge_seconds=_average(
+                item.time_to_acknowledge_seconds for item in feedback
+            ),
+            average_time_to_close_seconds=_average(item.time_to_close_seconds for item in feedback),
+        )
+        disagreement_metrics = DisagreementMetrics(
+            feedback_count=len(feedback),
+            determination_mismatch_count=sum(item.determination_mismatch for item in disagreements),
+            severity_mismatch_count=sum(item.severity_mismatch for item in disagreements),
+            disposition_mismatch_count=sum(item.disposition_mismatch for item in disagreements),
+            manager_review_required_count=sum(item.manager_review_required for item in disagreements),
+        )
+        return OperationalMetrics(
+            window=MetricsWindow(start=start, end=end),
+            case_counts=case_counts,
+            triage=triage,
+            report_decisions=report_decisions,
+            guardrails=guardrails,
+            disagreement=disagreement_metrics,
+            timing=timing,
+            grc=grc,
+        )
+
+    def list_case_read_models(
+        self,
+        *,
+        source: str | None = None,
+        status: str | None = None,
+        triage_status: str | None = None,
+        severity: str | None = None,
+        determination: str | None = None,
+        manager_review_required: bool | None = None,
+        healthcare_review_required: bool | None = None,
+        guardrail_blocked: bool | None = None,
+        authorization_denied: bool | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        limit: int = 50,
+        cursor: str | None = None,
+        role: ViewRole | None = None,
+    ) -> CaseReadModelEnvelope:
+        disagreements = self.repository.list_disagreements()
+        items = [
+            self._case_read_model_item(case, disagreements)
+            for case in self._cases_in_window(
+                self.repository.list_cases(),
+                created_after,
+                created_before,
+            )
+        ]
+        filters = {
+            "source": source,
+            "status": status,
+            "triage_status": triage_status,
+            "severity": severity,
+            "determination": determination,
+            "manager_review_required": manager_review_required,
+            "healthcare_review_required": healthcare_review_required,
+            "guardrail_blocked": guardrail_blocked,
+            "authorization_denied": authorization_denied,
+            "created_after": created_after.isoformat() if created_after else None,
+            "created_before": created_before.isoformat() if created_before else None,
+            "limit": limit,
+            "cursor": cursor,
+        }
+        filtered = [
+            item
+            for item in items
+            if _matches_filter(_enum_value(item.source), source)
+            and _matches_filter(_enum_value(item.status), status)
+            and _matches_filter(_enum_value(item.triage_status), triage_status)
+            and _matches_filter(item.triage.severity if item.triage else None, severity)
+            and _matches_filter(item.triage.determination if item.triage else None, determination)
+            and _matches_bool(item.manager_review_required, manager_review_required)
+            and _matches_bool(item.healthcare_review_required, healthcare_review_required)
+            and _matches_bool(item.guardrail_blocked, guardrail_blocked)
+            and _matches_bool(item.authorization_denied, authorization_denied)
+        ]
+        envelope = CaseReadModelEnvelope(
+            items=filtered[: max(0, limit)],
+            total=len(filtered),
+            next_cursor=None,
+            filters={key: value for key, value in filters.items() if value is not None},
+        )
+        if role is None:
+            return envelope
+        result = render_role_view(envelope, role)
+        payload = _payload_with_role_view_metadata(result.payload, result.metadata)
+        return CaseReadModelEnvelope.model_validate(payload)
+
+    def get_evidence_view(self, case_id: str, role: ViewRole | None = None) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        return self._detail_view(case, "evidence", case.evidence, role)
+
+    def get_timeline_view(self, case_id: str, role: ViewRole | None = None) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        return self._detail_view(case, "timeline", case.timeline, role)
+
+    def get_mitre_view(self, case_id: str, role: ViewRole | None = None) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        return self._detail_view(case, "mitre_mappings", case.mitre_mappings, role)
+
+    def get_grc_controls_view(self, case_id: str, role: ViewRole | None = None) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        return self._detail_view(case, "grc_controls", case.grc_controls, role)
+
+    def get_audit_events_view(self, case_id: str, role: ViewRole | None = None) -> dict[str, Any] | None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return None
+        events = [
+            SafeAuditEvent.model_validate(event.model_dump(mode="json"))
+            for event in case.audit_trail
+        ]
+        return self._detail_view(case, "audit_events", events, role)
 
     def get_case(self, case_id: str) -> CaseRecord | None:
         return self.repository.get_case(case_id)
@@ -388,6 +595,98 @@ class CaseService:
         case.updated_at = utc_now()
         self.repository.save_case(case)
 
+    def _detail_view(
+        self,
+        case: CaseRecord,
+        detail_name: str,
+        items: Any,
+        role: ViewRole | None,
+    ) -> dict[str, Any]:
+        payload = {
+            "case_id": case.case_id,
+            "detail": detail_name,
+            "items": _json_payload(items),
+        }
+        if role is None:
+            return payload
+        result = render_role_view(payload, role, case_id=case.case_id)
+        self._record_role_view_audit(case, result)
+        return _payload_with_role_view_metadata(result.payload, result.metadata)
+
+    def _case_read_model_item(
+        self,
+        case: CaseRecord,
+        disagreements: list[DisagreementRecord],
+    ) -> CaseReadModelItem:
+        report = case.triage_report
+        triage = None
+        if report is not None:
+            triage = TriageReadSummary(
+                determination=_enum_value(report.determination),
+                severity=_enum_value(report.severity),
+                disposition=_enum_value(report.disposition),
+                confidence=report.confidence,
+            )
+        return CaseReadModelItem(
+            case_id=case.case_id,
+            source=case.source,
+            source_case_id=case.source_case_id,
+            title=case.title,
+            status=case.status,
+            triage_status=case.triage_status,
+            triage=triage,
+            manager_review_required=self._case_manager_review_required(case, disagreements),
+            healthcare_review_required=bool(
+                self._healthcare_safeguard_summary(case).get("privacy_legal_review_required")
+            ),
+            guardrail_blocked=self._case_guardrail_blocked(case),
+            authorization_denied=self._case_authorization_denied(case),
+            created_at=case.created_at,
+            updated_at=case.updated_at,
+        )
+
+    def _cases_in_window(
+        self,
+        cases: list[CaseRecord],
+        start: datetime | None,
+        end: datetime | None,
+    ) -> list[CaseRecord]:
+        return [
+            case
+            for case in cases
+            if (start is None or case.created_at >= start)
+            and (end is None or case.created_at <= end)
+        ]
+
+    def _case_manager_review_required(
+        self,
+        case: CaseRecord,
+        disagreements: list[DisagreementRecord] | None = None,
+    ) -> bool:
+        active_disagreements = disagreements if disagreements is not None else self.repository.list_disagreements()
+        return any(
+            item.case_id == case.case_id and item.manager_review_required
+            for item in active_disagreements
+        )
+
+    def _case_guardrail_blocked(self, case: CaseRecord) -> bool:
+        return case.triage_status == TriageStatus.blocked_by_guardrail or any(
+            event.event_type == "triage_blocked_by_guardrail" for event in case.audit_trail
+        )
+
+    def _case_authorization_denied(self, case: CaseRecord) -> bool:
+        return any(
+            event.event_type == "authorization_decision"
+            and event.metadata.get("decision") == "deny"
+            for event in case.audit_trail
+        )
+
+    def _healthcare_safeguard_summary(self, case: CaseRecord) -> dict[str, Any]:
+        summary = case.source_metadata.get("healthcare_safeguard")
+        if isinstance(summary, dict):
+            return summary
+        return {}
+
     def _summary(self, case: CaseRecord) -> CaseSummary:
         report = case.triage_report
         triage = None
@@ -406,7 +705,7 @@ class CaseService:
             status=case.status,
             triage_status=case.triage_status,
             triage=triage,
-            manager_review_required=bool(report and report.analyst_review_required),
+            manager_review_required=self._case_manager_review_required(case),
             created_at=case.created_at,
             updated_at=case.updated_at,
         )
@@ -423,6 +722,16 @@ def _payload_with_role_view_metadata(payload: Any, metadata: dict[str, Any]) -> 
     return {"payload": payload, "role_view": metadata}
 
 
+def _json_payload(value: Any) -> Any:
+    if hasattr(value, "model_dump"):
+        return value.model_dump(mode="json")
+    if isinstance(value, list):
+        return [_json_payload(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _json_payload(item) for key, item in value.items()}
+    return value
+
+
 def _token_record_summary(records: list[SanitizationRecord]) -> dict[str, Any]:
     token_types: dict[str, int] = {}
     field_paths: list[str] = []
@@ -435,6 +744,33 @@ def _token_record_summary(records: list[SanitizationRecord]) -> dict[str, Any]:
         "token_types": token_types,
         "field_paths": sorted(set(field_paths)),
     }
+
+
+def _enum_value(value: Any) -> str:
+    return str(value.value if hasattr(value, "value") else value)
+
+
+def _increment(target: dict[str, int], key: str) -> None:
+    target[key] = target.get(key, 0) + 1
+
+
+def _average(values: Any) -> float | None:
+    filtered = [value for value in values if value is not None]
+    if not filtered:
+        return None
+    return round(sum(filtered) / len(filtered), 2)
+
+
+def _matches_filter(actual: str | None, expected: str | None) -> bool:
+    if expected is None:
+        return True
+    return actual == expected
+
+
+def _matches_bool(actual: bool, expected: bool | None) -> bool:
+    if expected is None:
+        return True
+    return actual is expected
 
 
 def _rehydrate_value(value: Any, vault: TokenVault) -> Any:

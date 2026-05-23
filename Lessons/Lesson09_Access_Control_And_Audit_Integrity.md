@@ -226,7 +226,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson09_full
 Expected output:
 
 ```text
-29 passed
+34 passed
 ```
 
 ## 📚 Interview Prep
@@ -265,6 +265,6 @@ Expected output:
 
 ## 🚀 Ready For The Next Slice?
 
-Next, build Operational Read Models & Metrics API v0.1 using this authorization pattern for every role-aware read surface.
+Next, study Operational Read Models & Metrics API v0.1 to see how this authorization pattern protects broader read surfaces.
 
 Remember: access control turns role views from helpful formatting into enforceable behavior. 🛡️

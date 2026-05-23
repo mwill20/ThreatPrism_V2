@@ -19,6 +19,9 @@ Trust files and validation results over older chat summaries.
   for new slices, workarounds, and major enhancements.
 - [x] `Lessons/00_Index.md` is the learning curriculum entry point for the
   implemented backend, guardrail, persistence, and testing slices.
+- [x] Every implementation slice must close with docs, README, checklist,
+  handoff, limitations/decisions as needed, lessons, and current validation
+  updates.
 
 ## Active Target
 
@@ -88,36 +91,35 @@ Healthcare Safeguard & Evidence Alignment Guardrails v0.1:
 - [x] Add tests proving compliance/certification/audit-ready claims are blocked.
 - [x] Add tests proving GRC mappings still cite evidence IDs.
 
-## Prepped Follow-On Slice
+## Completed Slice
 
 Operational Read Models & Metrics API v0.1:
 
 - [x] Add implementation-ready spec for operational read models and metrics.
-- [ ] Add Pydantic response models for metrics, case-list envelopes, detail
+- [x] Add Pydantic response models for metrics, case-list envelopes, detail
   route envelopes, and safe audit summaries.
-- [ ] Add `GET /metrics` with case, triage, guardrail, healthcare safeguard,
+- [x] Add `GET /metrics` with case, triage, guardrail, healthcare safeguard,
   disagreement, timing, and GRC aggregates.
-- [ ] Add dashboard-ready case list filtering for source, status,
+- [x] Add dashboard-ready case list filtering for source, status,
   triage_status, severity, determination, manager review, healthcare review,
   guardrail block, and created time windows.
-- [ ] Add manager-review queue behavior through filters or a dedicated route.
-- [ ] Add healthcare-review queue behavior through filters or a dedicated
+- [x] Add manager-review queue behavior through filters or a dedicated route.
+- [x] Add healthcare-review queue behavior through filters or a dedicated
   route.
-- [ ] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
+- [x] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
   and audit events.
-- [ ] Apply role-safe rendering to detail/read-model routes where case content
+- [x] Apply role-safe rendering to detail/read-model routes where case content
   or security telemetry can appear.
-- [ ] Ensure metrics and read-model routes never expose raw potential PHI/ePHI,
+- [x] Ensure metrics and read-model routes never expose raw potential PHI/ePHI,
   secrets, or token vault mappings.
-- [ ] Add tests for metrics aggregation, filtering, manager-review queue,
+- [x] Add tests for metrics aggregation, filtering, manager-review queue,
   healthcare-review queue, detail routes, role-safe views, and no sensitive
   value leakage.
-- [ ] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
+- [x] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
   SOAR, enrichment, cloud, or remediation calls.
 
-This slice remains queued, but the architect review identified access control
-as the stronger immediate prerequisite because role-based views are not
-security controls until identity and authorization enforce them.
+Implemented as `GET /cases/read-model` to preserve the existing compatibility
+`GET /cases` list response.
 
 ## Completed Slice
 
@@ -154,28 +156,25 @@ Access Control & Audit Integrity v0.1:
 
 ## Next Active Slice
 
-Operational Read Models & Metrics API v0.1 is now the next backend slice:
+Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
 
 - [ ] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
-- [ ] Add Pydantic response models for metrics, case-list envelopes, detail
-  route envelopes, and safe audit summaries.
-- [ ] Add `GET /metrics` with case, triage, guardrail, healthcare safeguard,
-  disagreement, timing, authorization, and GRC aggregates.
-- [ ] Add dashboard-ready case list filtering for source, status,
-  triage_status, severity, determination, manager review, healthcare review,
-  guardrail block, authorization denial, and created time windows.
-- [ ] Add manager-review queue behavior through filters or a dedicated route.
-- [ ] Add healthcare-review queue behavior through filters or a dedicated
-  route.
-- [ ] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
-  and safe audit events.
-- [ ] Apply authorization and role-safe rendering to detail/read-model routes.
-- [ ] Ensure metrics and read-model routes never expose raw potential PHI/ePHI,
-  secrets, credentials, raw payload bodies, or token vault mappings.
-- [ ] Add tests for metrics aggregation, filtering, review queues, detail
-  routes, authorization, role-safe views, and no sensitive value leakage.
-- [ ] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
-  SOAR, enrichment, cloud, dashboard, production IdP, or remediation work.
+- [ ] Add fake JSONL eval fixtures for prompt injection, hallucinated claims,
+  unsafe action claims, schema violations, evidence citation failures,
+  healthcare safeguard leakage, authorization escalation, and benign/suspicious
+  ambiguity.
+- [ ] Add a dry-run eval harness that uses the deterministic demo provider or
+  controlled fake providers only.
+- [ ] Add structured eval result models with pass/fail counts, category counts,
+  failure reasons, and safe artifact paths.
+- [ ] Add a local API or CLI entry point for eval execution only if it remains
+  fake-data and no-live-provider safe.
+- [ ] Ensure eval outputs do not expose raw potential PHI/ePHI, secrets,
+  credentials, raw payload bodies, or token vault mappings.
+- [ ] Add tests proving eval failures are visible and real remediation remains
+  disabled.
+- [ ] Update docs, README, lessons, checklist, handoff, limitations, and
+  validation notes when complete.
 
 ## Validation
 
@@ -188,7 +187,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 Current known result:
 
 ```text
-29 passed
+34 passed
 ```
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a
@@ -223,4 +222,6 @@ fresh ignored base temp directory.
 - Access control audit prep commit: `20ad254 Document access control audit slice`.
 - Architectural North Star commit: `31d5c98 Add architectural north star`.
 - Lessons curriculum commit: `6aa3755 Add ThreatPrism lessons curriculum`.
+- Access control implementation commit: `f05e93d Implement demo access control audit slice`.
+- Operational read models implementation commit: `Implement operational read models and metrics`.
 - Pushed to `origin/main` for `mwill20/ThreatPrism_V2`.

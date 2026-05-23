@@ -37,6 +37,19 @@ Result:
 22 passed
 ```
 
+Latest validation after Access Control & Audit Integrity v0.1 and Operational
+Read Models & Metrics API v0.1 on 2026-05-23:
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics2
+```
+
+Result:
+
+```text
+34 passed
+```
+
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
 with a fresh ignored base temp such as `.pytest_tmp_run_verify`.
 
@@ -889,18 +902,20 @@ Analyst submits feedback
 ThreatPrism records disagreement metrics
 ```
 
-The healthcare safeguard slice is now implemented. Access Control & Audit
-Integrity v0.1 is also implemented. Operational Read Models & Metrics API v0.1
-is the immediate next recommended slice:
+The healthcare safeguard slice is implemented. Access Control & Audit Integrity
+v0.1 is implemented. Operational Read Models & Metrics API v0.1 is implemented:
 
 ```text
 Operational Read Models & Metrics API v0.1
   -> Stable GET /metrics aggregate response shape
-  -> Dashboard-ready case list filtering
+  -> Dashboard-ready GET /cases/read-model companion envelope route
   -> Manager-review and healthcare-review queue behavior
   -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
   -> Authorization and role-safe rendering on read/detail routes
 ```
+
+The immediate next recommended slice is Evaluation Harness & Defense Labs
+v0.1.
 
 ---
 

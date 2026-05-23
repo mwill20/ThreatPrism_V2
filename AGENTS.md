@@ -49,6 +49,8 @@ Current baseline:
   `src/threatprism/guardrails/`.
 - Demo authentication and role-view authorization helpers exist under
   `src/threatprism/auth/`.
+- Operational read-model response types exist under
+  `src/threatprism/cases/read_models.py`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - API and guardrail tests exist under `tests/`.
 - The known local validation command is:
@@ -150,6 +152,9 @@ until identity and authorization enforce the effective role.
 ## Development Rules For Later Phases
 
 - Keep application behavior evidence-first and analyst-controlled.
+- After every implementation slice, update docs, README, lessons, checklist,
+  decision/limitation records, and validation notes before calling the slice
+  complete.
 - Check `docs/ARCHITECTURAL_NORTH_STAR.md` before starting a new implementation
   slice or accepting an architecture-shaping workaround.
 - If a workaround or enhancement intentionally changes architecture direction,

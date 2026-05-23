@@ -144,19 +144,54 @@ Example accepted response:
 
 ### GET /cases
 
-Returns paginated case summaries.
+Returns the compatibility case-summary list used by the first backend slice.
+
+The dashboard-ready envelope route is `GET /cases/read-model`.
+
+Example response:
+
+```json
+[
+  {
+    "case_id": "case_01JZ7NPZHV7Y7Y9D2PF3A2V3NX",
+    "source": "generic_soar",
+    "source_case_id": "SOAR-100245",
+    "title": "Suspicious sign-in followed by mailbox rule creation",
+    "status": "triage_completed",
+    "triage_status": "completed",
+    "triage": {
+      "determination": "suspicious",
+      "severity": "high",
+      "disposition": "escalate",
+      "confidence": 0.82
+    },
+    "manager_review_required": true,
+    "created_at": "2026-05-21T18:31:03Z",
+    "updated_at": "2026-05-21T18:33:19Z"
+  }
+]
+```
+
+### GET /cases/read-model
+
+Returns the dashboard-ready case-list envelope.
 
 Query parameters:
 
 - `source`
 - `status`
+- `triage_status`
 - `severity`
 - `determination`
 - `manager_review_required`
+- `healthcare_review_required`
+- `guardrail_blocked`
+- `authorization_denied`
 - `created_after`
 - `created_before`
 - `limit`
 - `cursor`
+- `role`
 
 Example response:
 
@@ -168,19 +203,28 @@ Example response:
       "source": "generic_soar",
       "source_case_id": "SOAR-100245",
       "title": "Suspicious sign-in followed by mailbox rule creation",
-      "status": "triage_completed",
+      "status": "analyst_feedback_submitted",
+      "triage_status": "completed",
       "triage": {
         "determination": "suspicious",
         "severity": "high",
         "disposition": "escalate",
-        "confidence": 0.84
+        "confidence": 0.82
       },
       "manager_review_required": true,
+      "healthcare_review_required": false,
+      "guardrail_blocked": false,
+      "authorization_denied": false,
       "created_at": "2026-05-21T18:31:03Z",
-      "updated_at": "2026-05-21T18:33:19Z"
+      "updated_at": "2026-05-21T19:02:44Z"
     }
   ],
-  "next_cursor": null
+  "next_cursor": null,
+  "total": 1,
+  "filters": {
+    "manager_review_required": true
+  },
+  "role_view": null
 }
 ```
 
@@ -338,9 +382,10 @@ Example response:
 }
 ```
 
-## Dashboard-Ready Routes For Later Slices
+## Dashboard-Ready Routes
 
-These routes are dashboard-ready targets. They do not all have to be fully implemented in the first build slice, but their response shapes should be kept stable once introduced.
+These routes are implemented as backend-only, demo-safe read surfaces. They do
+not require a frontend dashboard or live integrations.
 
 ### GET /metrics
 
@@ -484,6 +529,34 @@ Example response:
       "evidence_ids": ["ev-001"],
       "review_required": true,
       "language_note": "HITRUST-aligned category mapping only; this is not a compliance determination."
+    }
+  ]
+}
+```
+
+### GET /cases/{case_id}/audit-events
+
+Returns safe audit events for a case.
+
+Example response:
+
+```json
+{
+  "case_id": "case_01JZ7NPZHV7Y7Y9D2PF3A2V3NX",
+  "detail": "audit_events",
+  "items": [
+    {
+      "audit_event_id": "audit_01JZ7P51E6TAP8G5WT3Y7WB3RF",
+      "case_id": "case_01JZ7NPZHV7Y7Y9D2PF3A2V3NX",
+      "event_type": "authorization_decision",
+      "actor": "demo_manager",
+      "summary": "Authorization decision: allow.",
+      "created_at": "2026-05-21T18:33:19Z",
+      "metadata": {
+        "decision": "allow",
+        "reason": "role_view_allowed",
+        "request_metadata_hash": "sha256:demo-redacted-request-metadata-hash"
+      }
     }
   ]
 }

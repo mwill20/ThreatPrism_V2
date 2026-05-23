@@ -224,7 +224,7 @@ True
 - `CaseService` owns business workflow.
 - API tests use `TestClient` and in-memory SQLite.
 - The CLI is currently a simple Uvicorn runner.
-- Access control is now in place for role-aware case and report reads before dashboard/read-model expansion.
+- Access control and operational read models are now in place for role-aware backend reads.
 
 ## 📋 Summary Reference Card
 

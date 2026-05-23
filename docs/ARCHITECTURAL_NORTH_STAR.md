@@ -120,9 +120,9 @@ The architecture direction is:
 - `audit_debug`: token IDs, detector types, field paths, hashes, timestamps, and
   decisions only.
 
-Access Control & Audit Integrity v0.1 should make these role views enforceable
-with demo authentication and authorization before metrics, read models,
-dashboard routes, live integrations, or any non-demo data path.
+Access Control & Audit Integrity v0.1 makes these role views enforceable with
+demo authentication and authorization before live integrations or any non-demo
+data path.
 
 ## Evidence And GRC Direction
 
@@ -161,10 +161,11 @@ Current direction:
 
 1. Completed: first backend slice.
 2. Completed: Healthcare Safeguard & Evidence Alignment Guardrails v0.1.
-3. Current: Access Control & Audit Integrity v0.1.
-4. Queued: Operational Read Models & Metrics API v0.1.
-5. Later: evaluation harness, Microsoft adapter examples, threat intelligence
-   stubs, Docker/CI/demo hardening, and live-integration preparation.
+3. Completed: Access Control & Audit Integrity v0.1.
+4. Completed: Operational Read Models & Metrics API v0.1.
+5. Next: Evaluation Harness & Defense Labs v0.1.
+6. Later: Docker/CI/demo hardening, dashboard work, and live-integration
+   preparation.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live
 enrichment calls, production IdP integration, real remediation, or non-demo

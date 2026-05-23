@@ -36,6 +36,8 @@ Current implemented baseline:
 - Demo API-key authentication for role-aware case and report reads.
 - Identity-to-role authorization for role views.
 - Safe authorization audit events for allow and deny decisions.
+- Operational read models and metrics for dashboard-ready backend use.
+- Safe detail routes for evidence, timeline, MITRE, GRC, and audit events.
 
 Validation command confirmed on 2026-05-22:
 
@@ -43,10 +45,10 @@ Validation command confirmed on 2026-05-22:
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
 ```
 
-Result after Access Control & Audit Integrity v0.1:
+Result after Operational Read Models & Metrics API v0.1:
 
 ```text
-29 passed
+34 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -63,8 +65,7 @@ temp such as `.pytest_tmp_run_verify`.
 - CI/CD.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
-- Operational metrics/read-model APIs for dashboard-ready manager, GRC,
-  legal/privacy, engineer, and audit views.
+- Frontend dashboard.
 
 ## Product Limitations
 
@@ -152,6 +153,10 @@ Role-based views are protected by demo API-key authorization when
 `API_AUTH_MODE=demo_key`. This is not a production access-control boundary or
 IdP integration.
 
+Operational metrics and read models are demo-safe backend responses. They are
+not a production monitoring, SIEM export, BI/data-warehouse, or compliance
+reporting implementation.
+
 ## Demo Data Limitations
 
 - Demo data must be fake.
@@ -162,8 +167,8 @@ IdP integration.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Operational Read Models & Metrics API v0.1 before building any
-  frontend dashboard.
+- Implement Evaluation Harness & Defense Labs v0.1 before adding live LLM,
+  SOAR, enrichment, dashboard, or production-style integration work.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

@@ -4,9 +4,8 @@
 
 Access Control & Audit Integrity v0.1 is implemented.
 
-Operational Read Models & Metrics API v0.1 is now the next backend slice.
-Metrics remain important, but role-based views are now backed by demo
-identity-to-role enforcement before ThreatPrism expands read surfaces.
+Operational Read Models & Metrics API v0.1 has also been implemented. Access
+control remains the prerequisite that makes those broader read surfaces safer.
 
 ## Rationale
 
@@ -60,7 +59,7 @@ Implemented scope:
 Validation result:
 
 ```text
-29 passed
+34 passed
 ```
 
 ## Out Of Scope
@@ -77,11 +76,12 @@ Validation result:
 ## Next Prompt
 
 ```text
-Implement Operational Read Models & Metrics API v0.1 for ThreatPrism.
+Implement Evaluation Harness & Defense Labs v0.1 for ThreatPrism.
 
 Current state:
 - Access Control & Audit Integrity v0.1 is implemented.
-- Validation passes with 29 tests.
+- Operational Read Models & Metrics API v0.1 is implemented.
+- Validation passes with 34 tests.
 - Role-aware case and report reads use demo API-key authorization when
   API_AUTH_MODE=demo_key.
 
@@ -90,5 +90,5 @@ remediation, real healthcare data, dashboard work, or production IdP
 integration. Keep ALLOW_REAL_ACTIONS=false.
 
 Run:
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_evals
 ```

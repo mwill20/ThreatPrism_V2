@@ -324,3 +324,48 @@ demo credential and role escalation is denied.
 Authorization allow and deny decisions must create audit events without storing
 raw potential PHI/ePHI, secrets, full credentials, raw payload bodies, or token
 vault mappings.
+
+## D-027 Slice Completion Documentation Rule
+
+Every implementation slice must close with documentation and learning updates,
+not only code and tests.
+
+Required closeout updates:
+
+- `README.md`.
+- `docs/WORKING_CHECKLIST.md`.
+- `docs/THREATPRISM_V2_CODEX_HANDOFF.md`.
+- Applicable files under `docs/specs/`.
+- Applicable top-level docs under `docs/`.
+- `LIMITATIONS.md`.
+- `DECISIONS.md` when a durable decision was made.
+- `AGENTS.md` when future-agent guidance changed.
+- `Lessons/00_Index.md`.
+- New or updated lesson files when the slice adds learning-worthy behavior.
+
+Validation results must be recorded from the current live repo state. Do not
+carry forward stale test counts.
+
+## D-028 Operational Read Models And Metrics
+
+Operational Read Models & Metrics API v0.1 is implemented as a backend-only,
+dashboard-ready read slice.
+
+ThreatPrism preserves the existing `GET /cases` list response for compatibility
+and adds `GET /cases/read-model` as the stable filterable envelope route.
+
+Implemented read surfaces:
+
+- `GET /metrics`.
+- `GET /cases/read-model`.
+- `GET /cases/{case_id}/evidence`.
+- `GET /cases/{case_id}/timeline`.
+- `GET /cases/{case_id}/mitre`.
+- `GET /cases/{case_id}/grc-controls`.
+- `GET /cases/{case_id}/audit-events`.
+
+These routes remain fake-demo and backend-only. They must not expose raw
+potential PHI/ePHI, secrets, full credentials, raw payload bodies, or token
+vault mappings. Role-aware detail/read routes must use the same demo
+authorization and role-safe rendering policy introduced by Access Control &
+Audit Integrity v0.1.

@@ -175,7 +175,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-29 passed
+34 passed
 ```
 
 ### 🔬 Exercise 2: Inspect Configuration Defaults
@@ -229,7 +229,8 @@ Expected output:
 - The current backend is real code, not just specs.
 - Guardrails and evidence grounding are core architecture, not add-ons.
 - Role views are protected by demo API-key authorization when `API_AUTH_MODE=demo_key`.
-- The next active slice is Operational Read Models & Metrics API v0.1.
+- Operational read models and metrics are implemented.
+- The next active slice is Evaluation Harness & Defense Labs v0.1.
 
 ## 📋 Summary Reference Card
 
@@ -241,7 +242,7 @@ Expected output:
 | Main backend entry | `src/threatprism/api/app.py` |
 | CLI runner | `src/threatprism/cli/main.py` |
 | Config defaults | `src/threatprism/config.py` |
-| Current validation | `29 passed` |
+| Current validation | `34 passed` |
 | Hard safety default | `ALLOW_REAL_ACTIONS=false` |
 
 ## 🚀 Ready For Lesson 01?

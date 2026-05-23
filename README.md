@@ -16,6 +16,10 @@ The latest backend security slice adds demo API-key authentication,
 identity-to-role mapping, role-view authorization, and safe authorization audit
 events for role-aware case and report reads.
 
+The latest operational slice adds safe metrics, dashboard-ready case-list read
+models, manager-review and healthcare-review filters, and role-aware detail
+routes for evidence, timeline, MITRE, GRC, and audit events.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -33,7 +37,7 @@ events for role-aware case and report reads.
 ```text
 src/threatprism/
   api/            FastAPI application factory and routes
-  cases/          Case, triage report, feedback, and service orchestration
+  cases/          Case, triage report, feedback, read models, and service orchestration
   guardrails/     Prompt firewall, tokenization, policy, and evidence checks
   llm/            Provider interface and deterministic demo provider
   persistence/    SQLite demo repository
@@ -72,7 +76,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 Current known result:
 
 ```text
-29 passed
+34 passed
 ```
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
@@ -107,6 +111,18 @@ Fetch the triage report:
 
 ```powershell
 Invoke-RestMethod "http://127.0.0.1:8000/cases/$($created.case_id)/triage-report"
+```
+
+Fetch operational metrics:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/metrics
+```
+
+Fetch the dashboard-ready case-list envelope:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/cases/read-model?manager_review_required=false"
 ```
 
 Submit analyst feedback:
@@ -147,5 +163,9 @@ Access Control & Audit Integrity v0.1 is implemented. See
 `docs/ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md` and
 `docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`.
 
-Operational Read Models & Metrics API v0.1 is the next backend slice. See
+Operational Read Models & Metrics API v0.1 is implemented. See
+`docs/OPERATIONAL_READ_MODELS_AND_METRICS.md` and
 `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.
+
+The next recommended backend slice is Evaluation Harness & Defense Labs v0.1.
+See `docs/specs/11_EVALUATION_PLAN.md`.

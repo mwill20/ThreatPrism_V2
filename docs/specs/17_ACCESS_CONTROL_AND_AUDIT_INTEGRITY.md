@@ -43,7 +43,7 @@ Therefore, Access Control & Audit Integrity v0.1 should run before the
 Operational Read Models & Metrics API slice.
 
 That sequencing is now complete. Operational Read Models & Metrics API v0.1 is
-the next backend slice.
+also implemented.
 
 ## In Scope
 
@@ -145,8 +145,8 @@ Apply authorization to role-aware routes first:
 - `GET /cases/{case_id}`
 - `GET /cases/{case_id}/triage-report`
 
-If detail/read-model routes are added later, they must use the same
-authorization policy:
+Detail/read-model routes added in Operational Read Models & Metrics API v0.1
+use the same authorization policy:
 
 - evidence
 - timeline
@@ -229,7 +229,7 @@ Add tests proving:
 Current validation:
 
 ```text
-29 passed
+34 passed
 ```
 
 ## Recommended Implementation Prompt

@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 
 from threatprism import __version__
+from threatprism.auth.demo import AuthorizationError, authorize_role_view
 from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
     CaseAcceptedResponse,
@@ -50,8 +51,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/cases/{case_id}")
     def get_case(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
-        if role is not None:
-            view = _service(request).get_case_view(case_id, role)
+        view_role = _authorized_view_role(request, case_id, "get_case", role)
+        if view_role is not None:
+            view = _service(request).get_case_view(case_id, view_role)
             if view is None:
                 raise HTTPException(status_code=404, detail="Case not found")
             return view
@@ -62,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/cases/{case_id}/triage-report")
     def get_triage_report(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
+        view_role = _authorized_view_role(request, case_id, "get_triage_report", role)
         case = _service(request).get_case(case_id)
         if case is None:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -72,8 +75,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "status": case.triage_status,
                 "message": "Triage report is not ready.",
             }
-        if role is not None:
-            view = _service(request).get_report_view(case_id, role)
+        if view_role is not None:
+            view = _service(request).get_report_view(case_id, view_role)
             if view is None:
                 raise HTTPException(status_code=404, detail="Triage report not found")
             return view
@@ -95,3 +98,32 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 def _service(request: Request) -> CaseService:
     return request.app.state.case_service
+
+
+def _authorized_view_role(
+    request: Request,
+    case_id: str,
+    endpoint: str,
+    requested_role: ViewRole | None,
+) -> ViewRole | None:
+    service = _service(request)
+    settings: Settings = request.app.state.settings
+    try:
+        result = authorize_role_view(
+            settings=settings,
+            headers=request.headers,
+            method=request.method,
+            path=request.url.path,
+            query_keys=list(request.query_params.keys()),
+            requested_role=requested_role,
+            case_id=case_id,
+            endpoint=endpoint,
+        )
+    except AuthorizationError as exc:
+        if exc.audit_event is not None:
+            service.record_audit_event(case_id, exc.audit_event)
+        raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
+
+    if result.audit_event is not None:
+        service.record_audit_event(case_id, result.audit_event)
+    return result.view_role

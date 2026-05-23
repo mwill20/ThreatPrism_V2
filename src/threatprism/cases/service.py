@@ -204,6 +204,14 @@ class CaseService:
         result = render_role_view(report, role, case_id=case_id)
         return _payload_with_role_view_metadata(result.payload, result.metadata)
 
+    def record_audit_event(self, case_id: str, audit_event: AuditEvent) -> None:
+        case = self.repository.get_case(case_id)
+        if case is None:
+            return
+        case.audit_trail.append(audit_event)
+        case.updated_at = utc_now()
+        self.repository.save_case(case)
+
     def submit_feedback(self, case_id: str, feedback_create: AnalystFeedbackCreate) -> FeedbackResponse:
         case = self.repository.get_case(case_id)
         if case is None:

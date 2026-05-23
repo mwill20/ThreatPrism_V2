@@ -4,6 +4,8 @@
 
 Access Control & Audit Integrity v0.1
 
+Status: implemented.
+
 ## Goal
 
 Make ThreatPrism role-based views enforceable and auditable before any
@@ -39,6 +41,9 @@ Views are not security controls until identity and authorization enforce them.
 
 Therefore, Access Control & Audit Integrity v0.1 should run before the
 Operational Read Models & Metrics API slice.
+
+That sequencing is now complete. Operational Read Models & Metrics API v0.1 is
+the next backend slice.
 
 ## In Scope
 
@@ -208,18 +213,24 @@ Add tests proving:
 
 ## Acceptance Criteria
 
-- Role-aware case and report routes use an effective role derived from a
+- [x] Role-aware case and report routes use an effective role derived from a
   trusted demo principal when demo auth is enabled.
-- `?role=` is not trusted as authority outside explicit demo/test override
+- [x] `?role=` is not trusted as authority outside explicit demo/test override
   behavior.
-- Unauthorized role requests fail closed.
-- Allow and deny decisions create safe audit events.
-- Audit events include caller, requested role, effective role, endpoint,
+- [x] Unauthorized role requests fail closed.
+- [x] Allow and deny decisions create safe audit events.
+- [x] Audit events include caller, requested role, effective role, endpoint,
   decision, reason, and case/report ID when available.
-- Audit events do not include raw sensitive data, full credentials, or token
+- [x] Audit events do not include raw sensitive data, full credentials, or token
   vault mappings.
-- Existing healthcare safeguard tests remain green.
-- Safe local validation passes.
+- [x] Existing healthcare safeguard tests remain green.
+- [x] Safe local validation passes.
+
+Current validation:
+
+```text
+29 passed
+```
 
 ## Recommended Implementation Prompt
 

@@ -12,6 +12,10 @@ The latest implemented guardrail slice also includes context-aware healthcare
 safeguards, typed sensitive-data tokens, role-based rendering helpers, and
 compliance-language scanning for healthcare/GRC claims.
 
+The latest backend security slice adds demo API-key authentication,
+identity-to-role mapping, role-view authorization, and safe authorization audit
+events for role-aware case and report reads.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -68,7 +72,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 Current known result:
 
 ```text
-22 passed
+29 passed
 ```
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
@@ -139,9 +143,9 @@ The completed healthcare safeguard slice is documented in
 `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
 `docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.
 
-The next active implementation target is Access Control & Audit Integrity
-v0.1. See `docs/ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md` and
+Access Control & Audit Integrity v0.1 is implemented. See
+`docs/ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md` and
 `docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`.
 
-Operational Read Models & Metrics API v0.1 remains prepped as the follow-on
-backend slice. See `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.
+Operational Read Models & Metrics API v0.1 is the next backend slice. See
+`docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.

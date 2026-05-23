@@ -33,6 +33,9 @@ Current implemented baseline:
   legal/privacy, and audit/debug views.
 - Compliance-language scanner for HIPAA/HITRUST compliance, certification,
   audit-ready, control-satisfied, and evidence-proves-compliance claims.
+- Demo API-key authentication for role-aware case and report reads.
+- Identity-to-role authorization for role views.
+- Safe authorization audit events for allow and deny decisions.
 
 Validation command confirmed on 2026-05-22:
 
@@ -40,10 +43,10 @@ Validation command confirmed on 2026-05-22:
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
 ```
 
-Result:
+Result after Access Control & Audit Integrity v0.1:
 
 ```text
-22 passed
+29 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -58,9 +61,8 @@ temp such as `.pytest_tmp_run_verify`.
 - Evaluation harness.
 - Docker Compose.
 - CI/CD.
-- Authentication and authorization beyond demo-mode settings.
+- Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
-- Access-control enforcement for role-based views.
 - Operational metrics/read-model APIs for dashboard-ready manager, GRC,
   legal/privacy, engineer, and audit views.
 
@@ -146,9 +148,9 @@ The healthcare safeguard guardrails are not a legal determination,
 de-identification certification, HIPAA compliance claim, HITRUST certification,
 or audit opinion.
 
-Role-based views are not authorization controls until identity and
-authorization enforce the effective role. Current role rendering should be
-treated as internal/demo view logic, not a production access-control boundary.
+Role-based views are protected by demo API-key authorization when
+`API_AUTH_MODE=demo_key`. This is not a production access-control boundary or
+IdP integration.
 
 ## Demo Data Limitations
 
@@ -160,10 +162,8 @@ treated as internal/demo view logic, not a production access-control boundary.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Access Control & Audit Integrity v0.1 before operational read
-  models, metrics, frontend dashboard work, or non-demo data use.
-- Implement Operational Read Models & Metrics API v0.1 after access control is
-  in place and before building any frontend dashboard.
+- Implement Operational Read Models & Metrics API v0.1 before building any
+  frontend dashboard.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

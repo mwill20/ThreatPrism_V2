@@ -75,6 +75,15 @@ class Settings:
     database_url: str = "sqlite:///./data/threatprism.db"
     api_auth_mode: str = "none"
     api_token: str | None = None
+    demo_api_keys: str = (
+        "demo-analyst-key:demo_analyst:analyst,"
+        "demo-engineer-key:demo_engineer:engineer,"
+        "demo-manager-key:demo_manager:manager_grc,"
+        "demo-legal-key:demo_legal:legal_privacy,"
+        "demo-audit-key:demo_audit:audit_debug,"
+        "demo-admin-key:demo_admin:admin"
+    )
+    demo_role_override_enabled: bool = False
     llm_provider: str = "deterministic_demo"
     allow_real_actions: bool = False
 ```
@@ -82,9 +91,10 @@ class Settings:
 Line-by-line:
 
 1. Defaults are demo-safe.
-2. `api_auth_mode` exists but auth enforcement is not implemented yet.
-3. `llm_provider` defaults to deterministic mode.
-4. `allow_real_actions` defaults to `False`.
+2. `api_auth_mode` defaults to unauthenticated local demo mode.
+3. `demo_api_keys` maps fake credentials to demo identities and roles.
+4. `llm_provider` defaults to deterministic mode.
+5. `allow_real_actions` defaults to `False`.
 
 ### Lines 16-25
 

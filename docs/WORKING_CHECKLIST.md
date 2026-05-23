@@ -119,36 +119,61 @@ This slice remains queued, but the architect review identified access control
 as the stronger immediate prerequisite because role-based views are not
 security controls until identity and authorization enforce them.
 
-## Next Active Slice
+## Completed Slice
 
 Access Control & Audit Integrity v0.1:
 
-- [ ] Check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation and record
+- [x] Check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation and record
   any intentional architecture changes in `DECISIONS.md`.
 - [x] Document why this slice supersedes metrics/read models as the next
   implementation target.
 - [x] Add implementation-ready spec for demo authentication, authorization,
   and audit integrity.
-- [ ] Add demo authentication middleware or dependency using fake/demo
+- [x] Add demo authentication middleware or dependency using fake/demo
   credentials only.
-- [ ] Map authenticated callers to effective roles.
-- [ ] Stop treating `?role=` as authority outside explicit demo/test override
+- [x] Map authenticated callers to effective roles.
+- [x] Stop treating `?role=` as authority outside explicit demo/test override
   behavior.
-- [ ] Deny role escalation attempts and fail closed for missing, unknown, or
+- [x] Deny role escalation attempts and fail closed for missing, unknown, or
   unauthorized roles.
-- [ ] Harden role-view policy so manager/GRC, legal/privacy, audit/debug, and
+- [x] Harden role-view policy so manager/GRC, legal/privacy, audit/debug, and
   AI views cannot receive analyst/engineer-only data.
-- [ ] Record authorization audit events for allow and deny decisions.
-- [ ] Ensure authorization audit events include caller identity, requested role,
+- [x] Record authorization audit events for allow and deny decisions.
+- [x] Ensure authorization audit events include caller identity, requested role,
   effective role, endpoint, case/report ID, decision, reason, timestamp, and a
   redacted request metadata hash.
-- [ ] Ensure authorization audit events never store raw potential PHI/ePHI,
+- [x] Ensure authorization audit events never store raw potential PHI/ePHI,
   secrets, full credentials, raw payload bodies, or token vault mappings.
-- [ ] Add tests for unauthenticated denial when demo auth is enabled.
-- [ ] Add tests proving manager/GRC cannot force analyst or engineer views.
-- [ ] Add tests proving invalid role escalation fails closed.
-- [ ] Add tests proving allow and deny decisions create audit events.
-- [ ] Add tests proving healthcare leakage protections still pass.
+- [x] Add tests for unauthenticated denial when demo auth is enabled.
+- [x] Add tests proving manager/GRC cannot force analyst or engineer views.
+- [x] Add tests proving invalid role escalation fails closed.
+- [x] Add tests proving allow and deny decisions create audit events.
+- [x] Add tests proving healthcare leakage protections still pass.
+- [x] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
+  SOAR, enrichment, cloud, dashboard, production IdP, or remediation work.
+
+## Next Active Slice
+
+Operational Read Models & Metrics API v0.1 is now the next backend slice:
+
+- [ ] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [ ] Add Pydantic response models for metrics, case-list envelopes, detail
+  route envelopes, and safe audit summaries.
+- [ ] Add `GET /metrics` with case, triage, guardrail, healthcare safeguard,
+  disagreement, timing, authorization, and GRC aggregates.
+- [ ] Add dashboard-ready case list filtering for source, status,
+  triage_status, severity, determination, manager review, healthcare review,
+  guardrail block, authorization denial, and created time windows.
+- [ ] Add manager-review queue behavior through filters or a dedicated route.
+- [ ] Add healthcare-review queue behavior through filters or a dedicated
+  route.
+- [ ] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
+  and safe audit events.
+- [ ] Apply authorization and role-safe rendering to detail/read-model routes.
+- [ ] Ensure metrics and read-model routes never expose raw potential PHI/ePHI,
+  secrets, credentials, raw payload bodies, or token vault mappings.
+- [ ] Add tests for metrics aggregation, filtering, review queues, detail
+  routes, authorization, role-safe views, and no sensitive value leakage.
 - [ ] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
   SOAR, enrichment, cloud, dashboard, production IdP, or remediation work.
 
@@ -163,7 +188,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 Current known result:
 
 ```text
-22 passed
+29 passed
 ```
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a
@@ -195,4 +220,7 @@ fresh ignored base temp directory.
 - Initial baseline commit: `2ece6dd Build ThreatPrism V2 baseline`.
 - Healthcare safeguard guardrails commit: `f251d28 Implement healthcare safeguard guardrails`.
 - Operational metrics prep commit: `3a4dd84 Prep operational metrics read-model slice`.
+- Access control audit prep commit: `20ad254 Document access control audit slice`.
+- Architectural North Star commit: `31d5c98 Add architectural north star`.
+- Lessons curriculum commit: `6aa3755 Add ThreatPrism lessons curriculum`.
 - Pushed to `origin/main` for `mwill20/ThreatPrism_V2`.

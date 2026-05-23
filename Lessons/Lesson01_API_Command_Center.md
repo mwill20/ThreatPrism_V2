@@ -136,7 +136,7 @@ Line-by-line:
 2. If present, the service renders a role-specific view.
 3. If missing, the full case is returned.
 
-⚠️ Important: this is rendering logic, not authorization. The next active slice must stop trusting `?role=` as authority.
+⚠️ Important: in `API_AUTH_MODE=demo_key`, this route now derives the allowed role view from demo credentials before rendering.
 
 ## 🧪 Manual Verification
 
@@ -216,7 +216,7 @@ True
 **A**: `create_app(settings)` allows tests to inject safe in-memory settings while local runs use environment variables. It improves testability and keeps startup predictable.
 
 **Q: What is risky about `?role=` today?**  
-**A**: It changes rendering but does not prove who the caller is. Role-based views are not security controls until authentication and authorization enforce the effective role.
+**A**: In local `API_AUTH_MODE=none`, it remains a demo view selector. In `API_AUTH_MODE=demo_key`, it is only a requested view; the effective role comes from the demo credential and unauthorized views are denied.
 
 ## 🎯 Key Takeaways
 
@@ -224,7 +224,7 @@ True
 - `CaseService` owns business workflow.
 - API tests use `TestClient` and in-memory SQLite.
 - The CLI is currently a simple Uvicorn runner.
-- Access control is the right next slice before dashboard/read-model expansion.
+- Access control is now in place for role-aware case and report reads before dashboard/read-model expansion.
 
 ## 📋 Summary Reference Card
 

@@ -44,6 +44,8 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/guardrails/` with prompt firewall, tokenization,
   healthcare safeguard scanning, role-based rendering helpers, output-policy
   scanning, evidence-grounding checks, and action-safety checks.
+- `src/threatprism/auth/` with demo API-key authentication, identity-to-role
+  mapping, role-view authorization, and safe authorization audit events.
 - `src/threatprism/llm/providers.py` with a deterministic demo provider.
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
@@ -60,7 +62,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 Result:
 
 ```text
-22 passed
+29 passed
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -253,25 +255,31 @@ Context-aware potential PHI/ePHI, PII, secret, and security telemetry detection
      role-view policy application, guardrail blocks, and report validation
 ```
 
+Access Control & Audit Integrity v0.1 is implemented:
+
+```text
+Demo API key
+  -> Caller identity and effective role
+  -> Role-view authorization
+  -> Role escalation denial
+  -> Safe authorization audit event for allow or deny decisions
+  -> Role-aware case and report reads
+```
+
 ## Next Implementation Slice
 
 The next recommended slice is:
 
 ```text
-Access Control & Audit Integrity v0.1
-  -> Demo authentication using fake/demo credentials only
-  -> Caller identity mapped to an effective role
-  -> ?role= treated as a view request, not authority, outside explicit demo/test
-     override behavior
-  -> Role escalation denied and audited
-  -> Safe audit events for authorization allow and deny decisions
-  -> Tests proving manager/GRC cannot force analyst or engineer views
-  -> Tests proving authorization audit events do not expose raw potential
-     PHI/ePHI, secrets, full credentials, raw payloads, or token vault mappings
+Operational Read Models & Metrics API v0.1
+  -> Stable GET /metrics aggregate response shape
+  -> Dashboard-ready case list filtering or companion envelope route
+  -> Manager-review and healthcare-review queue behavior
+  -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
+  -> Authorization and role-safe rendering on read/detail routes
+  -> Tests proving metrics and read models do not expose raw potential PHI/ePHI,
+     secrets, credentials, raw payload bodies, or token vault mappings
 ```
-
-Operational Read Models & Metrics API v0.1 remains prepped as the follow-on
-backend slice after access control is in place.
 
 Do not implement:
 
@@ -449,7 +457,7 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Access Control & Audit Integrity v0.1 using a clean V2
+Continue with Operational Read Models & Metrics API v0.1 using a clean V2
 architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
@@ -466,5 +474,5 @@ dashboard, add live integrations, or add production IdP integration in this
 slice.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
-fresh ignored base temp such as `.pytest_tmp_run_auth`.
+fresh ignored base temp such as `.pytest_tmp_run_metrics`.
 ```

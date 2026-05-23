@@ -47,6 +47,8 @@ Current baseline:
 - The first backend slice exists under `src/threatprism/`.
 - Healthcare safeguard guardrails and role-based rendering helpers exist under
   `src/threatprism/guardrails/`.
+- Demo authentication and role-view authorization helpers exist under
+  `src/threatprism/auth/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - API and guardrail tests exist under `tests/`.
 - The known local validation command is:
@@ -161,6 +163,8 @@ until identity and authorization enforce the effective role.
   compliance-certification language.
 - Do not treat `?role=` as authorization. It is only a view request unless a
   trusted identity-to-role policy has authorized the effective role.
+- In `API_AUTH_MODE=demo_key`, derive role views from demo credentials and deny
+  role escalation.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.

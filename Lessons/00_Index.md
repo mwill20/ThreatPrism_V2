@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `22 passed`.
+- The current validated baseline is `29 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -48,6 +48,7 @@ Fake SOAR payload
 | ✅ | [Lesson 06](Lesson06_Deterministic_Triage_Mapping_And_Reports.md) | Deterministic Triage, Mapping, Enrichment, And Reports | `src/threatprism/llm/providers.py`, `src/threatprism/mitre/mapping.py`, `src/threatprism/grc/mapping.py`, `src/threatprism/enrichment/stubs.py`, `src/threatprism/reports/render.py` |
 | ✅ | [Lesson 07](Lesson07_SQLite_Config_And_Identifiers.md) | SQLite, Config, And Identifiers | `src/threatprism/persistence/sqlite.py`, `src/threatprism/config.py`, `src/threatprism/ids.py`, `.env.example` |
 | ✅ | [Lesson 08](Lesson08_Testing_Defense_Labs_And_Next_Slices.md) | Testing, Defense Labs, And Next Slices | `tests/*.py`, `docs/specs/16_*`, `docs/specs/17_*` |
+| ✅ | [Lesson 09](Lesson09_Access_Control_And_Audit_Integrity.md) | Access Control And Audit Integrity | `src/threatprism/auth/demo.py`, `tests/test_access_control.py`, `.env.example` |
 
 ## File Coverage Map
 
@@ -55,6 +56,8 @@ Fake SOAR payload
 
 - `C:\Projects\ThreatPrismV2\src\threatprism\__init__.py` -> Lesson 00
 - `C:\Projects\ThreatPrismV2\src\threatprism\api\app.py` -> Lesson 01
+- `C:\Projects\ThreatPrismV2\src\threatprism\auth\demo.py` -> Lesson 09
+- `C:\Projects\ThreatPrismV2\src\threatprism\auth\__init__.py` -> Lesson 09
 - `C:\Projects\ThreatPrismV2\src\threatprism\cli\main.py` -> Lesson 01
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\schemas.py` -> Lesson 02
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\service.py` -> Lesson 02
@@ -78,6 +81,7 @@ Fake SOAR payload
 ### Tests And Fixtures
 
 - `C:\Projects\ThreatPrismV2\tests\test_api_flow.py` -> Lessons 01 and 08
+- `C:\Projects\ThreatPrismV2\tests\test_access_control.py` -> Lessons 08 and 09
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrail_failures.py` -> Lessons 04 and 08
@@ -105,13 +109,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-22 passed
+29 passed
 ```
 
 ## What To Study Next
 
-After Lesson 08, continue into the next active implementation slice:
+After Lesson 09, continue into the next active implementation slice:
 
-- `C:\Projects\ThreatPrismV2\docs\ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
-- `C:\Projects\ThreatPrismV2\docs\specs\17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
+- `C:\Projects\ThreatPrismV2\docs\specs\16_OPERATIONAL_READ_MODELS_AND_METRICS.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

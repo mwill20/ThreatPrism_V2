@@ -20,7 +20,7 @@ Prerequisites:
 - Explain prompt-injection and guardrail failure labs.
 - Understand healthcare leakage tests.
 - Describe current test gaps.
-- Prepare for Access Control & Audit Integrity v0.1.
+- Prepare for Operational Read Models & Metrics API v0.1.
 
 ## 🔍 What This Component Does
 
@@ -40,7 +40,7 @@ Primary files:
 Current validated result:
 
 ```text
-22 passed
+29 passed
 ```
 
 ### Recommended (not implemented here)
@@ -158,7 +158,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-22 passed
+29 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
@@ -199,13 +199,13 @@ PowerShell:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Access Control & Audit Integrity v0.1"
+Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Operational Read Models & Metrics API v0.1"
 ```
 
 Expected output includes:
 
 ```text
-Access Control & Audit Integrity v0.1:
+Operational Read Models & Metrics API v0.1 is now the next backend slice:
 ```
 
 ## 📚 Interview Prep
@@ -217,7 +217,7 @@ Access Control & Audit Integrity v0.1:
 **A**: It proves ThreatPrism blocks unsafe provider output instead of saving it: policy violations, unknown evidence references, and real-action claims fail closed.
 
 **Q: What is the most important current test gap?**  
-**A**: Role rendering exists, but authorization does not. The next slice must test unauthenticated denial, role escalation denial, and safe authorization audit events.
+**A**: Access control exists for role-aware reads. The next major gap is dashboard-ready metrics and read models that preserve authorization, role-safe rendering, and no sensitive-value leakage.
 
 **Q: How would you extend the tests for live providers later?**  
 **A**: Keep deterministic provider tests as the baseline, then add contract tests around provider interfaces with fake responses, timeouts, schema failures, and not-configured paths before live credentials are used.
@@ -228,7 +228,7 @@ Access Control & Audit Integrity v0.1:
 - The defense labs prove unsafe output is blocked.
 - Healthcare tests prove raw sensitive values do not leak.
 - Tests are local and require no live providers.
-- Access Control & Audit Integrity is the next active implementation slice.
+- Operational Read Models & Metrics API v0.1 is the next active implementation slice.
 
 ## 📋 Summary Reference Card
 
@@ -253,6 +253,6 @@ Optional advanced challenges:
 - Add an access-control test before implementation.
 - Add an eval fixture for prompt injection cases.
 - Add snapshot testing for `render_report()`.
-- Add a safe audit-summary route after authorization exists.
+- Add a safe audit-summary route using the implemented authorization pattern.
 
 Remember: tests are how ThreatPrism proves guardrails are real, not just documented. 🛡️

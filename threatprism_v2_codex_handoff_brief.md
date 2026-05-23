@@ -889,19 +889,17 @@ Analyst submits feedback
 ThreatPrism records disagreement metrics
 ```
 
-The healthcare safeguard slice is now implemented. Operational Read Models &
-Metrics API v0.1 is prepped, but the immediate next recommended slice is:
+The healthcare safeguard slice is now implemented. Access Control & Audit
+Integrity v0.1 is also implemented. Operational Read Models & Metrics API v0.1
+is the immediate next recommended slice:
 
 ```text
-Access Control & Audit Integrity v0.1
-  -> Demo authentication using fake/demo credentials only
-  -> Caller identity mapped to an effective role
-  -> ?role= treated as a view request, not authority, outside explicit demo/test override behavior
-  -> Role escalation denied and audited
-  -> Safe audit events for authorization allow and deny decisions
-  -> Tests proving manager/GRC cannot force analyst or engineer views
-  -> Tests proving authorization audit events do not expose raw potential PHI/ePHI,
-     secrets, full credentials, raw payloads, or token vault mappings
+Operational Read Models & Metrics API v0.1
+  -> Stable GET /metrics aggregate response shape
+  -> Dashboard-ready case list filtering
+  -> Manager-review and healthcare-review queue behavior
+  -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
+  -> Authorization and role-safe rendering on read/detail routes
 ```
 
 ---

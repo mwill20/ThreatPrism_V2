@@ -292,3 +292,35 @@ workaround, check the North Star.
 If a workaround or enhancement intentionally changes architecture direction,
 update `docs/ARCHITECTURAL_NORTH_STAR.md`, `DECISIONS.md`, and
 `docs/WORKING_CHECKLIST.md` in the same change.
+
+## D-026 Demo Access Control
+
+ThreatPrism uses demo API-key authentication for role-aware case and report
+views when `API_AUTH_MODE=demo_key`.
+
+This is not a production IdP integration. It exists to make role-based
+healthcare views enforceable and auditable before broadening read models,
+metrics, dashboards, live integrations, or non-demo data paths.
+
+Demo credentials are fake and configured through `DEMO_API_KEYS` using:
+
+```text
+credential:identity:role
+```
+
+Supported effective roles:
+
+- `analyst`
+- `engineer`
+- `manager_grc`
+- `legal_privacy`
+- `audit_debug`
+- `admin`
+
+Role requests such as `?role=analyst` are treated as view requests, not
+authority. In `API_AUTH_MODE=demo_key`, the effective role is derived from the
+demo credential and role escalation is denied.
+
+Authorization allow and deny decisions must create audit events without storing
+raw potential PHI/ePHI, secrets, full credentials, raw payload bodies, or token
+vault mappings.

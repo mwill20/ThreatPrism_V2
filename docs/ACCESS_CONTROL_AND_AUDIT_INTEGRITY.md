@@ -1,12 +1,12 @@
 # Access Control And Audit Integrity
 
-## Current Recommendation
+## Current Status
 
-Access Control & Audit Integrity v0.1 is the next implementation slice.
+Access Control & Audit Integrity v0.1 is implemented.
 
-This supersedes the previously prepped Operational Read Models & Metrics API
-v0.1 slice as the immediate next step. Metrics remain important, but role-based
-views should be enforceable before ThreatPrism expands read surfaces.
+Operational Read Models & Metrics API v0.1 is now the next backend slice.
+Metrics remain important, but role-based views are now backed by demo
+identity-to-role enforcement before ThreatPrism expands read surfaces.
 
 ## Rationale
 
@@ -29,14 +29,14 @@ Core rule:
 Views are not security controls until identity and authorization enforce them.
 ```
 
-## Implementation Target
+## Implemented Behavior
 
-Build a demo-safe access-control layer before any non-demo data, live LLM,
-live SOAR, live enrichment, dashboard, or production integration work.
+ThreatPrism now has a demo-safe access-control layer for role-aware case and
+report reads.
 
-Minimum scope:
+Implemented scope:
 
-- Demo authentication middleware or dependency.
+- Demo authentication dependency/helper.
 - Fake/demo API keys or signed development tokens only.
 - Caller identity mapped to an effective role.
 - Role escalation denied.
@@ -46,7 +46,7 @@ Minimum scope:
 - Audit events exclude raw potential PHI/ePHI, secrets, full credentials, raw
   payload bodies, and token vault mappings.
 
-## Required Tests
+## Implemented Tests
 
 - Unauthenticated access is denied when demo auth is enabled.
 - Unknown demo credentials are denied.
@@ -56,6 +56,12 @@ Minimum scope:
 - Allow decisions create audit events.
 - Deny decisions create audit events.
 - Existing healthcare leakage tests still pass.
+
+Validation result:
+
+```text
+29 passed
+```
 
 ## Out Of Scope
 
@@ -71,17 +77,18 @@ Minimum scope:
 ## Next Prompt
 
 ```text
-Implement Access Control & Audit Integrity v0.1 for ThreatPrism.
+Implement Operational Read Models & Metrics API v0.1 for ThreatPrism.
 
-Use fake/demo credentials only. Map caller identity to an effective role and
-deny role escalation. Do not trust ?role= as authority outside explicit
-demo/test override behavior. Add safe audit events for allow and deny
-authorization decisions.
+Current state:
+- Access Control & Audit Integrity v0.1 is implemented.
+- Validation passes with 29 tests.
+- Role-aware case and report reads use demo API-key authorization when
+  API_AUTH_MODE=demo_key.
 
 Do not add live LLM calls, live SOAR calls, production credentials, real
 remediation, real healthcare data, dashboard work, or production IdP
 integration. Keep ALLOW_REAL_ACTIONS=false.
 
 Run:
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_auth
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics
 ```

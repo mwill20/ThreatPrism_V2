@@ -20,7 +20,7 @@ Prerequisites:
 - Trace typed token generation.
 - Describe role-view rendering behavior.
 - Run healthcare safeguard tests.
-- Explain current authorization limitations.
+- Explain how role views are enforced by demo API-key authorization.
 
 ## 🔍 What This Component Does
 
@@ -200,7 +200,7 @@ Line-by-line:
 3. Other roles get security telemetry masked.
 4. Sensitive typed tokens remain tokens; they are not rehydrated.
 
-⚠️ Current limitation: role rendering is not authorization. Access Control & Audit Integrity is next.
+⚠️ Current limitation: demo API-key authorization is not a production IdP integration.
 
 ## 🧪 Manual Verification
 
@@ -285,7 +285,7 @@ Security telemetry contains [SECURITY_TELEMETRY:IP:masked] and [POTENTIAL_PHI:MR
 **A**: SOC response depends on values like IPs, URLs, and hashes. Over-redacting those values would harm response workflows when they are not healthcare exposure tokens.
 
 **Q: What is still missing?**  
-**A**: Identity-to-role enforcement. Current role rendering is useful but must be backed by access control before real or shared data use.
+**A**: Production identity-to-role enforcement. Demo API-key authorization exists, but real or shared data would still need a production IdP, governance, and deployment hardening.
 
 ## 🎯 Key Takeaways
 
@@ -293,7 +293,7 @@ Security telemetry contains [SECURITY_TELEMETRY:IP:masked] and [POTENTIAL_PHI:MR
 - Identifiers become potential PHI/ePHI risk through context.
 - Sensitive healthcare tokens are never rehydrated.
 - Manager/GRC and audit/debug views are safer by default.
-- Access control is required before role views become security controls.
+- Demo access control now protects role-aware API reads, but production access control remains future work.
 
 ## 📋 Summary Reference Card
 

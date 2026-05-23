@@ -96,23 +96,26 @@ Frame the product generically as a tool for organizations moving from outsourced
 Read in this order:
 
 1. `docs/THREATPRISM_V2_CODEX_HANDOFF.md`
-2. `docs/specs/00_VISION.md`
-3. `docs/specs/01_PRODUCT_REQUIREMENTS.md`
-4. `docs/specs/02_ARCHITECTURE.md`
-5. `docs/specs/04_API_CONTRACT.md`
-6. `docs/specs/05_DATA_MODEL.md`
-7. `docs/specs/08_AI_GUARDRAILS.md`
-8. `docs/specs/09_ACTION_SAFETY_MODEL.md`
-9. `docs/specs/10_GRC_HITRUST_ALIGNMENT.md`
-10. `docs/specs/V1_REUSE_ANALYSIS.md`
-11. `DECISIONS.md`
-12. `LIMITATIONS.md`
-13. `AGENTS.md`
+2. `docs/ARCHITECTURAL_NORTH_STAR.md`
+3. `docs/specs/00_VISION.md`
+4. `docs/specs/01_PRODUCT_REQUIREMENTS.md`
+5. `docs/specs/02_ARCHITECTURE.md`
+6. `docs/specs/04_API_CONTRACT.md`
+7. `docs/specs/05_DATA_MODEL.md`
+8. `docs/specs/08_AI_GUARDRAILS.md`
+9. `docs/specs/09_ACTION_SAFETY_MODEL.md`
+10. `docs/specs/10_GRC_HITRUST_ALIGNMENT.md`
+11. `docs/specs/V1_REUSE_ANALYSIS.md`
+12. `DECISIONS.md`
+13. `LIMITATIONS.md`
+14. `AGENTS.md`
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
 ## Key Locked Decisions
 
+- `docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide for
+  new slices, workarounds, and major enhancements.
 - Architecture target: CLI + FastAPI service + dashboard-ready backend.
 - First backend is case-centric, not V1 run-centric.
 - Single-org internal SOC only. Do not build MSSP multi-tenancy.
@@ -440,6 +443,7 @@ Use this:
 
 ```text
 Read docs/THREATPRISM_V2_CODEX_HANDOFF.md first and treat it as the current source of truth.
+Then read docs/ARCHITECTURAL_NORTH_STAR.md as the directional architecture guide.
 
 Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked

@@ -126,6 +126,10 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/cases/$($created.case
 
 Track current work in `docs/WORKING_CHECKLIST.md`.
 
+Use `docs/ARCHITECTURAL_NORTH_STAR.md` as the directional architecture guide
+before starting a new slice, accepting a workaround, or adding a major
+enhancement.
+
 The completed healthcare safeguard slice is documented in
 `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
 `docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.

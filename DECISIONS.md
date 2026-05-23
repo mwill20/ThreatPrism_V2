@@ -276,3 +276,19 @@ Out of scope:
 - Live SOAR calls.
 - Live enrichment calls.
 - Real remediation or containment.
+
+## D-025 Architectural North Star
+
+`docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide for
+ThreatPrism.
+
+It does not replace the specs, decisions, limitations, handoff, or validation
+results. It keeps future slices, workarounds, and enhancements aligned with the
+same product and security direction.
+
+Before starting a new implementation slice or accepting an architecture-shaping
+workaround, check the North Star.
+
+If a workaround or enhancement intentionally changes architecture direction,
+update `docs/ARCHITECTURAL_NORTH_STAR.md`, `DECISIONS.md`, and
+`docs/WORKING_CHECKLIST.md` in the same change.

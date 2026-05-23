@@ -1,5 +1,13 @@
 # 12 Implementation Roadmap
 
+## Directional Guide
+
+Before starting a new roadmap slice, check `docs/ARCHITECTURAL_NORTH_STAR.md`.
+
+If a workaround or enhancement changes the direction of the roadmap, update the
+North Star, `DECISIONS.md`, and `docs/WORKING_CHECKLIST.md` instead of letting
+the roadmap drift.
+
 ## Build Order
 
 ### Phase 0: Repo Initialization And Baseline Audit

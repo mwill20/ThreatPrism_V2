@@ -70,6 +70,11 @@ ThreatPrism V2 is not a production deployment yet.
 
 It is designed as a production-style, demo-safe foundation that can be adapted toward production later with additional engineering, testing, deployment hardening, access control, and operational review.
 
+The Architectural North Star is a directional guide, not a substitute for
+implementation specs, decision records, limitations, tests, or validation
+results. If implementation needs to move away from it, update the North Star
+and decision records instead of allowing silent drift.
+
 ## AI Limitations
 
 - AI output can be incomplete, incorrect, or overconfident.
@@ -161,3 +166,5 @@ treated as internal/demo view logic, not a production access-control boundary.
   in place and before building any frontend dashboard.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
+- Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or
+  enhancements intentionally change architecture direction.

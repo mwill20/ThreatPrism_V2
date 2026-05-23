@@ -5,11 +5,15 @@
 For ThreatPrism V2 work, read these first:
 
 1. `threatprism_v2_codex_handoff_brief.md`
-2. `docs/specs/`
-3. `DECISIONS.md`
-4. `LIMITATIONS.md`
+2. `docs/THREATPRISM_V2_CODEX_HANDOFF.md`
+3. `docs/ARCHITECTURAL_NORTH_STAR.md`
+4. `docs/specs/`
+5. `DECISIONS.md`
+6. `LIMITATIONS.md`
 
 The handoff brief overrides assumptions from the old V1 README when they conflict.
+The architectural North Star is the directional guide for new slices,
+workarounds, and major enhancements.
 
 ## Product Identity
 
@@ -144,6 +148,10 @@ until identity and authorization enforce the effective role.
 ## Development Rules For Later Phases
 
 - Keep application behavior evidence-first and analyst-controlled.
+- Check `docs/ARCHITECTURAL_NORTH_STAR.md` before starting a new implementation
+  slice or accepting an architecture-shaping workaround.
+- If a workaround or enhancement intentionally changes architecture direction,
+  update the North Star, `DECISIONS.md`, and `docs/WORKING_CHECKLIST.md`.
 - Treat source case text and logs as untrusted.
 - Treat LLM output as untrusted until schema and policy validation pass.
 - Treat inbound SOAR payloads as potentially contaminated, even though they are

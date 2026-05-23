@@ -1,5 +1,13 @@
 # 02 Architecture
 
+## Directional Guide
+
+Use `docs/ARCHITECTURAL_NORTH_STAR.md` before starting a new implementation
+slice, accepting a workaround, or adding a major enhancement.
+
+If implementation needs to intentionally move away from that guide, update the
+North Star, `DECISIONS.md`, and `docs/WORKING_CHECKLIST.md` in the same change.
+
 ## Target Shape
 
 ThreatPrism must evolve into:

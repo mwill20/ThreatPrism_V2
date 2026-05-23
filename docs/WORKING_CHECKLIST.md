@@ -15,6 +15,8 @@ Trust files and validation results over older chat summaries.
 - [x] HITRUST language is category/alignment mapping only, not compliance or certification.
 - [x] The original docs-only baseline is stale; implementation has begun.
 - [x] The previous final response leaked drafting/debug text; trust files and validation results instead.
+- [x] `docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide
+  for new slices, workarounds, and major enhancements.
 
 ## Active Target
 
@@ -38,6 +40,7 @@ The first ThreatPrism backend slice is complete:
 
 - [x] Initialize or sync `C:\Projects\ThreatPrismV2` as the local checkout for `mwill20/ThreatPrism_V2`.
 - [x] Commit and push the current validated baseline to `main`.
+- [x] Add a dedicated Architectural North Star so future slices stay aligned.
 - [x] Add or update a user-facing `README.md` with setup, validation, and demo workflow.
 - [x] Add a concise local runbook for starting the FastAPI service.
 - [x] Review docs/specs against the implemented slice and remove remaining stale no-code wording.
@@ -116,6 +119,8 @@ security controls until identity and authorization enforce them.
 
 Access Control & Audit Integrity v0.1:
 
+- [ ] Check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation and record
+  any intentional architecture changes in `DECISIONS.md`.
 - [x] Document why this slice supersedes metrics/read models as the next
   implementation target.
 - [x] Add implementation-ready spec for demo authentication, authorization,

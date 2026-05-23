@@ -140,6 +140,11 @@ Preserve the V1 philosophy:
 - Treat LLM output as untrusted until validated
 - Human analyst review required
 
+Use `docs/ARCHITECTURAL_NORTH_STAR.md` as the directional guide before new
+implementation slices, workarounds, or major enhancements. If architecture
+direction changes intentionally, update the North Star, `DECISIONS.md`, and
+`docs/WORKING_CHECKLIST.md` together.
+
 ---
 
 ## Target Architecture
@@ -663,6 +668,7 @@ Control categories should include:
 Required docs:
 
 ```text
+docs/ARCHITECTURAL_NORTH_STAR.md
 docs/HITRUST_ALIGNMENT.md
 docs/GRC_MAPPING.md
 ```
@@ -952,6 +958,7 @@ Also create or update:
   AGENTS.md
   DECISIONS.md
   LIMITATIONS.md
+  docs/ARCHITECTURAL_NORTH_STAR.md
 
 ThreatPrism V2 must be specified as a production-style, demo-safe SOC migration accelerator for organizations moving from outsourced MSSP-managed SOC operations to an internal SOC model.
 

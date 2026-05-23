@@ -17,6 +17,8 @@ Trust files and validation results over older chat summaries.
 - [x] The previous final response leaked drafting/debug text; trust files and validation results instead.
 - [x] `docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide
   for new slices, workarounds, and major enhancements.
+- [x] `Lessons/00_Index.md` is the learning curriculum entry point for the
+  implemented backend, guardrail, persistence, and testing slices.
 
 ## Active Target
 
@@ -42,6 +44,8 @@ The first ThreatPrism backend slice is complete:
 - [x] Commit and push the current validated baseline to `main`.
 - [x] Add a dedicated Architectural North Star so future slices stay aligned.
 - [x] Add or update a user-facing `README.md` with setup, validation, and demo workflow.
+- [x] Add a lesson curriculum for the implemented project slices before
+  continuing new application code.
 - [x] Add a concise local runbook for starting the FastAPI service.
 - [x] Review docs/specs against the implemented slice and remove remaining stale no-code wording.
 - [x] Add targeted tests for guardrail-blocked triage output.

@@ -130,6 +130,11 @@ Use `docs/ARCHITECTURAL_NORTH_STAR.md` as the directional architecture guide
 before starting a new slice, accepting a workaround, or adding a major
 enhancement.
 
+## Learning Curriculum
+
+Use `Lessons/00_Index.md` for a hands-on curriculum that teaches the current
+backend slices, guardrails, tests, and next implementation direction.
+
 The completed healthcare safeguard slice is documented in
 `docs/HEALTHCARE_SAFEGUARD_GUARDRAILS.md` and
 `docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md`.

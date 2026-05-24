@@ -18,18 +18,38 @@ Set-Location C:\Projects\ThreatPrismV2
 python -m pip install -r requirements.txt
 ```
 
-## Run Tests
+## Run Safe Validation
+
+Use the wrapper for local validation:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+```
+
+The wrapper sets fake-only environment defaults, clears live provider
+credential variables for the validation process, runs the demo safety checker,
+runs pytest with plugin autoload disabled, runs the dry-run eval harness, and
+checks eval artifacts for forbidden raw values.
+
+Expected current result:
+
+```text
+45 passed
+```
+
+## Run Tests Directly
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
-python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
+python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 ```
 
 Expected current result:
 
 ```text
-13 passed
+45 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -77,6 +97,14 @@ Fetch the triage report:
 Invoke-RestMethod "http://127.0.0.1:8000/cases/$($created.case_id)/triage-report"
 ```
 
+Fetch metrics and review queues:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/metrics
+Invoke-RestMethod http://127.0.0.1:8000/queues/manager-review
+Invoke-RestMethod http://127.0.0.1:8000/queues/healthcare-review
+```
+
 Submit analyst feedback:
 
 ```powershell
@@ -93,6 +121,18 @@ $feedback = @{
 
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/cases/$($created.case_id)/analyst-feedback" -Body ($feedback | ConvertTo-Json -Depth 20) -ContentType 'application/json'
 ```
+
+## Run The Eval Harness
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m threatprism.evals.cli --fixtures regression_cases.jsonl --output local
+python tools\check_demo_safety.py --scan-eval-artifacts
+```
+
+Eval outputs are generated under `.eval_runs/` and are ignored by git. Do not
+move generated eval artifacts into tracked docs or test fixtures.
 
 ## Troubleshooting
 

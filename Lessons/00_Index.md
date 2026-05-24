@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `41 passed`.
+- The current validated baseline is `45 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -34,6 +34,7 @@ Fake SOAR payload
   -> SQLite persistence
   -> Operational metrics and read models
   -> Dry-run eval harness and regression defense labs
+  -> Safe validation wrapper and fake-data-only CI
   -> API responses and tests
 ```
 
@@ -53,6 +54,7 @@ Fake SOAR payload
 | ✅ | [Lesson 09](Lesson09_Access_Control_And_Audit_Integrity.md) | Access Control And Audit Integrity | `src/threatprism/auth/demo.py`, `tests/test_access_control.py`, `.env.example` |
 | ✅ | [Lesson 10](Lesson10_Operational_Read_Models_And_Metrics.md) | Operational Read Models And Metrics | `src/threatprism/cases/read_models.py`, `src/threatprism/api/app.py`, `tests/test_operational_read_models.py` |
 | ✅ | [Lesson 11](Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md) | Evaluation Harness And Regression Defense Labs | `src/threatprism/evals/*.py`, `tests/evals/*.jsonl`, `tests/test_eval_harness.py` |
+| ✅ | [Lesson 12](Lesson12_Demo_Operations_And_CI_Hardening.md) | Demo Operations And CI Hardening | `tools/*.py`, `tools/*.ps1`, `.github/workflows/safe-validation.yml`, `tests/test_ops_safety.py` |
 
 ## File Coverage Map
 
@@ -85,6 +87,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\schemas.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\runner.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\cli.py` -> Lesson 11
+- `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
+- `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
+- `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
 
 ### Tests And Fixtures
 
@@ -92,6 +97,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_access_control.py` -> Lessons 08 and 09
 - `C:\Projects\ThreatPrismV2\tests\test_operational_read_models.py` -> Lessons 08 and 10
 - `C:\Projects\ThreatPrismV2\tests\test_eval_harness.py` -> Lessons 08 and 11
+- `C:\Projects\ThreatPrismV2\tests\test_ops_safety.py` -> Lessons 08 and 12
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -106,8 +112,7 @@ PowerShell:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
-python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lessons
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
 Bash:
@@ -120,12 +125,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-41 passed
+45 passed
 ```
 
 ## What To Study Next
 
-After Lesson 11, continue into the next active implementation slice:
+After Lesson 12, continue into the next active implementation slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

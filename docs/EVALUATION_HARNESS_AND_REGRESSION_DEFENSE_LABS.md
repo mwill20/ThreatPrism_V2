@@ -83,11 +83,9 @@ Result:
 41 passed
 ```
 
-## Next Slice
+## Current Follow-On
 
-The next recommended slice is Demo Operations & CI Hardening v0.1.
+Demo Operations & CI Hardening v0.1 is implemented. The eval harness now runs
+as part of the safe local validation wrapper and lightweight CI workflow.
 
-Reason: the backend, guardrails, access control, read models, and eval harness
-are now locally validated. The next confidence step is repeatable developer
-operations: safe CI, run scripts, artifact hygiene, and demo/runbook hardening
-without adding live integrations or dashboard UI.
+The next recommended slice is Demo Scenario Pack & API Contract Freeze v0.1.

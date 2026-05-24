@@ -40,17 +40,20 @@ Current implemented baseline:
 - Safe detail routes for evidence, timeline, MITRE, GRC, and audit events.
 - Local dry-run evaluation harness and regression defense fixtures.
 - Production-like environments reject disabled auth and demo API-key auth.
+- Safe local validation wrapper and fake-data-only CI workflow.
+- Demo safety checks for environment posture, generated artifacts,
+  secret-looking content, and eval artifact hygiene.
 
-Validation command confirmed on 2026-05-22:
+Validation command confirmed on 2026-05-24:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
 ```
 
-Result after Evaluation Harness & Regression Defense Labs v0.1:
+Result after Demo Operations & CI Hardening v0.1:
 
 ```text
-41 passed
+45 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -63,7 +66,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Microsoft-specific production adapters.
 - Dedicated async worker or external queue.
 - Docker Compose.
-- CI/CD.
+- Production-grade CI/CD release pipeline.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
 - Frontend dashboard.
@@ -117,6 +120,8 @@ Allowed:
 - VirusTotal, URLScan.io, AbuseIPDB, and WHOIS/RDAP are specified as interfaces or stubs for early implementation.
 - Missing keys must return `not_configured`.
 - Enrichment results should not be treated as definitive without analyst review.
+- The safe validation wrapper clears live enrichment credential variables for
+  validation. It does not test live enrichment behavior.
 
 ## GRC Limitations
 
@@ -158,9 +163,9 @@ Operational metrics and read models are demo-safe backend responses. They are
 not a production monitoring, SIEM export, BI/data-warehouse, or compliance
 reporting implementation.
 
-The eval harness is a deterministic regression gate. It does not prove live-LLM
-safety, production readiness, HIPAA compliance, HITRUST certification, or audit
-readiness.
+The eval harness and CI workflow are deterministic regression gates. They do
+not prove live-LLM safety, production readiness, HIPAA compliance, HITRUST
+certification, or audit readiness.
 
 ## Demo Data Limitations
 
@@ -172,8 +177,9 @@ readiness.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Demo Operations & CI Hardening v0.1 before adding live LLM, SOAR,
-  enrichment, dashboard, or production-style integration work.
+- Implement Demo Scenario Pack & API Contract Freeze v0.1 before adding
+  dashboard UI, live LLM, SOAR, enrichment, or production-style integration
+  work.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

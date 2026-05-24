@@ -154,7 +154,7 @@ Access Control & Audit Integrity v0.1:
 - [x] Keep `ALLOW_REAL_ACTIONS=false`, fake fixtures only, and no live LLM,
   SOAR, enrichment, cloud, dashboard, production IdP, or remediation work.
 
-## Next Active Slice
+## Completed Slice
 
 Evaluation Harness & Regression Defense Labs v0.1 is complete:
 
@@ -181,19 +181,39 @@ Evaluation Harness & Regression Defense Labs v0.1 is complete:
 - [x] Update docs, README, lessons, checklist, handoff, limitations, and
   validation notes when complete.
 
+## Completed Slice
+
+Demo Operations & CI Hardening v0.1 is complete:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Add safe local validation script around the known-good pytest command:
+  `tools/validate-threatprism.ps1`.
+- [x] Add demo safety checker for environment posture, `.env.example`,
+  generated artifacts, secret-looking content, runtime guard behavior, and eval
+  artifact hygiene.
+- [x] Add lightweight CI that avoids live credentials and runs fake-data tests
+  only.
+- [x] Run the eval harness in deterministic dry-run mode in CI.
+- [x] Add demo/runbook hardening for API startup, SOAR intake, metrics, review
+  queues, and eval workflows.
+- [x] Ensure generated artifacts stay ignored and sanitized.
+- [x] Keep live LLM, live SOAR, cloud/enrichment calls, dashboard UI,
+  production IdP, and remediation out of scope.
+- [x] Update docs, README, lessons, checklist, handoff, limitations, and
+  validation notes when complete.
+
 ## Next Active Slice
 
-Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
+Demo Scenario Pack & API Contract Freeze v0.1 is the next recommended backend
+slice:
 
-- [ ] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
-- [ ] Add safe local validation scripts around the known-good pytest command.
-- [ ] Add lightweight CI that avoids live credentials and runs fake-data tests
-  only.
-- [ ] Add demo/runbook hardening for API startup, SOAR intake, metrics, and eval
-  workflows.
-- [ ] Ensure generated artifacts stay ignored and sanitized.
-- [ ] Keep live LLM, live SOAR, cloud/enrichment calls, dashboard UI,
-  production IdP, and remediation out of scope.
+- [ ] Keep fake/demo data only.
+- [ ] Add repeatable fake demo scenarios for analyst, manager/GRC,
+  legal/privacy, audit/debug, and engineering views.
+- [ ] Confirm OpenAPI/API response contracts for current backend routes.
+- [ ] Add smoke-testable demo instructions using fake payloads only.
+- [ ] Keep dashboard UI, live providers, production IdP, and remediation out of
+  scope unless explicitly requested.
 - [ ] Update docs, README, lessons, checklist, handoff, limitations, and
   validation notes when complete.
 
@@ -202,13 +222,13 @@ Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
 Use safe local validation first:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
 Current known result:
 
 ```text
-41 passed
+45 passed
 ```
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a
@@ -244,5 +264,10 @@ fresh ignored base temp directory.
 - Architectural North Star commit: `31d5c98 Add architectural north star`.
 - Lessons curriculum commit: `6aa3755 Add ThreatPrism lessons curriculum`.
 - Access control implementation commit: `f05e93d Implement demo access control audit slice`.
-- Operational read models implementation commit: `Implement operational read models and metrics`.
+- Operational read models implementation commit:
+  `fd8564b Implement operational read models and metrics`.
+- Evaluation harness implementation commit:
+  `d0a798a Implement eval harness and regression defense labs`.
+- Dedicated review queue implementation commit:
+  `39483f3 Add dedicated operational review queues`.
 - Pushed to `origin/main` for `mwill20/ThreatPrism_V2`.

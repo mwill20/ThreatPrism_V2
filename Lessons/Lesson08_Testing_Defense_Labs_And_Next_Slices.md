@@ -20,7 +20,7 @@ Prerequisites:
 - Explain prompt-injection and guardrail failure labs.
 - Understand healthcare leakage tests.
 - Describe current test gaps.
-- Understand the implemented eval harness and prepare for Demo Operations & CI Hardening v0.1.
+- Understand the implemented eval harness, safe validation wrapper, and fake-data-only CI path.
 
 ## 🔍 What This Component Does
 
@@ -44,7 +44,7 @@ Primary files:
 Current validated result:
 
 ```text
-41 passed
+45 passed
 ```
 
 ### Recommended (not implemented here)
@@ -163,7 +163,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-41 passed
+45 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
@@ -204,13 +204,13 @@ PowerShell:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Demo Operations & CI Hardening v0.1"
+Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Demo Scenario Pack"
 ```
 
 Expected output includes:
 
 ```text
-Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
+Demo Scenario Pack & API Contract Freeze v0.1 is the next recommended backend slice:
 ```
 
 ## 📚 Interview Prep
@@ -233,7 +233,8 @@ Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
 - The defense labs prove unsafe output is blocked.
 - Healthcare tests prove raw sensitive values do not leak.
 - Tests are local and require no live providers.
-- Demo Operations & CI Hardening v0.1 is the next active implementation slice.
+- Demo Operations & CI Hardening v0.1 is implemented.
+- Demo Scenario Pack & API Contract Freeze v0.1 is the next active implementation slice.
 
 ## 📋 Summary Reference Card
 

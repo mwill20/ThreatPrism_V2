@@ -226,7 +226,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson09_full
 Expected output:
 
 ```text
-41 passed
+45 passed
 ```
 
 ## 📚 Interview Prep

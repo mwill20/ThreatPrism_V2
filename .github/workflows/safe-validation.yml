@@ -1,0 +1,44 @@
+name: ThreatPrism Safe Validation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+      THREATPRISM_ENV: test
+      API_AUTH_MODE: none
+      LLM_PROVIDER: deterministic_demo
+      ALLOW_REAL_ACTIONS: "false"
+      OPENAI_API_KEY: ""
+      LOCAL_LLM_BASE_URL: ""
+      VIRUSTOTAL_API_KEY: ""
+      URLSCAN_API_KEY: ""
+      ABUSEIPDB_API_KEY: ""
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Check fake-data safety posture
+        run: python tools/check_demo_safety.py
+
+      - name: Run pytest suite
+        run: python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
+
+      - name: Run eval harness dry-run
+        run: python -m threatprism.evals.cli --fixtures regression_cases.jsonl --output ci
+
+      - name: Check eval artifact hygiene
+        run: python tools/check_demo_safety.py --scan-eval-artifacts

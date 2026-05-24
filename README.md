@@ -26,6 +26,10 @@ for prompt injection, unsafe action claims, healthcare leakage, auth
 escalation, read-model leakage, audit leakage, and compliance-language
 overclaims.
 
+The latest operations slice adds a safe validation wrapper, a fake-data-only CI
+workflow, a demo safety scanner, eval artifact hygiene checks, and runbook
+updates for repeatable local and CI validation.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -43,7 +47,9 @@ overclaims.
 ```text
 src/threatprism/
   api/            FastAPI application factory and routes
+  auth/           Demo authentication and role-view authorization
   cases/          Case, triage report, feedback, read models, and service orchestration
+  evals/          Local dry-run regression evaluation harness
   guardrails/     Prompt firewall, tokenization, policy, and evidence checks
   llm/            Provider interface and deterministic demo provider
   persistence/    SQLite demo repository
@@ -52,7 +58,9 @@ src/threatprism/
   enrichment/     Demo enrichment stubs
 docs/specs/       Product, architecture, API, data, security, and demo specs
 examples/         Fake demo SOAR payloads
-tests/            API flow and guardrail tests
+tests/            API, guardrail, read-model, eval, and safety tests
+tools/            Safe local validation and demo safety checks
+.github/          Fake-data-only CI workflow
 ```
 
 ## Setup
@@ -71,18 +79,38 @@ project root.
 
 ## Validate
 
-Use the known-safe local validation command:
+Use the safe local validation wrapper:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
-python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
+
+The wrapper runs:
+
+- Demo safety checks.
+- Pytest with plugin autoload disabled and a fresh temp directory.
+- The dry-run eval harness against fake fixtures.
+- Eval artifact hygiene checks.
 
 Current known result:
 
 ```text
-41 passed
+45 passed
+```
+
+The underlying pytest command remains:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
+```
+
+Run only the safety checker:
+
+```powershell
+python tools\check_demo_safety.py --include-untracked
 ```
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
@@ -195,4 +223,6 @@ Evaluation Harness & Regression Defense Labs v0.1 is implemented. See
 `docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md` and
 `docs/specs/11_EVALUATION_PLAN.md`.
 
-The next recommended backend slice is Demo Operations & CI Hardening v0.1.
+Demo Operations & CI Hardening v0.1 is implemented. See
+`docs/DEMO_OPERATIONS_AND_CI_HARDENING.md` and
+`docs/specs/18_DEMO_OPERATIONS_AND_CI_HARDENING.md`.

@@ -50,6 +50,8 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
 - `src/threatprism/evals/` with the local dry-run regression eval harness.
+- `tools/` with fake-data-only safety checks and local validation wrapper.
+- `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
 - `examples/soar_payloads/` with fake demo payloads only.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
@@ -57,17 +59,18 @@ The current live implementation includes a first backend slice:
 - `tests/test_operational_read_models.py` covering metrics, dedicated review
   queues, filtered read models, detail routes, authorization, and leakage
   prevention.
+- `tests/test_ops_safety.py` covering the demo safety checker.
 
 Validated on 2026-05-24 with:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final4
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
 ```
 
 Result:
 
 ```text
-41 passed
+45 passed
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -79,8 +82,8 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 ```
 
 The destination repo remains `mwill20/ThreatPrism_V2`. The local workspace at
-`C:\Projects\ThreatPrismV2` may not be initialized as a Git checkout; verify
-before making git claims.
+`C:\Projects\ThreatPrismV2` is a Git checkout; still verify live status before
+making git claims.
 
 The original V1 repo `mwill20/threatprism` was reviewed read-only for reuse analysis. It has not been copied into this workspace.
 
@@ -299,17 +302,27 @@ Fake JSONL eval fixtures
      payloads, malformed JSON, and conflicting evidence
 ```
 
+Demo Operations & CI Hardening v0.1 is implemented:
+
+```text
+Safe validation wrapper
+  -> Demo safety checker
+  -> Pytest with plugin autoload disabled
+  -> Dry-run eval harness
+  -> Eval artifact hygiene scan
+  -> Fake-data-only GitHub Actions workflow
+```
+
 ## Next Implementation Slice
 
 The next recommended slice is:
 
 ```text
-Demo Operations & CI Hardening v0.1
-  -> Safe local validation scripts
-  -> Lightweight CI around the known-safe pytest command
-  -> Demo/runbook hardening for API and eval workflows
-  -> Generated artifact hygiene
-  -> No live integrations or dashboard UI
+Demo Scenario Pack & API Contract Freeze v0.1
+  -> Repeatable fake demo scenarios for role-specific workflows
+  -> OpenAPI/API response contract confirmation
+  -> Smoke-testable demo instructions using fake payloads only
+  -> No dashboard UI or live integrations unless explicitly requested
 ```
 
 Do not implement:
@@ -492,8 +505,12 @@ tests/test_operational_read_models.py
 tests/test_eval_harness.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
+tools/check_demo_safety.py
+tools/validate-threatprism.ps1
+.github/workflows/safe-validation.yml
 Lessons/Lesson10_Operational_Read_Models_And_Metrics.md
 Lessons/Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md
+Lessons/Lesson12_Demo_Operations_And_CI_Hardening.md
 ```
 
 ## Next Session Recommended Prompt
@@ -508,7 +525,7 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Demo Operations & CI Hardening v0.1 using a clean V2
+Continue with Demo Scenario Pack & API Contract Freeze v0.1 using a clean V2
 architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
@@ -517,12 +534,12 @@ Start by inspecting `docs/specs/`, `src/threatprism/`, `tests/`,
 `examples/soar_payloads/`, `pyproject.toml`, `requirements.txt`, and
 `.env.example`. Run:
 
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
 analyst-controlled, no-real-remediation boundary. Do not build a frontend
-dashboard, add live integrations, or add production IdP integration in this
-slice.
+dashboard, add live integrations, or add production IdP integration unless the
+user explicitly changes scope.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
 fresh ignored base temp such as `.pytest_tmp_run_ops_ci`.

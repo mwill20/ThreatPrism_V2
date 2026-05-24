@@ -164,8 +164,9 @@ Current direction:
 3. Completed: Access Control & Audit Integrity v0.1.
 4. Completed: Operational Read Models & Metrics API v0.1.
 5. Completed: Evaluation Harness & Regression Defense Labs v0.1.
-6. Next: Demo Operations & CI Hardening v0.1.
-7. Later: dashboard work and live-integration
+6. Completed: Demo Operations & CI Hardening v0.1.
+7. Next: Demo Scenario Pack & API Contract Freeze v0.1.
+8. Later: dashboard work and live-integration
    preparation.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live

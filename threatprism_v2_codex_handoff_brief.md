@@ -37,17 +37,17 @@ Result:
 22 passed
 ```
 
-Latest validation after Evaluation Harness & Regression Defense Labs v0.1 on
+Latest validation after Demo Operations & CI Hardening v0.1 on
 2026-05-24:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final4
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
 ```
 
 Result:
 
 ```text
-41 passed
+45 passed
 ```
 
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
@@ -926,7 +926,8 @@ Operational Read Models & Metrics API v0.1
 
 Evaluation Harness & Regression Defense Labs v0.1 is implemented.
 
-The immediate next recommended slice is Demo Operations & CI Hardening v0.1.
+The immediate next recommended slice is Demo Scenario Pack & API Contract
+Freeze v0.1.
 
 ---
 

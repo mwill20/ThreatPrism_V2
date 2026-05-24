@@ -73,23 +73,13 @@ Validation result:
 - Real remediation or containment.
 - Real healthcare data.
 
-## Next Prompt
+## Current Follow-On
 
-```text
-Implement Demo Operations & CI Hardening v0.1 for ThreatPrism.
+Demo Operations & CI Hardening v0.1 is implemented. Use the safe validation
+wrapper for current checks:
 
-Current state:
-- Access Control & Audit Integrity v0.1 is implemented.
-- Operational Read Models & Metrics API v0.1 is implemented.
-- Evaluation Harness & Regression Defense Labs v0.1 is implemented.
-- Validation passes with 41 tests.
-- Role-aware case and report reads use demo API-key authorization when
-  API_AUTH_MODE=demo_key.
-
-Do not add live LLM calls, live SOAR calls, production credentials, real
-remediation, real healthcare data, dashboard work, or production IdP
-integration. Keep ALLOW_REAL_ACTIONS=false.
-
-Run:
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
+
+The next recommended slice is Demo Scenario Pack & API Contract Freeze v0.1.

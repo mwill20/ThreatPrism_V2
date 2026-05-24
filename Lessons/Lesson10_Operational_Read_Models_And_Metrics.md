@@ -310,7 +310,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-41 passed
+45 passed
 ```
 
 ### 🔬 Exercise 3: Inspect Metrics From The API
@@ -384,7 +384,7 @@ Expected output:
 | Filters | `source`, `status`, `triage_status`, `severity`, `determination`, `manager_review_required`, `healthcare_review_required`, `guardrail_blocked`, `authorization_denied` |
 | Auth behavior | `API_AUTH_MODE=demo_key` requires fake demo credentials |
 | Test file | `tests/test_operational_read_models.py` |
-| Validation | `41 passed` |
+| Validation | `45 passed` |
 
 ## 🚀 Ready For The Next Slice?
 

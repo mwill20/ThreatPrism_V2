@@ -398,3 +398,24 @@ If `THREATPRISM_ENV` is `prod` or `production`, `API_AUTH_MODE=none` and
 This does not implement production IdP integration. It prevents the current
 demo access-control layer from accidentally being treated as production
 authentication.
+
+## D-031 Demo Operations And CI Hardening
+
+Demo Operations & CI Hardening v0.1 is implemented as a fake-data-only
+operations safety layer.
+
+The preferred local validation path is `tools/validate-threatprism.ps1`. It
+sets fake-only environment defaults, clears live-provider credential variables,
+runs the demo safety checker, runs pytest with plugin autoload disabled, runs
+the dry-run eval harness, and scans eval artifacts.
+
+The CI workflow in `.github/workflows/safe-validation.yml` mirrors this
+fake-data-only contract and must not require repository secrets.
+
+Generated validation artifacts must remain ignored. Eval outputs, pytest temp
+directories, cache files, local databases, bytecode, and `.env` files must not
+be tracked.
+
+This slice does not make ThreatPrism production-ready. It makes unsafe local
+and CI operation harder before dashboards, live integrations, production IdP,
+or production persistence are introduced.

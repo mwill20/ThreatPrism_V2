@@ -110,6 +110,24 @@ Status: implemented.
   secrets, credentials, raw payload bodies, or token vault mappings.
 - Malformed fixtures fail safely.
 
+## Demo Operations And CI Hardening Acceptance Criteria
+
+Status: implemented.
+
+- Local validation can be run with one PowerShell command:
+  `tools/validate-threatprism.ps1`.
+- Validation sets fake-only defaults and keeps `ALLOW_REAL_ACTIONS=false`.
+- Pytest runs with plugin autoload disabled and an ignored base temp.
+- The dry-run eval harness runs against fake fixtures in deterministic mode.
+- Safety checks fail if live provider credentials are present during
+  validation.
+- Safety checks fail if real remediation is enabled.
+- Safety checks fail if production-like settings use disabled or demo auth.
+- Safety checks fail if generated runtime artifacts are tracked.
+- Safety checks scan generated eval artifacts for forbidden raw sensitive
+  values, raw payload markers, and token-vault mapping markers.
+- CI runs fake-data-only tests and evals without repository secrets.
+
 ## Healthcare Safeguard Acceptance Criteria
 
 - SOAR payloads are expected to be security-only, but all inbound payloads are

@@ -53,12 +53,20 @@ Current baseline:
   `src/threatprism/cases/read_models.py`.
 - Local dry-run eval harness code exists under `src/threatprism/evals/`.
 - Fake eval fixtures exist under `tests/evals/`.
+- Safe validation tooling exists under `tools/`.
+- Lightweight fake-data-only CI exists under `.github/workflows/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - API and guardrail tests exist under `tests/`.
-- The known local validation command is:
+- The preferred local validation command is:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+```
+
+- The underlying pytest command is:
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 ```
 
 Before changing code, verify the live repo state directly.
@@ -176,6 +184,10 @@ until identity and authorization enforce the effective role.
   disabled or demo API authentication.
 - Keep eval fixtures under `tests/evals/` and eval artifacts under
   `.eval_runs/`; reject path traversal.
+- Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
+  fake-data-only validation and artifact hygiene checks.
+- Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not
+  require repository secrets or live-provider credentials.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.
@@ -189,8 +201,7 @@ until identity and authorization enforce the effective role.
 Use safe local validation first:
 
 ```powershell
-python -m pytest
-python -m compileall .
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
 Do not run live LLM, cloud, SOAR, or enrichment calls unless the user explicitly requests them and credentials are intentionally configured.

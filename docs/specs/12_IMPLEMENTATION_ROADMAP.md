@@ -261,7 +261,7 @@ Evaluation Harness & Regression Defense Labs v0.1
 This slice is implemented as Evaluation Harness & Regression Defense Labs
 v0.1.
 
-## Next Recommended Slice
+## Recently Completed Slice
 
 ```text
 Demo Operations & CI Hardening v0.1
@@ -271,6 +271,20 @@ Demo Operations & CI Hardening v0.1
   -> Keep generated artifacts ignored and sanitized
   -> Keep live LLM, SOAR, cloud, dashboard, production IdP, and remediation out
      of scope
+```
+
+This slice is implemented.
+
+## Next Recommended Slice
+
+```text
+Demo Scenario Pack & API Contract Freeze v0.1
+  -> Add repeatable fake demo scenarios for analyst, manager/GRC,
+     legal/privacy, audit/debug, and engineering views
+  -> Confirm OpenAPI/API response contracts for current backend routes
+  -> Add smoke-testable demo instructions using only fake payloads
+  -> Keep dashboard UI, live providers, production IdP, and remediation out of
+     scope unless explicitly requested
 ```
 
 ## Roadmap Constraints

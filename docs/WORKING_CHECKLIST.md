@@ -103,9 +103,9 @@ Operational Read Models & Metrics API v0.1:
 - [x] Add dashboard-ready case list filtering for source, status,
   triage_status, severity, determination, manager review, healthcare review,
   guardrail block, and created time windows.
-- [x] Add manager-review queue behavior through filters or a dedicated route.
-- [x] Add healthcare-review queue behavior through filters or a dedicated
-  route.
+- [x] Add dedicated manager-review queue route: `GET /queues/manager-review`.
+- [x] Add dedicated healthcare-review queue route:
+  `GET /queues/healthcare-review`.
 - [x] Add detail routes for evidence, timeline, MITRE mappings, GRC mappings,
   and audit events.
 - [x] Apply role-safe rendering to detail/read-model routes where case content

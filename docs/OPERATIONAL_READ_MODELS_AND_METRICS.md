@@ -11,6 +11,8 @@ building a frontend or adding live integrations.
 ```text
 GET /metrics
 GET /cases/read-model
+GET /queues/manager-review
+GET /queues/healthcare-review
 GET /cases/{case_id}/evidence
 GET /cases/{case_id}/timeline
 GET /cases/{case_id}/mitre
@@ -19,7 +21,9 @@ GET /cases/{case_id}/audit-events
 ```
 
 The existing `GET /cases` list route is preserved for compatibility. The
-dashboard-ready envelope route is `GET /cases/read-model`.
+dashboard-ready envelope route is `GET /cases/read-model`. Dedicated queue
+aliases expose the same role-safe envelope shape for manager review and
+healthcare/privacy review work.
 
 ## Metrics Coverage
 
@@ -63,6 +67,14 @@ created_before
 limit
 cursor
 role
+```
+
+Dedicated queue routes apply the same safe read-model rendering while pinning
+the relevant review flag:
+
+```text
+GET /queues/manager-review
+GET /queues/healthcare-review
 ```
 
 The response shape is:

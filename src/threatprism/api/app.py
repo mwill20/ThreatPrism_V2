@@ -6,7 +6,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 
 from threatprism import __version__
 from threatprism.auth.demo import AuthorizationError, authorize_role_view
-from threatprism.cases.read_models import CaseReadModelEnvelope, OperationalMetrics
+from threatprism.cases.read_models import CaseReadModelEnvelope, OperationalMetrics, ReviewQueueEnvelope
 from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
     CaseAcceptedResponse,
@@ -98,6 +98,74 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             cursor=cursor,
             role=view_role,
         )
+
+    @app.get("/queues/manager-review", response_model=ReviewQueueEnvelope)
+    def get_manager_review_queue(
+        request: Request,
+        source: Source | None = None,
+        status: CaseStatus | None = None,
+        triage_status: TriageStatus | None = None,
+        severity: Severity | None = None,
+        determination: Determination | None = None,
+        guardrail_blocked: bool | None = None,
+        authorization_denied: bool | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        limit: int = 50,
+        cursor: str | None = None,
+        role: ViewRole | None = None,
+    ) -> ReviewQueueEnvelope:
+        view_role = _authorized_global_view_role(request, "get_manager_review_queue", role)
+        envelope = _service(request).list_case_read_models(
+            source=str(source.value) if source else None,
+            status=str(status.value) if status else None,
+            triage_status=str(triage_status.value) if triage_status else None,
+            severity=str(severity.value) if severity else None,
+            determination=str(determination.value) if determination else None,
+            manager_review_required=True,
+            guardrail_blocked=guardrail_blocked,
+            authorization_denied=authorization_denied,
+            created_after=created_after,
+            created_before=created_before,
+            limit=limit,
+            cursor=cursor,
+            role=view_role,
+        )
+        return ReviewQueueEnvelope(queue="manager-review", **envelope.model_dump())
+
+    @app.get("/queues/healthcare-review", response_model=ReviewQueueEnvelope)
+    def get_healthcare_review_queue(
+        request: Request,
+        source: Source | None = None,
+        status: CaseStatus | None = None,
+        triage_status: TriageStatus | None = None,
+        severity: Severity | None = None,
+        determination: Determination | None = None,
+        guardrail_blocked: bool | None = None,
+        authorization_denied: bool | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        limit: int = 50,
+        cursor: str | None = None,
+        role: ViewRole | None = None,
+    ) -> ReviewQueueEnvelope:
+        view_role = _authorized_global_view_role(request, "get_healthcare_review_queue", role)
+        envelope = _service(request).list_case_read_models(
+            source=str(source.value) if source else None,
+            status=str(status.value) if status else None,
+            triage_status=str(triage_status.value) if triage_status else None,
+            severity=str(severity.value) if severity else None,
+            determination=str(determination.value) if determination else None,
+            healthcare_review_required=True,
+            guardrail_blocked=guardrail_blocked,
+            authorization_denied=authorization_denied,
+            created_after=created_after,
+            created_before=created_before,
+            limit=limit,
+            cursor=cursor,
+            role=view_role,
+        )
+        return ReviewQueueEnvelope(queue="healthcare-review", **envelope.model_dump())
 
     @app.get("/cases/{case_id}")
     def get_case(case_id: str, request: Request, role: ViewRole | None = None) -> dict:

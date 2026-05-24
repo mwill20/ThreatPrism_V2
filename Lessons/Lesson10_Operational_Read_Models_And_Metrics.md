@@ -19,7 +19,8 @@ Prerequisites:
 - Explain why read models are separate from source-of-truth case records.
 - Run the operational read-model test suite.
 - Trace `GET /metrics` from API route to service aggregation.
-- Use `GET /cases/read-model` filters for manager and healthcare review queues.
+- Use `GET /queues/manager-review`, `GET /queues/healthcare-review`, and
+  `GET /cases/read-model` filters for review queues.
 - Inspect role-safe detail routes for evidence, timeline, MITRE, GRC, and audit events.
 - Describe what is implemented here versus production observability best practices.
 
@@ -77,6 +78,8 @@ POST /cases
   -> POST analyst feedback
   -> GET /metrics
   -> GET /cases/read-model
+  -> GET /queues/manager-review
+  -> GET /queues/healthcare-review
   -> GET /cases/{case_id}/evidence|timeline|mitre|grc-controls|audit-events
 ```
 
@@ -88,8 +91,8 @@ POST /cases
 |---|---|
 | Read model | A safe API response shape derived from stored case data. |
 | Metrics model | Aggregated counts and averages from cases, reports, feedback, disagreements, and audit events. |
-| Manager-review queue | `GET /cases/read-model?manager_review_required=true`. |
-| Healthcare-review queue | `GET /cases/read-model?healthcare_review_required=true`. |
+| Manager-review queue | `GET /queues/manager-review` or `GET /cases/read-model?manager_review_required=true`. |
+| Healthcare-review queue | `GET /queues/healthcare-review` or `GET /cases/read-model?healthcare_review_required=true`. |
 | Detail route | A route that returns one type of case detail, such as evidence or audit events. |
 | Role-safe rendering | Applying `render_role_view()` to a response before returning it. |
 
@@ -252,7 +255,7 @@ This code does:
 
 1. Keeps `GET /cases` compatible.
 2. Adds a dedicated filtered envelope for dashboard-style views.
-3. Supports manager-review, healthcare-review, guardrail, and authorization-denied queues.
+3. Supports dedicated manager-review and healthcare-review routes, plus guardrail and authorization-denied filters.
 4. Accepts `role` as a view request, not as authority.
 
 ### Detail routes
@@ -364,6 +367,8 @@ Expected output:
 
 - `GET /metrics` returns safe aggregate operational data.
 - `GET /cases/read-model` is the dashboard-ready filtered envelope route.
+- `GET /queues/manager-review` and `GET /queues/healthcare-review` are
+  dedicated review queue aliases.
 - Detail routes expose evidence, timeline, MITRE, GRC, and audit events.
 - Role-aware read routes reuse demo auth and role-safe rendering.
 - This slice is backend-only and fake-data-only.
@@ -373,9 +378,9 @@ Expected output:
 
 | Item | Details |
 |---|---|
-| Main models | `OperationalMetrics`, `CaseReadModelEnvelope`, `CaseReadModelItem`, `SafeAuditEvent` |
+| Main models | `OperationalMetrics`, `CaseReadModelEnvelope`, `ReviewQueueEnvelope`, `CaseReadModelItem`, `SafeAuditEvent` |
 | Main service methods | `get_operational_metrics()`, `list_case_read_models()`, `get_evidence_view()`, `get_audit_events_view()` |
-| Main routes | `/metrics`, `/cases/read-model`, `/cases/{case_id}/evidence`, `/timeline`, `/mitre`, `/grc-controls`, `/audit-events` |
+| Main routes | `/metrics`, `/cases/read-model`, `/queues/manager-review`, `/queues/healthcare-review`, `/cases/{case_id}/evidence`, `/timeline`, `/mitre`, `/grc-controls`, `/audit-events` |
 | Filters | `source`, `status`, `triage_status`, `severity`, `determination`, `manager_review_required`, `healthcare_review_required`, `guardrail_blocked`, `authorization_denied` |
 | Auth behavior | `API_AUTH_MODE=demo_key` requires fake demo credentials |
 | Test file | `tests/test_operational_read_models.py` |

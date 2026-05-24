@@ -134,7 +134,8 @@ GET /cases?manager_review_required=true
 Optional implementation if clearer:
 
 ```text
-GET /review-queues/manager
+GET /queues/manager-review
+GET /queues/healthcare-review
 ```
 
 Returned items must not expose raw potential PHI/ePHI or secrets.
@@ -318,8 +319,8 @@ credentials, or token vault mappings.
 - `GET /metrics` returns a stable aggregate response shape.
 - `GET /cases` supports dashboard-useful filtering or has a documented
   companion route that does.
-- Manager-review and healthcare-review case queues can be expressed through
-  filters or dedicated routes.
+- Manager-review and healthcare-review case queues are exposed through
+  dedicated routes and can also be expressed through read-model filters.
 - Detail routes return evidence, timeline, MITRE, GRC, and audit/event data in
   role-safe form.
 - Metrics and read models do not expose raw potential PHI/ePHI or secrets.

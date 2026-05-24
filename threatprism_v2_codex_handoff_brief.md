@@ -41,7 +41,7 @@ Latest validation after Evaluation Harness & Regression Defense Labs v0.1 on
 2026-05-24:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final3
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final4
 ```
 
 Result:

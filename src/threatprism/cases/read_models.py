@@ -106,6 +106,10 @@ class CaseReadModelEnvelope(BaseModel):
     role_view: dict[str, Any] | None = None
 
 
+class ReviewQueueEnvelope(CaseReadModelEnvelope):
+    queue: str
+
+
 class SafeAuditEvent(BaseModel):
     audit_event_id: str
     case_id: str | None = None

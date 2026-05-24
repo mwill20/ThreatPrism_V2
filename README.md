@@ -17,8 +17,8 @@ identity-to-role mapping, role-view authorization, and safe authorization audit
 events for role-aware case and report reads.
 
 The latest operational slice adds safe metrics, dashboard-ready case-list read
-models, manager-review and healthcare-review filters, and role-aware detail
-routes for evidence, timeline, MITRE, GRC, and audit events.
+models, manager-review and healthcare-review queue routes, filters, and
+role-aware detail routes for evidence, timeline, MITRE, GRC, and audit events.
 
 The latest regression slice adds a local dry-run evaluation harness with fake
 JSONL fixtures, sanitized eval artifacts, path traversal protection, and tests
@@ -129,6 +129,13 @@ Fetch the dashboard-ready case-list envelope:
 
 ```powershell
 Invoke-RestMethod "http://127.0.0.1:8000/cases/read-model?manager_review_required=false"
+```
+
+Read dedicated review queues:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/queues/manager-review"
+Invoke-RestMethod "http://127.0.0.1:8000/queues/healthcare-review"
 ```
 
 Submit analyst feedback:

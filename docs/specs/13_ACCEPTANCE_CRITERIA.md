@@ -136,9 +136,10 @@ Status: implemented.
   disagreement, timing, and GRC aggregates.
 - Case-list responses support dashboard-useful filtering or a documented
   companion envelope route.
-- Manager-review cases can be queried without exposing raw sensitive values.
-- Healthcare-review cases can be queried with exposure metadata and review
-  flags, not raw potential PHI/ePHI.
+- Manager-review cases can be queried through `GET /queues/manager-review`
+  without exposing raw sensitive values.
+- Healthcare-review cases can be queried through `GET /queues/healthcare-review`
+  with exposure metadata and review flags, not raw potential PHI/ePHI.
 - Evidence, timeline, MITRE, GRC, and audit detail routes return stable JSON
   shapes.
 - Role-aware read routes apply role-safe rendering consistently.

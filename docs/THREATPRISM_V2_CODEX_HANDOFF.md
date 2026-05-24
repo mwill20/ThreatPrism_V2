@@ -54,13 +54,14 @@ The current live implementation includes a first backend slice:
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
-- `tests/test_operational_read_models.py` covering metrics, filtered queues,
-  detail routes, authorization, and leakage prevention.
+- `tests/test_operational_read_models.py` covering metrics, dedicated review
+  queues, filtered read models, detail routes, authorization, and leakage
+  prevention.
 
 Validated on 2026-05-24 with:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final3
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final4
 ```
 
 Result:
@@ -276,7 +277,8 @@ Operational Read Models & Metrics API v0.1 is implemented:
 Operational Read Models & Metrics API v0.1
   -> Stable GET /metrics aggregate response shape
   -> Dashboard-ready GET /cases/read-model companion envelope route
-  -> Manager-review and healthcare-review queue behavior
+  -> Dedicated GET /queues/manager-review and GET /queues/healthcare-review
+     queue routes
   -> Safe detail routes for evidence, timeline, MITRE, GRC, and audit events
   -> Authorization and role-safe rendering on read/detail routes
   -> Tests proving metrics and read models do not expose raw potential PHI/ePHI,

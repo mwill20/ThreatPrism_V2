@@ -123,16 +123,26 @@ def test_case_read_model_filters_manager_and_healthcare_review_queues() -> None:
 
     manager_response = client.get("/cases/read-model?manager_review_required=true")
     healthcare_response = client.get("/cases/read-model?healthcare_review_required=true")
+    manager_queue_response = client.get("/queues/manager-review")
+    healthcare_queue_response = client.get("/queues/healthcare-review")
 
     assert manager_response.status_code == 200
     manager_items = manager_response.json()["items"]
     assert [item["case_id"] for item in manager_items] == [manager_case_id]
     assert manager_items[0]["manager_review_required"] is True
+    assert manager_queue_response.status_code == 200
+    manager_queue = manager_queue_response.json()
+    assert manager_queue["queue"] == "manager-review"
+    assert [item["case_id"] for item in manager_queue["items"]] == [manager_case_id]
 
     assert healthcare_response.status_code == 200
     healthcare_items = healthcare_response.json()["items"]
     assert [item["case_id"] for item in healthcare_items] == [healthcare_case_id]
     assert healthcare_items[0]["healthcare_review_required"] is True
+    assert healthcare_queue_response.status_code == 200
+    healthcare_queue = healthcare_queue_response.json()
+    assert healthcare_queue["queue"] == "healthcare-review"
+    assert [item["case_id"] for item in healthcare_queue["items"]] == [healthcare_case_id]
 
 
 def test_detail_routes_apply_role_safe_rendering_and_preserve_grc_evidence_links() -> None:
@@ -185,6 +195,7 @@ def test_read_model_auth_denial_and_safe_audit_event_details() -> None:
 
     unauth_metrics = client.get("/metrics")
     unauth_case_list = client.get("/cases/read-model")
+    unauth_queue = client.get("/queues/manager-review")
     denied_case = client.get(f"/cases/{case_id}?role=analyst")
     audit_events = client.get(
         f"/cases/{case_id}/audit-events",
@@ -197,6 +208,7 @@ def test_read_model_auth_denial_and_safe_audit_event_details() -> None:
 
     assert unauth_metrics.status_code == 401
     assert unauth_case_list.status_code == 401
+    assert unauth_queue.status_code == 401
     assert denied_case.status_code == 401
     assert audit_events.status_code == 200
     audit_payload = audit_events.json()

@@ -423,3 +423,27 @@ The operational metrics model includes:
 Read models must remain safe derived views. They must not expose raw potential
 PHI/ePHI, secrets, full credentials, raw source payload bodies, or token vault
 mappings.
+
+## Eval Result Models
+
+Eval models are local regression artifacts, not production telemetry records.
+
+Implemented Pydantic eval models live in:
+
+```text
+src/threatprism/evals/schemas.py
+```
+
+The eval result model includes:
+
+- `run_id`.
+- `fixture_id`.
+- `category`.
+- `passed`.
+- `failure_reason`.
+- `safe_sanitized_preview`.
+- `artifact_path`.
+
+Eval artifacts must store sanitized previews only. They must not store raw
+potential PHI/ePHI, secrets, credentials, raw payload bodies, or token vault
+mappings.

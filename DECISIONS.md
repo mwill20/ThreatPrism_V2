@@ -369,3 +369,32 @@ potential PHI/ePHI, secrets, full credentials, raw payload bodies, or token
 vault mappings. Role-aware detail/read routes must use the same demo
 authorization and role-safe rendering policy introduced by Access Control &
 Audit Integrity v0.1.
+
+## D-029 Evaluation Harness And Regression Defense Labs
+
+Evaluation Harness & Regression Defense Labs v0.1 is implemented as a local,
+dry-run regression safety gate.
+
+The harness reads fake JSONL fixtures only from `tests/evals/` and writes
+sanitized artifacts only under `.eval_runs/`. Path traversal is rejected.
+
+The harness must not write raw potential PHI/ePHI, secrets, credentials, full
+authorization headers, raw payload bodies, or token vault mappings to result
+artifacts.
+
+This harness is not a live-LLM safety proof, HIPAA compliance claim, HITRUST
+certification claim, audit-ready claim, or production readiness claim. It proves
+the current deterministic and controlled fake-provider safety checks keep
+working.
+
+## D-030 Production Environment Rejects Demo Auth
+
+ThreatPrism must not start a production-like environment with authentication
+disabled or demo API-key authentication enabled.
+
+If `THREATPRISM_ENV` is `prod` or `production`, `API_AUTH_MODE=none` and
+`API_AUTH_MODE=demo_key` are rejected during application startup.
+
+This does not implement production IdP integration. It prevents the current
+demo access-control layer from accidentally being treated as production
+authentication.

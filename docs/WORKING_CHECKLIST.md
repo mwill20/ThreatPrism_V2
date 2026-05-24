@@ -156,23 +156,44 @@ Access Control & Audit Integrity v0.1:
 
 ## Next Active Slice
 
-Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
+Evaluation Harness & Regression Defense Labs v0.1 is complete:
 
-- [ ] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
-- [ ] Add fake JSONL eval fixtures for prompt injection, hallucinated claims,
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Add fake JSONL eval fixtures for prompt injection, hallucinated claims,
   unsafe action claims, schema violations, evidence citation failures,
   healthcare safeguard leakage, authorization escalation, and benign/suspicious
   ambiguity.
-- [ ] Add a dry-run eval harness that uses the deterministic demo provider or
+- [x] Add additional eval coverage for compliance overclaiming, cross-role
+  leakage, read-model leakage, audit leakage, token-vault mapping exposure,
+  oversized payload handling, malformed JSON, and conflicting evidence.
+- [x] Add a dry-run eval harness that uses the deterministic demo provider or
   controlled fake providers only.
-- [ ] Add structured eval result models with pass/fail counts, category counts,
+- [x] Add structured eval result models with pass/fail counts, category counts,
   failure reasons, and safe artifact paths.
-- [ ] Add a local API or CLI entry point for eval execution only if it remains
+- [x] Add a local API or CLI entry point for eval execution only if it remains
   fake-data and no-live-provider safe.
-- [ ] Ensure eval outputs do not expose raw potential PHI/ePHI, secrets,
+- [x] Ensure eval outputs do not expose raw potential PHI/ePHI, secrets,
   credentials, raw payload bodies, or token vault mappings.
-- [ ] Add tests proving eval failures are visible and real remediation remains
+- [x] Add tests proving eval failures are visible and real remediation remains
   disabled.
+- [x] Reject fixture and output path traversal.
+- [x] Reject disabled or demo auth in production-like environments.
+- [x] Update docs, README, lessons, checklist, handoff, limitations, and
+  validation notes when complete.
+
+## Next Active Slice
+
+Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
+
+- [ ] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [ ] Add safe local validation scripts around the known-good pytest command.
+- [ ] Add lightweight CI that avoids live credentials and runs fake-data tests
+  only.
+- [ ] Add demo/runbook hardening for API startup, SOAR intake, metrics, and eval
+  workflows.
+- [ ] Ensure generated artifacts stay ignored and sanitized.
+- [ ] Keep live LLM, live SOAR, cloud/enrichment calls, dashboard UI,
+  production IdP, and remediation out of scope.
 - [ ] Update docs, README, lessons, checklist, handoff, limitations, and
   validation notes when complete.
 
@@ -187,7 +208,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --
 Current known result:
 
 ```text
-34 passed
+41 passed
 ```
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a

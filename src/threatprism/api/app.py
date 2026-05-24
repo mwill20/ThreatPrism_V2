@@ -25,6 +25,7 @@ from threatprism.guardrails.views import ViewRole
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     active_settings = settings or Settings.from_env()
+    active_settings.validate_runtime()
     app = FastAPI(title="ThreatPrism API", version=__version__)
     app.state.settings = active_settings
     app.state.case_service = CaseService(active_settings)

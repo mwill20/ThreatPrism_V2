@@ -191,3 +191,21 @@ def test_manager_grc_cannot_force_engineer_report_view() -> None:
     assert event.metadata["decision"] == "deny"
     assert event.metadata["endpoint"] == "get_triage_report"
     assert event.metadata["view_role"] == "engineer"
+
+
+def test_production_environment_rejects_disabled_or_demo_auth() -> None:
+    for auth_mode in ["none", "demo_key"]:
+        try:
+            create_app(
+                Settings(
+                    env="production",
+                    database_url="sqlite:///:memory:",
+                    api_auth_mode=auth_mode,
+                    llm_provider="deterministic_demo",
+                    allow_real_actions=False,
+                )
+            )
+        except ValueError as exc:
+            assert "Production environments cannot use disabled or demo API authentication." in str(exc)
+        else:
+            raise AssertionError(f"Expected production auth mode {auth_mode} to be rejected.")

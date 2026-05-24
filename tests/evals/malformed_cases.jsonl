@@ -1,0 +1,1 @@
+{"fixture_id":"eval_malformed_json_001","category":"malformed_json_handling","description":"Malformed JSONL line is rejected safely"

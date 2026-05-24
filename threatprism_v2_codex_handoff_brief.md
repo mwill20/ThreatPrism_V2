@@ -37,17 +37,17 @@ Result:
 22 passed
 ```
 
-Latest validation after Access Control & Audit Integrity v0.1 and Operational
-Read Models & Metrics API v0.1 on 2026-05-23:
+Latest validation after Evaluation Harness & Regression Defense Labs v0.1 on
+2026-05-24:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final3
 ```
 
 Result:
 
 ```text
-34 passed
+41 passed
 ```
 
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
@@ -537,18 +537,15 @@ Treat all LLM output as untrusted until validated.
 
 ## Evaluation Harness
 
-Create or update:
+Implemented fixture files:
 
 ```text
 tests/evals/
-  benign_cases.jsonl
-  prompt_injection_cases.jsonl
-  hallucination_cases.jsonl
-  unsafe_action_claim_cases.jsonl
-  expected_outputs.jsonl
+  regression_cases.jsonl
+  malformed_cases.jsonl
 ```
 
-Eval harness should test:
+Eval harness tests:
 
 - Prompt injection resistance
 - Hallucinated claims
@@ -558,6 +555,19 @@ Eval harness should test:
 - Evidence citation failures
 - Misclassification risk
 - No autonomous action claims
+- Healthcare safeguard leakage
+- Authorization escalation
+- Cross-role data leakage
+- Metrics/read-model leakage
+- Audit-event leakage
+- Token-vault mapping exposure
+- Compliance-language overclaiming
+- Oversized payload handling
+- Malformed JSON handling
+- Conflicting evidence handling
+
+Eval artifacts are written only under `.eval_runs/` and store sanitized
+previews, not raw payload bodies.
 
 ---
 
@@ -914,8 +924,9 @@ Operational Read Models & Metrics API v0.1
   -> Authorization and role-safe rendering on read/detail routes
 ```
 
-The immediate next recommended slice is Evaluation Harness & Defense Labs
-v0.1.
+Evaluation Harness & Regression Defense Labs v0.1 is implemented.
+
+The immediate next recommended slice is Demo Operations & CI Hardening v0.1.
 
 ---
 

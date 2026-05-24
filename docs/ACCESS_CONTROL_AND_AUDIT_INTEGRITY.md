@@ -59,7 +59,7 @@ Implemented scope:
 Validation result:
 
 ```text
-34 passed
+41 passed
 ```
 
 ## Out Of Scope
@@ -76,12 +76,13 @@ Validation result:
 ## Next Prompt
 
 ```text
-Implement Evaluation Harness & Defense Labs v0.1 for ThreatPrism.
+Implement Demo Operations & CI Hardening v0.1 for ThreatPrism.
 
 Current state:
 - Access Control & Audit Integrity v0.1 is implemented.
 - Operational Read Models & Metrics API v0.1 is implemented.
-- Validation passes with 34 tests.
+- Evaluation Harness & Regression Defense Labs v0.1 is implemented.
+- Validation passes with 41 tests.
 - Role-aware case and report reads use demo API-key authorization when
   API_AUTH_MODE=demo_key.
 
@@ -90,5 +91,5 @@ remediation, real healthcare data, dashboard work, or production IdP
 integration. Keep ALLOW_REAL_ACTIONS=false.
 
 Run:
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_evals
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 ```

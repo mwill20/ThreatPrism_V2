@@ -163,8 +163,9 @@ Current direction:
 2. Completed: Healthcare Safeguard & Evidence Alignment Guardrails v0.1.
 3. Completed: Access Control & Audit Integrity v0.1.
 4. Completed: Operational Read Models & Metrics API v0.1.
-5. Next: Evaluation Harness & Defense Labs v0.1.
-6. Later: Docker/CI/demo hardening, dashboard work, and live-integration
+5. Completed: Evaluation Harness & Regression Defense Labs v0.1.
+6. Next: Demo Operations & CI Hardening v0.1.
+7. Later: dashboard work and live-integration
    preparation.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live

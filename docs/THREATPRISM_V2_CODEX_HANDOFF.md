@@ -49,22 +49,24 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/llm/providers.py` with a deterministic demo provider.
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
+- `src/threatprism/evals/` with the local dry-run regression eval harness.
 - `examples/soar_payloads/` with fake demo payloads only.
+- `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
 - `tests/test_operational_read_models.py` covering metrics, filtered queues,
   detail routes, authorization, and leakage prevention.
 
-Validated on 2026-05-23 with:
+Validated on 2026-05-24 with:
 
 ```powershell
-$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_metrics2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final3
 ```
 
 Result:
 
 ```text
-34 passed
+41 passed
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -281,18 +283,31 @@ Operational Read Models & Metrics API v0.1
      secrets, credentials, raw payload bodies, or token vault mappings
 ```
 
+Evaluation Harness & Regression Defense Labs v0.1 is implemented:
+
+```text
+Fake JSONL eval fixtures
+  -> Approved tests/evals fixture directory only
+  -> Dry-run deterministic checks
+  -> Sanitized eval result previews
+  -> Approved .eval_runs output directory only
+  -> Tests for prompt injection, unsafe actions, schema/evidence failures,
+     healthcare leakage, authorization escalation, read-model leakage,
+     audit leakage, token-vault exposure, compliance overclaims, oversized
+     payloads, malformed JSON, and conflicting evidence
+```
+
 ## Next Implementation Slice
 
 The next recommended slice is:
 
 ```text
-Evaluation Harness & Defense Labs v0.1
-  -> Fixture-based dry-run eval datasets
-  -> Prompt-injection, evidence-grounding, schema, action-safety,
-     healthcare-safeguard, authorization, and leakage checks
-  -> Structured eval results without live LLM, SOAR, cloud, or enrichment calls
-  -> Fake demo data only
-  -> ALLOW_REAL_ACTIONS=false
+Demo Operations & CI Hardening v0.1
+  -> Safe local validation scripts
+  -> Lightweight CI around the known-safe pytest command
+  -> Demo/runbook hardening for API and eval workflows
+  -> Generated artifact hygiene
+  -> No live integrations or dashboard UI
 ```
 
 Do not implement:
@@ -453,6 +468,7 @@ DECISIONS.md
 LIMITATIONS.md
 README.md
 docs/OPERATIONAL_READ_MODELS_AND_METRICS.md
+docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md
 threatprism_v2_codex_handoff_brief.md
 threatprism_v2_codex_spec_prompt.md
 ```
@@ -467,8 +483,15 @@ Current operational implementation additions:
 
 ```text
 src/threatprism/cases/read_models.py
+src/threatprism/evals/schemas.py
+src/threatprism/evals/runner.py
+src/threatprism/evals/cli.py
 tests/test_operational_read_models.py
+tests/test_eval_harness.py
+tests/evals/regression_cases.jsonl
+tests/evals/malformed_cases.jsonl
 Lessons/Lesson10_Operational_Read_Models_And_Metrics.md
+Lessons/Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md
 ```
 
 ## Next Session Recommended Prompt
@@ -483,7 +506,7 @@ Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Evaluation Harness & Defense Labs v0.1 using a clean V2
+Continue with Demo Operations & CI Hardening v0.1 using a clean V2
 architecture with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
@@ -500,5 +523,5 @@ dashboard, add live integrations, or add production IdP integration in this
 slice.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
-fresh ignored base temp such as `.pytest_tmp_run_evals`.
+fresh ignored base temp such as `.pytest_tmp_run_ops_ci`.
 ```

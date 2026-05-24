@@ -20,7 +20,7 @@ Prerequisites:
 - Explain prompt-injection and guardrail failure labs.
 - Understand healthcare leakage tests.
 - Describe current test gaps.
-- Prepare for Evaluation Harness & Defense Labs v0.1.
+- Understand the implemented eval harness and prepare for Demo Operations & CI Hardening v0.1.
 
 ## 🔍 What This Component Does
 
@@ -36,13 +36,15 @@ Primary files:
 - `C:\Projects\ThreatPrismV2\tests\test_enrichment_stubs.py`
 - `C:\Projects\ThreatPrismV2\tests\test_access_control.py`
 - `C:\Projects\ThreatPrismV2\tests\test_operational_read_models.py`
+- `C:\Projects\ThreatPrismV2\tests\test_eval_harness.py`
+- `C:\Projects\ThreatPrismV2\tests\evals\regression_cases.jsonl`
 - `C:\Projects\ThreatPrismV2\docs\specs\17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
 - `C:\Projects\ThreatPrismV2\docs\specs\16_OPERATIONAL_READ_MODELS_AND_METRICS.md`
 
 Current validated result:
 
 ```text
-34 passed
+41 passed
 ```
 
 ### Recommended (not implemented here)
@@ -161,7 +163,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-34 passed
+41 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
@@ -202,13 +204,13 @@ PowerShell:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
-Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Evaluation Harness & Defense Labs v0.1"
+Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Demo Operations & CI Hardening v0.1"
 ```
 
 Expected output includes:
 
 ```text
-Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
+Demo Operations & CI Hardening v0.1 is the next recommended backend slice:
 ```
 
 ## 📚 Interview Prep
@@ -220,7 +222,7 @@ Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
 **A**: It proves ThreatPrism blocks unsafe provider output instead of saving it: policy violations, unknown evidence references, and real-action claims fail closed.
 
 **Q: What is the most important current test gap?**  
-**A**: The main gap is a fixture-based eval harness that runs repeatable prompt-injection, evidence-grounding, schema, action-safety, healthcare-safeguard, authorization, and leakage checks before live integrations.
+**A**: The eval harness now exists. The main gap is repeatable developer operations: validation scripts, lightweight CI, artifact hygiene, and demo runbook hardening before live integrations.
 
 **Q: How would you extend the tests for live providers later?**  
 **A**: Keep deterministic provider tests as the baseline, then add contract tests around provider interfaces with fake responses, timeouts, schema failures, and not-configured paths before live credentials are used.
@@ -231,7 +233,7 @@ Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
 - The defense labs prove unsafe output is blocked.
 - Healthcare tests prove raw sensitive values do not leak.
 - Tests are local and require no live providers.
-- Evaluation Harness & Defense Labs v0.1 is the next active implementation slice.
+- Demo Operations & CI Hardening v0.1 is the next active implementation slice.
 
 ## 📋 Summary Reference Card
 
@@ -245,13 +247,14 @@ Evaluation Harness & Defense Labs v0.1 is the next recommended backend slice:
 | `test_enrichment_stubs.py` | `not_configured` enrichment providers. |
 | `test_access_control.py` | Demo auth, role escalation denial, and safe authorization audit events. |
 | `test_operational_read_models.py` | Metrics, filters, queues, detail routes, auth, and leakage prevention. |
+| `test_eval_harness.py` | Dry-run eval harness, artifact sanitization, traversal rejection, and regression fixtures. |
 
 ## 🚀 Where To Go Next
 
 Next implementation target:
 
-- `C:\Projects\ThreatPrismV2\docs\specs\11_EVALUATION_PLAN.md`
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
+- `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`
 
 Optional advanced challenges:
 

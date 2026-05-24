@@ -20,6 +20,12 @@ The latest operational slice adds safe metrics, dashboard-ready case-list read
 models, manager-review and healthcare-review filters, and role-aware detail
 routes for evidence, timeline, MITRE, GRC, and audit events.
 
+The latest regression slice adds a local dry-run evaluation harness with fake
+JSONL fixtures, sanitized eval artifacts, path traversal protection, and tests
+for prompt injection, unsafe action claims, healthcare leakage, auth
+escalation, read-model leakage, audit leakage, and compliance-language
+overclaims.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -76,7 +82,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 Current known result:
 
 ```text
-34 passed
+41 passed
 ```
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
@@ -142,6 +148,17 @@ $feedback = @{
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/cases/$($created.case_id)/analyst-feedback" -Body ($feedback | ConvertTo-Json -Depth 20) -ContentType 'application/json'
 ```
 
+## Run The Eval Harness
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m threatprism.evals.cli --fixtures regression_cases.jsonl
+```
+
+Eval artifacts are written under `.eval_runs/<run_id>/` and contain sanitized
+previews only.
+
 ## Active Checklist
 
 Track current work in `docs/WORKING_CHECKLIST.md`.
@@ -167,5 +184,8 @@ Operational Read Models & Metrics API v0.1 is implemented. See
 `docs/OPERATIONAL_READ_MODELS_AND_METRICS.md` and
 `docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md`.
 
-The next recommended backend slice is Evaluation Harness & Defense Labs v0.1.
-See `docs/specs/11_EVALUATION_PLAN.md`.
+Evaluation Harness & Regression Defense Labs v0.1 is implemented. See
+`docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md` and
+`docs/specs/11_EVALUATION_PLAN.md`.
+
+The next recommended backend slice is Demo Operations & CI Hardening v0.1.

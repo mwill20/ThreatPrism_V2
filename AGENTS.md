@@ -51,6 +51,8 @@ Current baseline:
   `src/threatprism/auth/`.
 - Operational read-model response types exist under
   `src/threatprism/cases/read_models.py`.
+- Local dry-run eval harness code exists under `src/threatprism/evals/`.
+- Fake eval fixtures exist under `tests/evals/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - API and guardrail tests exist under `tests/`.
 - The known local validation command is:
@@ -170,6 +172,10 @@ until identity and authorization enforce the effective role.
   trusted identity-to-role policy has authorized the effective role.
 - In `API_AUTH_MODE=demo_key`, derive role views from demo credentials and deny
   role escalation.
+- Do not allow `THREATPRISM_ENV=prod` or `THREATPRISM_ENV=production` to use
+  disabled or demo API authentication.
+- Keep eval fixtures under `tests/evals/` and eval artifacts under
+  `.eval_runs/`; reject path traversal.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.

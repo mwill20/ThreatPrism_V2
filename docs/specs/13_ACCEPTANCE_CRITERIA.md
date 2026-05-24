@@ -93,6 +93,23 @@ Each completed report includes:
 - Demo unauthenticated API mode is limited to localhost and fake data.
 - Production-style use requires authentication and authorization before exposing case data.
 
+## Evaluation Harness Acceptance Criteria
+
+Status: implemented.
+
+- Fake JSONL eval fixtures cover prompt injection, hallucinated claims, unsafe
+  action claims, schema failures, evidence citation failures, healthcare
+  leakage, authorization escalation, cross-role leakage, read-model leakage,
+  audit leakage, token-vault mapping exposure, compliance overclaims, malformed
+  JSON, oversized payloads, and conflicting evidence.
+- Eval harness runs without live LLM credentials, live SOAR calls, cloud calls,
+  or enrichment calls.
+- Eval artifacts are written only under `.eval_runs/`.
+- Eval fixture reads are restricted to `tests/evals/`.
+- Eval artifacts contain sanitized previews, not raw potential PHI/ePHI,
+  secrets, credentials, raw payload bodies, or token vault mappings.
+- Malformed fixtures fail safely.
+
 ## Healthcare Safeguard Acceptance Criteria
 
 - SOAR payloads are expected to be security-only, but all inbound payloads are

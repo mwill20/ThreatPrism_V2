@@ -38,6 +38,8 @@ Current implemented baseline:
 - Safe authorization audit events for allow and deny decisions.
 - Operational read models and metrics for dashboard-ready backend use.
 - Safe detail routes for evidence, timeline, MITRE, GRC, and audit events.
+- Local dry-run evaluation harness and regression defense fixtures.
+- Production-like environments reject disabled auth and demo API-key auth.
 
 Validation command confirmed on 2026-05-22:
 
@@ -45,10 +47,10 @@ Validation command confirmed on 2026-05-22:
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_healthcare3
 ```
 
-Result after Operational Read Models & Metrics API v0.1:
+Result after Evaluation Harness & Regression Defense Labs v0.1:
 
 ```text
-34 passed
+41 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -60,7 +62,6 @@ temp such as `.pytest_tmp_run_verify`.
 - Full threat intelligence provider interfaces/stubs.
 - Microsoft-specific production adapters.
 - Dedicated async worker or external queue.
-- Evaluation harness.
 - Docker Compose.
 - CI/CD.
 - Production authentication and authorization beyond demo API-key mode.
@@ -157,6 +158,10 @@ Operational metrics and read models are demo-safe backend responses. They are
 not a production monitoring, SIEM export, BI/data-warehouse, or compliance
 reporting implementation.
 
+The eval harness is a deterministic regression gate. It does not prove live-LLM
+safety, production readiness, HIPAA compliance, HITRUST certification, or audit
+readiness.
+
 ## Demo Data Limitations
 
 - Demo data must be fake.
@@ -167,8 +172,8 @@ reporting implementation.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Evaluation Harness & Defense Labs v0.1 before adding live LLM,
-  SOAR, enrichment, dashboard, or production-style integration work.
+- Implement Demo Operations & CI Hardening v0.1 before adding live LLM, SOAR,
+  enrichment, dashboard, or production-style integration work.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

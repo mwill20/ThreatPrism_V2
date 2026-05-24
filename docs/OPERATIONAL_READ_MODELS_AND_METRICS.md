@@ -119,10 +119,11 @@ Result:
 
 ## Next Slice
 
-The next recommended slice is Evaluation Harness & Defense Labs v0.1.
+Evaluation Harness & Regression Defense Labs v0.1 is now implemented.
 
-Reason: ThreatPrism now has intake, guardrails, access control, metrics, and
-safe read models. Before adding live providers, dashboard UI, Docker/CI, or
-production-style integrations, the project needs repeatable dry-run evals that
-prove prompt-injection, evidence-grounding, schema, action-safety,
-healthcare-safeguard, authorization, and leakage controls continue to hold.
+The next recommended slice is Demo Operations & CI Hardening v0.1.
+
+Reason: ThreatPrism now has intake, guardrails, access control, metrics, safe
+read models, and a local eval harness. Before adding live providers, dashboard
+UI, or production-style integrations, the project needs repeatable developer
+operations, lightweight CI, and artifact hygiene.

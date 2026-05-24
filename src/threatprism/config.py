@@ -35,6 +35,10 @@ class Settings:
             allow_real_actions=_parse_bool(os.getenv("ALLOW_REAL_ACTIONS"), default=False),
         )
 
+    def validate_runtime(self) -> None:
+        if self.env.strip().lower() in {"prod", "production"} and self.api_auth_mode in {"none", "demo_key"}:
+            raise ValueError("Production environments cannot use disabled or demo API authentication.")
+
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:
     if value is None:

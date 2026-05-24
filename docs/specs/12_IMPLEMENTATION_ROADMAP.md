@@ -245,10 +245,10 @@ Operational Read Models & Metrics API v0.1
 This slice is implemented. It preserves the compatibility `GET /cases` list
 route and adds `GET /cases/read-model` as the dashboard-ready envelope route.
 
-## Next Recommended Slice
+## Recently Completed Slice
 
 ```text
-Evaluation Harness & Defense Labs v0.1
+Evaluation Harness & Regression Defense Labs v0.1
   -> Add fixture-based dry-run eval datasets
   -> Exercise prompt injection, evidence grounding, schema, action safety,
      healthcare safeguard, authorization, and leakage controls
@@ -256,6 +256,21 @@ Evaluation Harness & Defense Labs v0.1
      enrichment calls
   -> Keep ALLOW_REAL_ACTIONS=false and fake data only
   -> Use eval output as a regression signal before dashboards or live providers
+```
+
+This slice is implemented as Evaluation Harness & Regression Defense Labs
+v0.1.
+
+## Next Recommended Slice
+
+```text
+Demo Operations & CI Hardening v0.1
+  -> Add safe local validation scripts
+  -> Add lightweight CI that runs the validated local test command
+  -> Add demo/runbook hardening for API and eval workflows
+  -> Keep generated artifacts ignored and sanitized
+  -> Keep live LLM, SOAR, cloud, dashboard, production IdP, and remediation out
+     of scope
 ```
 
 ## Roadmap Constraints

@@ -4,6 +4,7 @@ __pycache__/
 .pytest_tmp*/
 pytest-cache-files-*/
 data/
+.eval_runs/
 *.db
 *.db-journal
 .env

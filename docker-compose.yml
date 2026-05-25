@@ -1,0 +1,44 @@
+name: threatprism-local-demo
+
+services:
+  threatprism-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: threatprism:local-demo
+    ports:
+      - "${THREATPRISM_PORT:-8000}:8000"
+    environment:
+      THREATPRISM_ENV: demo
+      DATABASE_URL: sqlite:////app/data/threatprism.db
+      API_AUTH_MODE: demo_key
+      DEMO_API_KEYS: demo-analyst-key:demo_analyst:analyst,demo-engineer-key:demo_engineer:engineer,demo-manager-key:demo_manager:manager_grc,demo-legal-key:demo_legal:legal_privacy,demo-audit-key:demo_audit:audit_debug,demo-admin-key:demo_admin:admin
+      THREATPRISM_AUTH_REQUIRED: "true"
+      THREATPRISM_LOCAL_DEV_ACK: "false"
+      DEMO_ROLE_OVERRIDE_ENABLED: "false"
+      LLM_PROVIDER: deterministic_demo
+      OPENAI_API_KEY: ""
+      LOCAL_LLM_BASE_URL: ""
+      ALLOW_REAL_ACTIONS: "false"
+      MAX_REQUEST_BODY_BYTES: "262144"
+      CASE_POST_RATE_LIMIT_PER_MINUTE: "60"
+      TRIAGE_CONCURRENCY_LIMIT: "4"
+      VIRUSTOTAL_API_KEY: ""
+      URLSCAN_API_KEY: ""
+      ABUSEIPDB_API_KEY: ""
+      WHOIS_RDAP_PROVIDER: default
+    volumes:
+      - threatprism-data:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  threatprism-data:

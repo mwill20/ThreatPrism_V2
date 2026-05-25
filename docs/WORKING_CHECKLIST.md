@@ -295,11 +295,36 @@ eval harness dry-run: 15 passed / 0 failed
 
 ## Next Active Slice
 
-No new implementation slice is selected yet. Recommended next backend-safe
-option after final validation:
+Docker Compose & Local Demo Packaging v0.1 is complete:
 
-- [ ] Docker Compose & Local Demo Packaging v0.1, if the user wants packaging
-  before dashboard UI or live-integration preparation.
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Add a Dockerfile for the existing fake-data FastAPI backend.
+- [x] Add Docker Compose local demo startup with a single backend service.
+- [x] Preserve demo-safe defaults: fake demo API keys, deterministic provider,
+  SQLite demo persistence, and `ALLOW_REAL_ACTIONS=false`.
+- [x] Keep live providers, production IdP, PostgreSQL, Redis, dashboard UI,
+  workers, and remediation out of scope.
+- [x] Add `.dockerignore` coverage for `.env`, generated artifacts, local
+  databases, pytest temp files, ignored dataset staging, and git metadata.
+- [x] Add tests for the Dockerfile, Compose file, and Docker ignore safety
+  boundary.
+- [x] Update docs, README, runbook, lessons, checklist, handoff, decisions, and
+  limitations.
+
+Implemented with `Dockerfile`, `docker-compose.yml`, `.dockerignore`,
+`tests/test_docker_packaging.py`,
+`docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`, and
+`docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`.
+
+## Next Active Slice
+
+No new implementation slice is selected yet. Recommended next choices should
+be selected explicitly before implementation:
+
+- [ ] Data Strategy & Synthetic Fixture Factory v0.1 if the user wants
+  synthetic fixture generation next.
+- [ ] Dashboard UI preparation if the user explicitly approves frontend work.
+- [ ] Live-provider preparation only after re-opening gated threat treatments.
 
 Future planned data-realism slice:
 
@@ -332,7 +357,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-63 passed
+66 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

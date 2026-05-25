@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `51 passed`.
+- The current validated baseline is `66 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -36,6 +36,7 @@ Fake SOAR payload
   -> Dry-run eval harness and regression defense labs
   -> Safe validation wrapper and fake-data-only CI
   -> Demo scenario pack and API contract freeze tests
+  -> Docker Compose local demo packaging
   -> API responses and tests
 ```
 
@@ -57,6 +58,7 @@ Fake SOAR payload
 | ✅ | [Lesson 11](Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md) | Evaluation Harness And Regression Defense Labs | `src/threatprism/evals/*.py`, `tests/evals/*.jsonl`, `tests/test_eval_harness.py` |
 | ✅ | [Lesson 12](Lesson12_Demo_Operations_And_CI_Hardening.md) | Demo Operations And CI Hardening | `tools/*.py`, `tools/*.ps1`, `.github/workflows/safe-validation.yml`, `tests/test_ops_safety.py` |
 | ✅ | [Lesson 13](Lesson13_Demo_Scenarios_And_API_Contract.md) | Demo Scenarios And API Contract | `src/threatprism/demo/scenarios.py`, `examples/demo_scenarios/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
+| ✅ | [Lesson 14](Lesson14_Docker_Compose_Local_Demo_Packaging.md) | Docker Compose Local Demo Packaging | `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `tests/test_docker_packaging.py` |
 
 ## File Coverage Map
 
@@ -93,6 +95,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
+- `C:\Projects\ThreatPrismV2\Dockerfile` -> Lesson 14
+- `C:\Projects\ThreatPrismV2\docker-compose.yml` -> Lesson 14
+- `C:\Projects\ThreatPrismV2\.dockerignore` -> Lesson 14
 
 ### Tests And Fixtures
 
@@ -102,6 +107,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_eval_harness.py` -> Lessons 08 and 11
 - `C:\Projects\ThreatPrismV2\tests\test_ops_safety.py` -> Lessons 08 and 12
 - `C:\Projects\ThreatPrismV2\tests\test_demo_scenarios_and_api_contract.py` -> Lessons 08 and 13
+- `C:\Projects\ThreatPrismV2\tests\test_docker_packaging.py` -> Lessons 08 and 14
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -130,12 +136,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-51 passed
+66 passed
 ```
 
 ## What To Study Next
 
-After Lesson 13, use the working checklist to choose the next requested slice:
+After Lesson 14, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

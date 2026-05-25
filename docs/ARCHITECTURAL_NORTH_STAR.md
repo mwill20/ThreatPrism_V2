@@ -182,11 +182,12 @@ Current direction:
 5. Completed: Evaluation Harness & Regression Defense Labs v0.1.
 6. Completed: Demo Operations & CI Hardening v0.1.
 7. Completed: Demo Scenario Pack & API Contract Freeze v0.1.
-8. Next: Docker/local demo packaging or explicit dashboard/live-integration
-   preparation after user approval.
+8. Completed: Docker Compose & Local Demo Packaging v0.1.
 9. Planned future data realism path: Data Strategy & Synthetic Fixture Factory
    v0.1 before broad live-provider evaluation, larger external datasets, or
    lab-generated telemetry.
+10. Dashboard UI or live-integration preparation only after explicit user
+    approval and any required threat-model treatment updates.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live
 enrichment calls, production IdP integration, real remediation, or non-demo

@@ -54,7 +54,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-63 passed
+66 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

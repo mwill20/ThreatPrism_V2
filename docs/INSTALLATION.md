@@ -86,7 +86,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-63 passed
+66 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -96,7 +96,7 @@ eval harness dry-run: 15 passed / 0 failed
 pytest
 ```
 
-Expected current result: **63 passed**.
+Expected current result: **66 passed**.
 
 If Windows locks a pytest cache directory, use a fresh `--basetemp`:
 
@@ -170,6 +170,22 @@ Expected response:
   "mode": "demo",
   "allow_real_actions": false
 }
+```
+
+## Run With Docker Compose
+
+```powershell
+docker compose up --build
+```
+
+The Compose service starts the backend at `http://127.0.0.1:8000` with fake
+demo API keys, deterministic demo triage, empty live-provider credentials, and
+`ALLOW_REAL_ACTIONS=false`.
+
+Stop the service:
+
+```powershell
+docker compose down
 ```
 
 ### Submit a demo case

@@ -48,7 +48,8 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-63 passed
+66 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
 
 ## Run Tests Directly
@@ -62,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-63 passed
+66 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -101,6 +102,8 @@ Set-Location C:\Projects\ThreatPrismV2
 $env:PYTHONPATH='src'
 $env:THREATPRISM_ENV='demo'
 $env:DATABASE_URL='sqlite:///./data/threatprism.db'
+$env:API_AUTH_MODE='none'
+$env:THREATPRISM_LOCAL_DEV_ACK='true'
 $env:LLM_PROVIDER='deterministic_demo'
 $env:ALLOW_REAL_ACTIONS='false'
 python -m uvicorn threatprism.api.app:create_app --factory --reload
@@ -113,6 +116,32 @@ Invoke-RestMethod http://127.0.0.1:8000/health
 ```
 
 The response should show `allow_real_actions` as `false`.
+
+## Start With Docker Compose
+
+Use this when you want repeatable local backend startup without setting a
+Python virtual environment manually:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+docker compose up --build
+```
+
+The service runs at `http://127.0.0.1:8000` with fake demo API-key
+authentication, deterministic demo triage, empty live-provider credential
+variables, and `ALLOW_REAL_ACTIONS=false`.
+
+Stop the service:
+
+```powershell
+docker compose down
+```
+
+Reset the demo SQLite volume:
+
+```powershell
+docker compose down -v
+```
 
 ## Run The Demo Flow
 

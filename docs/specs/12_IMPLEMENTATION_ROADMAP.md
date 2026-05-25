@@ -294,11 +294,11 @@ tests.
 ## Next Recommended Slice
 
 ```text
-Docker Compose & Local Demo Packaging v0.1
-  -> Add local packaging around the existing fake-data backend
-  -> Keep safe validation and deterministic demo defaults
-  -> Avoid live providers, production IdP, dashboard UI, and remediation unless
-     explicitly requested
+No new implementation slice is selected yet.
+  -> Docker Compose & Local Demo Packaging v0.1 is complete
+  -> Data Strategy & Synthetic Fixture Factory v0.1 remains planned
+  -> Dashboard UI, live providers, production IdP, and remediation require
+     explicit approval and updated threat treatment
 ```
 
 ## Future Planned Slice

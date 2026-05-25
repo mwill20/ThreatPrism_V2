@@ -48,17 +48,20 @@ Current implemented baseline:
 - OpenAPI contract tests for the current backend route and response-model
   surface.
 - Context-light startup file and compact handoff prompt generation tooling.
+- Docker Compose local demo packaging for the existing fake-data FastAPI
+  backend.
 
-Validation command confirmed on 2026-05-24:
+Validation command confirmed on 2026-05-25:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
 ```
 
-Result after Demo Scenario Pack & API Contract Freeze v0.1:
+Result after Docker Compose & Local Demo Packaging v0.1:
 
 ```text
-51 passed
+66 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -70,7 +73,6 @@ temp such as `.pytest_tmp_run_verify`.
 - Full threat intelligence provider interfaces/stubs.
 - Microsoft-specific production adapters.
 - Dedicated async worker or external queue.
-- Docker Compose.
 - Production-grade CI/CD release pipeline.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
@@ -208,12 +210,27 @@ The user must manually review dataset license terms, redistribution rules,
 attribution requirements, safety constraints, and whether derivative fixtures
 can be committed before any source sample is used.
 
+## Docker Packaging Limitations
+
+The Docker Compose packaging is local-demo packaging only.
+
+Current boundaries:
+
+- One FastAPI backend service.
+- SQLite demo persistence through a named Docker volume.
+- Fake demo API keys only.
+- Empty live-provider credential variables.
+- No dashboard UI.
+- No PostgreSQL, Redis, worker, production IdP, live LLM, live SOAR, live
+  enrichment, or remediation profile.
+
+Any production-style packaging profile must re-open the relevant threat-model
+treatments before implementation.
+
 ## Known Open Items
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Decide whether the next packaging slice should add Docker Compose/local demo
-  packaging before dashboard UI or live-integration preparation.
 - Decide when to implement Data Strategy & Synthetic Fixture Factory v0.1 and
   which candidate datasets the user has approved after license and safety
   review.

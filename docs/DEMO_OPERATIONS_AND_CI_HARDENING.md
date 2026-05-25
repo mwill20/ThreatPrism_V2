@@ -99,7 +99,7 @@ Current validation on 2026-05-24 with:
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_threat_treatment_final2
 ```
 
-Result:
+Original slice validation result:
 
 ```text
 63 passed

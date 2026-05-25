@@ -57,6 +57,8 @@ The current live implementation includes a first backend slice:
 - `tools/` with fake-data-only safety checks and local validation wrapper.
 - `tools/generate-compact-handoff.ps1` with compact fresh-chat prompt
   generation.
+- `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with local demo
+  backend packaging.
 - `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
 - `examples/soar_payloads/` with fake demo payloads only.
 - `examples/demo_scenarios/` with the fake role-specific demo scenario pack.
@@ -68,21 +70,23 @@ The current live implementation includes a first backend slice:
   prevention.
 - `tests/test_demo_scenarios_and_api_contract.py` covering scenario-pack smoke
   workflows and OpenAPI route/response-model contract checks.
+- `tests/test_docker_packaging.py` covering Dockerfile, Compose, and Docker
+  ignore safety boundaries.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the planned
   future data-realism and synthetic fixture factory slice.
 
-Validated on 2026-05-24 with:
+Validated on 2026-05-25 with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
 ```
 
 Result:
 
 ```text
-63 passed
+66 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -350,9 +354,28 @@ Typed scenario pack
   -> No dashboard UI, live integrations, production IdP, or remediation
 ```
 
+Docker Compose & Local Demo Packaging v0.1 is implemented:
+
+```text
+Dockerfile
+  -> Existing FastAPI backend image
+  -> Locked dependency install
+  -> Non-root runtime user
+  -> Demo-safe environment defaults
+docker-compose.yml
+  -> Single threatprism-api service
+  -> Fake demo API-key auth
+  -> Deterministic demo provider
+  -> SQLite named volume
+  -> Empty live-provider credential variables
+```
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. The next backend-safe option is:
+No new implementation slice is selected yet. Recommended next choices should be
+selected explicitly before implementation.
+
+The previous backend-safe option is complete:
 
 ```text
 Docker Compose & Local Demo Packaging v0.1
@@ -520,6 +543,7 @@ docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md
 docs/specs/19_DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
 docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
+docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -536,6 +560,7 @@ docs/OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md
 docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
 docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
+docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
 threatprism_v2_codex_handoff_brief.md
 threatprism_v2_codex_spec_prompt.md
 ```
@@ -566,11 +591,15 @@ tools/validate-threatprism.ps1
 tools/generate-compact-handoff.ps1
 tools/generate_compact_handoff.py
 .claude/commands/compact-handoff.md
+Dockerfile
+docker-compose.yml
+.dockerignore
 .github/workflows/safe-validation.yml
 Lessons/Lesson10_Operational_Read_Models_And_Metrics.md
 Lessons/Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md
 Lessons/Lesson12_Demo_Operations_And_CI_Hardening.md
 Lessons/Lesson13_Demo_Scenarios_And_API_Contract.md
+Lessons/Lesson14_Docker_Compose_Local_Demo_Packaging.md
 ```
 
 ## Next Session Recommended Prompt

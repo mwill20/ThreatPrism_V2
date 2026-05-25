@@ -34,6 +34,10 @@ The latest demo slice adds a repeatable fake scenario pack for analyst,
 manager/GRC, legal/privacy, audit/debug, and engineer workflows, plus OpenAPI
 contract tests for the current backend routes.
 
+The latest packaging slice adds Docker Compose local demo packaging for the
+existing fake-data FastAPI backend, with deterministic demo defaults and no
+live providers.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -66,6 +70,8 @@ examples/         Fake demo SOAR payloads and scenario packs
 tests/            API, guardrail, read-model, eval, and safety tests
 tools/            Safe local validation and demo safety checks
 .github/          Fake-data-only CI workflow
+Dockerfile        Local demo backend image
+docker-compose.yml Local demo backend service
 ```
 
 ## Setup
@@ -120,7 +126,8 @@ The wrapper runs:
 Current known result:
 
 ```text
-63 passed
+66 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
 
 The underlying pytest command remains:
@@ -159,6 +166,8 @@ Expected focused result:
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
 $env:PYTHONPATH='src'
+$env:API_AUTH_MODE='none'
+$env:THREATPRISM_LOCAL_DEV_ACK='true'
 $env:ALLOW_REAL_ACTIONS='false'
 python -m uvicorn threatprism.api.app:create_app --factory --reload
 ```
@@ -167,6 +176,23 @@ Health check:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health
+```
+
+## Run With Docker Compose
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+docker compose up --build
+```
+
+The Compose service runs the same backend at `http://127.0.0.1:8000` with
+`API_AUTH_MODE=demo_key`, fake demo credentials,
+`LLM_PROVIDER=deterministic_demo`, and `ALLOW_REAL_ACTIONS=false`.
+
+Stop the container:
+
+```powershell
+docker compose down
 ```
 
 ## Demo SOAR Intake
@@ -275,3 +301,8 @@ See `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
 `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`. Public or synthetic
 datasets must be manually reviewed, kept out of git as raw data, and converted
 into sanitized ThreatPrism-native fixtures before use.
+
+Docker Compose & Local Demo Packaging v0.1 is implemented. See
+`docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,
+`docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`, `Dockerfile`, and
+`docker-compose.yml`.

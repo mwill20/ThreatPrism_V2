@@ -44,7 +44,7 @@ Primary files:
 Current validated result:
 
 ```text
-51 passed
+66 passed
 ```
 
 ### Recommended (not implemented here)
@@ -163,7 +163,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-51 passed
+66 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only

@@ -479,3 +479,24 @@ Data Strategy & Synthetic Fixture Factory v0.1
 Candidate source families include Synthea, OTRF/Security Datasets, Lakera PINT,
 and Giskard prompt-injection samples, but each source remains review-required
 until the user approves license, safety, and commitability for selected samples.
+
+## D-035 Docker Compose Local Demo Packaging
+
+Docker Compose & Local Demo Packaging v0.1 packages only the existing fake-data
+FastAPI backend.
+
+The default Compose service is intentionally single-service:
+
+```text
+threatprism-api
+```
+
+The slice does not add PostgreSQL, Redis, dashboard UI, production identity,
+live LLM, live SOAR, live enrichment, or real remediation. Those surfaces
+remain gated by the threat model treatment register and require explicit
+future approval.
+
+Compose hard-codes empty live-provider credential variables and fake demo API
+keys so host secrets are not passed through by accident. The local image uses
+the transitive lock file for dependency installation and stores demo SQLite
+state in a named Docker volume.

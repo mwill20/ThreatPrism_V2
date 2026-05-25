@@ -40,17 +40,18 @@ Result:
 22 passed
 ```
 
-Latest validation after Demo Scenario Pack & API Contract Freeze v0.1 on
-2026-05-24:
+Latest validation after Docker Compose & Local Demo Packaging v0.1 on
+2026-05-25:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
 ```
 
 Result:
 
 ```text
-63 passed
+66 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
 
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
@@ -946,15 +947,17 @@ Demo Operations & CI Hardening v0.1 is implemented.
 
 Demo Scenario Pack & API Contract Freeze v0.1 is implemented.
 
+Docker Compose & Local Demo Packaging v0.1 is implemented.
+
 Data Strategy & Synthetic Fixture Factory v0.1 is planned for future data
 realism work. It should keep fake hand-written fixtures, add sanitized
 ThreatPrism-native synthetic fixtures, use Synthea, OTRF/Security Datasets,
 PINT, and Giskard samples only after manual review, and avoid automatic
 downloads or raw dataset commits.
 
-No new implementation slice is selected yet. A backend-safe next option is
-Docker Compose & Local Demo Packaging v0.1, if packaging is desired before
-dashboard UI or live-integration preparation.
+No new implementation slice is selected yet. Docker Compose & Local Demo
+Packaging v0.1 is complete. Pick the next slice explicitly before adding
+dashboard UI, live providers, production IdP, non-demo data, or remediation.
 
 ---
 

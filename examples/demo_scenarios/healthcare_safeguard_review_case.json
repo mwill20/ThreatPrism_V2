@@ -1,0 +1,73 @@
+{
+  "source": "generic_soar",
+  "source_case_id": "SOAR-DEMO-HEALTHCARE-001",
+  "organization_context": {
+    "environment": "demo",
+    "business_unit": "internal_soc",
+    "sensitivity": "demo",
+    "operating_model": "mssp_to_internal_soc_transition"
+  },
+  "title": "Patient portal security alert",
+  "description": "Patient portal alert for patient id PAT-DEMO-9001 from 198.51.100.24 using patient.demo@example.invalid. Automation note included API key sk-testscenariosecret12345.",
+  "created_at": "2026-05-24T18:30:00Z",
+  "alerts": [
+    {
+      "alert_id": "alert-healthcare-001",
+      "name": "Suspicious patient portal login",
+      "severity": "medium",
+      "source": "identity_provider",
+      "description": "Fake patient portal sign-in alert used only for healthcare safeguard review."
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt-healthcare-001",
+      "timestamp": "2026-05-24T18:21:00Z",
+      "event_type": "portal_login",
+      "source": "identity_provider",
+      "description": "Patient portal login investigation referenced C:\\demo\\patient_9001\\case_note.txt and source address 198.51.100.24.",
+      "normalized": {
+        "actor": "patient.demo@example.invalid",
+        "source_ip": "198.51.100.24"
+      },
+      "provenance": {
+        "source_file": "demo://payloads/healthcare_safeguard_review_case.json",
+        "record_index": 0,
+        "source_event_id": "source-event-healthcare-001"
+      },
+      "raw_reference": "demo://events/evt-healthcare-001"
+    }
+  ],
+  "entities": [
+    {
+      "entity_type": "user",
+      "value": "patient.demo@example.invalid",
+      "role": "subject"
+    }
+  ],
+  "iocs": [
+    {
+      "ioc_type": "ip",
+      "value": "198.51.100.24",
+      "source": "alert",
+      "confidence": 0.6,
+      "evidence_ids": ["ev-healthcare-001"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-healthcare-001",
+      "evidence_type": "log",
+      "summary": "Patient portal evidence mentions patient id PAT-DEMO-9001, contact patient.demo@example.invalid, source IP 198.51.100.24, and C:\\demo\\patient_9001\\case_note.txt.",
+      "source_uri": "demo://logs/patient-portal/evt-healthcare-001",
+      "event_ids": ["evt-healthcare-001"],
+      "excerpt": "Secret-like value sk-testscenariosecret12345 was present in a fake note.",
+      "sensitivity": "demo",
+      "provenance": {
+        "source_file": "demo://payloads/healthcare_safeguard_review_case.json",
+        "record_index": 0,
+        "source_event_id": "source-event-healthcare-001"
+      }
+    }
+  ]
+}

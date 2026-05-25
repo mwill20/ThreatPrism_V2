@@ -102,13 +102,15 @@ Recommended config:
 
 ```text
 API_AUTH_MODE=none|demo_key
+THREATPRISM_AUTH_REQUIRED=true
+THREATPRISM_LOCAL_DEV_ACK=false
 DEMO_ROLE_OVERRIDE_ENABLED=false
 ```
 
 Rules:
 
 - In `API_AUTH_MODE=none`, route behavior may remain easy for local fake-data
-  demos, but docs must state that this mode is localhost/fake-data only.
+  demos only when `THREATPRISM_LOCAL_DEV_ACK=true` is set explicitly.
 - In `API_AUTH_MODE=demo_key`, role escalation must be denied.
 - `DEMO_ROLE_OVERRIDE_ENABLED=true` should be test/demo-only and should still
   create audit events.
@@ -226,11 +228,13 @@ Add tests proving:
 - [x] Existing healthcare safeguard tests remain green.
 - [x] Safe local validation passes.
 
-Current validation:
+Original slice validation result:
 
 ```text
 41 passed
 ```
+
+Current full-project validation is tracked in `docs/WORKING_CHECKLIST.md`.
 
 ## Recommended Implementation Prompt
 

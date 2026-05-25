@@ -44,7 +44,7 @@ Primary files:
 Current validated result:
 
 ```text
-45 passed
+51 passed
 ```
 
 ### Recommended (not implemented here)
@@ -163,7 +163,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-45 passed
+51 passed
 ```
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
@@ -210,7 +210,7 @@ Select-String -Path docs\WORKING_CHECKLIST.md -Pattern "Demo Scenario Pack"
 Expected output includes:
 
 ```text
-Demo Scenario Pack & API Contract Freeze v0.1 is the next recommended backend slice:
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented:
 ```
 
 ## 📚 Interview Prep
@@ -222,19 +222,19 @@ Demo Scenario Pack & API Contract Freeze v0.1 is the next recommended backend sl
 **A**: It proves ThreatPrism blocks unsafe provider output instead of saving it: policy violations, unknown evidence references, and real-action claims fail closed.
 
 **Q: What is the most important current test gap?**  
-**A**: The eval harness now exists. The main gap is repeatable developer operations: validation scripts, lightweight CI, artifact hygiene, and demo runbook hardening before live integrations.
+**A**: The scenario-pack and contract tests now cover local role workflows. The next gap is packaging/runtime smoke coverage outside the in-memory test app, such as Docker/local demo startup, before dashboard or live-integration work.
 
 **Q: How would you extend the tests for live providers later?**  
 **A**: Keep deterministic provider tests as the baseline, then add contract tests around provider interfaces with fake responses, timeouts, schema failures, and not-configured paths before live credentials are used.
 
 ## 🎯 Key Takeaways
 
-- The current suite covers API flow, SOAR adapters, guardrails, healthcare safeguards, enrichment stubs, access control, and operational read models.
+- The current suite covers API flow, SOAR adapters, guardrails, healthcare safeguards, enrichment stubs, access control, operational read models, evals, demo scenarios, and API contract checks.
 - The defense labs prove unsafe output is blocked.
 - Healthcare tests prove raw sensitive values do not leak.
 - Tests are local and require no live providers.
 - Demo Operations & CI Hardening v0.1 is implemented.
-- Demo Scenario Pack & API Contract Freeze v0.1 is the next active implementation slice.
+- Demo Scenario Pack & API Contract Freeze v0.1 is implemented.
 
 ## 📋 Summary Reference Card
 

@@ -4,16 +4,32 @@
 
 For ThreatPrism V2 work, read these first:
 
-1. `threatprism_v2_codex_handoff_brief.md`
-2. `docs/THREATPRISM_V2_CODEX_HANDOFF.md`
-3. `docs/ARCHITECTURAL_NORTH_STAR.md`
-4. `docs/specs/`
-5. `DECISIONS.md`
-6. `LIMITATIONS.md`
+1. `START_HERE.md`
+2. `threatprism_v2_codex_handoff_brief.md`
+3. `docs/THREATPRISM_V2_CODEX_HANDOFF.md`
+4. `docs/WORKING_CHECKLIST.md`
+5. `docs/ARCHITECTURAL_NORTH_STAR.md`
+6. `docs/specs/`
+7. `DECISIONS.md`
+8. `LIMITATIONS.md`
 
 The handoff brief overrides assumptions from the old V1 README when they conflict.
 The architectural North Star is the directional guide for new slices,
 workarounds, and major enhancements.
+
+## Context Window Optimization
+
+Do not paste this file or the handoff docs into new chats. Point the next agent
+to `START_HERE.md` and the source-of-truth files instead.
+
+When context is approaching 75% used or less than roughly 25% remains, output a
+compact handoff prompt before continuing. If the user asks for one, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\generate-compact-handoff.ps1
+```
+
+Then update durable project files rather than relying on chat history.
 
 ## Product Identity
 
@@ -52,10 +68,13 @@ Current baseline:
 - Operational read-model response types exist under
   `src/threatprism/cases/read_models.py`.
 - Local dry-run eval harness code exists under `src/threatprism/evals/`.
+- Demo scenario-pack helpers exist under `src/threatprism/demo/`.
 - Fake eval fixtures exist under `tests/evals/`.
 - Safe validation tooling exists under `tools/`.
+- Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
+- Fake role-specific demo scenarios exist under `examples/demo_scenarios/`.
 - API and guardrail tests exist under `tests/`.
 - The preferred local validation command is:
 
@@ -191,6 +210,10 @@ until identity and authorization enforce the effective role.
 - Do not add real remediation or containment in V2.
 - Keep `ALLOW_REAL_ACTIONS=false` by default.
 - Use fake demo data only.
+- For dataset realism work, read `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md`
+  and `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` first. Do not
+  auto-download datasets, commit raw external datasets, or use public dataset
+  schemas directly in runtime flows.
 - Missing external API keys should return structured `not_configured` results.
 - Prefer provider-agnostic interfaces for SOAR, LLMs, and enrichment.
 - Keep Microsoft integrations first-class but not hardwired into the core model.

@@ -30,6 +30,10 @@ The latest operations slice adds a safe validation wrapper, a fake-data-only CI
 workflow, a demo safety scanner, eval artifact hygiene checks, and runbook
 updates for repeatable local and CI validation.
 
+The latest demo slice adds a repeatable fake scenario pack for analyst,
+manager/GRC, legal/privacy, audit/debug, and engineer workflows, plus OpenAPI
+contract tests for the current backend routes.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -50,6 +54,7 @@ src/threatprism/
   auth/           Demo authentication and role-view authorization
   cases/          Case, triage report, feedback, read models, and service orchestration
   evals/          Local dry-run regression evaluation harness
+  demo/           Typed fake scenario-pack loading
   guardrails/     Prompt firewall, tokenization, policy, and evidence checks
   llm/            Provider interface and deterministic demo provider
   persistence/    SQLite demo repository
@@ -57,7 +62,7 @@ src/threatprism/
   soar/           SOAR payload normalization
   enrichment/     Demo enrichment stubs
 docs/specs/       Product, architecture, API, data, security, and demo specs
-examples/         Fake demo SOAR payloads
+examples/         Fake demo SOAR payloads and scenario packs
 tests/            API, guardrail, read-model, eval, and safety tests
 tools/            Safe local validation and demo safety checks
 .github/          Fake-data-only CI workflow
@@ -76,6 +81,25 @@ python -m pip install -r requirements.txt
 
 If you do not use a virtual environment, run the same install command from the
 project root.
+
+## Start A New AI Chat
+
+Do not paste long handoff docs into a new chat. Use the compact startup file:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+Get-Content .\START_HERE.md
+```
+
+Generate a fresh compact handoff prompt:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+powershell -ExecutionPolicy Bypass -File .\tools\generate-compact-handoff.ps1
+```
+
+Claude Code users can run `/compact-handoff`. Codex users can ask for
+`compact handoff` to trigger the global handoff skill.
 
 ## Validate
 
@@ -96,7 +120,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-45 passed
+63 passed
 ```
 
 The underlying pytest command remains:
@@ -115,6 +139,20 @@ python tools\check_demo_safety.py --include-untracked
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
 `--basetemp` value.
+
+Run only the demo scenario and API contract checks:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest tests\test_demo_scenarios_and_api_contract.py -p no:cacheprovider --basetemp .pytest_tmp_run_demo_contract_focus
+```
+
+Expected focused result:
+
+```text
+4 passed
+```
 
 ## Run The API
 
@@ -226,3 +264,14 @@ Evaluation Harness & Regression Defense Labs v0.1 is implemented. See
 Demo Operations & CI Hardening v0.1 is implemented. See
 `docs/DEMO_OPERATIONS_AND_CI_HARDENING.md` and
 `docs/specs/18_DEMO_OPERATIONS_AND_CI_HARDENING.md`.
+
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented. See
+`docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md`,
+`docs/specs/19_DEMO_SCENARIO_PACK_AND_API_CONTRACT.md`, and
+`examples/demo_scenarios/demo_scenario_pack.json`.
+
+Data Strategy & Synthetic Fixture Factory v0.1 is planned, not implemented.
+See `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
+`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`. Public or synthetic
+datasets must be manually reviewed, kept out of git as raw data, and converted
+into sanitized ThreatPrism-native fixtures before use.

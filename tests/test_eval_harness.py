@@ -21,6 +21,9 @@ def _eval_settings() -> Settings:
     return Settings(
         env="eval",
         database_url="sqlite:///:memory:",
+        api_auth_mode="none",
+        auth_required=False,
+        local_dev_ack=True,
         llm_provider="deterministic_demo",
         allow_real_actions=False,
     )

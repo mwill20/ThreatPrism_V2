@@ -166,7 +166,7 @@ Expected output includes:
 
 ```text
 ThreatPrism demo safety check passed.
-45 passed
+51 passed
 "failed": 0
 ThreatPrism safe validation completed.
 ```
@@ -258,7 +258,7 @@ does not add production auth, deployment hardening, or live-provider review.
 | CI workflow | `.github/workflows/safe-validation.yml` |
 | Test file | `tests/test_ops_safety.py` |
 | Eval output | `.eval_runs/` |
-| Current validation | `45 passed` |
+| Current validation | `51 passed` |
 | Out of scope | Live providers, dashboard UI, production IdP, real remediation |
 
 ## 🚀 Ready For The Next Slice?

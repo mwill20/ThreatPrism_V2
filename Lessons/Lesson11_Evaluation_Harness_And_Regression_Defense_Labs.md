@@ -218,7 +218,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson11_full
 Expected output:
 
 ```text
-45 passed
+51 passed
 ```
 
 ### 🔬 Exercise 3: Run The CLI Harness
@@ -286,7 +286,7 @@ Expected output:
 | Output directory | `.eval_runs/` |
 | CLI | `python -m threatprism.evals.cli --fixtures regression_cases.jsonl` |
 | Test file | `tests/test_eval_harness.py` |
-| Validation | `45 passed` |
+| Validation | `51 passed` |
 
 ## 🚀 Ready For The Next Slice?
 

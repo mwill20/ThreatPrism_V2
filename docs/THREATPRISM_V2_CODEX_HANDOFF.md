@@ -4,6 +4,9 @@
 
 This handoff is the current source of truth for continuing ThreatPrism V2 work in this workspace.
 
+For context-light startup, read `START_HERE.md` first and do not paste this
+file into a new chat.
+
 Canonical local path:
 
 ```text
@@ -50,27 +53,47 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
 - `src/threatprism/evals/` with the local dry-run regression eval harness.
+- `src/threatprism/demo/` with typed fake scenario-pack loading.
 - `tools/` with fake-data-only safety checks and local validation wrapper.
+- `tools/generate-compact-handoff.ps1` with compact fresh-chat prompt
+  generation.
 - `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
 - `examples/soar_payloads/` with fake demo payloads only.
+- `examples/demo_scenarios/` with the fake role-specific demo scenario pack.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
 - `tests/test_operational_read_models.py` covering metrics, dedicated review
   queues, filtered read models, detail routes, authorization, and leakage
   prevention.
+- `tests/test_demo_scenarios_and_api_contract.py` covering scenario-pack smoke
+  workflows and OpenAPI route/response-model contract checks.
 - `tests/test_ops_safety.py` covering the demo safety checker.
+- `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
+  `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the planned
+  future data-realism and synthetic fixture factory slice.
 
 Validated on 2026-05-24 with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
 ```
 
 Result:
 
 ```text
-45 passed
+63 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+CI follow-up on 2026-05-24: GitHub Actions run `26350740346` failed on Ubuntu
+at `tests/test_eval_harness.py::test_path_traversal_is_rejected_for_fixtures_and_outputs`.
+Root cause was Windows-style backslash traversal being treated as a literal
+filename on POSIX before approved-directory validation. The eval runner now
+normalizes backslash candidates before resolution. Revalidated locally with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_ci_fix_validation
 ```
 
 If rerunning the exact command fails with a Windows `WinError 5` while cleaning
@@ -119,6 +142,8 @@ Read in this order:
 12. `DECISIONS.md`
 13. `LIMITATIONS.md`
 14. `AGENTS.md`
+15. `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` when the task involves
+    datasets, synthetic fixtures, or data realism.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -313,16 +338,38 @@ Safe validation wrapper
   -> Fake-data-only GitHub Actions workflow
 ```
 
-## Next Implementation Slice
-
-The next recommended slice is:
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented:
 
 ```text
-Demo Scenario Pack & API Contract Freeze v0.1
-  -> Repeatable fake demo scenarios for role-specific workflows
-  -> OpenAPI/API response contract confirmation
-  -> Smoke-testable demo instructions using fake payloads only
-  -> No dashboard UI or live integrations unless explicitly requested
+Typed scenario pack
+  -> Fake analyst, manager/GRC, legal/privacy, audit/debug, and engineer
+     workflows
+  -> Fake healthcare safeguard review payload
+  -> OpenAPI route and response-model contract assertions
+  -> Scenario smoke tests against local in-memory FastAPI
+  -> No dashboard UI, live integrations, production IdP, or remediation
+```
+
+## Next Implementation Slice
+
+No new implementation slice is selected yet. The next backend-safe option is:
+
+```text
+Docker Compose & Local Demo Packaging v0.1
+  -> Package the existing fake-data backend for repeatable local startup
+  -> Preserve safe validation and deterministic demo defaults
+  -> Avoid dashboard UI, live providers, production IdP, and remediation unless
+     explicitly requested
+```
+
+The dataset issue is captured as a future planned slice:
+
+```text
+Data Strategy & Synthetic Fixture Factory v0.1
+  -> Use public or synthetic datasets only as reviewed source material
+  -> Keep raw external datasets ignored and out of runtime flows
+  -> Convert small samples into sanitized ThreatPrism-native fixtures
+  -> Require manual license and safety review before any dataset use
 ```
 
 Do not implement:
@@ -471,6 +518,8 @@ docs/specs/14_DEMO_PLAN.md
 docs/specs/15_HEALTHCARE_SAFEGUARD_GUARDRAILS.md
 docs/specs/16_OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md
+docs/specs/19_DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
+docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -479,11 +528,14 @@ Root docs:
 
 ```text
 AGENTS.md
+START_HERE.md
 DECISIONS.md
 LIMITATIONS.md
 README.md
 docs/OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md
+docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
+docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 threatprism_v2_codex_handoff_brief.md
 threatprism_v2_codex_spec_prompt.md
 ```
@@ -501,16 +553,24 @@ src/threatprism/cases/read_models.py
 src/threatprism/evals/schemas.py
 src/threatprism/evals/runner.py
 src/threatprism/evals/cli.py
+src/threatprism/demo/scenarios.py
 tests/test_operational_read_models.py
 tests/test_eval_harness.py
+tests/test_demo_scenarios_and_api_contract.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
+examples/demo_scenarios/demo_scenario_pack.json
+examples/demo_scenarios/healthcare_safeguard_review_case.json
 tools/check_demo_safety.py
 tools/validate-threatprism.ps1
+tools/generate-compact-handoff.ps1
+tools/generate_compact_handoff.py
+.claude/commands/compact-handoff.md
 .github/workflows/safe-validation.yml
 Lessons/Lesson10_Operational_Read_Models_And_Metrics.md
 Lessons/Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md
 Lessons/Lesson12_Demo_Operations_And_CI_Hardening.md
+Lessons/Lesson13_Demo_Scenarios_And_API_Contract.md
 ```
 
 ## Next Session Recommended Prompt
@@ -519,19 +579,21 @@ Use this:
 
 ```text
 Read docs/THREATPRISM_V2_CODEX_HANDOFF.md first and treat it as the current source of truth.
+If available, read START_HERE.md before the longer handoff docs.
 Then read docs/ARCHITECTURAL_NORTH_STAR.md as the directional architecture guide.
 
 Verify the live repo state before making changes. The original docs-only
 handoff baseline is stale, and the previous final response leaked
 drafting/debug text; trust the files and validation results over that message.
 
-Continue with Demo Scenario Pack & API Contract Freeze v0.1 using a clean V2
-architecture with selective V1 concept porting.
+Continue with the next explicitly requested slice using a clean V2 architecture
+with selective V1 concept porting.
 
 Do not full-copy V1. Do not implement real remediation. Keep ALLOW_REAL_ACTIONS=false.
 
 Start by inspecting `docs/specs/`, `src/threatprism/`, `tests/`,
-`examples/soar_payloads/`, `pyproject.toml`, `requirements.txt`, and
+`examples/soar_payloads/`, `examples/demo_scenarios/`, `pyproject.toml`,
+`requirements.txt`, and
 `.env.example`. Run:
 
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
@@ -539,7 +601,13 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
 analyst-controlled, no-real-remediation boundary. Do not build a frontend
 dashboard, add live integrations, or add production IdP integration unless the
-user explicitly changes scope.
+user explicitly changes scope. The scenario pack and API contract tests are now
+the quickest route/role smoke signal after the full validation wrapper.
+
+If the next request is about datasets or more realistic fixtures, read
+`docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
+`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` before implementation.
+Do not auto-download datasets or commit raw third-party data.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a
 fresh ignored base temp such as `.pytest_tmp_run_ops_ci`.

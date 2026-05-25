@@ -6,6 +6,7 @@ with real case data, live provider credentials, or production-impacting actions.
 ## Preconditions
 
 - Work from `C:\Projects\ThreatPrismV2`.
+- Start new AI chats from `START_HERE.md` instead of pasting long handoff docs.
 - Use fake payloads from `examples/soar_payloads/`.
 - Keep `ALLOW_REAL_ACTIONS=false`.
 - Do not run live LLM, SOAR, cloud, or enrichment calls unless explicitly
@@ -17,6 +18,18 @@ with real case data, live provider credentials, or production-impacting actions.
 Set-Location C:\Projects\ThreatPrismV2
 python -m pip install -r requirements.txt
 ```
+
+## Generate A Compact Handoff Prompt
+
+Use this before starting a fresh chat or when context is approaching 75% used:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+powershell -ExecutionPolicy Bypass -File .\tools\generate-compact-handoff.ps1
+```
+
+Claude Code users can run `/compact-handoff`. Codex users can ask for
+`compact handoff`.
 
 ## Run Safe Validation
 
@@ -35,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-45 passed
+63 passed
 ```
 
 ## Run Tests Directly
@@ -49,11 +62,37 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-45 passed
+63 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
 `--basetemp` directory.
+
+## Run Demo Scenario And Contract Checks
+
+Use this focused check when changing routes, response models, demo payloads, or
+role-view behavior:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest tests\test_demo_scenarios_and_api_contract.py -p no:cacheprovider --basetemp .pytest_tmp_run_demo_contract_focus
+```
+
+Expected focused result:
+
+```text
+4 passed
+```
+
+The scenario definitions live at:
+
+```text
+examples/demo_scenarios/demo_scenario_pack.json
+```
+
+They cover analyst, manager/GRC, legal/privacy, audit/debug, and engineer
+workflows using fake payloads and fake demo credentials only.
 
 ## Start The API
 

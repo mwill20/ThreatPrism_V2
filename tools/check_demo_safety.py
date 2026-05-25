@@ -92,6 +92,7 @@ def run_checks(
     findings.extend(_check_runtime_environment())
     findings.extend(_check_runtime_guard(root))
     findings.extend(_check_env_example(root))
+    findings.extend(_check_dependency_pins(root))
     findings.extend(_check_gitignore(root))
     findings.extend(_check_generated_artifacts_not_tracked(tracked_files))
     findings.extend(_check_secret_patterns(root, scan_files))
@@ -160,6 +161,37 @@ def _check_runtime_guard(root: Path) -> list[SafetyFinding]:
                 f"Production environment did not reject API_AUTH_MODE={auth_mode}.",
             )
         )
+    try:
+        Settings(env="test", api_auth_mode="demo_key", demo_api_keys="", allow_real_actions=False).validate_runtime()
+    except ValueError:
+        pass
+    else:
+        findings.append(
+            SafetyFinding(
+                "runtime-guard",
+                "src/threatprism/config.py",
+                "API_AUTH_MODE=demo_key did not fail closed when DEMO_API_KEYS was empty.",
+            )
+        )
+
+    try:
+        Settings(
+            env="test",
+            api_auth_mode="none",
+            auth_required=True,
+            local_dev_ack=False,
+            allow_real_actions=False,
+        ).validate_runtime()
+    except ValueError:
+        pass
+    else:
+        findings.append(
+            SafetyFinding(
+                "runtime-guard",
+                "src/threatprism/config.py",
+                "API_AUTH_MODE=none did not require an explicit local development acknowledgement.",
+            )
+        )
     return findings
 
 
@@ -178,6 +210,20 @@ def _check_env_example(root: Path) -> list[SafetyFinding]:
         findings.append(
             SafetyFinding("env-template", ".env.example", "LLM_PROVIDER must default to deterministic_demo.")
         )
+    if env_values.get("THREATPRISM_AUTH_REQUIRED", "").strip().lower() != "true":
+        findings.append(
+            SafetyFinding("env-template", ".env.example", "THREATPRISM_AUTH_REQUIRED must default to true.")
+        )
+    auth_mode = env_values.get("API_AUTH_MODE", "").strip().lower()
+    local_dev_ack = env_values.get("THREATPRISM_LOCAL_DEV_ACK", "").strip().lower()
+    if auth_mode == "none" and local_dev_ack != "true":
+        findings.append(
+            SafetyFinding(
+                "env-template",
+                ".env.example",
+                "API_AUTH_MODE=none requires THREATPRISM_LOCAL_DEV_ACK=true in the template.",
+            )
+        )
     for env_var in sorted(LIVE_CREDENTIAL_ENV_VARS):
         if env_values.get(env_var, "").strip():
             findings.append(
@@ -188,6 +234,32 @@ def _check_env_example(root: Path) -> list[SafetyFinding]:
         findings.append(
             SafetyFinding("env-template", ".env.example", "DEMO_API_KEYS must contain fake demo credentials only.")
         )
+    return findings
+
+
+def _check_dependency_pins(root: Path) -> list[SafetyFinding]:
+    requirements = root / "requirements.txt"
+    lock = root / "requirements-lock.txt"
+    findings: list[SafetyFinding] = []
+    if not requirements.exists():
+        findings.append(SafetyFinding("dependency-pins", "requirements.txt", "requirements.txt is missing."))
+        return findings
+    if not lock.exists():
+        findings.append(
+            SafetyFinding("dependency-pins", "requirements-lock.txt", "requirements-lock.txt is missing.")
+        )
+    for line_number, line in enumerate(requirements.read_text(encoding="utf-8").splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if "==" not in stripped:
+            findings.append(
+                SafetyFinding(
+                    "dependency-pins",
+                    "requirements.txt",
+                    f"Line {line_number} must use exact-version pinning with ==.",
+                )
+            )
     return findings
 
 

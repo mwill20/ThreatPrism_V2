@@ -419,3 +419,63 @@ be tracked.
 This slice does not make ThreatPrism production-ready. It makes unsafe local
 and CI operation harder before dashboards, live integrations, production IdP,
 or production persistence are introduced.
+
+## D-032 Demo Scenario Pack And API Contract Freeze
+
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented as a fake-data-only
+backend demonstration and regression layer.
+
+The scenario pack lives under `examples/demo_scenarios/` and covers analyst,
+manager/GRC, legal/privacy, audit/debug, and engineer workflows through local
+FastAPI routes only.
+
+The current API contract is frozen by tests that assert the implemented routes
+and key OpenAPI response model references remain present. Later slices may add
+routes, but removing or renaming the frozen routes is a contract change that
+must update docs, tests, and decision records.
+
+This slice does not add dashboard UI, live provider calls, production IdP
+integration, real SOAR callbacks, or remediation.
+
+## D-033 Context-Light Handoff
+
+ThreatPrism uses a file-based startup path to reduce new-chat context usage.
+
+`START_HERE.md` is the compact entry point for future AI sessions. Long handoff
+docs should be referenced by path, not pasted into chat.
+
+When context is approaching 75% used, or less than roughly 25% remains, the
+agent should output a compact handoff prompt and update durable handoff files
+before continuing.
+
+The local command for generating the compact prompt is:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\generate-compact-handoff.ps1
+```
+
+## D-034 Dataset Strategy
+
+ThreatPrism uses a layered data strategy.
+
+Hand-written fake fixtures remain the baseline for deterministic unit and
+regression tests.
+
+Public or synthetic datasets may be used only as source material after manual
+license and safety review. They must be converted into sanitized
+ThreatPrism-native synthetic fixtures before being used in tests, demos, or
+evals.
+
+Raw external datasets must not be committed. Full datasets must not be
+auto-downloaded by default. Runtime flows must not depend directly on public
+dataset schemas.
+
+The first planned data-realism implementation slice is:
+
+```text
+Data Strategy & Synthetic Fixture Factory v0.1
+```
+
+Candidate source families include Synthea, OTRF/Security Datasets, Lakera PINT,
+and Giskard prompt-injection samples, but each source remains review-required
+until the user approves license, safety, and commitability for selected samples.

@@ -175,7 +175,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-45 passed
+51 passed
 ```
 
 ### 🔬 Exercise 2: Inspect Configuration Defaults
@@ -242,7 +242,7 @@ Expected output:
 | Main backend entry | `src/threatprism/api/app.py` |
 | CLI runner | `src/threatprism/cli/main.py` |
 | Config defaults | `src/threatprism/config.py` |
-| Current validation | `45 passed` |
+| Current validation | `51 passed` |
 | Hard safety default | `ALLOW_REAL_ACTIONS=false` |
 
 ## 🚀 Ready For Lesson 01?

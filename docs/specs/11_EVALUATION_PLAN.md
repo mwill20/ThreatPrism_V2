@@ -11,11 +11,13 @@ Validation:
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_eval_harness_final4
 ```
 
-Result:
+Original slice validation result:
 
 ```text
 41 passed
 ```
+
+Current full-project validation is tracked in `docs/WORKING_CHECKLIST.md`.
 
 Implementation files:
 

@@ -17,6 +17,7 @@ Trust files and validation results over older chat summaries.
 - [x] The previous final response leaked drafting/debug text; trust files and validation results instead.
 - [x] `docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide
   for new slices, workarounds, and major enhancements.
+- [x] `START_HERE.md` is the context-light entry point for new chats.
 - [x] `Lessons/00_Index.md` is the learning curriculum entry point for the
   implemented backend, guardrail, persistence, and testing slices.
 - [x] Every implementation slice must close with docs, README, checklist,
@@ -202,20 +203,123 @@ Demo Operations & CI Hardening v0.1 is complete:
 - [x] Update docs, README, lessons, checklist, handoff, limitations, and
   validation notes when complete.
 
+## Completed Slice
+
+Demo Scenario Pack & API Contract Freeze v0.1 is complete:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep fake/demo data only.
+- [x] Add repeatable fake demo scenarios for analyst, manager/GRC,
+  legal/privacy, audit/debug, and engineering views.
+- [x] Confirm OpenAPI/API response contracts for current backend routes.
+- [x] Add smoke-testable demo instructions using fake payloads only.
+- [x] Keep dashboard UI, live providers, production IdP, and remediation out of
+  scope unless explicitly requested.
+- [x] Update docs, README, lessons, checklist, handoff, limitations, and
+  validation notes when complete.
+
+Implemented with typed scenario-pack loading under `src/threatprism/demo/`,
+scenario artifacts under `examples/demo_scenarios/`, and OpenAPI/smoke tests in
+`tests/test_demo_scenarios_and_api_contract.py`.
+
+## Completed Slice
+
+Threat Model Pack v0.1 is complete:
+
+- [x] Add `docs/threat-models/README.md` as the index for the threat model
+  pack.
+- [x] Document current system assets, users, trust boundaries, data flows,
+  integrations, assumptions, and security objectives.
+- [x] Add STRIDE coverage for spoofing, tampering, repudiation, information
+  disclosure, denial of service, and elevation of privilege.
+- [x] Add LLM/agent threat coverage for prompt injection, tool abuse, RAG
+  poisoning, unsafe memory writes, over-permissive retrieval, hallucinated
+  evidence, untrusted webhook input, and cross-tenant leakage.
+- [x] Add healthcare data threat coverage for PHI/PII exposure, minimum
+  necessary access, role-view bypass, audit logging, sensitive evidence
+  persistence, and compliance-language overclaiming.
+- [x] Add mitigation traceability from threat to guardrail to current or
+  proposed test file.
+- [x] Keep this slice documentation-only with no runtime security logic changes.
+- [x] Use this pack before memory, RAG, write-back, multi-tenancy, dashboard UI,
+  live provider, or production identity work.
+- [x] Validate after the documentation slice with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_run_threat_model_pack`.
+
+Original documentation-slice validation result:
+
+```text
+48 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+## Active Draft / Follow-Up
+
+Threat Model Pack v0.2 and Treatment Register follow-up:
+
+- [x] Add v0.2 threat-model refresh with severity, residual risk, open threat,
+  and traceability tables.
+- [x] Add draft treatment register in
+  `docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md`.
+- [x] Record POC owner decision pass in the treatment register.
+- [x] Implement Slice G quarantine enforcement so prompt-firewall quarantine
+  records block provider execution before triage generation.
+- [x] Add `tests/test_quarantine_enforcement.py` for provider-call blocking and
+  prompt-firewall blocker messaging.
+- [x] Implement Slice D test gap closure:
+  `tests/test_token_vault_isolation.py` and
+  `tests/test_stage1_no_rehydration.py`.
+- [x] Implement Slice A auth hardening:
+  fail-closed demo keys, explicit local-dev ack for disabled auth, and startup
+  warnings.
+- [x] Implement Slice B HTTP DoS protection:
+  request body cap, in-process rate limit, and triage concurrency cap.
+- [x] Implement Slice F pattern refresh process:
+  quarterly runbook, overclaim fixture catalog, healthcare detector fixtures,
+  and `potential_sensitive_data_exposure` operator semantics.
+- [x] Implement Slice E dependency hardening:
+  exact direct pins, transitive lock file, safety-check pin validation, and
+  advisory dependency-audit hook.
+- [ ] Gated mitigations for real LLM, RAG, memory/write-back, tools,
+  multi-tenancy, fine-tuning, non-demo data, and real PHI remain out of scope
+  until explicitly requested.
+- [x] First pattern refresh review is scheduled for 2026-08-24.
+
+Validation after owner pass and Slices A, B, D, E, F, and G:
+
+```text
+63 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
 ## Next Active Slice
 
-Demo Scenario Pack & API Contract Freeze v0.1 is the next recommended backend
-slice:
+No new implementation slice is selected yet. Recommended next backend-safe
+option after final validation:
 
-- [ ] Keep fake/demo data only.
-- [ ] Add repeatable fake demo scenarios for analyst, manager/GRC,
-  legal/privacy, audit/debug, and engineering views.
-- [ ] Confirm OpenAPI/API response contracts for current backend routes.
-- [ ] Add smoke-testable demo instructions using fake payloads only.
-- [ ] Keep dashboard UI, live providers, production IdP, and remediation out of
-  scope unless explicitly requested.
-- [ ] Update docs, README, lessons, checklist, handoff, limitations, and
-  validation notes when complete.
+- [ ] Docker Compose & Local Demo Packaging v0.1, if the user wants packaging
+  before dashboard UI or live-integration preparation.
+
+Future planned data-realism slice:
+
+- [ ] Data Strategy & Synthetic Fixture Factory v0.1.
+- [x] Capture the dataset strategy in
+  `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
+- [x] Capture the implementation-ready spec in
+  `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
+- [ ] When implemented, keep raw external datasets ignored and convert only
+  manually reviewed source samples into sanitized ThreatPrism-native fixtures.
+- [ ] Do not auto-download datasets, run Caldera, add live LLM evaluation, or
+  commit raw third-party data without an explicit future prompt.
+
+## Context Handoff
+
+- [x] Avoid pasting long project instructions into new chats.
+- [x] Use `START_HERE.md` as the compact startup path.
+- [x] Use `tools/generate-compact-handoff.ps1` to print the fresh-chat prompt.
+- [x] Treat roughly 75% context used, or less than roughly 25% remaining, as the
+  handoff-warning threshold.
 
 ## Validation
 
@@ -228,8 +332,15 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-45 passed
+63 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
+
+CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
+fixture path traversal guard did not normalize Windows-style backslash paths
+before checking the approved fixture/output directories. The local fix
+normalizes those candidates before resolution; full safe validation passes with
+`-BaseTemp .pytest_tmp_ci_fix_validation`.
 
 If a reused pytest temp directory fails with Windows `WinError 5`, rerun with a
 fresh ignored base temp directory.

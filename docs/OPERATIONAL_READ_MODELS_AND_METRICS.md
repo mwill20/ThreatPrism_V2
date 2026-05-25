@@ -134,4 +134,5 @@ Result:
 Evaluation Harness & Regression Defense Labs v0.1 and Demo Operations & CI
 Hardening v0.1 are now implemented.
 
-The next recommended slice is Demo Scenario Pack & API Contract Freeze v0.1.
+Demo Scenario Pack & API Contract Freeze v0.1 is also implemented, including
+role-specific scenario smoke tests for these read-model routes.

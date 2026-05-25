@@ -38,6 +38,9 @@ V2.
 - Build a clean V2 architecture with selective V1 concept porting.
 - Do not full-copy V1.
 - Demo data must stay fake.
+- Public or synthetic datasets may be used only as reviewed source material
+  for sanitized ThreatPrism-native fixtures. Raw external datasets must not be
+  committed or used as runtime data models.
 - Do not include real organizations, workplaces, tenants, users, hosts,
   domains, IPs, secrets, or operational details in docs, code, examples, tests,
   or commit messages.
@@ -106,6 +109,19 @@ No raw potential PHI/ePHI, secrets, full credentials, raw payload bodies, or
 token vault mappings should enter model-visible payloads, management/GRC views,
 audit/debug views, authorization audit events, logs, or deterministic reports.
 
+Public or synthetic datasets must flow through a separate fixture-factory path:
+
+```text
+Reviewed source sample
+  -> Ignored external_datasets/ local storage
+  -> Dataset adapter
+  -> Sanitizer and validator
+  -> ThreatPrism-native synthetic fixture
+  -> Generated fixture review before any tracked test promotion
+```
+
+Do not couple runtime case processing directly to public dataset schemas.
+
 ## Role And Access Direction
 
 Role-based rendering is useful but is not an access-control boundary by itself.
@@ -165,9 +181,12 @@ Current direction:
 4. Completed: Operational Read Models & Metrics API v0.1.
 5. Completed: Evaluation Harness & Regression Defense Labs v0.1.
 6. Completed: Demo Operations & CI Hardening v0.1.
-7. Next: Demo Scenario Pack & API Contract Freeze v0.1.
-8. Later: dashboard work and live-integration
-   preparation.
+7. Completed: Demo Scenario Pack & API Contract Freeze v0.1.
+8. Next: Docker/local demo packaging or explicit dashboard/live-integration
+   preparation after user approval.
+9. Planned future data realism path: Data Strategy & Synthetic Fixture Factory
+   v0.1 before broad live-provider evaluation, larger external datasets, or
+   lab-generated telemetry.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live
 enrichment calls, production IdP integration, real remediation, or non-demo

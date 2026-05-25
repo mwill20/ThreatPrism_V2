@@ -6,17 +6,12 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from threatprism.api.app import create_app
-from threatprism.config import Settings
+from support_settings import local_auth_disabled_settings
 
 
 def _client(tmp_path: Path) -> TestClient:
     app = create_app(
-        Settings(
-            env="test",
-            database_url="sqlite:///:memory:",
-            llm_provider="deterministic_demo",
-            allow_real_actions=False,
-        )
+        local_auth_disabled_settings()
     )
     return TestClient(app)
 

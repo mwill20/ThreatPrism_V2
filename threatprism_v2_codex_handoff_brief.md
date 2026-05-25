@@ -9,6 +9,9 @@ final response if it conflicts with the repository; that response leaked
 drafting/debug text. Use the live files and validation results as the source of
 truth.
 
+For context-light startup, read `START_HERE.md` first and reference this file by
+path instead of pasting it into new chats.
+
 Implementation has begun after the original planning baseline. The current live
 repo includes an initial backend slice under `src/threatprism/`, fake demo SOAR
 payloads under `examples/soar_payloads/`, and tests under `tests/`.
@@ -37,17 +40,17 @@ Result:
 22 passed
 ```
 
-Latest validation after Demo Operations & CI Hardening v0.1 on
+Latest validation after Demo Scenario Pack & API Contract Freeze v0.1 on
 2026-05-24:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
 ```
 
 Result:
 
 ```text
-45 passed
+63 passed
 ```
 
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
@@ -304,6 +307,19 @@ Potential data sources:
 - DNS logs
 - Firewall logs
 - Existing V1 data sources where useful
+
+For public and synthetic datasets, use the planned data strategy captured in:
+
+```text
+docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
+docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
+```
+
+Public or synthetic datasets are source material only. They must go through
+manual license and safety review, ignored local raw storage, adapter conversion,
+sanitization, and ThreatPrism-native fixture validation before use. Do not
+commit raw external datasets or couple runtime flows directly to public dataset
+schemas.
 
 ---
 
@@ -926,8 +942,19 @@ Operational Read Models & Metrics API v0.1
 
 Evaluation Harness & Regression Defense Labs v0.1 is implemented.
 
-The immediate next recommended slice is Demo Scenario Pack & API Contract
-Freeze v0.1.
+Demo Operations & CI Hardening v0.1 is implemented.
+
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented.
+
+Data Strategy & Synthetic Fixture Factory v0.1 is planned for future data
+realism work. It should keep fake hand-written fixtures, add sanitized
+ThreatPrism-native synthetic fixtures, use Synthea, OTRF/Security Datasets,
+PINT, and Giskard samples only after manual review, and avoid automatic
+downloads or raw dataset commits.
+
+No new implementation slice is selected yet. A backend-safe next option is
+Docker Compose & Local Demo Packaging v0.1, if packaging is desired before
+dashboard UI or live-integration preparation.
 
 ---
 

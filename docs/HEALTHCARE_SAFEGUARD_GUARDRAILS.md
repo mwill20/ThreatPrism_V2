@@ -74,6 +74,20 @@ values.
 
 Secrets are never rehydrated.
 
+## Exposure Flag Semantics
+
+`potential_sensitive_data_exposure` is a review-routing flag, not a compliance
+finding and not a count of affected people or records.
+
+When the flag is true, ThreatPrism found at least one fake-demo payload value
+that matched a potential PHI/ePHI detector in healthcare context. Operators
+should treat the case as requiring healthcare/privacy review before sharing,
+exporting, or using the content in a broader demo.
+
+When the flag is false, ThreatPrism did not detect a configured pattern. It does
+not prove that the payload is free of PHI/ePHI, PII, secrets, or compliance
+risk.
+
 ## Compliance-Language Boundary
 
 ThreatPrism uses healthcare safeguard language, not compliance-certification

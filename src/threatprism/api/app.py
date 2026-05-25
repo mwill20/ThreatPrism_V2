@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import logging
+import threading
+import time
+from collections import deque
 from datetime import datetime
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from threatprism import __version__
 from threatprism.auth.demo import AuthorizationError, authorize_role_view
@@ -23,12 +28,76 @@ from threatprism.config import Settings
 from threatprism.guardrails.views import ViewRole
 
 
+logger = logging.getLogger(__name__)
+
+AUTH_ERROR_RESPONSES = {
+    401: {"description": "Missing or invalid demo credential"},
+    403: {"description": "Requested role is not authorized"},
+}
+CASE_ERROR_RESPONSES = {
+    **AUTH_ERROR_RESPONSES,
+    404: {"description": "Case not found"},
+}
+
+
+class InMemoryRateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int = 60) -> None:
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._hits: dict[str, deque[float]] = {}
+        self._lock = threading.Lock()
+
+    def allow(self, key: str, now: float | None = None) -> bool:
+        current = time.monotonic() if now is None else now
+        window_start = current - self.window_seconds
+        with self._lock:
+            hits = self._hits.setdefault(key, deque())
+            while hits and hits[0] <= window_start:
+                hits.popleft()
+            if len(hits) >= self.max_requests:
+                return False
+            hits.append(current)
+            return True
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     active_settings = settings or Settings.from_env()
     active_settings.validate_runtime()
     app = FastAPI(title="ThreatPrism API", version=__version__)
     app.state.settings = active_settings
     app.state.case_service = CaseService(active_settings)
+    app.state.case_rate_limiter = InMemoryRateLimiter(active_settings.case_post_rate_limit_per_minute)
+    app.state.triage_semaphore = threading.BoundedSemaphore(active_settings.triage_concurrency_limit)
+    logger.info("ThreatPrism API auth mode: %s", active_settings.api_auth_mode)
+    if active_settings.api_auth_mode == "none":
+        logger.warning("API authentication is disabled for explicit local-development use only.")
+
+    @app.middleware("http")
+    async def case_ingress_limits(request: Request, call_next):  # noqa: ANN001
+        if request.method.upper() == "POST" and request.url.path == "/cases":
+            content_length = request.headers.get("content-length")
+            if content_length:
+                try:
+                    request_size = int(content_length)
+                except ValueError:
+                    request_size = active_settings.max_request_body_bytes + 1
+                if request_size > active_settings.max_request_body_bytes:
+                    return JSONResponse(status_code=413, content={"detail": "Request body too large."})
+
+            client_key = request.client.host if request.client else "unknown"
+            if not app.state.case_rate_limiter.allow(client_key):
+                return JSONResponse(status_code=429, content={"detail": "POST /cases rate limit exceeded."})
+
+            if not content_length:
+                body = await request.body()
+                if len(body) > active_settings.max_request_body_bytes:
+                    return JSONResponse(status_code=413, content={"detail": "Request body too large."})
+
+                async def receive() -> dict[str, object]:
+                    return {"type": "http.request", "body": body, "more_body": False}
+
+                request = Request(request.scope, receive)
+        return await call_next(request)
 
     @app.get("/health")
     def health() -> dict[str, object]:
@@ -40,7 +109,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "allow_real_actions": active_settings.allow_real_actions,
         }
 
-    @app.post("/cases", response_model=CaseAcceptedResponse, status_code=202)
+    @app.post(
+        "/cases",
+        response_model=CaseAcceptedResponse,
+        status_code=202,
+        responses={400: {"description": "Invalid case payload"}},
+    )
     def create_case(
         payload: dict,
         background_tasks: BackgroundTasks,
@@ -51,19 +125,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             accepted = service.create_case(payload)
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        background_tasks.add_task(service.run_triage, accepted.case_id)
+        background_tasks.add_task(_run_triage_with_limit, service, accepted.case_id, request.app.state.triage_semaphore)
         return accepted
 
     @app.get("/cases", response_model=list[CaseSummary])
     def list_cases(request: Request) -> list[CaseSummary]:
         return _service(request).list_cases()
 
-    @app.get("/metrics", response_model=OperationalMetrics)
+    @app.get("/metrics", response_model=OperationalMetrics, responses=AUTH_ERROR_RESPONSES)
     def get_metrics(request: Request) -> OperationalMetrics:
         _authorized_global_view_role(request, "get_metrics", None)
         return _service(request).get_operational_metrics()
 
-    @app.get("/cases/read-model", response_model=CaseReadModelEnvelope)
+    @app.get("/cases/read-model", response_model=CaseReadModelEnvelope, responses=AUTH_ERROR_RESPONSES)
     def list_case_read_models(
         request: Request,
         source: Source | None = None,
@@ -99,7 +173,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             role=view_role,
         )
 
-    @app.get("/queues/manager-review", response_model=ReviewQueueEnvelope)
+    @app.get("/queues/manager-review", response_model=ReviewQueueEnvelope, responses=AUTH_ERROR_RESPONSES)
     def get_manager_review_queue(
         request: Request,
         source: Source | None = None,
@@ -133,7 +207,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return ReviewQueueEnvelope(queue="manager-review", **envelope.model_dump())
 
-    @app.get("/queues/healthcare-review", response_model=ReviewQueueEnvelope)
+    @app.get("/queues/healthcare-review", response_model=ReviewQueueEnvelope, responses=AUTH_ERROR_RESPONSES)
     def get_healthcare_review_queue(
         request: Request,
         source: Source | None = None,
@@ -167,7 +241,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return ReviewQueueEnvelope(queue="healthcare-review", **envelope.model_dump())
 
-    @app.get("/cases/{case_id}")
+    @app.get("/cases/{case_id}", responses=CASE_ERROR_RESPONSES)
     def get_case(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case", role)
         if view_role is not None:
@@ -180,7 +254,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return case.model_dump(mode="json")
 
-    @app.get("/cases/{case_id}/triage-report")
+    @app.get("/cases/{case_id}/triage-report", responses=CASE_ERROR_RESPONSES)
     def get_triage_report(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_triage_report", role)
         case = _service(request).get_case(case_id)
@@ -188,10 +262,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         report = _service(request).get_report(case_id)
         if report is None:
+            message = "Triage report is not ready."
+            if case.triage_status == TriageStatus.blocked_by_guardrail and any(
+                event.event_type == "triage_blocked_by_prompt_firewall" for event in case.audit_trail
+            ):
+                message = "Triage was blocked by the prompt firewall."
             return {
                 "case_id": case_id,
                 "status": case.triage_status,
-                "message": "Triage report is not ready.",
+                "message": message,
             }
         if view_role is not None:
             view = _service(request).get_report_view(case_id, view_role)
@@ -200,7 +279,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return view
         return report.model_dump(mode="json")
 
-    @app.get("/cases/{case_id}/evidence")
+    @app.get("/cases/{case_id}/evidence", responses=CASE_ERROR_RESPONSES)
     def get_case_evidence(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case_evidence", role)
         view = _service(request).get_evidence_view(case_id, view_role)
@@ -208,7 +287,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return view
 
-    @app.get("/cases/{case_id}/timeline")
+    @app.get("/cases/{case_id}/timeline", responses=CASE_ERROR_RESPONSES)
     def get_case_timeline(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case_timeline", role)
         view = _service(request).get_timeline_view(case_id, view_role)
@@ -216,7 +295,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return view
 
-    @app.get("/cases/{case_id}/mitre")
+    @app.get("/cases/{case_id}/mitre", responses=CASE_ERROR_RESPONSES)
     def get_case_mitre(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case_mitre", role)
         view = _service(request).get_mitre_view(case_id, view_role)
@@ -224,7 +303,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return view
 
-    @app.get("/cases/{case_id}/grc-controls")
+    @app.get("/cases/{case_id}/grc-controls", responses=CASE_ERROR_RESPONSES)
     def get_case_grc_controls(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case_grc_controls", role)
         view = _service(request).get_grc_controls_view(case_id, view_role)
@@ -232,7 +311,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return view
 
-    @app.get("/cases/{case_id}/audit-events")
+    @app.get("/cases/{case_id}/audit-events", responses=CASE_ERROR_RESPONSES)
     def get_case_audit_events(case_id: str, request: Request, role: ViewRole | None = None) -> dict:
         view_role = _authorized_view_role(request, case_id, "get_case_audit_events", role)
         view = _service(request).get_audit_events_view(case_id, view_role)
@@ -240,7 +319,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=404, detail="Case not found")
         return view
 
-    @app.post("/cases/{case_id}/analyst-feedback", response_model=FeedbackResponse)
+    @app.post(
+        "/cases/{case_id}/analyst-feedback",
+        response_model=FeedbackResponse,
+        responses={404: {"description": "Case not found"}},
+    )
     def submit_feedback(
         case_id: str,
         feedback: AnalystFeedbackCreate,
@@ -256,6 +339,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
 def _service(request: Request) -> CaseService:
     return request.app.state.case_service
+
+
+def _run_triage_with_limit(service: CaseService, case_id: str, semaphore: threading.BoundedSemaphore) -> None:
+    with semaphore:
+        service.run_triage(case_id)
 
 
 def _authorized_view_role(

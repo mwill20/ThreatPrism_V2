@@ -208,10 +208,15 @@ THREATPRISM_ENV=demo
 DATABASE_URL=sqlite:///./data/threatprism.db
 API_AUTH_MODE=none
 API_TOKEN=
-LLM_PROVIDER=openai
+THREATPRISM_AUTH_REQUIRED=true
+THREATPRISM_LOCAL_DEV_ACK=true
+LLM_PROVIDER=deterministic_demo
 OPENAI_API_KEY=
 LOCAL_LLM_BASE_URL=
 ALLOW_REAL_ACTIONS=false
+MAX_REQUEST_BODY_BYTES=262144
+CASE_POST_RATE_LIMIT_PER_MINUTE=60
+TRIAGE_CONCURRENCY_LIMIT=4
 VIRUSTOTAL_API_KEY=
 URLSCAN_API_KEY=
 ABUSEIPDB_API_KEY=
@@ -225,4 +230,5 @@ WHOIS_RDAP_PROVIDER=default
 - No full dashboard in the initial build.
 - No production-impacting actions.
 - No real customer data in demo payloads.
-- Demo `API_AUTH_MODE=none` is acceptable only for localhost and fake data.
+- Demo `API_AUTH_MODE=none` is acceptable only for localhost, fake data, and
+  explicit `THREATPRISM_LOCAL_DEV_ACK=true`.

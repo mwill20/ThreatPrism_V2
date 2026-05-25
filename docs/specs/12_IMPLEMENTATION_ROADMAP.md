@@ -275,7 +275,7 @@ Demo Operations & CI Hardening v0.1
 
 This slice is implemented.
 
-## Next Recommended Slice
+## Recently Completed Slice
 
 ```text
 Demo Scenario Pack & API Contract Freeze v0.1
@@ -287,6 +287,38 @@ Demo Scenario Pack & API Contract Freeze v0.1
      scope unless explicitly requested
 ```
 
+This slice is implemented with typed scenario-pack loading, fake demo scenario
+artifacts, OpenAPI route/response-model assertions, and role workflow smoke
+tests.
+
+## Next Recommended Slice
+
+```text
+Docker Compose & Local Demo Packaging v0.1
+  -> Add local packaging around the existing fake-data backend
+  -> Keep safe validation and deterministic demo defaults
+  -> Avoid live providers, production IdP, dashboard UI, and remediation unless
+     explicitly requested
+```
+
+## Future Planned Slice
+
+```text
+Data Strategy & Synthetic Fixture Factory v0.1
+  -> Keep hand-written fake fixtures for deterministic tests
+  -> Use public or synthetic datasets only as manually reviewed source material
+  -> Add a data-source registry with license-review flags
+  -> Add local-only adapters for Synthea, OTRF/Security Datasets, PINT, and
+     Giskard prompt-injection samples
+  -> Convert small source samples into sanitized ThreatPrism-native fixtures
+  -> Ignore raw external datasets and generated fixture outputs by default
+  -> Keep live LLM, live SOAR, Caldera execution, production telemetry, and
+     remediation out of scope
+```
+
+This slice is planned in `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
+`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
+
 ## Roadmap Constraints
 
 - Do not build a full dashboard before the backend is stable.
@@ -294,3 +326,5 @@ Demo Scenario Pack & API Contract Freeze v0.1
 - Do not require live SOAR credentials for demos.
 - Do not claim HITRUST compliance.
 - Do not make strict CI checks block progress before the inherited codebase is ready.
+- Do not ingest public datasets directly into runtime flows. Convert reviewed
+  samples into sanitized ThreatPrism-native fixtures first.

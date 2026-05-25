@@ -4,9 +4,9 @@ version = "0.1.0"
 description = "ThreatPrism SOC migration accelerator backend"
 requires-python = ">=3.11"
 dependencies = [
-  "fastapi>=0.115.0",
-  "pydantic>=2.0.0",
-  "uvicorn>=0.30.0",
+  "fastapi==0.115.12",
+  "pydantic==2.11.2",
+  "uvicorn==0.34.2",
 ]
 
 [tool.pytest.ini_options]

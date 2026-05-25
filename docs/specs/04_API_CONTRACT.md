@@ -10,6 +10,14 @@
 - Error responses must be structured and must not leak secrets.
 - Raw source payloads must not be returned by default.
 - Endpoints that return case details must return redacted or normalized fields unless an explicit future export permission is defined.
+- Current route and key response-model expectations are covered by
+  `tests/test_demo_scenarios_and_api_contract.py`.
+
+## Contract Freeze Status
+
+Demo Scenario Pack & API Contract Freeze v0.1 is implemented. Later slices may
+add routes, but removing or renaming current routes must be treated as a
+contract change and reflected in tests, docs, and decision records.
 
 ## API Security Boundary
 

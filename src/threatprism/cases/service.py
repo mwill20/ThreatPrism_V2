@@ -144,6 +144,30 @@ class CaseService:
 
         tokenized_case, records, vault = self._prepare_case_for_model(case)
         case.sanitization_records.extend(records)
+        quarantine_records = [record for record in records if record.operation == "quarantine"]
+        if quarantine_records:
+            case.status = CaseStatus.needs_analyst_review
+            case.triage_status = TriageStatus.blocked_by_guardrail
+            case.audit_trail.append(
+                AuditEvent(
+                    case_id=case.case_id,
+                    event_type="triage_blocked_by_prompt_firewall",
+                    summary="Triage was blocked before provider execution by the prompt firewall.",
+                    metadata={
+                        "field_paths": sorted({record.field_path for record in quarantine_records}),
+                        "flags": sorted(
+                            {
+                                flag
+                                for record in quarantine_records
+                                for flag in record.metadata.get("flags", [])
+                            }
+                        ),
+                    },
+                )
+            )
+            case.updated_at = utc_now()
+            self.repository.save_case(case)
+            return
 
         report = self.provider.generate_report(tokenized_case)
         issues = []

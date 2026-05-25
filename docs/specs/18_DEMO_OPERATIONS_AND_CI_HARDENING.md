@@ -7,13 +7,13 @@ Implemented on 2026-05-24.
 Validation:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_threat_treatment_final2
 ```
 
 Result:
 
 ```text
-45 passed
+63 passed
 ```
 
 Eval harness result:

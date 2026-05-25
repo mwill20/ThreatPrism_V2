@@ -56,11 +56,13 @@ Implemented scope:
 - Deny decisions create audit events.
 - Existing healthcare leakage tests still pass.
 
-Validation result:
+Original slice validation result at the time this slice landed:
 
 ```text
 41 passed
 ```
+
+Current full-project validation is tracked in `docs/WORKING_CHECKLIST.md`.
 
 ## Out Of Scope
 

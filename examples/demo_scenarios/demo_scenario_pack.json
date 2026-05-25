@@ -1,0 +1,351 @@
+{
+  "schema_version": "demo-scenario-pack/0.1",
+  "safety_rules": {
+    "data_boundary": "fake_data_only",
+    "external_calls": "not_allowed",
+    "allow_real_actions": false,
+    "llm_provider": "deterministic_demo",
+    "notes": [
+      "Use only local FastAPI routes.",
+      "Use fake demo credentials only.",
+      "Do not require live SOAR, LLM, cloud, enrichment, or remediation providers."
+    ]
+  },
+  "api_contract": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "response_model": null,
+      "status_codes": [200]
+    },
+    {
+      "method": "POST",
+      "path": "/cases",
+      "response_model": "CaseAcceptedResponse",
+      "status_codes": [202, 400]
+    },
+    {
+      "method": "GET",
+      "path": "/cases",
+      "response_model": "list[CaseSummary]",
+      "status_codes": [200]
+    },
+    {
+      "method": "GET",
+      "path": "/metrics",
+      "response_model": "OperationalMetrics",
+      "status_codes": [200, 401, 403]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/read-model",
+      "response_model": "CaseReadModelEnvelope",
+      "status_codes": [200, 401, 403]
+    },
+    {
+      "method": "GET",
+      "path": "/queues/manager-review",
+      "response_model": "ReviewQueueEnvelope",
+      "status_codes": [200, 401, 403]
+    },
+    {
+      "method": "GET",
+      "path": "/queues/healthcare-review",
+      "response_model": "ReviewQueueEnvelope",
+      "status_codes": [200, 401, 403]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/triage-report",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/evidence",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/timeline",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/mitre",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/grc-controls",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "GET",
+      "path": "/cases/{case_id}/audit-events",
+      "response_model": null,
+      "status_codes": [200, 401, 403, 404]
+    },
+    {
+      "method": "POST",
+      "path": "/cases/{case_id}/analyst-feedback",
+      "response_model": "FeedbackResponse",
+      "status_codes": [200, 404]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "analyst-triage-and-feedback",
+      "title": "Analyst reviews automated closure and records disagreement",
+      "persona": "analyst",
+      "auth_key": "demo-analyst-key",
+      "payload_path": "examples/soar_payloads/generic_soar_case.json",
+      "feedback": {
+        "analyst_id": "analyst_demo_001",
+        "analyst_determination": "benign",
+        "analyst_severity": "low",
+        "analyst_confidence": 0.76,
+        "analyst_final_disposition": "close",
+        "time_to_acknowledge_seconds": 120,
+        "time_to_close_seconds": 900,
+        "analyst_notes": "Synthetic review for demo scenario.",
+        "manager_review_required": false,
+        "false_positive": true,
+        "false_negative": false,
+        "missed_ioc": false,
+        "missed_mitre_mapping": false,
+        "missed_escalation": true
+      },
+      "steps": [
+        {
+          "step_id": "create_case",
+          "method": "POST",
+          "path": "/cases",
+          "purpose": "Submit a fake SOAR case and receive a tracking ID.",
+          "expected_status": 202,
+          "body": "payload",
+          "expected_json_paths": ["case_id", "tracking_id", "links.triage_report"]
+        },
+        {
+          "step_id": "read_case",
+          "method": "GET",
+          "path": "/cases/{case_id}?role=analyst",
+          "purpose": "Read the analyst role view for the normalized case.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "events.0.event_id", "evidence.0.evidence_id"],
+          "expected_substrings": ["203.0.113.42"]
+        },
+        {
+          "step_id": "read_report",
+          "method": "GET",
+          "path": "/cases/{case_id}/triage-report?role=analyst",
+          "purpose": "Read the validated analyst triage report.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "severity", "simulated_actions.0.real_action_executed", "grc_controls.0.language_note"]
+        },
+        {
+          "step_id": "submit_feedback",
+          "method": "POST",
+          "path": "/cases/{case_id}/analyst-feedback",
+          "purpose": "Record analyst feedback and disagreement fields.",
+          "expected_status": 200,
+          "body": "feedback",
+          "expected_json_paths": ["feedback_id", "disagreement.manager_review_required", "disagreement.severity_mismatch"]
+        }
+      ]
+    },
+    {
+      "scenario_id": "manager-grc-review-queue",
+      "title": "Manager and GRC reviewer checks disagreement metrics and queue",
+      "persona": "manager_grc",
+      "auth_key": "demo-manager-key",
+      "payload_path": "examples/soar_payloads/generic_soar_case.json",
+      "feedback": {
+        "analyst_id": "analyst_demo_002",
+        "analyst_determination": "benign",
+        "analyst_severity": "low",
+        "analyst_confidence": 0.74,
+        "analyst_final_disposition": "close",
+        "time_to_acknowledge_seconds": 300,
+        "time_to_close_seconds": 1200,
+        "analyst_notes": "Synthetic review for manager scenario.",
+        "manager_review_required": false,
+        "false_positive": true,
+        "false_negative": false,
+        "missed_ioc": false,
+        "missed_mitre_mapping": false,
+        "missed_escalation": true
+      },
+      "steps": [
+        {
+          "step_id": "create_case",
+          "method": "POST",
+          "path": "/cases",
+          "purpose": "Submit a fake case that will later appear in manager review.",
+          "expected_status": 202,
+          "body": "payload",
+          "expected_json_paths": ["case_id", "tracking_id"]
+        },
+        {
+          "step_id": "submit_feedback",
+          "method": "POST",
+          "path": "/cases/{case_id}/analyst-feedback",
+          "purpose": "Create disagreement metrics for manager review.",
+          "expected_status": 200,
+          "body": "feedback",
+          "expected_json_paths": ["disagreement.manager_review_required"]
+        },
+        {
+          "step_id": "read_metrics",
+          "method": "GET",
+          "path": "/metrics",
+          "purpose": "Read aggregate manager metrics with demo authorization.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_counts.total", "disagreement.manager_review_required_count", "grc.mapping_count"]
+        },
+        {
+          "step_id": "read_manager_queue",
+          "method": "GET",
+          "path": "/queues/manager-review?role=manager_grc",
+          "purpose": "Read the manager review queue without analyst-only data.",
+          "expected_status": 200,
+          "expected_json_paths": ["queue", "role_view.role", "items.0.case_id", "items.0.manager_review_required"]
+        },
+        {
+          "step_id": "read_grc_controls",
+          "method": "GET",
+          "path": "/cases/{case_id}/grc-controls?role=manager_grc",
+          "purpose": "Read evidence-linked GRC category mappings.",
+          "expected_status": 200,
+          "expected_json_paths": ["role_view.role", "items.0.category", "items.0.evidence_ids", "items.0.language_note"],
+          "forbidden_substrings": ["compliant", "certified", "audit-ready"]
+        }
+      ]
+    },
+    {
+      "scenario_id": "legal-privacy-healthcare-review",
+      "title": "Legal and privacy reviewer checks healthcare safeguard queue",
+      "persona": "legal_privacy",
+      "auth_key": "demo-legal-key",
+      "payload_path": "examples/demo_scenarios/healthcare_safeguard_review_case.json",
+      "steps": [
+        {
+          "step_id": "create_case",
+          "method": "POST",
+          "path": "/cases",
+          "purpose": "Submit a fake contaminated healthcare-context payload.",
+          "expected_status": 202,
+          "body": "payload",
+          "expected_json_paths": ["case_id", "tracking_id"]
+        },
+        {
+          "step_id": "read_healthcare_queue",
+          "method": "GET",
+          "path": "/queues/healthcare-review?role=legal_privacy",
+          "purpose": "Read healthcare review metadata without raw potential PHI.",
+          "expected_status": 200,
+          "expected_json_paths": ["queue", "role_view.role", "items.0.healthcare_review_required"],
+          "forbidden_substrings": ["PAT-DEMO-9001", "patient.demo@example.invalid", "198.51.100.24", "sk-testscenariosecret12345", "C:\\\\demo\\\\patient_9001\\\\case_note.txt"]
+        },
+        {
+          "step_id": "read_evidence",
+          "method": "GET",
+          "path": "/cases/{case_id}/evidence?role=legal_privacy",
+          "purpose": "Read exposure-safe evidence details for privacy review.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "items.0.evidence_id"],
+          "forbidden_substrings": ["PAT-DEMO-9001", "patient.demo@example.invalid", "198.51.100.24", "sk-testscenariosecret12345", "C:\\\\demo\\\\patient_9001\\\\case_note.txt"]
+        }
+      ]
+    },
+    {
+      "scenario_id": "audit-debug-denial-review",
+      "title": "Audit debug reviewer confirms denied role escalation is recorded safely",
+      "persona": "audit_debug",
+      "auth_key": "demo-audit-key",
+      "payload_path": "examples/demo_scenarios/healthcare_safeguard_review_case.json",
+      "steps": [
+        {
+          "step_id": "create_case",
+          "method": "POST",
+          "path": "/cases",
+          "purpose": "Submit a fake case for audit review.",
+          "expected_status": 202,
+          "body": "payload",
+          "expected_json_paths": ["case_id", "tracking_id"]
+        },
+        {
+          "step_id": "deny_unauthenticated_role_request",
+          "method": "GET",
+          "path": "/cases/{case_id}?role=analyst",
+          "purpose": "Create a safe authorization denial event.",
+          "expected_status": 401,
+          "auth": "none",
+          "expected_json_paths": ["detail"]
+        },
+        {
+          "step_id": "read_audit_events",
+          "method": "GET",
+          "path": "/cases/{case_id}/audit-events?role=audit_debug",
+          "purpose": "Read audit events without credentials, raw payloads, or token mappings.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "items.0.audit_event_id"],
+          "expected_substrings": ["authorization_decision"],
+          "forbidden_substrings": ["PAT-DEMO-9001", "patient.demo@example.invalid", "198.51.100.24", "sk-testscenariosecret12345", "raw_payload", "vault_mappings", "demo-audit-key"]
+        }
+      ]
+    },
+    {
+      "scenario_id": "engineer-evidence-trace-review",
+      "title": "Engineer reviews timeline, MITRE, and evidence traceability",
+      "persona": "engineer",
+      "auth_key": "demo-engineer-key",
+      "payload_path": "examples/soar_payloads/generic_soar_case.json",
+      "steps": [
+        {
+          "step_id": "create_case",
+          "method": "POST",
+          "path": "/cases",
+          "purpose": "Submit a fake case for engineering trace review.",
+          "expected_status": 202,
+          "body": "payload",
+          "expected_json_paths": ["case_id", "tracking_id"]
+        },
+        {
+          "step_id": "read_timeline",
+          "method": "GET",
+          "path": "/cases/{case_id}/timeline?role=engineer",
+          "purpose": "Read normalized timeline evidence links.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "items.0.evidence_id"]
+        },
+        {
+          "step_id": "read_mitre",
+          "method": "GET",
+          "path": "/cases/{case_id}/mitre?role=engineer",
+          "purpose": "Read evidence-linked MITRE mappings.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "items.0.technique_id", "items.0.evidence_ids"]
+        },
+        {
+          "step_id": "read_evidence",
+          "method": "GET",
+          "path": "/cases/{case_id}/evidence?role=engineer",
+          "purpose": "Read engineering evidence details.",
+          "expected_status": 200,
+          "expected_json_paths": ["case_id", "role_view.role", "items.0.evidence_id"]
+        }
+      ]
+    }
+  ]
+}

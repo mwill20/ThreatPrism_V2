@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import importlib.util
+import logging
 import sys
 from pathlib import Path
+
+import pytest
+
+from threatprism.api.app import create_app
+from threatprism.config import Settings
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +53,39 @@ def test_runtime_environment_rejects_real_actions(monkeypatch) -> None:
     findings = safety._check_runtime_environment()
 
     assert any(finding.check == "runtime-env" for finding in findings)
+
+
+def test_runtime_rejects_demo_key_without_configured_keys() -> None:
+    with pytest.raises(ValueError, match="DEMO_API_KEYS must be configured"):
+        Settings(env="test", api_auth_mode="demo_key", demo_api_keys="", allow_real_actions=False).validate_runtime()
+
+
+def test_runtime_rejects_auth_disabled_without_local_ack() -> None:
+    with pytest.raises(ValueError, match="THREATPRISM_LOCAL_DEV_ACK=true"):
+        Settings(
+            env="test",
+            api_auth_mode="none",
+            auth_required=True,
+            local_dev_ack=False,
+            allow_real_actions=False,
+        ).validate_runtime()
+
+
+def test_runtime_allows_auth_disabled_with_local_ack_and_logs_warning(caplog) -> None:
+    caplog.set_level(logging.WARNING)
+
+    create_app(
+        Settings(
+            env="test",
+            database_url="sqlite:///:memory:",
+            api_auth_mode="none",
+            auth_required=True,
+            local_dev_ack=True,
+            allow_real_actions=False,
+        )
+    )
+
+    assert "API authentication is disabled for explicit local-development use only." in caplog.text
 
 
 def test_eval_artifact_scan_rejects_raw_sensitive_values(tmp_path) -> None:

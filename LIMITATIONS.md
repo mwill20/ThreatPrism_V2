@@ -43,17 +43,22 @@ Current implemented baseline:
 - Safe local validation wrapper and fake-data-only CI workflow.
 - Demo safety checks for environment posture, generated artifacts,
   secret-looking content, and eval artifact hygiene.
+- Demo scenario pack for analyst, manager/GRC, legal/privacy, audit/debug, and
+  engineer workflows.
+- OpenAPI contract tests for the current backend route and response-model
+  surface.
+- Context-light startup file and compact handoff prompt generation tooling.
 
 Validation command confirmed on 2026-05-24:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_ops_ci_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_context_handoff
 ```
 
-Result after Demo Operations & CI Hardening v0.1:
+Result after Demo Scenario Pack & API Contract Freeze v0.1:
 
 ```text
-45 passed
+51 passed
 ```
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
@@ -70,6 +75,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
 - Frontend dashboard.
+- An API compatibility policy beyond the current tested local route contract.
 
 ## Product Limitations
 
@@ -167,19 +173,50 @@ The eval harness and CI workflow are deterministic regression gates. They do
 not prove live-LLM safety, production readiness, HIPAA compliance, HITRUST
 certification, or audit readiness.
 
+The compact handoff prompt is an operator aid, not an automatic context-window
+sensor. Agents should use it proactively around the 75% context-used threshold,
+and the user can run the command manually when needed.
+
 ## Demo Data Limitations
 
 - Demo data must be fake.
 - Do not include real tenant IDs, workplace names, customer names, users, hosts, domains, IPs, secrets, or operational details.
 - Use reserved domains, documentation IP ranges, and synthetic identifiers where possible.
 
+## Dataset Strategy Limitations
+
+ThreatPrism does not currently include a dataset ingestion or fixture-factory
+implementation.
+
+Planned public or synthetic dataset use is limited to reviewed source material
+for generating sanitized ThreatPrism-native synthetic fixtures. Public datasets
+are not runtime data models.
+
+Current dataset boundaries:
+
+- No automatic dataset downloads.
+- No committed raw third-party datasets.
+- No production telemetry.
+- No real healthcare records.
+- No real workplace, customer, tenant, user, host, domain, IP, or secret data.
+- No raw prompt-injection or jailbreak samples in public-facing docs or logs.
+- No Caldera execution or adversary emulation lab setup without explicit
+  future approval.
+- No model training or fine-tuning.
+
+The user must manually review dataset license terms, redistribution rules,
+attribution requirements, safety constraints, and whether derivative fixtures
+can be committed before any source sample is used.
+
 ## Known Open Items
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Implement Demo Scenario Pack & API Contract Freeze v0.1 before adding
-  dashboard UI, live LLM, SOAR, enrichment, or production-style integration
-  work.
+- Decide whether the next packaging slice should add Docker Compose/local demo
+  packaging before dashboard UI or live-integration preparation.
+- Decide when to implement Data Strategy & Synthetic Fixture Factory v0.1 and
+  which candidate datasets the user has approved after license and safety
+  review.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

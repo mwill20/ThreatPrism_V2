@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from threatprism.api.app import create_app
 from threatprism.config import Settings
+from support_settings import DEMO_API_KEYS
 
 
 RAW_PATIENT_ID = "PAT-44321"
@@ -24,6 +25,9 @@ def _app_and_client(api_auth_mode: str = "none") -> tuple[FastAPI, TestClient]:
             env="test",
             database_url="sqlite:///:memory:",
             api_auth_mode=api_auth_mode,
+            demo_api_keys=DEMO_API_KEYS if api_auth_mode == "demo_key" else "",
+            auth_required=api_auth_mode != "none",
+            local_dev_ack=api_auth_mode == "none",
             llm_provider="deterministic_demo",
             allow_real_actions=False,
         )

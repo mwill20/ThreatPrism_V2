@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from pydantic import ValidationError
@@ -24,6 +24,36 @@ from threatprism.ids import new_id
 APPROVED_FIXTURE_DIR = Path("tests/evals")
 APPROVED_OUTPUT_DIR = Path(".eval_runs")
 MAX_PREVIEW_CHARS = 500
+EVAL_DEMO_API_KEYS = ",".join(
+    [
+        "demo-manager-key:demo_manager:manager_grc",
+        "demo-analyst-key:demo_analyst:analyst",
+        "demo-audit-key:demo_audit:audit_debug",
+    ]
+)
+
+
+def _local_eval_settings(**overrides: Any) -> Settings:
+    values: dict[str, Any] = {
+        "env": "eval",
+        "database_url": "sqlite:///:memory:",
+        "api_auth_mode": "none",
+        "auth_required": False,
+        "local_dev_ack": True,
+        "llm_provider": "deterministic_demo",
+        "allow_real_actions": False,
+    }
+    values.update(overrides)
+    return Settings(**values)
+
+
+def _demo_key_eval_settings() -> Settings:
+    return _local_eval_settings(
+        api_auth_mode="demo_key",
+        demo_api_keys=EVAL_DEMO_API_KEYS,
+        auth_required=True,
+        local_dev_ack=False,
+    )
 
 
 def run_eval_suite(
@@ -31,12 +61,7 @@ def run_eval_suite(
     output_dir: str | Path | None = None,
     settings: Settings | None = None,
 ) -> EvalRunSummary:
-    active_settings = settings or Settings(
-        env="eval",
-        database_url="sqlite:///:memory:",
-        llm_provider="deterministic_demo",
-        allow_real_actions=False,
-    )
+    active_settings = settings or _local_eval_settings()
     run_id = new_id("eval")
     approved_fixture_dir = _approved_fixture_dir()
     approved_output_dir = _approved_output_dir()
@@ -73,7 +98,7 @@ def run_eval_suite(
 
 
 def evaluate_fixture(fixture: EvalFixture, settings: Settings | None = None, run_id: str | None = None) -> EvalCaseResult:
-    active_settings = settings or Settings(env="eval", database_url="sqlite:///:memory:", allow_real_actions=False)
+    active_settings = settings or _local_eval_settings()
     active_run_id = run_id or new_id("eval")
     passed = False
     reason: str | None = None
@@ -154,7 +179,7 @@ def _evaluate_by_category(fixture: EvalFixture, settings: Settings) -> tuple[boo
     if category == EvalCategory.authorization_escalation:
         try:
             authorize_role_view(
-                settings=Settings(env="eval", api_auth_mode="demo_key", allow_real_actions=False),
+                settings=_demo_key_eval_settings(),
                 headers={"X-ThreatPrism-Demo-Key": "demo-manager-key"},
                 method="GET",
                 path="/cases/case_eval",
@@ -177,7 +202,7 @@ def _evaluate_by_category(fixture: EvalFixture, settings: Settings) -> tuple[boo
         )
 
     if category == EvalCategory.metrics_read_model_leakage:
-        service = CaseService(Settings(env="eval", database_url="sqlite:///:memory:", allow_real_actions=False))
+        service = CaseService(_local_eval_settings())
         accepted = service.create_case(payload["case_payload"])
         service.run_triage(accepted.case_id)
         envelope = service.list_case_read_models(healthcare_review_required=True, role="manager_grc")
@@ -192,7 +217,7 @@ def _evaluate_by_category(fixture: EvalFixture, settings: Settings) -> tuple[boo
         )
 
     if category == EvalCategory.audit_event_leakage:
-        service = CaseService(Settings(env="eval", database_url="sqlite:///:memory:", allow_real_actions=False))
+        service = CaseService(_local_eval_settings())
         accepted = service.create_case(payload["case_payload"])
         event = authorize_denial_event()
         service.record_audit_event(accepted.case_id, event)
@@ -244,7 +269,7 @@ def _evaluate_by_category(fixture: EvalFixture, settings: Settings) -> tuple[boo
 def authorize_denial_event():
     try:
         authorize_role_view(
-            settings=Settings(env="eval", api_auth_mode="demo_key", allow_real_actions=False),
+            settings=_demo_key_eval_settings(),
             headers={"X-ThreatPrism-Demo-Key": "not-a-real-demo-key"},
             method="GET",
             path="/cases/case_eval",
@@ -333,7 +358,7 @@ def _approved_output_dir() -> Path:
 
 def _resolve_under_approved_dir(candidate: str | Path, approved_dir: Path) -> Path:
     approved = approved_dir.resolve()
-    raw = Path(candidate)
+    raw = _candidate_path(candidate, approved)
     if raw.is_absolute():
         resolved = raw.resolve()
     elif raw.parts and Path(*raw.parts[:2]) == APPROVED_FIXTURE_DIR:
@@ -345,3 +370,14 @@ def _resolve_under_approved_dir(candidate: str | Path, approved_dir: Path) -> Pa
     if resolved != approved and approved not in resolved.parents:
         raise ValueError(f"Path must stay under approved directory: {approved}")
     return resolved
+
+
+def _candidate_path(candidate: str | Path, approved_dir: Path) -> Path:
+    raw_text = str(candidate)
+    if "\\" not in raw_text:
+        return Path(candidate)
+
+    windows_path = PureWindowsPath(raw_text)
+    if windows_path.is_absolute() or windows_path.drive:
+        raise ValueError(f"Path must stay under approved directory: {approved_dir.resolve()}")
+    return Path(windows_path.as_posix())

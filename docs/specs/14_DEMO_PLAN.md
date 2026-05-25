@@ -19,7 +19,7 @@ Scenario: a generic SOAR platform automatically closed a suspicious identity cas
 
 ## Demo Payloads
 
-Required later implementation files:
+Implemented fake SOAR payloads:
 
 ```text
 examples/soar_payloads/generic_soar_case.json
@@ -28,6 +28,16 @@ examples/soar_payloads/defender_xdr_alert.json
 examples/soar_payloads/logic_apps_webhook_payload.json
 examples/soar_payloads/swimlane_case_mock.json
 ```
+
+Implemented demo scenario pack:
+
+```text
+examples/demo_scenarios/demo_scenario_pack.json
+examples/demo_scenarios/healthcare_safeguard_review_case.json
+```
+
+The scenario pack covers analyst, manager/GRC, legal/privacy, audit/debug, and
+engineer workflows.
 
 ## Demo Flow
 
@@ -115,3 +125,5 @@ The demo should emphasize:
 - Simulated actions show no real action execution.
 - Analyst feedback records disagreement metrics.
 - Missing enrichment keys do not break the demo.
+- Scenario-pack smoke tests pass.
+- OpenAPI contract tests confirm the current backend route surface.

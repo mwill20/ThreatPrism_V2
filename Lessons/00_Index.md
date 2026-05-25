@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `45 passed`.
+- The current validated baseline is `51 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -35,6 +35,7 @@ Fake SOAR payload
   -> Operational metrics and read models
   -> Dry-run eval harness and regression defense labs
   -> Safe validation wrapper and fake-data-only CI
+  -> Demo scenario pack and API contract freeze tests
   -> API responses and tests
 ```
 
@@ -55,6 +56,7 @@ Fake SOAR payload
 | ✅ | [Lesson 10](Lesson10_Operational_Read_Models_And_Metrics.md) | Operational Read Models And Metrics | `src/threatprism/cases/read_models.py`, `src/threatprism/api/app.py`, `tests/test_operational_read_models.py` |
 | ✅ | [Lesson 11](Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md) | Evaluation Harness And Regression Defense Labs | `src/threatprism/evals/*.py`, `tests/evals/*.jsonl`, `tests/test_eval_harness.py` |
 | ✅ | [Lesson 12](Lesson12_Demo_Operations_And_CI_Hardening.md) | Demo Operations And CI Hardening | `tools/*.py`, `tools/*.ps1`, `.github/workflows/safe-validation.yml`, `tests/test_ops_safety.py` |
+| ✅ | [Lesson 13](Lesson13_Demo_Scenarios_And_API_Contract.md) | Demo Scenarios And API Contract | `src/threatprism/demo/scenarios.py`, `examples/demo_scenarios/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
 
 ## File Coverage Map
 
@@ -87,6 +89,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\schemas.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\runner.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\cli.py` -> Lesson 11
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\scenarios.py` -> Lesson 13
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
@@ -98,6 +101,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_operational_read_models.py` -> Lessons 08 and 10
 - `C:\Projects\ThreatPrismV2\tests\test_eval_harness.py` -> Lessons 08 and 11
 - `C:\Projects\ThreatPrismV2\tests\test_ops_safety.py` -> Lessons 08 and 12
+- `C:\Projects\ThreatPrismV2\tests\test_demo_scenarios_and_api_contract.py` -> Lessons 08 and 13
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -105,6 +109,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_healthcare_guardrails.py` -> Lessons 05 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_enrichment_stubs.py` -> Lessons 06 and 08
 - `C:\Projects\ThreatPrismV2\examples\soar_payloads\*.json` -> Lesson 03
+- `C:\Projects\ThreatPrismV2\examples\demo_scenarios\*.json` -> Lesson 13
 
 ## Fast Validation Commands
 
@@ -125,12 +130,14 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-45 passed
+51 passed
 ```
 
 ## What To Study Next
 
-After Lesson 12, continue into the next active implementation slice:
+After Lesson 13, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`
+- `C:\Projects\ThreatPrismV2\docs\DATA_STRATEGY_AND_FIXTURE_FACTORY.md`
+  when the next request involves datasets, synthetic fixtures, or data realism

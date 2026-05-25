@@ -128,6 +128,49 @@ Status: implemented.
   values, raw payload markers, and token-vault mapping markers.
 - CI runs fake-data-only tests and evals without repository secrets.
 
+## Demo Scenario Pack And API Contract Freeze Acceptance Criteria
+
+Status: implemented.
+
+- Scenario pack uses typed schema version `demo-scenario-pack/0.1`.
+- Scenario personas cover analyst, manager/GRC, legal/privacy, audit/debug, and
+  engineer workflows.
+- Scenario payloads live under `examples/` and use fake data only.
+- Scenario steps call local FastAPI paths only.
+- Scenario smoke tests run against an in-memory FastAPI app without live LLM,
+  SOAR, cloud, enrichment, or remediation calls.
+- OpenAPI contract tests assert the current backend routes remain present.
+- OpenAPI contract tests assert key response models remain stable for the
+  current route surface.
+- Role-specific scenario tests verify forbidden raw sensitive values do not
+  appear in privacy/audit views.
+
+## Data Strategy And Synthetic Fixture Factory Acceptance Criteria
+
+Status: planned future slice.
+
+- Candidate source registry exists with source URL, intended use, license-review
+  requirement, auto-download policy, raw-data commit policy, and notes.
+- Every source defaults to `license_review_required=true`,
+  `allowed_for_auto_download=false`, and `raw_data_committed=false`.
+- Raw external datasets are stored only under ignored local folders such as
+  `external_datasets/`.
+- Generated fixtures are stored only under ignored local folders such as
+  `fixtures/generated/` unless a small sanitized sample is explicitly promoted
+  into tracked tests after review.
+- Fixture models require `synthetic_only=true` and `raw_source_retained=false`.
+- Local-only adapters exist for the first approved source families without
+  performing automatic network downloads.
+- Sanitizers remove or reject potential PHI/ePHI, secrets, credentials, raw
+  payload bodies, token vault mappings, and real-looking infrastructure before
+  output.
+- The CLI requires explicit source, input path, output path, and limit values.
+- The CLI rejects input and output path traversal.
+- Console output and summaries include sanitized previews only.
+- Tests cover registry loading, model validation, adapter non-download behavior,
+  sanitizer behavior, path controls, output limits, and non-leakage.
+- Full safe validation passes before the slice is marked complete.
+
 ## Healthcare Safeguard Acceptance Criteria
 
 - SOAR payloads are expected to be security-only, but all inbound payloads are

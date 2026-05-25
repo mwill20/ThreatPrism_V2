@@ -281,6 +281,8 @@ Threat Model Pack v0.2 and Treatment Register follow-up:
 - [x] Implement Slice E dependency hardening:
   exact direct pins, transitive lock file, safety-check pin validation, and
   advisory dependency-audit hook.
+- [x] Add `Lessons/Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md` and
+  index coverage for the threat treatment and demo hardening slice.
 - [ ] Gated mitigations for real LLM, RAG, memory/write-back, tools,
   multi-tenancy, fine-tuning, non-demo data, and real PHI remain out of scope
   until explicitly requested.

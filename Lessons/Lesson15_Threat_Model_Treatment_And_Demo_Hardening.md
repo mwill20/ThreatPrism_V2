@@ -1,0 +1,221 @@
+# Lesson 15: Threat Model Treatment And Demo Hardening
+
+## Goal
+
+Understand how ThreatPrism turns threat-model findings into explicit treatment
+decisions, then backs the POC-scope decisions with demo-safe hardening tests.
+
+This lesson is about the threat treatment and demo hardening slice. It does not
+approve live providers, real credentials, real organization data, real PHI/ePHI,
+production identity, multi-tenancy, RAG, memory, tool calling, or remediation.
+
+## Primary Files
+
+```text
+docs/threat-models/*.md
+docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md
+docs/runbooks/PATTERN_REFRESH.md
+tests/test_quarantine_enforcement.py
+tests/test_api_limits.py
+tests/test_overclaim_regression.py
+tests/test_phi_detector_coverage.py
+tests/test_stage1_no_rehydration.py
+tests/test_token_vault_isolation.py
+```
+
+## What The Slice Adds
+
+Threat Model Pack v0.2 and the Treatment Register follow-up add:
+
+- A structured threat model pack under `docs/threat-models/`.
+- A treatment register that labels threats as mitigate, accept, transfer, avoid,
+  or gated mitigation.
+- Owner decisions for current fake-data POC scope.
+- Explicit gates before real LLM, RAG, memory, tool calling, multi-tenancy,
+  non-demo data, real PHI, and production persistence work.
+- POC hardening for auth defaults, request resource controls, dependency
+  tracking, pattern refresh, quarantine enforcement, token vault isolation, and
+  stage-1 token non-rehydration.
+
+The important lesson: a threat is not handled just because it is documented.
+ThreatPrism records the treatment decision and either lands a control, accepts
+the risk for POC scope, transfers the risk to an operator boundary, avoids the
+surface, or gates the mitigation before the future feature can land.
+
+## Mental Model
+
+```text
+Threat model finding
+  -> Treatment decision
+  -> Owner and scope
+  -> Control or explicit gate
+  -> Test coverage
+  -> Checklist and review cadence
+```
+
+For current POC scope, the treatment register closes cheap, foundational
+controls while keeping larger production surfaces gated. That matters because a
+demo-safe product can still have disciplined risk ownership without pretending
+to be production-ready.
+
+## Threat Model Pack
+
+The threat model pack lives in `docs/threat-models/`.
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Pack index, current scope, critical findings, and validation path. |
+| `system-context.md` | Assets, users, integrations, trust boundaries, data flows, and assumptions. |
+| `stride-threat-model.md` | Traditional application/API risks. |
+| `llm-agent-threat-model.md` | AI-specific risks from prompt injection, unsafe output, provider supply chain, tools, and agency. |
+| `healthcare-data-threat-model.md` | Privacy risks around linkability, identifiability, disclosure, unawareness, and non-compliance. |
+| `mitigations-traceability.md` | Threat ID to mitigation and test references. |
+
+Use the pack before adding any new trust boundary, external integration, role,
+storage layer, model provider, retrieval layer, memory feature, or dashboard
+surface.
+
+## Treatment Register
+
+`docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md` is the binding
+POC-scope treatment record.
+
+It separates five outcomes:
+
+| Treatment | Meaning |
+|-----------|---------|
+| Mitigate | Land a control that lowers the risk for the current scope. |
+| Accept | Formally own the risk because it is tolerable at the current scope. |
+| Transfer | Assign the control to an operator or provider boundary. |
+| Avoid | Do not build the risky surface. |
+| Gated mitigation | Commit to mitigation before a future feature lands. |
+
+Examples:
+
+- Prompt quarantine enforcement is mitigated now for POC scope.
+- Real LLM semantic prompt-injection defenses are gated until real LLM work.
+- Real PHI handling is avoided in current scope.
+- Unsalted hashes are accepted only for fake demo data and gated before
+  non-demo data.
+
+## Demo Hardening Tests
+
+The hardening tests make the treatment register executable enough for local
+development.
+
+| Test file | What it protects |
+|-----------|------------------|
+| `tests/test_quarantine_enforcement.py` | Prompt-firewall quarantine blocks provider execution and exposes a clear blocked-by-firewall response. |
+| `tests/test_api_limits.py` | Oversized request rejection, POST `/cases` rate limiting, and triage concurrency caps. |
+| `tests/test_overclaim_regression.py` | Compliance, medical, legal, and action overclaim patterns stay covered by fixtures. |
+| `tests/test_phi_detector_coverage.py` | Healthcare detector fixtures cover current sensitive-data detector families. |
+| `tests/test_stage1_no_rehydration.py` | Stage-1 healthcare safeguard tokens are never marked rehydratable. |
+| `tests/test_token_vault_isolation.py` | Token vault mappings do not leak through serialized cases, reports, API responses, or persistence blobs. |
+
+## Quarantine Enforcement
+
+Prompt-firewall quarantine is a hard stop before provider execution.
+
+The test uses a counting provider that raises if `generate_report()` is called.
+When a payload contains quarantine-triggering instructions, triage must:
+
+1. Stop before provider execution.
+2. Set the case triage status to `blocked_by_guardrail`.
+3. Avoid creating a triage report.
+4. Record a `triage_blocked_by_prompt_firewall` audit event.
+5. Return a report endpoint message that names the prompt firewall as the
+   blocker.
+
+This is stronger than simply recording a sanitization warning. The risky input
+does not reach the model-provider boundary.
+
+## HTTP DoS Controls
+
+The API limit tests protect the local demo backend from easy resource abuse:
+
+- Request bodies above `MAX_REQUEST_BODY_BYTES` return HTTP 413 before normal
+  case validation.
+- POST `/cases` request bursts return HTTP 429 once the configured limit is
+  exceeded.
+- Background triage calls run behind a bounded semaphore.
+
+These controls are POC safeguards, not a complete production edge-security
+story. Production deployment would still need a reverse proxy, centralized rate
+limiting, request logging, TLS, and operator-owned infrastructure controls.
+
+## Pattern Refresh
+
+`docs/runbooks/PATTERN_REFRESH.md` keeps detector and prohibited-output rules
+from becoming one-time regex decisions.
+
+The pattern refresh process should:
+
+1. Review recent eval failures and near misses.
+2. Add fixtures before adding new patterns.
+3. Confirm every prohibited phrase category has a regression fixture.
+4. Confirm healthcare detector examples cover current detector families.
+5. Record the review result in durable project docs.
+
+The paired tests are:
+
+- `tests/test_overclaim_regression.py`
+- `tests/test_phi_detector_coverage.py`
+
+## Token Vault And Stage-1 Tokens
+
+Two tests lock down the sensitive-data boundary:
+
+- `tests/test_token_vault_isolation.py` proves token-to-raw-value mappings are
+  not serialized into outward-facing or persisted artifacts.
+- `tests/test_stage1_no_rehydration.py` proves Stage-1 healthcare safeguard
+  tokens are never marked as rehydratable for any role.
+
+This preserves the core architecture: tokenize before model-visible payloads,
+validate output before any controlled rehydration, and never expose the vault
+mapping as an operational shortcut.
+
+## Run The Focused Tests
+
+PowerShell:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest -p no:cacheprovider `
+  tests\test_quarantine_enforcement.py `
+  tests\test_api_limits.py `
+  tests\test_overclaim_regression.py `
+  tests\test_phi_detector_coverage.py `
+  tests\test_stage1_no_rehydration.py `
+  tests\test_token_vault_isolation.py `
+  --basetemp .pytest_tmp_lesson15
+```
+
+Full safe validation:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+```
+
+## Review Questions
+
+- Does every threat-model finding have a treatment decision?
+- Is each accepted risk explicitly scoped to fake-data POC use?
+- Are real LLM, RAG, memory, tools, multi-tenancy, non-demo data, and real PHI
+  still gated or avoided?
+- Does quarantine stop provider execution, or only record a warning?
+- Do request limits fail closed before expensive processing?
+- Do pattern and detector changes require fixtures first?
+- Can any API response, persisted blob, report, or eval artifact expose token
+  vault mappings?
+- Can Stage-1 healthcare safeguard tokens ever be marked rehydratable?
+
+## Quick Reference
+
+- Threat model pack: `docs/threat-models/`.
+- Treatment register: `docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md`.
+- Pattern refresh runbook: `docs/runbooks/PATTERN_REFRESH.md`.
+- Current scope: fake-data POC only.
+- Current action boundary: `ALLOW_REAL_ACTIONS=false`.
+- Full validation command: `tools/validate-threatprism.ps1`.

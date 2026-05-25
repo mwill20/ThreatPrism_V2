@@ -600,6 +600,7 @@ Lessons/Lesson11_Evaluation_Harness_And_Regression_Defense_Labs.md
 Lessons/Lesson12_Demo_Operations_And_CI_Hardening.md
 Lessons/Lesson13_Demo_Scenarios_And_API_Contract.md
 Lessons/Lesson14_Docker_Compose_Local_Demo_Packaging.md
+Lessons/Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md
 ```
 
 ## Next Session Recommended Prompt

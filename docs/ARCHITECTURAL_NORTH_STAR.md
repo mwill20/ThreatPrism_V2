@@ -183,9 +183,9 @@ Current direction:
 6. Completed: Demo Operations & CI Hardening v0.1.
 7. Completed: Demo Scenario Pack & API Contract Freeze v0.1.
 8. Completed: Docker Compose & Local Demo Packaging v0.1.
-9. Planned future data realism path: Data Strategy & Synthetic Fixture Factory
-   v0.1 before broad live-provider evaluation, larger external datasets, or
-   lab-generated telemetry.
+9. Completed: Data Strategy & Synthetic Fixture Factory v0.1 for local-only
+   reviewed source-shape conversion into sanitized ThreatPrism-native
+   fixtures.
 10. Dashboard UI or live-integration preparation only after explicit user
     approval and any required threat-model treatment updates.
 

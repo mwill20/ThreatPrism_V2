@@ -6,7 +6,7 @@ ThreatPrism needs more realistic data without introducing real regulated data,
 real workplace telemetry, real customer data, unsafe prompt content, or raw
 third-party dataset drift.
 
-The strategy is layered:
+The implemented strategy is layered:
 
 1. Keep hand-written fake fixtures for deterministic unit and regression tests.
 2. Add ThreatPrism-native synthetic fixtures for realistic SOC workflows.
@@ -79,7 +79,7 @@ Manual review must confirm:
 - no raw harmful prompt text in public-facing docs or logs
 - expected guardrail outcomes make sense
 
-## Planned Directory Structure
+## Implemented Directory Structure
 
 ```text
 data_sources/
@@ -111,7 +111,7 @@ tools/
 `external_datasets/**` and `fixtures/generated/**` should be ignored by git
 except for `.gitkeep` or README files.
 
-## Planned Fixture Shape
+## Implemented Fixture Shape
 
 Each generated fixture should be ThreatPrism-native and self-describing:
 
@@ -132,7 +132,7 @@ Each generated fixture should be ThreatPrism-native and self-describing:
 }
 ```
 
-## Planned Adapter Behavior
+## Implemented Adapter Behavior
 
 `synthea_adapter.py`:
 
@@ -159,15 +159,15 @@ Each generated fixture should be ThreatPrism-native and self-describing:
 - Preserve category metadata when useful.
 - Store sanitized previews only in summaries.
 
-## Planned CLI
+## Implemented CLI
 
-Example future command:
+Example command:
 
 ```powershell
 python -m tools.fixture_factory.factory --source synthea --input external_datasets/synthea_sample --output fixtures/generated/synthea_healthcare.jsonl --limit 10
 ```
 
-CLI requirements:
+CLI behavior:
 
 - require explicit input path
 - require explicit output path under an approved generated-fixture directory
@@ -177,9 +177,9 @@ CLI requirements:
 - print sanitized summaries only
 - never auto-download by default
 
-## Planned Validation
+## Implemented Validation
 
-Tests should prove:
+Tests prove:
 
 - dataset registry loads
 - adapters do not auto-download by default
@@ -193,31 +193,24 @@ Tests should prove:
 - `--limit` bounds output volume
 - console summaries do not leak raw sensitive values
 
-## Future Codex Prompt
+## Completion Notes
 
-Use this when the user explicitly asks to implement the slice:
+Data Strategy & Synthetic Fixture Factory v0.1 is implemented with:
+
+- `data_sources/registry.json`.
+- `tools/fixture_factory/` models, sanitizers, validators, adapters, and CLI.
+- Local-only adapters for Synthea-style, OTRF-style, PINT-style, and
+  Giskard-style source-shape samples.
+- Path controls that require inputs under `external_datasets/` and outputs
+  under `fixtures/generated/`.
+- Deterministic JSONL output with sorted fixture IDs and sorted JSON keys.
+- Tests in `tests/test_fixture_factory.py`.
+
+Validation on 2026-05-25:
 
 ```text
-Implement Data Strategy & Synthetic Fixture Factory v0.1 for ThreatPrism.
-
-Before implementation, read START_HERE.md, AGENTS.md,
-docs/THREATPRISM_V2_CODEX_HANDOFF.md, docs/ARCHITECTURAL_NORTH_STAR.md,
-docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md, and
-docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md.
-
-Do not download datasets automatically. Do not commit raw third-party datasets.
-Do not add live LLM, SOAR, cloud, enrichment, production IdP, dashboard, or
-remediation scope. Keep ALLOW_REAL_ACTIONS=false and fake-data-only defaults.
-
-Build a local fixture factory that converts user-provided, license-reviewed
-small source samples under external_datasets/ into sanitized ThreatPrism-native
-fixtures under fixtures/generated/. Add a machine-readable source registry,
-Pydantic fixture models, safe local-only adapters, sanitizers, validators, a
-CLI, tests, docs, decision records, limitations, checklist updates, and current
-validation notes.
-
-Validation must pass through tools/validate-threatprism.ps1 before the slice is
-called complete.
+73 passed
+eval harness dry-run: 15 passed / 0 failed
 ```
 
 ## Out Of Scope For v0.1

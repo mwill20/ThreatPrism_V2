@@ -70,6 +70,11 @@ Current baseline:
 - Local dry-run eval harness code exists under `src/threatprism/evals/`.
 - Demo scenario-pack helpers exist under `src/threatprism/demo/`.
 - Fake eval fixtures exist under `tests/evals/`.
+- Synthetic fixture factory tooling exists under `tools/fixture_factory/`.
+- Review-required source registry exists under `data_sources/registry.json`.
+- Local reviewed source staging is `external_datasets/`; generated fixture
+  output is `fixtures/generated/`. Both are ignored except approved
+  placeholders/docs.
 - Safe validation tooling exists under `tools/`.
 - Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
@@ -203,6 +208,9 @@ until identity and authorization enforce the effective role.
   disabled or demo API authentication.
 - Keep eval fixtures under `tests/evals/` and eval artifacts under
   `.eval_runs/`; reject path traversal.
+- Keep synthetic fixture factory inputs under `external_datasets/` and outputs
+  under `fixtures/generated/`; reject path traversal and avoid auto-scanning
+  ignored generated folders by default.
 - Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
   fake-data-only validation and artifact hygiene checks.
 - Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not

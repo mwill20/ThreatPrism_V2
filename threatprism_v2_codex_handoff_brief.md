@@ -14,7 +14,8 @@ path instead of pasting it into new chats.
 
 Implementation has begun after the original planning baseline. The current live
 repo includes an initial backend slice under `src/threatprism/`, fake demo SOAR
-payloads under `examples/soar_payloads/`, and tests under `tests/`.
+payloads under `examples/soar_payloads/`, local-only synthetic fixture factory
+tooling under `tools/fixture_factory/`, and tests under `tests/`.
 
 Known validation command:
 
@@ -40,17 +41,17 @@ Result:
 22 passed
 ```
 
-Latest validation after Docker Compose & Local Demo Packaging v0.1 on
+Latest validation after Data Strategy & Synthetic Fixture Factory v0.1 on
 2026-05-25:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_fixture_factory_validation_done
 ```
 
 Result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -309,11 +310,14 @@ Potential data sources:
 - Firewall logs
 - Existing V1 data sources where useful
 
-For public and synthetic datasets, use the planned data strategy captured in:
+For public and synthetic datasets, use the implemented local-only fixture
+factory and data strategy captured in:
 
 ```text
 docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
+data_sources/registry.json
+tools/fixture_factory/
 ```
 
 Public or synthetic datasets are source material only. They must go through
@@ -949,15 +953,15 @@ Demo Scenario Pack & API Contract Freeze v0.1 is implemented.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented.
 
-Data Strategy & Synthetic Fixture Factory v0.1 is planned for future data
-realism work. It should keep fake hand-written fixtures, add sanitized
-ThreatPrism-native synthetic fixtures, use Synthea, OTRF/Security Datasets,
-PINT, and Giskard samples only after manual review, and avoid automatic
-downloads or raw dataset commits.
+Data Strategy & Synthetic Fixture Factory v0.1 is implemented for local-only
+data realism work. It keeps fake hand-written fixtures, adds sanitized
+ThreatPrism-native synthetic fixture generation, supports Synthea-style,
+OTRF-style, PINT-style, and Giskard-style source-shape samples only after
+manual review, and avoids automatic downloads or raw dataset commits.
 
-No new implementation slice is selected yet. Docker Compose & Local Demo
-Packaging v0.1 is complete. Pick the next slice explicitly before adding
-dashboard UI, live providers, production IdP, non-demo data, or remediation.
+No new implementation slice is selected yet. Pick the next slice explicitly
+before adding dashboard UI, live providers, production IdP, non-demo data, or
+remediation. Generated fixture promotion is also a separate reviewed action.
 
 ---
 

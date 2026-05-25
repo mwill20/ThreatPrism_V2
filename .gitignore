@@ -8,3 +8,9 @@ data/
 *.db
 *.db-journal
 .env
+external_datasets/**
+!external_datasets/README.md
+!external_datasets/.gitkeep
+fixtures/generated/**
+!fixtures/generated/.gitkeep
+downloaded_datasets/**

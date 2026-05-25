@@ -57,6 +57,12 @@ The current live implementation includes a first backend slice:
 - `tools/` with fake-data-only safety checks and local validation wrapper.
 - `tools/generate-compact-handoff.ps1` with compact fresh-chat prompt
   generation.
+- `tools/fixture_factory/` with local-only synthetic fixture models,
+  sanitizers, validators, adapters, and CLI generation.
+- `data_sources/registry.json` with review-required, no-download, no-raw-commit
+  defaults for candidate source families.
+- `external_datasets/` and `fixtures/generated/` with ignored local staging and
+  generated fixture output boundaries.
 - `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with local demo
   backend packaging.
 - `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
@@ -72,21 +78,24 @@ The current live implementation includes a first backend slice:
   workflows and OpenAPI route/response-model contract checks.
 - `tests/test_docker_packaging.py` covering Dockerfile, Compose, and Docker
   ignore safety boundaries.
+- `tests/test_fixture_factory.py` covering registry metadata, fixture models,
+  sanitizer behavior, adapters, CLI behavior, path safety, deterministic
+  output, no-network behavior, schema validity, and leakage prevention.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
-  `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the planned
-  future data-realism and synthetic fixture factory slice.
+  `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
+  implemented local-only data-realism and synthetic fixture factory slice.
 
 Validated on 2026-05-25 with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_fixture_factory_validation_done
 ```
 
 Result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -370,30 +379,27 @@ docker-compose.yml
   -> Empty live-provider credential variables
 ```
 
+Data Strategy & Synthetic Fixture Factory v0.1 is implemented:
+
+```text
+data_sources/registry.json
+  -> review-required source registry with downloads disabled
+external_datasets/
+  -> ignored local-only reviewed source sample staging
+tools/fixture_factory/
+  -> local-only adapters, sanitizers, validators, models, and CLI
+fixtures/generated/
+  -> ignored deterministic sanitized JSONL fixture output
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
 selected explicitly before implementation.
 
-The previous backend-safe option is complete:
-
-```text
-Docker Compose & Local Demo Packaging v0.1
-  -> Package the existing fake-data backend for repeatable local startup
-  -> Preserve safe validation and deterministic demo defaults
-  -> Avoid dashboard UI, live providers, production IdP, and remediation unless
-     explicitly requested
-```
-
-The dataset issue is captured as a future planned slice:
-
-```text
-Data Strategy & Synthetic Fixture Factory v0.1
-  -> Use public or synthetic datasets only as reviewed source material
-  -> Keep raw external datasets ignored and out of runtime flows
-  -> Convert small samples into sanitized ThreatPrism-native fixtures
-  -> Require manual license and safety review before any dataset use
-```
+Curated generated-fixture promotion is a future reviewed action, not an
+automatic follow-on. Generated fixtures remain ignored until a tiny curated
+sample is manually reviewed for license, safety, and data content.
 
 Do not implement:
 
@@ -582,6 +588,7 @@ src/threatprism/demo/scenarios.py
 tests/test_operational_read_models.py
 tests/test_eval_harness.py
 tests/test_demo_scenarios_and_api_contract.py
+tests/test_fixture_factory.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
 examples/demo_scenarios/demo_scenario_pack.json
@@ -590,6 +597,11 @@ tools/check_demo_safety.py
 tools/validate-threatprism.ps1
 tools/generate-compact-handoff.ps1
 tools/generate_compact_handoff.py
+tools/fixture_factory/
+data_sources/registry.json
+external_datasets/README.md
+external_datasets/.gitkeep
+fixtures/generated/.gitkeep
 .claude/commands/compact-handoff.md
 Dockerfile
 docker-compose.yml
@@ -636,7 +648,7 @@ the quickest route/role smoke signal after the full validation wrapper.
 
 If the next request is about datasets or more realistic fixtures, read
 `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
-`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` before implementation.
+`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` before making changes.
 Do not auto-download datasets or commit raw third-party data.
 
 If the reused `.pytest_tmp_run_verify` folder is locked on Windows, rerun with a

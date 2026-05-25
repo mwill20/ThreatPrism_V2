@@ -16,3 +16,4 @@ data/
 !.env.example
 external_datasets/
 fixtures/generated/
+downloaded_datasets/

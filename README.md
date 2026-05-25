@@ -38,6 +38,11 @@ The latest packaging slice adds Docker Compose local demo packaging for the
 existing fake-data FastAPI backend, with deterministic demo defaults and no
 live providers.
 
+The latest data-realism slice adds a safe, deterministic synthetic fixture
+factory that converts explicit local, manually reviewed source-shape samples
+into sanitized ThreatPrism-native JSONL fixtures without downloads, live
+providers, raw dataset commits, or baseline test auto-scanning.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -69,6 +74,13 @@ docs/specs/       Product, architecture, API, data, security, and demo specs
 examples/         Fake demo SOAR payloads and scenario packs
 tests/            API, guardrail, read-model, eval, and safety tests
 tools/            Safe local validation and demo safety checks
+tools/fixture_factory/
+                  Local-only synthetic fixture factory
+data_sources/     Review-required source registry
+external_datasets/
+                  Ignored local-only reviewed source sample staging
+fixtures/generated/
+                  Ignored generated fixture output
 .github/          Fake-data-only CI workflow
 Dockerfile        Local demo backend image
 docker-compose.yml Local demo backend service
@@ -126,7 +138,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -146,6 +158,22 @@ python tools\check_demo_safety.py --include-untracked
 
 If Windows locks a reused pytest temp directory, rerun with a fresh ignored
 `--basetemp` value.
+
+## Generate Synthetic Fixtures
+
+The fixture factory is local-only and requires explicit reviewed source samples
+under `external_datasets/`. It does not download datasets and does not promote
+generated fixtures into baseline tests automatically.
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m tools.fixture_factory.factory --source synthea_sample_data --input external_datasets/synthea_sample --output fixtures/generated/synthea_healthcare.jsonl --limit 10
+```
+
+Output is written under `fixtures/generated/`, which is ignored by git except
+for the placeholder file. Review generated fixtures manually before promoting
+any curated sample into tracked tests or eval fixtures.
 
 Run only the demo scenario and API contract checks:
 
@@ -296,11 +324,12 @@ Demo Scenario Pack & API Contract Freeze v0.1 is implemented. See
 `docs/specs/19_DEMO_SCENARIO_PACK_AND_API_CONTRACT.md`, and
 `examples/demo_scenarios/demo_scenario_pack.json`.
 
-Data Strategy & Synthetic Fixture Factory v0.1 is planned, not implemented.
-See `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
-`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`. Public or synthetic
-datasets must be manually reviewed, kept out of git as raw data, and converted
-into sanitized ThreatPrism-native fixtures before use.
+Data Strategy & Synthetic Fixture Factory v0.1 is implemented. See
+`docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md`,
+`docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`,
+`data_sources/registry.json`, and `tools/fixture_factory/`. Public or
+synthetic datasets must be manually reviewed, kept out of git as raw data, and
+converted into sanitized ThreatPrism-native fixtures before use.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

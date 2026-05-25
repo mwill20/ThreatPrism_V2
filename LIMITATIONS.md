@@ -50,17 +50,19 @@ Current implemented baseline:
 - Context-light startup file and compact handoff prompt generation tooling.
 - Docker Compose local demo packaging for the existing fake-data FastAPI
   backend.
+- Data source registry, local-only synthetic fixture factory, fixture models,
+  sanitizers, validators, adapters, CLI entry point, and fixture-factory tests.
 
 Validation command confirmed on 2026-05-25:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_run_docker_packaging_final4
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_fixture_factory_validation_done
 ```
 
-Result after Docker Compose & Local Demo Packaging v0.1:
+Result after Data Strategy & Synthetic Fixture Factory v0.1:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -187,8 +189,9 @@ and the user can run the command manually when needed.
 
 ## Dataset Strategy Limitations
 
-ThreatPrism does not currently include a dataset ingestion or fixture-factory
-implementation.
+ThreatPrism includes a local-only synthetic fixture factory. It is not a
+dataset ingestion pipeline, download manager, runtime data model, or approval
+mechanism for third-party data.
 
 Planned public or synthetic dataset use is limited to reviewed source material
 for generating sanitized ThreatPrism-native synthetic fixtures. Public datasets
@@ -198,6 +201,10 @@ Current dataset boundaries:
 
 - No automatic dataset downloads.
 - No committed raw third-party datasets.
+- Generated fixtures under `fixtures/generated/` are ignored by git unless a
+  tiny curated sample is intentionally promoted in a future reviewed change.
+- The eval harness and tests do not auto-scan ignored generated fixture
+  folders.
 - No production telemetry.
 - No real healthcare records.
 - No real workplace, customer, tenant, user, host, domain, IP, or secret data.
@@ -231,9 +238,8 @@ treatments before implementation.
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.
 - Decide how much V1 CLI behavior is directly preserved versus wrapped around the new case model.
-- Decide when to implement Data Strategy & Synthetic Fixture Factory v0.1 and
-  which candidate datasets the user has approved after license and safety
-  review.
+- Decide whether any generated fixture should be manually curated and promoted
+  into tracked tests or eval fixtures after license and safety review.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or

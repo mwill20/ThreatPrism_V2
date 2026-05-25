@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-66 passed
+73 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -201,6 +201,26 @@ python tools\check_demo_safety.py --scan-eval-artifacts
 
 Eval outputs are generated under `.eval_runs/` and are ignored by git. Do not
 move generated eval artifacts into tracked docs or test fixtures.
+
+## Generate Synthetic Fixtures
+
+Use this only with tiny source-shape samples that were manually reviewed and
+placed under `external_datasets/`. The factory is local-only and does not
+download data.
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m tools.fixture_factory.factory --source synthea_sample_data --input external_datasets/synthea_sample --output fixtures/generated/synthea_healthcare.jsonl --limit 10
+```
+
+Factory guardrails:
+
+- Input paths must stay under `external_datasets/`.
+- Output paths must stay under `fixtures/generated/`.
+- Existing output files require `--force`.
+- Generated JSONL is ignored by git and must be manually reviewed before any
+  curated sample is promoted into tracked tests or eval fixtures.
 
 ## Troubleshooting
 

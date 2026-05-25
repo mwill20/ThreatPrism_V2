@@ -295,7 +295,7 @@ Validation after owner pass and Slices A, B, D, E, F, and G:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
-## Next Active Slice
+## Completed Slice
 
 Docker Compose & Local Demo Packaging v0.1 is complete:
 
@@ -318,26 +318,60 @@ Implemented with `Dockerfile`, `docker-compose.yml`, `.dockerignore`,
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`, and
 `docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`.
 
+## Completed Slice
+
+Data Strategy & Synthetic Fixture Factory v0.1 is complete:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Add `data_sources/registry.json` with review-required, no-download,
+  no-raw-commit defaults.
+- [x] Add ignored `external_datasets/` staging with README and `.gitkeep`.
+- [x] Add ignored `fixtures/generated/` output with `.gitkeep`.
+- [x] Add `tools/fixture_factory/` models, sanitizers, validators, adapters,
+  and CLI entry point.
+- [x] Reuse existing ThreatPrism schemas and guardrails where practical.
+- [x] Keep generated fixtures ThreatPrism-native rather than adding a second
+  runtime data model.
+- [x] Enforce deterministic fixture IDs, sorted fixture ordering, sorted JSON,
+  and no unseeded randomness.
+- [x] Enforce input paths under `external_datasets/` and output paths under
+  `fixtures/generated/`.
+- [x] Reject path traversal, absolute escapes, unsafe extensions, and
+  overwrite attempts unless `--force` is explicit.
+- [x] Keep adapters local-only with no downloads or network calls.
+- [x] Add tests for registry metadata, fixture models, sanitizer behavior,
+  adapters, CLI behavior, path safety, deterministic output, no-network
+  behavior, schema validity, and no sensitive data leakage.
+- [x] Update docs, README, runbook, checklist, handoff, decisions,
+  limitations, lessons, `.gitignore`, and `.dockerignore`.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_fixture_factory_validation_done`.
+
+Implemented with `data_sources/registry.json`, `external_datasets/README.md`,
+`fixtures/generated/.gitkeep`, `tools/fixture_factory/`, and
+`tests/test_fixture_factory.py`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should
 be selected explicitly before implementation:
 
-- [ ] Data Strategy & Synthetic Fixture Factory v0.1 if the user wants
-  synthetic fixture generation next.
 - [ ] Dashboard UI preparation if the user explicitly approves frontend work.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
+- [ ] Curated generated-fixture promotion only after manual license, safety,
+  and content review.
 
 Future planned data-realism slice:
 
-- [ ] Data Strategy & Synthetic Fixture Factory v0.1.
+- [x] Data Strategy & Synthetic Fixture Factory v0.1.
 - [x] Capture the dataset strategy in
   `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
 - [x] Capture the implementation-ready spec in
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
-- [ ] When implemented, keep raw external datasets ignored and convert only
+- [x] When implemented, keep raw external datasets ignored and convert only
   manually reviewed source samples into sanitized ThreatPrism-native fixtures.
-- [ ] Do not auto-download datasets, run Caldera, add live LLM evaluation, or
+- [x] Do not auto-download datasets, run Caldera, add live LLM evaluation, or
   commit raw third-party data without an explicit future prompt.
 
 ## Context Handoff
@@ -359,7 +393,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

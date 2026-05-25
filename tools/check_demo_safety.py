@@ -24,6 +24,9 @@ REQUIRED_GITIGNORE_ENTRIES = {
     "pytest-cache-files-*/",
     "data/",
     "*.db",
+    "external_datasets/**",
+    "fixtures/generated/**",
+    "downloaded_datasets/**",
 }
 
 GENERATED_TRACKED_PREFIXES = (

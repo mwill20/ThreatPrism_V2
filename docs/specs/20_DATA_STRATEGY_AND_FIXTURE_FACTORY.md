@@ -2,9 +2,11 @@
 
 ## Status
 
-Planned future implementation slice. This spec captures the dataset strategy
-from the dataset planning discussion. It does not authorize raw dataset
-ingestion or live-provider work.
+Implemented in Data Strategy & Synthetic Fixture Factory v0.1.
+
+This spec captures the dataset strategy and the implemented local-only fixture
+factory. It does not authorize raw dataset ingestion, automatic downloads, or
+live-provider work.
 
 ## Problem
 
@@ -213,7 +215,7 @@ reviewed download command.
 
 ## CLI Requirements
 
-Planned command shape:
+Implemented command shape:
 
 ```powershell
 python -m tools.fixture_factory.factory --source synthea --input external_datasets/synthea_sample --output fixtures/generated/synthea_healthcare.jsonl --limit 10
@@ -251,18 +253,27 @@ Add tests proving:
 
 ## Acceptance Criteria
 
-- Data strategy docs exist and list candidate sources with review status.
-- Machine-readable registry exists.
-- Raw external dataset folders are ignored.
-- Generated fixture folders are ignored unless explicitly promoted.
-- Fixture factory scaffold exists.
-- Safe local-only adapter stubs exist for Synthea, OTRF, PINT, and Giskard.
-- Sanitizer and validator functions fail closed.
-- CLI exists with explicit input/output/limit controls.
-- Tests cover safety, schema, adapters, path controls, and non-leakage.
-- README, checklist, handoff, decisions, limitations, and lesson index are
-  updated when implementation happens.
-- `tools/validate-threatprism.ps1` passes before completion.
+- [x] Data strategy docs exist and list candidate sources with review status.
+- [x] Machine-readable registry exists.
+- [x] Raw external dataset folders are ignored.
+- [x] Generated fixture folders are ignored unless explicitly promoted.
+- [x] Fixture factory scaffold exists.
+- [x] Safe local-only adapters exist for Synthea, OTRF, PINT, and Giskard
+  source-shape samples.
+- [x] Sanitizer and validator functions fail closed.
+- [x] CLI exists with explicit input/output/limit controls.
+- [x] Tests cover safety, schema, adapters, path controls, determinism,
+  no-network behavior, and non-leakage.
+- [x] README, checklist, handoff, decisions, limitations, and lesson index are
+  updated.
+- [x] `tools/validate-threatprism.ps1` passes before completion.
+
+Validation on 2026-05-25:
+
+```text
+73 passed
+eval harness dry-run: 15 passed / 0 failed
+```
 
 ## Future Expansion
 

@@ -1,0 +1,136 @@
+{
+  "sources": [
+    {
+      "source_id": "synthea_sample_data",
+      "name": "Synthea Sample Data",
+      "url": "https://github.com/synthetichealth/synthea-sample-data",
+      "category": "synthetic_healthcare_context",
+      "intended_use": "Small synthetic healthcare-context source samples for accidental contamination fixture generation.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Preferred first healthcare-context source family after manual license and safety review."
+    },
+    {
+      "source_id": "synthea_generator",
+      "name": "Synthea Generator",
+      "url": "https://github.com/synthetichealth/synthea",
+      "category": "synthetic_healthcare_generation",
+      "intended_use": "Later local generation of synthetic patient and encounter-style source samples.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Out of scope for v0.1; no generation or download support is implemented."
+    },
+    {
+      "source_id": "synthea_downloads",
+      "name": "Synthea Downloads",
+      "url": "https://synthea.mitre.org/downloads",
+      "category": "synthetic_healthcare_archives",
+      "intended_use": "Later manually reviewed FHIR, C-CDA, or CSV source samples.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Large archives remain out of scope for v0.1."
+    },
+    {
+      "source_id": "synthea_coherent_data",
+      "name": "Synthea Coherent Data",
+      "url": "https://registry.opendata.aws/synthea-coherent-data/",
+      "category": "synthetic_healthcare_corpus",
+      "intended_use": "Later manually reviewed rich synthetic healthcare source material.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "High complexity; not used by the v0.1 local-only adapters."
+    },
+    {
+      "source_id": "otrf_security_datasets",
+      "name": "OTRF Security Datasets",
+      "url": "https://github.com/OTRF/Security-Datasets",
+      "category": "soc_telemetry",
+      "intended_use": "Small manually reviewed SOC telemetry source samples for case and evidence realism.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Preferred first SOC telemetry source family after manual license and safety review."
+    },
+    {
+      "source_id": "security_datasets_docs",
+      "name": "Security Datasets Documentation",
+      "url": "https://securitydatasets.com",
+      "category": "soc_telemetry_reference",
+      "intended_use": "Reference material for understanding OTRF-style datasets.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Reference only; no runtime dependency."
+    },
+    {
+      "source_id": "mordor_legacy",
+      "name": "Mordor Legacy Datasets",
+      "url": "https://github.com/UraSecTeam/mordor",
+      "category": "soc_telemetry_archive",
+      "intended_use": "Later selective adversary-simulation source samples after manual review.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Later only; not used by the v0.1 adapters."
+    },
+    {
+      "source_id": "lakera_pint",
+      "name": "Lakera PINT",
+      "url": "https://github.com/lakeraai/pint-benchmark",
+      "category": "prompt_injection_research",
+      "intended_use": "Small manually reviewed prompt-injection source-shape samples for eval fixture generation.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Preferred first prompt-injection source family after manual license and safety review."
+    },
+    {
+      "source_id": "giskard_prompt_injections",
+      "name": "Giskard Prompt Injections",
+      "url": "https://github.com/Giskard-AI/prompt-injections",
+      "category": "prompt_injection_research",
+      "intended_use": "Small manually reviewed prompt-injection CSV source-shape samples for eval fixture generation.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Preferred first prompt-injection CSV source family after manual license and safety review."
+    },
+    {
+      "source_id": "mindgard_evasion_samples",
+      "name": "Mindgard Evasion Samples",
+      "url": "https://huggingface.co/datasets/Mindgard/evaded-prompt-injection-and-jailbreak-samples",
+      "category": "prompt_injection_research",
+      "intended_use": "Later evasion-style prompt-injection source-shape review.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Review-required later source family; no v0.1 adapter."
+    },
+    {
+      "source_id": "trustairlab_jailbreakllms",
+      "name": "TrustAIRLab JailbreakLLMs",
+      "url": "https://github.com/TrustAIRLab/JailbreakLLMs",
+      "category": "prompt_injection_research",
+      "intended_use": "Later jailbreak prompt source-shape review.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "Review-required later source family; no v0.1 adapter."
+    },
+    {
+      "source_id": "apache_caldera",
+      "name": "Apache Caldera",
+      "url": "https://github.com/apache/caldera",
+      "category": "lab_telemetry_generation",
+      "intended_use": "Future isolated lab telemetry generation only after explicit approval.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "No Caldera execution or lab setup in v0.1."
+    }
+  ]
+}

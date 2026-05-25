@@ -500,3 +500,33 @@ Compose hard-codes empty live-provider credential variables and fake demo API
 keys so host secrets are not passed through by accident. The local image uses
 the transitive lock file for dependency installation and stores demo SQLite
 state in a named Docker volume.
+
+## D-036 Synthetic Fixture Factory Boundary
+
+Data Strategy & Synthetic Fixture Factory v0.1 is implemented as local tooling
+under `tools/fixture_factory/`.
+
+The factory converts explicit, manually reviewed source-shape samples under
+`external_datasets/` into sanitized ThreatPrism-native JSONL fixtures under
+`fixtures/generated/`.
+
+The factory must remain deterministic:
+
+- Stable fixture IDs.
+- Sorted fixture ordering.
+- Sorted JSON output.
+- No unseeded randomness.
+- No timestamps in generated fixture payloads.
+
+The factory must remain local-only:
+
+- No automatic dataset downloads.
+- No future download support hidden in this slice.
+- No raw third-party dataset commits.
+- No live LLM, SOAR, cloud, enrichment, RAG, memory/write-back, dashboard,
+  production IdP, or remediation scope.
+
+Generated fixtures are ignored by default and must not silently affect baseline
+tests or evals. Any generated fixture promoted into tracked tests or eval
+fixtures requires a separate manual review of license, safety, and data
+content.

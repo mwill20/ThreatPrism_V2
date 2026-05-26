@@ -81,6 +81,6 @@ data, workplace data, or provider output.
 Status: gated option.
 
 The current dashboard is local and fake-data-only. Production dashboard
-deployment, production identity, external telemetry, browser matrix
-certification, and accessibility certification require explicit approval and a
-separate implementation slice.
+deployment, live production token verification, external telemetry, browser
+matrix certification, and accessibility certification require explicit approval
+and a separate implementation slice.

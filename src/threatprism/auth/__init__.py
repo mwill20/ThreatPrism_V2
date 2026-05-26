@@ -1,1 +1,1 @@
-"""Demo authentication and authorization helpers."""
+"""Authentication and authorization helpers."""

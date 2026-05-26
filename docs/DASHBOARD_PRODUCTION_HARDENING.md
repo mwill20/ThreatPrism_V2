@@ -49,7 +49,7 @@ remain future work.
 
 ## Still Required Before Production
 
-- production identity provider integration
+- live production token verification and identity provider integration
 - TLS and reverse proxy configuration
 - secrets management
 - production persistence and audit integrity

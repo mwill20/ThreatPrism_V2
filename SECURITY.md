@@ -51,14 +51,19 @@ review, penetration testing, or production hardening.
 - Local dashboard hardening with same-origin static assets, CSP, frame
   blocking, no-sniff, referrer, browser permission, same-origin resource, and
   no-store cache headers.
-- Production environment startup guard (rejects demo auth modes).
+- Production environment startup guard (rejects disabled and demo auth modes).
+- Static production identity readiness for `API_AUTH_MODE=external_oidc`,
+  including provider, issuer, audience, JWKS, claim, role, and algorithm
+  checks. Protected requests still fail closed until a live token verifier is
+  implemented.
 - POC-grade HTTP request body limits, in-process `POST /cases` rate limiting,
   and triage concurrency caps.
 - Exact-pinned direct dependencies plus a transitive `requirements-lock.txt`.
 
 ### What is not implemented
 
-- Production identity provider (OAuth, OIDC, Entra ID).
+- Live production token verification and production IdP integration (OAuth,
+  OIDC, Entra ID).
 - TLS termination or transport security (expected from a reverse proxy).
 - Edge or distributed rate limiting beyond the in-process POC limiter.
 - Network-level access controls.
@@ -118,6 +123,7 @@ review, penetration testing, or production hardening.
 | LLM claiming real remediation was executed | Action safety check blocks any report containing `real_action_executed: true` | `guardrails/policy.py` |
 | Role escalation (lower-privilege caller requests higher-privilege view) | `ROLE_VIEW_POLICY` enforcement; caller's effective role derived from credential, not request parameter | `auth/demo.py` |
 | Unauthorized access to case data | Demo API-key auth required when `API_AUTH_MODE=demo_key`; production env rejects demo auth | `auth/demo.py`, `config.py` |
+| Production identity misconfiguration | `external_oidc` requires static OIDC-shaped readiness config and rejects live verifier enablement until an approved verifier slice exists | `auth/production.py`, `config.py`, `tests/test_production_identity_readiness.py` |
 | Security telemetry visible to non-analyst roles | Role-based view masking replaces IPs, URLs, emails, hashes with `[SECURITY_TELEMETRY:TYPE:masked]` for non-analyst roles | `guardrails/views.py` |
 | Token vault mapping exposure (raw-to-token map leaked) | Vault mappings stay in-memory on `CaseService`; never serialized to database, API responses, or eval artifacts | `guardrails/tokenization.py` |
 | Eval fixture path traversal | `_resolve_under_approved_dir()` rejects paths outside `tests/evals/` and `.eval_runs/` | `evals/runner.py` |
@@ -177,24 +183,29 @@ these is a security defect.
    credential. A `?role=` parameter is a view request, not authority — the
    auth layer denies requests for views outside the caller's `ROLE_VIEW_POLICY`.
 
-8. **Production environments cannot start with demo auth.** `validate_runtime()`
-   blocks `THREATPRISM_ENV=prod` or `production` when `API_AUTH_MODE` is `none`
-   or `demo_key`.
+8. **Production environments cannot start with disabled or demo auth.**
+   `validate_runtime()` blocks `THREATPRISM_ENV=prod` or `production` when
+   `API_AUTH_MODE` is `none` or `demo_key`.
 
-9. **Disabled auth requires explicit local acknowledgement.**
+9. **Production identity readiness is static and fail-closed.**
+   `API_AUTH_MODE=external_oidc` requires static OIDC-shaped configuration and
+   rejects live verifier enablement. Protected API routes still deny requests
+   until a future trusted token verifier is implemented.
+
+10. **Disabled auth requires explicit local acknowledgement.**
    `API_AUTH_MODE=none` is rejected unless local development is explicitly
    acknowledged with `THREATPRISM_LOCAL_DEV_ACK=true` or auth is explicitly
    disabled for tests.
 
-10. **Case submission cost is bounded for POC scope.** `/cases` has a body
+11. **Case submission cost is bounded for POC scope.** `/cases` has a body
     limit, per-process rate limit, and triage concurrency cap. Production still
     needs edge enforcement and durable queue backpressure.
 
-11. **CSI/RGOI is read-only.** CSI/RGOI routes must not write memory, mutate
+12. **CSI/RGOI is read-only.** CSI/RGOI routes must not write memory, mutate
     trust, approve knowledge, publish suppressions, execute remediation, or
     call live RAG providers.
 
-12. **Dashboard requests stay same-origin.** The dashboard must not load
+13. **Dashboard requests stay same-origin.** The dashboard must not load
     external scripts, styles, fonts, telemetry beacons, or provider URLs. It
     must consume same-origin API routes with fake demo credentials only.
 
@@ -215,6 +226,7 @@ source code.
 | `VIRUSTOTAL_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
 | `URLSCAN_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
 | `ABUSEIPDB_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
+| `PRODUCTION_IDENTITY_*` | Static production identity readiness shape | Empty or fake examples only; no live verifier |
 
 ### Rules
 
@@ -290,7 +302,8 @@ When adding dependencies:
 
 Before ThreatPrism handles non-demo data, these items must be addressed:
 
-- [ ] Production identity provider integration (OAuth/OIDC/Entra ID).
+- [ ] Live production token verification and production IdP integration
+  (OAuth/OIDC/Entra ID).
 - [ ] TLS termination (reverse proxy or direct).
 - [ ] Edge or distributed rate limiting and durable queue backpressure beyond
   the current in-process POC controls.

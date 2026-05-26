@@ -357,7 +357,9 @@ If `THREATPRISM_ENV` is set to `prod` or `production`,
 ValueError: Production environments cannot use disabled or demo API authentication.
 ```
 
-This is intentional. Production auth modes are not yet implemented.
+This is intentional. Production-like environments must use the static
+`external_oidc` readiness mode. Live production token verification is not yet
+implemented.
 
 Outside production, `API_AUTH_MODE=demo_key` also fails closed unless
 `DEMO_API_KEYS` is configured, and `API_AUTH_MODE=none` fails closed unless

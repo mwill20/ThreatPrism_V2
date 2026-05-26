@@ -558,3 +558,19 @@ The current implementation must not:
 Tenant IDs in CSI/RGOI v0.1 are defensive cognition namespaces for testable
 isolation. They are not MSSP multi-tenancy or production tenant
 administration.
+
+## D-038 Production Identity Readiness Boundary
+
+Production Identity Readiness v0.1 defines `API_AUTH_MODE=external_oidc` as the
+explicit production identity readiness mode.
+
+This is a static readiness boundary only. It validates provider, issuer,
+audience, JWKS URI, claim names, role coverage, and safe asymmetric algorithms.
+It rejects live verifier enablement because no trusted production token
+verifier exists yet.
+
+Production-like environments still reject `API_AUTH_MODE=none` and
+`API_AUTH_MODE=demo_key`. Protected API routes under `external_oidc` fail closed
+with `403 Unsupported API auth mode.` until a future approved slice implements
+token validation, trusted principal extraction, claim-to-role mapping, and
+production authorization policy.

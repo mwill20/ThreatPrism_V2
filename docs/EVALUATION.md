@@ -28,6 +28,9 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
 10. Does curated fixture promotion require explicit manifest review, reject
     generated-folder paths, preserve scenario coverage, and keep promoted
     fixtures schema-valid and sanitized?
+11. Does production identity readiness reject unsafe auth modes, require static
+    OIDC-shaped config, reject live verifier enablement, and keep protected
+    routes fail-closed under `external_oidc`?
 
 ## Current Validation Command
 
@@ -46,16 +49,16 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Broader Curated Fixture Expansion pass with:
+Validated during the Production Identity Readiness pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_v02_final_docs
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
 ```
 
 Result:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -77,11 +80,13 @@ eval harness dry-run: 15 passed / 0 failed
 | CSI/RGOI governed cognition | `tests/test_csi_rgoi.py` |
 | Dashboard contract fixtures | `examples/dashboard_contract/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
 | Dashboard UI and hardening | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |
+| Production identity readiness | `src/threatprism/auth/production.py`, `tests/test_production_identity_readiness.py` |
 
 ## Known Evaluation Limits
 
 - No live LLM calls are evaluated.
 - No live SOAR, cloud, enrichment, or remediation providers are evaluated.
+- No live production IdP, OIDC, JWKS, or token verification flow is evaluated.
 - No real PHI, PII, secrets, workplace data, or production telemetry is used.
 - No performance, latency, or load-test benchmark has been measured.
 - No external penetration test, production security review, or deployment

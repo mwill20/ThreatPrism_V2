@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from threatprism import __version__
 from threatprism.auth.demo import AuthorizationError, authorize_role_view
+from threatprism.auth.production import PRODUCTION_IDENTITY_AUTH_MODE
 from threatprism.cases.read_models import CaseReadModelEnvelope, OperationalMetrics, ReviewQueueEnvelope
 from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
@@ -115,6 +116,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     logger.info("ThreatPrism API auth mode: %s", active_settings.api_auth_mode)
     if active_settings.api_auth_mode == "none":
         logger.warning("API authentication is disabled for explicit local-development use only.")
+    if active_settings.api_auth_mode == PRODUCTION_IDENTITY_AUTH_MODE:
+        logger.warning(
+            "Production identity readiness is configured, but live token verification is not implemented; "
+            "protected requests fail closed."
+        )
 
     if DASHBOARD_STATIC_DIR.exists():
         app.mount(

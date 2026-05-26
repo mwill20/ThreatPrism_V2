@@ -114,7 +114,7 @@ The dashboard contract and local UI still do not add:
 
 - live LLM/provider calls
 - live SOAR/cloud/enrichment calls
-- production IdP integration
+- live production token verification or IdP integration
 - real data handling
 - remediation or containment
 - CSI/RGOI write-back or RAG corpus expansion

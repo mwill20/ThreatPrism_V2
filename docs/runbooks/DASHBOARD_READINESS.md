@@ -7,8 +7,8 @@ credentials only.
 
 - Work from `C:\Projects\ThreatPrismV2`.
 - Keep `ALLOW_REAL_ACTIONS=false`.
-- Do not use live LLM, SOAR, cloud, enrichment, RAG, or production IdP
-  providers.
+- Do not use live LLM, SOAR, cloud, enrichment, RAG, or live production IdP
+  providers/token verification.
 - Do not use real organization, workplace, tenant, user, host, domain, IP,
   PHI, PII, or secret data.
 
@@ -116,7 +116,7 @@ Expected current behavior:
 Stop and update the threat model before any work requires:
 
 - live providers
-- production IdP
+- live production IdP/token verification
 - real data
 - remediation
 - CSI/RGOI write-back

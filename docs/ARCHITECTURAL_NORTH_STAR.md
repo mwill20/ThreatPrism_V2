@@ -68,6 +68,9 @@ V2.
 - Do not add external research providers such as Exa.ai to CSI/RGOI, live RAG,
   validation, demos, fixture promotion, or source-of-truth paths without
   explicit approval and updated threat treatment.
+- Do not treat production identity readiness as live authentication. The
+  `external_oidc` readiness mode validates static configuration only; protected
+  requests must fail closed until a future token-verifier slice exists.
 - Use healthcare safeguard and evidence-alignment language only.
 - Do not claim HIPAA compliance, HIPAA certification, HITRUST compliance,
   HITRUST certification, control satisfaction, certification readiness, or that
@@ -231,14 +234,17 @@ Current direction:
 15. Completed: Broader Curated Fixture Expansion v0.2 for four tiny tracked,
     hand-reviewed fake fixtures covering SOC, healthcare-context exposure,
     sanitized prompt-injection, and evidence-conflict/GRC review.
-16. Production dashboard deployment, production identity, live-integration
-    preparation, external research providers, or additional curated fixture
+16. Completed: Production Identity Readiness v0.1 for static
+    `external_oidc` configuration checks and fail-closed protected-route
+    behavior without live token verification.
+17. Production dashboard deployment, live production identity integration,
+    live-integration preparation, external research providers, or additional curated fixture
     promotion only after explicit user approval and any required threat-model
     treatment updates.
 
 Do not add live LLM calls, live SOAR calls, live enrichment calls, production
-IdP integration, real remediation, non-demo data, or production dashboard
-deployment before the security and access-control foundation is validated.
+token verification, real remediation, non-demo data, or production dashboard
+deployment before the relevant threat treatments are reopened and validated.
 
 ## Decision Rubric
 

@@ -55,6 +55,25 @@ Result:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
+Later slices implemented CSI/RGOI, dashboard preparation, dashboard UI,
+dashboard hardening, curated fixture promotion, broader curated fixture
+expansion, and static production identity readiness. Treat
+`docs/THREATPRISM_V2_CODEX_HANDOFF.md` and `docs/WORKING_CHECKLIST.md` as the
+current detailed source of truth.
+
+Latest validation after Production Identity Readiness v0.1 on 2026-05-26:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
+```
+
+Result:
+
+```text
+102 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
 If Windows reports `WinError 5` while cleaning a reused pytest base temp, rerun
 with a fresh ignored base temp such as `.pytest_tmp_run_verify`.
 
@@ -960,8 +979,9 @@ OTRF-style, PINT-style, and Giskard-style source-shape samples only after
 manual review, and avoids automatic downloads or raw dataset commits.
 
 No new implementation slice is selected yet. Pick the next slice explicitly
-before adding dashboard UI, live providers, production IdP, non-demo data, or
-remediation. Generated fixture promotion is also a separate reviewed action.
+before adding live providers, live production token verification, non-demo
+data, production dashboard deployment, or remediation. Generated fixture
+promotion is also a separate reviewed action.
 
 ---
 

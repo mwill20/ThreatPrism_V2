@@ -3,6 +3,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from threatprism.auth.production import (
+    PRODUCTION_IDENTITY_AUTH_MODE,
+    ProductionIdentityReadinessReport,
+    evaluate_production_identity_readiness,
+)
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -19,6 +25,16 @@ class Settings:
     max_request_body_bytes: int = 262_144
     case_post_rate_limit_per_minute: int = 60
     triage_concurrency_limit: int = 4
+    production_identity_provider: str = ""
+    production_identity_issuer: str = ""
+    production_identity_audience: str = ""
+    production_identity_jwks_uri: str = ""
+    production_identity_subject_claim: str = "sub"
+    production_identity_roles_claim: str = "roles"
+    production_identity_tenant_claim: str = "tid"
+    production_identity_required_roles: str = "analyst,engineer,manager_grc,legal_privacy,audit_debug,admin"
+    production_identity_allowed_algorithms: str = "RS256"
+    production_identity_live_verification_enabled: bool = False
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -38,12 +54,48 @@ class Settings:
                 os.getenv("CASE_POST_RATE_LIMIT_PER_MINUTE"), default=60
             ),
             triage_concurrency_limit=_parse_int(os.getenv("TRIAGE_CONCURRENCY_LIMIT"), default=4),
+            production_identity_provider=os.getenv("PRODUCTION_IDENTITY_PROVIDER", ""),
+            production_identity_issuer=os.getenv("PRODUCTION_IDENTITY_ISSUER", ""),
+            production_identity_audience=os.getenv("PRODUCTION_IDENTITY_AUDIENCE", ""),
+            production_identity_jwks_uri=os.getenv("PRODUCTION_IDENTITY_JWKS_URI", ""),
+            production_identity_subject_claim=os.getenv("PRODUCTION_IDENTITY_SUBJECT_CLAIM", "sub"),
+            production_identity_roles_claim=os.getenv("PRODUCTION_IDENTITY_ROLES_CLAIM", "roles"),
+            production_identity_tenant_claim=os.getenv("PRODUCTION_IDENTITY_TENANT_CLAIM", "tid"),
+            production_identity_required_roles=os.getenv(
+                "PRODUCTION_IDENTITY_REQUIRED_ROLES",
+                "analyst,engineer,manager_grc,legal_privacy,audit_debug,admin",
+            ),
+            production_identity_allowed_algorithms=os.getenv(
+                "PRODUCTION_IDENTITY_ALLOWED_ALGORITHMS", "RS256"
+            ),
+            production_identity_live_verification_enabled=_parse_bool(
+                os.getenv("PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED"), default=False
+            ),
+        )
+
+    def production_identity_readiness(self) -> ProductionIdentityReadinessReport:
+        return evaluate_production_identity_readiness(
+            auth_mode=self.api_auth_mode,
+            provider=self.production_identity_provider,
+            issuer=self.production_identity_issuer,
+            audience=self.production_identity_audience,
+            jwks_uri=self.production_identity_jwks_uri,
+            subject_claim=self.production_identity_subject_claim,
+            roles_claim=self.production_identity_roles_claim,
+            tenant_claim=self.production_identity_tenant_claim,
+            required_roles=self.production_identity_required_roles,
+            allowed_algorithms=self.production_identity_allowed_algorithms,
+            live_verification_enabled=self.production_identity_live_verification_enabled,
         )
 
     def validate_runtime(self) -> None:
         auth_mode = self.api_auth_mode.strip().lower()
+        if auth_mode not in {"none", "demo_key", PRODUCTION_IDENTITY_AUTH_MODE}:
+            raise ValueError("Unsupported API_AUTH_MODE.")
         if self.env.strip().lower() in {"prod", "production"} and auth_mode in {"none", "demo_key"}:
             raise ValueError("Production environments cannot use disabled or demo API authentication.")
+        if auth_mode == PRODUCTION_IDENTITY_AUTH_MODE:
+            self.production_identity_readiness().require_static_ready()
         if auth_mode == "demo_key" and not self.demo_api_keys.strip():
             raise ValueError("DEMO_API_KEYS must be configured when API_AUTH_MODE=demo_key.")
         if auth_mode == "none" and self.auth_required and not self.local_dev_ack:

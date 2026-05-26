@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -176,3 +176,24 @@ docs/DASHBOARD_DATA_CONTRACT.md
 docs/runbooks/DASHBOARD_READINESS.md
 examples/dashboard_contract/
 ```
+
+## Review Production Identity Readiness
+
+Production identity readiness is static-only. It validates the future
+OIDC-shaped configuration boundary but does not verify live tokens:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+$env:THREATPRISM_ENV='production'
+$env:API_AUTH_MODE='external_oidc'
+$env:PRODUCTION_IDENTITY_PROVIDER='entra_oidc'
+$env:PRODUCTION_IDENTITY_ISSUER='https://idp.example.com/tenant/v2.0'
+$env:PRODUCTION_IDENTITY_AUDIENCE='api://threatprism-demo'
+$env:PRODUCTION_IDENTITY_JWKS_URI='https://idp.example.com/tenant/discovery/v2.0/keys'
+$env:ALLOW_REAL_ACTIONS='false'
+python -c "from threatprism.config import Settings; s=Settings.from_env(); s.validate_runtime(); print(s.production_identity_readiness().ready_for_token_verifier)"
+```
+
+Use fake example values only. Protected API routes still fail closed under
+`external_oidc` until a future live token-verifier slice is implemented.

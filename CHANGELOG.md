@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added Production Identity Readiness v0.1 with static `external_oidc`
+  configuration validation, unknown-auth-mode rejection, live-verifier
+  rejection, fail-closed protected-route behavior, docs, runbook, and tests.
 - Expanded the curated fixture set to four tiny hand-reviewed fake fixtures
   covering SOC, healthcare-context exposure, sanitized prompt-injection, and
   evidence-conflict/GRC review, with stronger manifest and scenario tests.

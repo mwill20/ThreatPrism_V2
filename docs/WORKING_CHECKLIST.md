@@ -463,8 +463,8 @@ Dashboard UI Implementation v0.1:
 Production Dashboard Hardening v0.1:
 
 - [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
-- [x] Keep this as dashboard hardening only; do not add production IdP, live
-  providers, real data, production deployment, external telemetry, or
+- [x] Keep this as dashboard hardening only; do not add live production IdP,
+  live providers, real data, production deployment, external telemetry, or
   remediation.
 - [x] Add dashboard-specific security headers for `GET /dashboard` and
   `/dashboard/assets/*`.
@@ -526,6 +526,33 @@ Broader Curated Fixture Expansion v0.2:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_curated_v02_final_docs`.
 
+## Completed Slice
+
+Production Identity Readiness v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep this as static readiness only; do not add live OIDC/JWKS calls,
+  JWT verification, Entra integration, real credentials, production tenant
+  administration, production dashboard deployment, or non-demo data handling.
+- [x] Add `API_AUTH_MODE=external_oidc` as the explicit production identity
+  readiness mode.
+- [x] Keep production-like environments blocked from `API_AUTH_MODE=none` and
+  `API_AUTH_MODE=demo_key`.
+- [x] Reject unknown auth modes.
+- [x] Validate static provider, issuer, audience, JWKS, claim, role, and
+  algorithm readiness settings.
+- [x] Reject live verifier enablement until a future approved token-verifier
+  slice exists.
+- [x] Keep protected routes fail-closed under `external_oidc`.
+- [x] Add focused tests for readiness validation, unsafe config rejection,
+  live-verifier rejection, unknown auth mode rejection, and protected-route
+  fail-closed behavior.
+- [x] Update docs, README, runbook, lesson, checklist, handoff, limitations,
+  security notes, threat model traceability, and validation notes.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_production_identity_final2`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended choices should be
@@ -536,8 +563,11 @@ selected explicitly before implementation:
   a gated future enhancement; it is not needed for the current build and must
   not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
   promotion, trust mutation, or source-of-truth changes.
-- [ ] Production dashboard deployment, production IdP, browser matrix
-  certification, and accessibility certification only after explicit approval.
+- [ ] Live production token verification and claim-to-role authorization only
+  after reopening production identity threat treatments and approving the
+  provider-specific design.
+- [ ] Production dashboard deployment, browser matrix certification, and
+  accessibility certification only after explicit approval.
 - [ ] Additional curated fixture promotion only after manual license, safety,
   and content review for each new fixture.
 
@@ -572,7 +602,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -593,7 +623,7 @@ fresh ignored base temp directory.
 - [ ] Live cloud or enrichment provider calls.
 - [ ] Production credentials.
 - [ ] Real workplace, tenant, user, host, domain, IP, or secret data.
-- [ ] Production dashboard deployment and production identity integration.
+- [ ] Production dashboard deployment and live production identity integration.
 - [ ] Strict CI gates that fail before the inherited baseline is ready.
 
 ## Definition Of Done For The Current Slice

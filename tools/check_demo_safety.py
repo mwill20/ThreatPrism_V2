@@ -195,6 +195,48 @@ def _check_runtime_guard(root: Path) -> list[SafetyFinding]:
                 "API_AUTH_MODE=none did not require an explicit local development acknowledgement.",
             )
         )
+    try:
+        Settings(
+            env="production",
+            api_auth_mode="external_oidc",
+            production_identity_provider="",
+            production_identity_issuer="",
+            production_identity_audience="",
+            production_identity_jwks_uri="",
+            allow_real_actions=False,
+        ).validate_runtime()
+    except ValueError:
+        pass
+    else:
+        findings.append(
+            SafetyFinding(
+                "runtime-guard",
+                "src/threatprism/config.py",
+                "API_AUTH_MODE=external_oidc did not require static production identity readiness config.",
+            )
+        )
+
+    try:
+        Settings(
+            env="production",
+            api_auth_mode="external_oidc",
+            production_identity_provider="entra_oidc",
+            production_identity_issuer="https://idp.example.com/tenant/v2.0",
+            production_identity_audience="api://threatprism-demo",
+            production_identity_jwks_uri="https://idp.example.com/tenant/discovery/v2.0/keys",
+            production_identity_live_verification_enabled=True,
+            allow_real_actions=False,
+        ).validate_runtime()
+    except ValueError:
+        pass
+    else:
+        findings.append(
+            SafetyFinding(
+                "runtime-guard",
+                "src/threatprism/config.py",
+                "Production identity readiness did not reject live token verification enablement.",
+            )
+        )
     return findings
 
 
@@ -216,6 +258,14 @@ def _check_env_example(root: Path) -> list[SafetyFinding]:
     if env_values.get("THREATPRISM_AUTH_REQUIRED", "").strip().lower() != "true":
         findings.append(
             SafetyFinding("env-template", ".env.example", "THREATPRISM_AUTH_REQUIRED must default to true.")
+        )
+    if env_values.get("PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED", "").strip().lower() != "false":
+        findings.append(
+            SafetyFinding(
+                "env-template",
+                ".env.example",
+                "PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED must default to false.",
+            )
         )
     auth_mode = env_values.get("API_AUTH_MODE", "").strip().lower()
     local_dev_ack = env_values.get("THREATPRISM_LOCAL_DEV_ACK", "").strip().lower()

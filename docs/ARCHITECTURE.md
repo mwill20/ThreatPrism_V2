@@ -413,7 +413,7 @@ Key design decisions:
 
 These are directional — they are not committed work:
 
-- **Production auth:** OAuth/OIDC/Entra ID replacing demo API-key auth
+- **Live production auth:** OAuth/OIDC/Entra ID token verification replacing demo API-key auth
 - **PostgreSQL:** replacing SQLite for multi-user, concurrent-write scenarios
 - **Async worker:** Celery or equivalent replacing in-process background tasks
 - **Real LLM provider:** implementing `TriageProvider` with OpenAI or local LLM

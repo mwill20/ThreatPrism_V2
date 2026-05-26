@@ -48,6 +48,10 @@ Read deeper files only when the task needs them:
   `docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md` when the task involves
   dashboard hardening, browser risk, CSP, or production-style dashboard
   readiness.
+- `docs/PRODUCTION_IDENTITY_READINESS.md` and
+  `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md` when the task involves
+  production auth readiness, OIDC-shaped settings, or future live token
+  verification.
 - `DECISIONS.md`
 - `LIMITATIONS.md`
 - `README.md`
@@ -68,7 +72,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

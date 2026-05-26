@@ -48,7 +48,8 @@ The current live implementation includes a first backend slice:
   healthcare safeguard scanning, role-based rendering helpers, output-policy
   scanning, evidence-grounding checks, and action-safety checks.
 - `src/threatprism/auth/` with demo API-key authentication, identity-to-role
-  mapping, role-view authorization, and safe authorization audit events.
+  mapping, role-view authorization, safe authorization audit events, and
+  static production identity readiness checks.
 - `src/threatprism/llm/providers.py` with a deterministic demo provider.
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
@@ -82,6 +83,10 @@ The current live implementation includes a first backend slice:
 - Dashboard hardening for `GET /dashboard` and `/dashboard/assets/*` with
   security headers, same-origin request enforcement, timeout-bounded API calls,
   keyboard persona navigation markers, docs, threat-model updates, and tests.
+- Production identity readiness for `API_AUTH_MODE=external_oidc` with static
+  OIDC-shaped provider, issuer, audience, JWKS, claim, role, and algorithm
+  validation. Live token verification is not implemented, and protected routes
+  fail closed under `external_oidc`.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -116,6 +121,10 @@ The current live implementation includes a first backend slice:
 - `docs/CURATED_GENERATED_FIXTURE_PROMOTION.md` and
   `docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md` capturing the
   reviewed tiny fixture-promotion and expansion path.
+- `docs/PRODUCTION_IDENTITY_READINESS.md`,
+  `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md`, and
+  `docs/runbooks/PRODUCTION_IDENTITY_READINESS.md` capturing the static
+  production identity readiness boundary.
 - `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
   reviewer-readiness docs for usage, evaluation, dataset handling,
   model/provider behavior, deployment boundary, monitoring, and
@@ -212,6 +221,19 @@ Result:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
+Production Identity Readiness validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
+```
+
+Result:
+
+```text
+102 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
 CI follow-up on 2026-05-24: GitHub Actions run `26350740346` failed on Ubuntu
 at `tests/test_eval_harness.py::test_path_traversal_is_rejected_for_fixtures_and_outputs`.
 Root cause was Windows-style backslash traversal being treated as a literal
@@ -277,6 +299,9 @@ Read in this order:
     `docs/specs/24_DASHBOARD_UI_PREPARATION.md` when the task involves
     dashboard contracts, UI readiness, persona response fixtures, or frontend
     planning.
+18. `docs/PRODUCTION_IDENTITY_READINESS.md` and
+    `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md` when the task involves
+    production auth readiness, OIDC-shaped settings, or future IdP planning.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -596,12 +621,24 @@ tests/test_curated_fixture_promotion.py
      leakage checks
 ```
 
+Production Identity Readiness v0.1 is implemented:
+
+```text
+API_AUTH_MODE=external_oidc
+  -> Static OIDC-shaped readiness config validation
+  -> Provider, issuer, audience, JWKS, claim, role, and algorithm checks
+  -> Live verifier enablement rejected
+  -> Unknown auth modes rejected
+  -> Production environments still reject none/demo_key
+  -> Protected API routes fail closed until a future token-verifier slice
+```
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Broader Curated Fixture Expansion
-v0.2 is complete; it promotes four tiny tracked fake fixtures through
-`fixtures/curated/manifest.json`. Generated fixtures remain ignored and are not
-auto-scanned.
+No new implementation slice is selected yet. Production Identity Readiness
+v0.1 is complete as a static readiness/fail-closed boundary only. Live token
+verification, claim-to-role production authorization, production tenant
+administration, and production dashboard deployment remain gated future work.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and
@@ -613,8 +650,8 @@ Do not implement:
 
 - real remediation actions
 - full threat intelligence integrations
-- production dashboard deployment, production IdP, external telemetry, or
-  tracked browser/accessibility certification
+- production dashboard deployment, live production IdP/token verification,
+  external telemetry, or tracked browser/accessibility certification
 - MSSP multi-tenancy
 - live SOAR credential flows
 - CSI/RGOI write-back, live RAG, autonomous knowledge approval, trust mutation,
@@ -767,6 +804,7 @@ docs/specs/24_DASHBOARD_UI_PREPARATION.md
 docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md
 docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md
 docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md
+docs/specs/28_PRODUCTION_IDENTITY_READINESS.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -798,6 +836,7 @@ docs/DASHBOARD_DATA_CONTRACT.md
 docs/DASHBOARD_UI_IMPLEMENTATION.md
 docs/DASHBOARD_PRODUCTION_HARDENING.md
 docs/CURATED_GENERATED_FIXTURE_PROMOTION.md
+docs/PRODUCTION_IDENTITY_READINESS.md
 docs/CSI_RGOI_ARCHITECTURE.md
 docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
@@ -826,6 +865,7 @@ tests/test_curated_fixture_promotion.py
 tests/test_csi_rgoi.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
+tests/test_production_identity_readiness.py
 examples/demo_scenarios/demo_scenario_pack.json
 examples/demo_scenarios/healthcare_safeguard_review_case.json
 examples/csi/rgoi_cognitive_objects.json
@@ -860,6 +900,7 @@ Lessons/Lesson19_Dashboard_UI_Preparation.md
 Lessons/Lesson20_Dashboard_UI_Implementation.md
 Lessons/Lesson21_Production_Dashboard_Hardening.md
 Lessons/Lesson22_Curated_Generated_Fixture_Promotion.md
+Lessons/Lesson23_Production_Identity_Readiness.md
 ```
 
 ## Next Session Recommended Prompt
@@ -890,7 +931,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
 analyst-controlled, no-real-remediation boundary. Do not add production
 dashboard deployment, live integrations, real data, external telemetry, or
-production IdP integration unless the user explicitly changes scope. The
+live production token verification unless the user explicitly changes scope. The
 scenario pack, dashboard UI tests, and API contract tests are now the quickest
 route/role smoke signals after the full validation wrapper.
 

@@ -91,12 +91,18 @@ and tests.
 The latest dashboard slice adds a same-origin, fake-data-only dashboard served
 by FastAPI at `GET /dashboard`. It consumes the documented role-safe API
 contract without adding live providers, external frontend dependencies, real
-data, production identity, or remediation.
+data, live production token verification, or remediation.
 
 The latest dashboard-hardening slice adds dashboard-specific security headers,
 same-origin request enforcement, timeout-bounded API calls, and keyboard
-persona navigation. It does not add production IdP, live providers,
-production deployment, or real data handling.
+persona navigation. It does not add live production token verification, live
+providers, production deployment, or real data handling.
+
+The latest production-identity-readiness slice adds a static
+`API_AUTH_MODE=external_oidc` readiness boundary, production auth-mode
+validation, OIDC-shaped configuration checks, and fail-closed protected-route
+behavior. It does not add live token verification, OAuth flows, Entra calls, or
+real credentials.
 
 Optional external research providers, such as Exa.ai, are documented only as a
 deferred future enhancement. They are not needed for the current build and are
@@ -131,7 +137,7 @@ not part of CSI/RGOI memory, live RAG, validation, demos, or fixture promotion.
 ```text
 src/threatprism/
   api/            FastAPI application factory and routes
-  auth/           Demo authentication and role-view authorization
+  auth/           Demo authentication, role-view authorization, and production identity readiness
   cases/          Case, triage report, feedback, read models, and service orchestration
   dashboard/      Static fake-data dashboard UI served by FastAPI
   evals/          Local dry-run regression evaluation harness
@@ -172,6 +178,7 @@ docker-compose.yml Local demo backend service
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
 | Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_PRODUCTION_HARDENING.md](docs/DASHBOARD_PRODUCTION_HARDENING.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
+| Production identity readiness | [docs/PRODUCTION_IDENTITY_READINESS.md](docs/PRODUCTION_IDENTITY_READINESS.md), [docs/specs/28_PRODUCTION_IDENTITY_READINESS.md](docs/specs/28_PRODUCTION_IDENTITY_READINESS.md), [docs/runbooks/PRODUCTION_IDENTITY_READINESS.md](docs/runbooks/PRODUCTION_IDENTITY_READINESS.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Future enhancement options | [docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
@@ -239,7 +246,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -447,7 +454,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -521,8 +528,15 @@ Dashboard UI Implementation v0.1 is implemented. See
 Production Dashboard Hardening v0.1 is implemented. See
 `docs/DASHBOARD_PRODUCTION_HARDENING.md` and
 `docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md`. This is hardening for the
-local fake-data UI only. Production identity, live integrations, external
-telemetry, production deployment, and real data remain out of scope.
+local fake-data UI only. Live production token verification, live integrations,
+external telemetry, production deployment, and real data remain out of scope.
+
+Production Identity Readiness v0.1 is implemented. See
+`docs/PRODUCTION_IDENTITY_READINESS.md`,
+`docs/specs/28_PRODUCTION_IDENTITY_READINESS.md`, and
+`docs/runbooks/PRODUCTION_IDENTITY_READINESS.md`. This is static readiness
+only. Live production token verification and trusted claim-to-role mapping are
+still future work.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

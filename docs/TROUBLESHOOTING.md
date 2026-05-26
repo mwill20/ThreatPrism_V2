@@ -32,8 +32,9 @@ real action settings.
 ## API Refuses To Start In Production Mode
 
 This is intentional. `THREATPRISM_ENV=prod` or `production` cannot use
-`API_AUTH_MODE=none` or `API_AUTH_MODE=demo_key`. Production IdP integration is
-not implemented yet.
+`API_AUTH_MODE=none` or `API_AUTH_MODE=demo_key`. Use
+`API_AUTH_MODE=external_oidc` only for static production identity readiness.
+Live production token verification is not implemented yet.
 
 ## Demo Auth Fails Closed
 
@@ -55,5 +56,5 @@ Stop if the next step requires:
 - real case data
 - real PHI or PII
 - real organization or workplace data
-- production authentication claims
+- live production authentication claims
 - HIPAA or HITRUST compliance claims

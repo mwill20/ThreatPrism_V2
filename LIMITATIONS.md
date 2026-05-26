@@ -62,17 +62,20 @@ Current implemented baseline:
 - Production-style hardening for the local dashboard surface, including
   dashboard security headers, same-origin request enforcement, timeout-bounded
   API calls, and keyboard persona navigation markers.
+- Static production identity readiness for `API_AUTH_MODE=external_oidc`,
+  including provider, issuer, audience, JWKS, claim, role, and algorithm
+  checks plus fail-closed protected-route behavior.
 
 Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_v02_final_docs
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
 ```
 
-Result after Broader Curated Fixture Expansion v0.2:
+Result after Production Identity Readiness v0.1:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -86,9 +89,10 @@ temp such as `.pytest_tmp_run_verify`.
 - Microsoft-specific production adapters.
 - Dedicated async worker or external queue.
 - Production-grade CI/CD release pipeline.
-- Production authentication and authorization beyond demo API-key mode.
+- Live production token verification and trusted production claim-to-role
+  authorization.
 - Production deployment hardening.
-- Production dashboard deployment and production identity integration.
+- Production dashboard deployment and live production identity integration.
 - An API compatibility policy beyond the current tested local route contract.
 - External research provider adapters such as Exa.ai.
 
@@ -157,6 +161,33 @@ Any future external research provider work must be disabled by default, use
 mocked provider responses in tests, avoid live calls in standard validation,
 record provenance and review status, and require human approval before any
 retrieved content becomes authoritative or curated.
+
+## Production Identity Limitations
+
+Production Identity Readiness v0.1 is static readiness only.
+
+Current behavior:
+
+- `THREATPRISM_ENV=prod` or `production` rejects `API_AUTH_MODE=none` and
+  `API_AUTH_MODE=demo_key`.
+- `API_AUTH_MODE=external_oidc` requires OIDC-shaped static configuration.
+- Unknown auth modes are rejected during startup.
+- Live verifier enablement is rejected.
+- Protected API requests still fail closed under `external_oidc` because no
+  trusted token verifier or claim-to-role mapper exists yet.
+
+Not implemented:
+
+- OAuth or OIDC redirect flows.
+- JWKS download.
+- JWT parsing or signature verification.
+- Entra ID integration.
+- Production RBAC/ABAC claim mapping.
+- Break-glass access governance.
+- Production tenant administration.
+
+Do not use real issuer URLs, tenant IDs, audiences, credentials, workplace
+data, or non-demo case data in this repository.
 
 ## GRC Limitations
 
@@ -274,7 +305,7 @@ Known repository-readiness gaps:
 - No tracked screenshot, GIF, or rendered architecture image exists yet. Text
   diagrams are available in docs, and local dashboard hardening is implemented,
   but permanent visual assets are not tracked.
-- Production deployment, live provider operation, production identity,
+- Production deployment, live provider operation, live production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.
 
@@ -292,7 +323,7 @@ Current boundaries:
 - No autonomous suppression publication.
 - No remediation or containment.
 - No live LLM, RAG, SOAR, cloud, or enrichment calls.
-- No production IdP or production tenant administration.
+- No live production IdP or production tenant administration.
 - No real PHI, PII, credentials, tenant data, workplace data, provider output,
   or organization data.
 
@@ -320,9 +351,9 @@ Current boundaries:
 - The dashboard consumes the existing role-safe API surfaces and must not
   bypass authorization, masking, evidence alignment, or CSI/RGOI retrieval
   governance.
-- No production IdP integration, external telemetry, frontend package manager,
-  browser matrix certification, production deployment, or real data handling is
-  implemented.
+- No live production token verification, external telemetry, frontend package
+  manager, browser matrix certification, production deployment, or real data
+  handling is implemented.
 
 ## Known Open Items
 

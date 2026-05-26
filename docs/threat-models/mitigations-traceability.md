@@ -31,6 +31,7 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 | S2 | Disabled auth requires explicit local-development acknowledgement; production env rejects `none` / `demo_key` auth modes | `validate_runtime()` at [config.py:38](../../src/threatprism/config.py); called from `create_app()` at [api/app.py:28](../../src/threatprism/api/app.py) | Mitigated for POC scope | `tests/test_ops_safety.py` |
 | E1 | `ROLE_VIEW_POLICY` enforces requested-role ⊆ caller's-allowed-set; escalation raises 403 | `ROLE_VIEW_POLICY` at [auth/demo.py:24-31](../../src/threatprism/auth/demo.py); enforcement at [auth/demo.py:158-170](../../src/threatprism/auth/demo.py) | Mitigated | `tests/test_access_control.py`, `tests/test_operational_read_models.py` |
 | R1 / DI4 | Authorization decisions (allow and deny) emit `AuditEvent` with hashed metadata (no raw credential) | `_authorization_event()` at [auth/demo.py:232](../../src/threatprism/auth/demo.py); `_request_metadata_hash()` (SHA-256) at [auth/demo.py:263](../../src/threatprism/auth/demo.py) | Mitigated | `tests/test_access_control.py`, `tests/test_healthcare_guardrails.py`, `tests/test_operational_read_models.py` |
+| S3 | Production identity readiness requires static `external_oidc` config and keeps protected routes fail-closed until a token verifier exists | `evaluate_production_identity_readiness()` in [auth/production.py](../../src/threatprism/auth/production.py); `validate_runtime()` in [config.py](../../src/threatprism/config.py); startup warning in [api/app.py](../../src/threatprism/api/app.py) | Mitigated for readiness scope | `tests/test_production_identity_readiness.py`, `tests/test_ops_safety.py` |
 
 ### API Resource Controls
 
@@ -171,6 +172,7 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production identity readiness traceability updated | Added S3 readiness control references and mapped them to `tests/test_production_identity_readiness.py` plus runtime guard checks. |
 | 2026-05-26 | Codex | Production dashboard hardening traceability updated | Added T4/I5 dashboard static-surface controls and mapped them to `tests/test_dashboard_ui.py`. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F traceability updated | Closed fail-closed auth, API resource controls, token-vault isolation tests, Stage 1 non-rehydration tests, pattern refresh fixtures, and dependency pinning entries for POC scope. |
 | 2026-05-24 | Codex | Slice G traceability updated | Added `tests/test_quarantine_enforcement.py` as coverage for prompt-firewall quarantine enforcement and removed OT-L5 from open threats. |

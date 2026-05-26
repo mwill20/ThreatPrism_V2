@@ -4,7 +4,7 @@
 
 Threat Model Treatment & Risk Register v0.1
 
-Status: owner decision pass recorded for POC scope; Slices A, B, D, E, F, and G implemented for current POC scope.
+Status: owner decision pass recorded for POC scope; Slices A, B, D, E, F, and G plus Production Identity Readiness v0.1 implemented for current POC/readiness scope.
 
 ## Goal
 
@@ -93,6 +93,7 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 |----|----------------|---------------------|-------|-------|-------|
 | S1 / RR-S1 | Default `demo_api_keys` are public in source | **Mitigated** | Slice A | Project owner (POC), 2026-05-24 | Defaults removed from `Settings`; `demo_key` mode now requires explicit `DEMO_API_KEYS`; covered by `tests/test_ops_safety.py` |
 | S2 / RR-S2 / OT-4 | `API_AUTH_MODE=none` default + narrow prod guard | **Mitigated** | Slice A | Project owner (POC), 2026-05-24 | Disabled auth now requires explicit local-dev acknowledgement; startup warns; covered by `tests/test_ops_safety.py` |
+| S3 | Production identity readiness misconfiguration | **Mitigated for readiness scope** | Production Identity Readiness v0.1 | Codex, 2026-05-26 | `external_oidc` now requires static readiness config, rejects live verifier enablement, and keeps protected routes fail-closed; live token verification remains gated |
 | T1 / OT-1 | SQLite blob tampering not detectable | **Gated Mitigation** | Gated (real persistence) | Project owner (POC), 2026-05-24 | Append-only audit table + hash chain. Not warranted while the system is demo-only with SQLite; required before any non-demo persistence |
 | T2 | LLM provider returns report with unsupported evidence | **Mitigated** (current) | n/a | n/a | Already implemented via `validate_report_evidence()`. No further treatment required |
 | T3 / OT-5 / RR-LD3 | `PROHIBITED_PATTERNS` regex needs refresh process | **Mitigated** | Slice F | Project owner (POC), 2026-05-24 | Quarterly review runbook and overclaim fixtures added; first review scheduled 2026-08-24 |
@@ -473,6 +474,7 @@ This spec does not:
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production identity readiness implemented | Added static `external_oidc` readiness config checks, unknown auth-mode rejection, live-verifier rejection, and fail-closed protected-route behavior. Live token verification and production claim mapping remain gated. |
 | 2026-05-26 | Codex | Curated fixture promotion implemented | Added one tracked fake SOC fixture through an explicit manifest review gate. Generated fixture output remains ignored and is not auto-scanned; no raw datasets, downloads, live providers, RAG, memory write-back, or real data were added. |
 | 2026-05-26 | Codex | External research provider deferred | Documented Exa.ai or equivalent public-web research as an optional future enhancement only. It is not needed for the current build and must not add live calls, live RAG, CSI/RGOI memory write-back, automatic fixture promotion, trust mutation, or source-of-truth changes without reopening gated treatments. |
 | 2026-05-26 | Codex | Production dashboard hardening implemented | Added local dashboard CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard persona navigation markers, and tests. Re-evaluated accepted risk ID2 for the local dashboard; production deployment, production identity, non-demo data, and real PHI remain gated. |

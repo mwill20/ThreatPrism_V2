@@ -36,6 +36,7 @@ Severity is `Likelihood × Impact`:
 |---|----------|--------|---------------------|------------------|--------|----------------|------------------------------|-------|
 | S1 | Spoofing | Caller submits fake/missing demo API key or forges role through `?role=` parameter. | API ingress — `src/threatprism/api/app.py` | High | High | **Critical** | `authorize_role_view()` at [auth/demo.py:73](../../src/threatprism/auth/demo.py); `ROLE_VIEW_POLICY` at [auth/demo.py:24](../../src/threatprism/auth/demo.py); `_extract_credential()` at [auth/demo.py:192](../../src/threatprism/auth/demo.py); `validate_runtime()` requires explicit `DEMO_API_KEYS` for `demo_key` mode. | Mitigated for POC scope |
 | S2 | Spoofing | `API_AUTH_MODE=none` grants admin role to every caller if explicitly allowed. | Auth bootstrap — `src/threatprism/api/app.py:create_app()` | High | High | **Critical** | `validate_runtime()` at [config.py:38](../../src/threatprism/config.py) rejects `none` unless local development is explicitly acknowledged; production still blocks `none` and `demo_key`; startup logs disabled-auth warning. | Mitigated for POC scope |
+| S3 | Spoofing | Operator configures an unsupported or incomplete production identity mode and assumes requests are authenticated. | Auth bootstrap - `src/threatprism/auth/production.py` and `src/threatprism/config.py` | Medium | High | **High** | `evaluate_production_identity_readiness()` requires static `external_oidc` provider, issuer, audience, JWKS, claims, role coverage, and safe algorithms; live verifier enablement is rejected; protected routes fail closed until a verifier exists. | Mitigated for readiness scope |
 | T1 | Tampering | SQLite case/report JSON blobs altered out-of-band via host or file access. | Persistence — `src/threatprism/persistence/sqlite.py` | Low | High | **Medium** | None inside ThreatPrism; relies on host OS file permissions. | Unmitigated — see OT-1 |
 | T2 | Tampering | LLM provider returns report claiming evidence that does not exist in the case. | LLM output — `src/threatprism/llm/providers.py` | High | Medium | **High** | `validate_report_evidence()` at [evidence.py:6](../../src/threatprism/guardrails/evidence.py) — every cited `evidence_id` must exist in the case set. | Mitigated |
 | T3 | Tampering | LLM output overclaims compliance ("HIPAA compliant", "control satisfied", "audit-ready") or executed-action language. | LLM output | High | High | **Critical** | `scan_output_policy()` at [policy.py:22](../../src/threatprism/guardrails/policy.py) with `PROHIBITED_PATTERNS` at [policy.py:8](../../src/threatprism/guardrails/policy.py); refresh fixtures in `tests/test_overclaim_regression.py`; process in [PATTERN_REFRESH.md](../runbooks/PATTERN_REFRESH.md). | Mitigated + process-backed |
@@ -83,6 +84,29 @@ Severity is `Likelihood × Impact`:
 **Severity.** Raw: Critical. Residual: Low for POC local use when the explicit acknowledgement is present.
 
 **State.** Mitigated for POC scope. Disabled auth remains unacceptable for any shared, networked, MVP, production, or enterprise deployment.
+
+---
+
+### S3 - Production identity readiness misconfiguration
+
+**Scenario.** An operator sets an unsupported production auth mode or incomplete
+OIDC-style settings and assumes ThreatPrism is enforcing production identity.
+
+**Current controls.**
+- `validate_runtime()` rejects unknown `API_AUTH_MODE` values.
+- Production-like environments still reject `API_AUTH_MODE=none` and
+  `API_AUTH_MODE=demo_key`.
+- `API_AUTH_MODE=external_oidc` requires static provider, issuer, audience,
+  JWKS, claim, role, and algorithm readiness checks.
+- `PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED=true` is rejected.
+- Protected routes continue to fail closed because no trusted token verifier is
+  implemented yet.
+
+**Severity.** Raw: High. Residual: Low for readiness scope; Medium until live
+token verification and production claim mapping are implemented.
+
+**State.** Mitigated for readiness scope. Live token verification remains a
+future gated treatment before non-demo deployment.
 
 ---
 
@@ -340,6 +364,7 @@ Architectural changes identified during modeling but outside the current sprint 
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production identity readiness reconciled | Added S3 for static `external_oidc` readiness and fail-closed protected-route behavior. Live token verification remains gated. |
 | 2026-05-26 | Codex | Production dashboard hardening reconciled | Added dashboard browser-boundary threat T4/I5 and mapped it to CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard markers, and `tests/test_dashboard_ui.py`. Production deployment and production identity remain gated. |
 | 2026-05-24 | Codex | Slices A, B, D, and F reconciled | Closed RR-S1, RR-S2, OT-2, OT-3, OT-4, OT-5, and OT-6 for POC scope after fail-closed auth, API ingress limits, token-vault serialization tests, and pattern refresh process landed. Production identity, durable queueing, append-only audit, and semantic prompt-injection controls remain gated. |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2 format. Added severity rubric, file:function mitigation pointers verified against code at commit `fea5f9f`, residual risk register, and open threats with target conditions. Surfaced 8 open threats (OT-1 through OT-8) and 4 residual risks. Critical findings flagged: RR-S1, RR-S2, OT-4. |

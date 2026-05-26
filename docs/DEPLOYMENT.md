@@ -10,6 +10,7 @@ production-ready.
 | Local Python/FastAPI | Supported | Run with Uvicorn from the repository root. |
 | Docker Compose local demo | Supported | Single backend service with fake demo credentials. |
 | Local dashboard | Supported | Served at `GET /dashboard` with fake demo credentials and dashboard hardening headers. |
+| Production identity readiness | Static-only scaffold | `API_AUTH_MODE=external_oidc` validates OIDC-shaped config but does not verify tokens. |
 | Production container deployment | Not implemented | Requires production auth, secrets, TLS, monitoring, and hardening. |
 | Cloud deployment | Not implemented | No Azure, AWS, GCP, or managed deployment profile exists. |
 | Production dashboard deployment | Not implemented | Requires production identity, browser matrix testing, accessibility review, and deployment posture. |
@@ -40,7 +41,8 @@ for TLS, production identity, or reverse-proxy deployment controls.
 
 Before any production-style deployment, ThreatPrism needs:
 
-- production identity provider integration
+- live production token verification and production identity provider
+  integration
 - TLS termination and network access controls
 - secrets management
 - database hardening and backup strategy

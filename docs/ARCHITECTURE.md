@@ -206,6 +206,29 @@ model or dict structure and applies text masking:
   `[SECURITY_TELEMETRY:TYPE:masked]`
 - Stage 1 typed tokens are visible to all roles but are never reversed
 
+### Layer 9: Production identity readiness and verifier design
+
+**Modules/docs:** `auth/production.py`,
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`
+
+`API_AUTH_MODE=external_oidc` is currently a static readiness and fail-closed
+boundary. It validates OIDC-shaped settings but does not parse JWTs, fetch
+JWKS keys, call a live IdP, or authorize production users.
+
+The future token verifier design requires:
+
+- bearer-token extraction,
+- asymmetric signature validation,
+- issuer, audience, expiration, not-before, and issued-at checks,
+- required subject, tenant, and role claims,
+- deterministic external-claim-to-ThreatPrism-role mapping,
+- existing role-view policy enforcement,
+- sanitized audit events, and
+- no-network standard validation with fake local keys and fake JWKS fixtures.
+
+Until that implementation lands, protected routes under `external_oidc` remain
+closed.
+
 ---
 
 ## Data Model
@@ -406,6 +429,7 @@ Key design decisions:
 | Role-view masking at read time | Database stores full records; access control can evolve without data migration |
 | Evidence-grounded reports | Every finding and mapping must cite evidence that exists in the case; prevents hallucinated citations |
 | `ALLOW_REAL_ACTIONS=false` | Hard safety boundary for V2; real remediation is a future-version concern |
+| Production token verifier design before runtime auth | Prevents unverified claims, live JWKS fetch, or provider-specific assumptions from becoming production authorization by accident |
 
 ---
 
@@ -413,7 +437,8 @@ Key design decisions:
 
 These are directional — they are not committed work:
 
-- **Live production auth:** OAuth/OIDC/Entra ID token verification replacing demo API-key auth
+- **Live production auth:** implement the approved token verifier design before
+  OAuth/OIDC/Entra ID token verification replaces demo API-key auth
 - **PostgreSQL:** replacing SQLite for multi-user, concurrent-write scenarios
 - **Async worker:** Celery or equivalent replacing in-process background tasks
 - **Real LLM provider:** implementing `TriageProvider` with OpenAI or local LLM

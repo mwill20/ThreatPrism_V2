@@ -84,3 +84,16 @@ The current dashboard is local and fake-data-only. Production dashboard
 deployment, live production token verification, external telemetry, browser
 matrix certification, and accessibility certification require explicit approval
 and a separate implementation slice.
+
+## Production Token Verifier Implementation
+
+Status: design complete; implementation gated.
+
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` defines the future
+`external_oidc` verifier contract. Implementation still requires explicit
+approval and must use fake local keys, fake JWKS fixtures, no-network standard
+validation, verified-claims-only authorization, and sanitized audit events.
+
+Live JWKS fetch, Entra calls, real issuer URLs, real tenant IDs, real group
+IDs, production dashboard deployment, and non-demo data remain out of scope
+until separately approved.

@@ -18,6 +18,7 @@ ThreatPrism's surface combines traditional API/auth/persistence risks, AI-specif
 | Local dashboard static surface ([dashboard/static/](../../src/threatprism/dashboard/static)) | **STRIDE** | Browser-facing route with static assets, role-aware API calls, and framing/resource-loading risks | [stride-threat-model.md](stride-threat-model.md) |
 | Demo auth + role-view authorization ([auth/demo.py](../../src/threatprism/auth/demo.py)) | **STRIDE** | Authentication, authorization, audit are classic STRIDE concerns | [stride-threat-model.md](stride-threat-model.md) |
 | Production identity readiness ([auth/production.py](../../src/threatprism/auth/production.py)) | **STRIDE** | Auth bootstrap and fail-closed production mode selection are classic spoofing/elevation controls | [stride-threat-model.md](stride-threat-model.md) |
+| Production token verifier design ([PRODUCTION_TOKEN_VERIFIER_DESIGN.md](../PRODUCTION_TOKEN_VERIFIER_DESIGN.md)) | **STRIDE** | Future token trust boundary must be modeled before claims become authority | [stride-threat-model.md](stride-threat-model.md) |
 | Prompt firewall ([guardrails/prompt_firewall.py](../../src/threatprism/guardrails/prompt_firewall.py)) | **OWASP LLM Top 10 (LLM01)** | Prompt injection is an LLM-specific class STRIDE doesn't name | [llm-agent-threat-model.md](llm-agent-threat-model.md) |
 | Healthcare safeguard ([guardrails/healthcare.py](../../src/threatprism/guardrails/healthcare.py)) | **LINDDUN** | Privacy threats need privacy framework — Stage 1 tokenization is the PHI/PII boundary | [healthcare-data-threat-model.md](healthcare-data-threat-model.md) |
 | Stage 2 tokenization ([guardrails/tokenization.py](../../src/threatprism/guardrails/tokenization.py)) | **STRIDE + LINDDUN** | Information disclosure (STRIDE) + identifiability (LINDDUN) | Both |
@@ -43,6 +44,9 @@ ThreatPrism should:
 - Deny role escalation and audit allow and deny authorization decisions.
 - Reject unsupported auth modes and require static production identity
   readiness before any production-compatible auth mode can start.
+- Keep future production token verification fail-closed until signatures,
+  issuer, audience, time, tenant, role, and audit requirements are
+  implemented and tested.
 - Keep real remediation disabled with `ALLOW_REAL_ACTIONS=false`.
 - Return structured `not_configured` results for missing live enrichment keys.
 - Avoid healthcare compliance, certification, control-satisfied, and audit-ready claims.
@@ -62,6 +66,7 @@ ThreatPrism should:
 | Stage 1 healthcare tokens | Permanent PHI/PII redaction | `rehydration_allowed=False`; vault not carried into rehydration path | LINDDUN (DI2) |
 | Demo API credentials | Demo identity-to-role mapping | Fake credentials, role authorization, full credential non-logging | STRIDE (S1, S2) |
 | Production identity readiness config | Future IdP trust boundary shape | Static HTTPS issuer/JWKS, audience, claims, roles, and algorithm checks; no live token verification | STRIDE (S2) |
+| Future production bearer tokens | Potential production identity artifacts | Design requires verified signature, issuer, audience, time, tenant, subject, and role claims before authority; no runtime verifier exists yet | STRIDE (S4) |
 | Eval artifacts | Regression evidence for safety checks | `.eval_runs/` only, sanitized previews, path traversal rejection | STRIDE (D3), LINDDUN (DI5) |
 
 ---
@@ -116,7 +121,8 @@ ROLE_VIEW_POLICY = {
 | Memory / write-back layer | Planned | LLM threat model — Before Memory section |
 | Tool / plugin / function-calling | Planned | LLM threat model — Before Tools section |
 | Multi-tenancy | Planned | LLM threat model — Before Multi-Tenancy section |
-| Production identity readiness (OIDC-shaped config) | Static readiness implemented | Live token verification and production claim mapping still require a future threat-model update |
+| Production identity readiness (OIDC-shaped config) | Static readiness implemented | Live token verification and production claim mapping still require a future implementation slice |
+| Production token verifier | Design complete, runtime not implemented | Future implementation must follow `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and update this pack when code lands |
 | Production IdP (OAuth/OIDC/Entra ID) | Planned for live verification | Production-readiness gate before non-demo deployment |
 | TLS termination at reverse proxy | Planned | Operational concern; STRIDE assumes trusted proxy |
 | Threat intelligence (VirusTotal, AbuseIPDB, URLScan) | Stub only | New trust boundary — model before activation |
@@ -136,6 +142,7 @@ ROLE_VIEW_POLICY = {
 | Model boundary | Schema-validated output that passes all guardrails | LLM/provider output | Pydantic schema, `scan_output_policy()`, `validate_report_evidence()`, `enforce_action_safety()` | `run_triage()` at [cases/service.py:149-167](../../src/threatprism/cases/service.py) |
 | Role-view boundary | Authorized effective role | Requested `?role=` view | Identity-derived role, deny escalation, audit decisions | `authorize_role_view()` at [auth/demo.py:73](../../src/threatprism/auth/demo.py); `render_role_view()` at [views.py:32](../../src/threatprism/guardrails/views.py) |
 | Production identity readiness boundary | Static `external_oidc` settings | Operator-supplied env config | HTTPS issuer/JWKS checks, audience, claims, role coverage, safe algorithms, live-verifier rejection | `evaluate_production_identity_readiness()` in [auth/production.py](../../src/threatprism/auth/production.py); `validate_runtime()` in [config.py](../../src/threatprism/config.py) |
+| Future token verifier boundary | Verified production principal | Bearer token, JWT header, claims, JWKS cache, operator identity config | Design requires signature verification, issuer/audience/time enforcement, tenant and role claim checks, role mapping, fail-closed responses, and sanitized audit | [PRODUCTION_TOKEN_VERIFIER_DESIGN.md](../PRODUCTION_TOKEN_VERIFIER_DESIGN.md) |
 | Dashboard browser boundary | Same-origin static dashboard and role-safe API routes | Browser, framing contexts, cached pages, external resource targets | CSP, frame denial, no-sniff, no-referrer, no-store, same-origin request enforcement, timeout-bounded fetches | `DASHBOARD_SECURITY_HEADERS` in [api/app.py](../../src/threatprism/api/app.py); `sameOriginUrl()` in [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js) |
 | Persistence boundary | SQLite demo repository | Raw inbound payloads and token vault internals | Store sanitized case records and safe audit events only | `SQLiteRepository.save_case()` at [persistence/sqlite.py:73](../../src/threatprism/persistence/sqlite.py) — receives already-tokenized `CaseRecord` |
 | Eval artifact boundary | `.eval_runs/` sanitized outputs | Eval fixture content and failure text | Approved paths, sanitized previews, artifact scan | `_resolve_under_approved_dir()` at [evals/runner.py:334](../../src/threatprism/evals/runner.py); `_safe_preview()` at [evals/runner.py:262](../../src/threatprism/evals/runner.py) |
@@ -249,9 +256,9 @@ These assumptions are the trust premises of all three threat models. Any change 
 - The operator is trusted not to deliberately send real PHI to ThreatPrism.
 - Operator-controlled environment overrides for `DEMO_API_KEYS` are honored before any networked deployment.
 - Memory, RAG, write-back, live SOAR callbacks, live production token
-  verification, production dashboard deployment, and browser/accessibility
-  certification are future work and require new threat-model updates before
-  implementation.
+  verification runtime behavior, production dashboard deployment, and
+  browser/accessibility certification are future work and require new
+  threat-model updates before implementation.
 
 ---
 
@@ -259,5 +266,6 @@ These assumptions are the trust premises of all three threat models. Any change 
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production token verifier design reconciled | Added design-only future verifier boundary. Runtime JWT verification, JWKS fetch, live IdP calls, and production authorization remain out of scope. |
 | 2026-05-26 | Codex | Production identity readiness reconciled | Added static `external_oidc` configuration as an auth bootstrap boundary. Live token verification and production claim mapping remain out of scope. |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2 format. Added per-component Framework Selection table linking each major component to its lens file(s). Added code references (`file:function`) to Trust Boundaries table. Added concrete data flow diagrams with line-number anchors. Preserved all existing asset and role content. |

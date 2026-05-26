@@ -93,6 +93,10 @@ Current baseline:
 - Dashboard hardening is implemented for the local UI with CSP/framing/referrer
   headers, same-origin request enforcement, timeout-bounded API calls, keyboard
   persona navigation, and focused tests.
+- Production identity readiness and production token verifier design docs
+  exist for `API_AUTH_MODE=external_oidc`. The runtime validates static
+  OIDC-shaped configuration and fails closed on protected routes; it does not
+  parse JWTs, fetch JWKS keys, call a live IdP, or authorize production users.
 - Safe validation tooling exists under `tools/`.
 - Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
@@ -253,6 +257,14 @@ source of truth.
   `docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md`. Do not add production
   IdP, live integrations, real data, external telemetry, CDN deployment, or
   production dashboard deployment unless the user explicitly asks for it.
+- For production token-verifier work, read
+  `docs/PRODUCTION_IDENTITY_READINESS.md`,
+  `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
+  `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md`, and
+  `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` first. Do not add live
+  OIDC/JWKS calls, Entra calls, real credentials, real tenant data, production
+  claim-to-role authorization, or non-demo data unless the user explicitly
+  approves an implementation slice.
 - Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
   fake-data-only validation and artifact hygiene checks.
 - Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not

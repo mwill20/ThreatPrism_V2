@@ -65,14 +65,17 @@ Current implemented baseline:
 - Static production identity readiness for `API_AUTH_MODE=external_oidc`,
   including provider, issuer, audience, JWKS, claim, role, and algorithm
   checks plus fail-closed protected-route behavior.
+- Production token verifier design for the future `external_oidc`
+  implementation contract. This is documentation only; no JWT parsing, JWKS
+  fetch, live IdP calls, or production authorization are implemented.
 
 Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_design_final
 ```
 
-Result after Production Identity Readiness v0.1:
+Result after Production Token Verifier Design v0.1:
 
 ```text
 102 passed
@@ -91,6 +94,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Production-grade CI/CD release pipeline.
 - Live production token verification and trusted production claim-to-role
   authorization.
+- Production token verifier runtime implementation.
 - Production deployment hardening.
 - Production dashboard deployment and live production identity integration.
 - An API compatibility policy beyond the current tested local route contract.
@@ -185,6 +189,11 @@ Not implemented:
 - Production RBAC/ABAC claim mapping.
 - Break-glass access governance.
 - Production tenant administration.
+
+Production Token Verifier Design v0.1 defines the future verifier contract for
+bearer-token extraction, asymmetric signature validation, issuer/audience/time
+checks, tenant and role claim enforcement, role mapping, JWKS cache behavior,
+fail-closed responses, and sanitized audit telemetry. It is design only.
 
 Do not use real issuer URLs, tenant IDs, audiences, credentials, workplace
 data, or non-demo case data in this repository.
@@ -363,5 +372,8 @@ Current boundaries:
   into tracked tests or eval fixtures after license and safety review.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
+- Implement live production token verification only after an explicit approved
+  slice with fake-key tests, no-network validation, threat-model updates, and
+  sanitized audit coverage.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or
   enhancements intentionally change architecture direction.

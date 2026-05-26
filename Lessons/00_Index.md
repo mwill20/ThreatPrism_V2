@@ -45,6 +45,7 @@ Fake SOAR payload
   -> Dashboard data contract and fake persona response fixtures
   -> Dashboard UI hardening headers, same-origin request controls, and keyboard navigation
   -> Production identity readiness static config and fail-closed external_oidc boundary
+  -> Production token verifier design for future external_oidc verification
   -> API responses and tests
 ```
 
@@ -76,6 +77,7 @@ Fake SOAR payload
 | yes | [Lesson 21](Lesson21_Production_Dashboard_Hardening.md) | Production Dashboard Hardening | `src/threatprism/api/app.py`, `src/threatprism/dashboard/static/*`, `tests/test_dashboard_ui.py`, `docs/DASHBOARD_PRODUCTION_HARDENING.md` |
 | yes | [Lesson 22](Lesson22_Curated_Generated_Fixture_Promotion.md) | Curated Generated-Fixture Promotion And Expansion | `fixtures/curated/*`, `tools/fixture_factory/promotions.py`, `tests/test_curated_fixture_promotion.py` |
 | yes | [Lesson 23](Lesson23_Production_Identity_Readiness.md) | Production Identity Readiness | `src/threatprism/auth/production.py`, `src/threatprism/config.py`, `tests/test_production_identity_readiness.py` |
+| yes | [Lesson 24](Lesson24_Production_Token_Verifier_Design.md) | Production Token Verifier Design | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` |
 
 ## File Coverage Map
 
@@ -139,6 +141,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\docs\PRODUCTION_IDENTITY_READINESS.md` -> Lesson 23
 - `C:\Projects\ThreatPrismV2\docs\specs\28_PRODUCTION_IDENTITY_READINESS.md` -> Lesson 23
 - `C:\Projects\ThreatPrismV2\docs\runbooks\PRODUCTION_IDENTITY_READINESS.md` -> Lesson 23
+- `C:\Projects\ThreatPrismV2\docs\PRODUCTION_TOKEN_VERIFIER_DESIGN.md` -> Lesson 24
+- `C:\Projects\ThreatPrismV2\docs\specs\29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` -> Lesson 24
+- `C:\Projects\ThreatPrismV2\docs\runbooks\PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` -> Lesson 24
 - `C:\Projects\ThreatPrismV2\Dockerfile` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\docker-compose.yml` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\.dockerignore` -> Lesson 14
@@ -168,7 +173,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_csi_rgoi.py` -> Lessons 08 and 18
 - `C:\Projects\ThreatPrismV2\examples\dashboard_contract\*.json` -> Lesson 19
 - `C:\Projects\ThreatPrismV2\tests\test_dashboard_ui.py` -> Lessons 08, 20, and 21
-- `C:\Projects\ThreatPrismV2\tests\test_production_identity_readiness.py` -> Lessons 08 and 23
+- `C:\Projects\ThreatPrismV2\tests\test_production_identity_readiness.py` -> Lessons 08, 23, and 24
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -202,7 +207,7 @@ Expected output:
 
 ## What To Study Next
 
-After Lesson 23, use the working checklist to choose the next requested slice:
+After Lesson 24, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

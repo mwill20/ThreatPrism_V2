@@ -71,6 +71,9 @@ V2.
 - Do not treat production identity readiness as live authentication. The
   `external_oidc` readiness mode validates static configuration only; protected
   requests must fail closed until a future token-verifier slice exists.
+- Do not treat the production token verifier design as live authentication.
+  It is an implementation contract for a future slice, not JWT parsing, JWKS
+  fetching, live IdP integration, or production claim-to-role authorization.
 - Use healthcare safeguard and evidence-alignment language only.
 - Do not claim HIPAA compliance, HIPAA certification, HITRUST compliance,
   HITRUST certification, control satisfaction, certification readiness, or that
@@ -237,7 +240,11 @@ Current direction:
 16. Completed: Production Identity Readiness v0.1 for static
     `external_oidc` configuration checks and fail-closed protected-route
     behavior without live token verification.
-17. Production dashboard deployment, live production identity integration,
+17. Completed: Production Token Verifier Design v0.1 for the future
+    `external_oidc` verifier contract, claim-to-role mapping rules,
+    JWKS/cache boundaries, fail-closed semantics, no-network validation, and
+    sanitized audit requirements without implementing live token verification.
+18. Production dashboard deployment, live production identity integration,
     live-integration preparation, external research providers, or additional curated fixture
     promotion only after explicit user approval and any required threat-model
     treatment updates.

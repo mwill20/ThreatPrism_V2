@@ -574,3 +574,24 @@ Production-like environments still reject `API_AUTH_MODE=none` and
 with `403 Unsupported API auth mode.` until a future approved slice implements
 token validation, trusted principal extraction, claim-to-role mapping, and
 production authorization policy.
+
+## D-039 Production Token Verifier Design Boundary
+
+Production Token Verifier Design v0.1 is an implementation contract, not live
+authentication.
+
+The future `external_oidc` verifier must:
+
+- accept only bearer tokens that pass signature, issuer, audience, time, tenant,
+  and role validation.
+- use configured asymmetric algorithms only.
+- map verified external roles or groups to one ThreatPrism effective role.
+- preserve the existing rule that `?role=` is a view request, not authority.
+- emit sanitized audit decisions without raw JWTs, raw Authorization headers,
+  full claim payloads, real tenant IDs, real group IDs, credentials, or JWKS
+  key material.
+- keep standard validation offline with fake keys and fake JWKS fixtures.
+
+This decision does not approve live JWKS fetch, Entra calls, real credentials,
+production tenant administration, production dashboard deployment, or non-demo
+data. Those remain gated until explicitly approved.

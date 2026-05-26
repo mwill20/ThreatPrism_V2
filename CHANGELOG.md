@@ -4,6 +4,10 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added Production Token Verifier Design v0.1 with the future `external_oidc`
+  verifier contract, claim-to-role mapping rules, JWKS/cache boundaries,
+  fail-closed semantics, sanitized audit requirements, no-network validation
+  rules, docs, runbook, lesson, and threat-model notes.
 - Added Production Identity Readiness v0.1 with static `external_oidc`
   configuration validation, unknown-auth-mode rejection, live-verifier
   rejection, fail-closed protected-route behavior, docs, runbook, and tests.

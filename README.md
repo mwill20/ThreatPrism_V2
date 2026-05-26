@@ -104,6 +104,13 @@ validation, OIDC-shaped configuration checks, and fail-closed protected-route
 behavior. It does not add live token verification, OAuth flows, Entra calls, or
 real credentials.
 
+The latest production-token-verifier-design slice documents the future
+`external_oidc` verifier contract: bearer-token acceptance, asymmetric
+signature verification, issuer/audience/time checks, claim-to-role mapping,
+JWKS cache boundaries, fail-closed error semantics, no-network validation, and
+sanitized audit telemetry. It does not implement JWT verification or live IdP
+calls.
+
 Optional external research providers, such as Exa.ai, are documented only as a
 deferred future enhancement. They are not needed for the current build and are
 not part of CSI/RGOI memory, live RAG, validation, demos, or fixture promotion.
@@ -178,7 +185,7 @@ docker-compose.yml Local demo backend service
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
 | Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_PRODUCTION_HARDENING.md](docs/DASHBOARD_PRODUCTION_HARDENING.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
-| Production identity readiness | [docs/PRODUCTION_IDENTITY_READINESS.md](docs/PRODUCTION_IDENTITY_READINESS.md), [docs/specs/28_PRODUCTION_IDENTITY_READINESS.md](docs/specs/28_PRODUCTION_IDENTITY_READINESS.md), [docs/runbooks/PRODUCTION_IDENTITY_READINESS.md](docs/runbooks/PRODUCTION_IDENTITY_READINESS.md) |
+| Production identity readiness | [docs/PRODUCTION_IDENTITY_READINESS.md](docs/PRODUCTION_IDENTITY_READINESS.md), [docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/specs/28_PRODUCTION_IDENTITY_READINESS.md](docs/specs/28_PRODUCTION_IDENTITY_READINESS.md), [docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/runbooks/PRODUCTION_IDENTITY_READINESS.md](docs/runbooks/PRODUCTION_IDENTITY_READINESS.md), [docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md](docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Future enhancement options | [docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
@@ -537,6 +544,13 @@ Production Identity Readiness v0.1 is implemented. See
 `docs/runbooks/PRODUCTION_IDENTITY_READINESS.md`. This is static readiness
 only. Live production token verification and trusted claim-to-role mapping are
 still future work.
+
+Production Token Verifier Design v0.1 is documented. See
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
+`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, and
+`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md`. This is design
+only. Live token verification, JWKS fetch, Entra calls, and production
+authorization remain future gated work.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

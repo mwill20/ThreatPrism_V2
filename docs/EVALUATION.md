@@ -31,6 +31,9 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
 11. Does production identity readiness reject unsafe auth modes, require static
     OIDC-shaped config, reject live verifier enablement, and keep protected
     routes fail-closed under `external_oidc`?
+12. Does the production token verifier design preserve no-network validation,
+    fail-closed semantics, verified-claims-only authorization, and sanitized
+    audit requirements for a future implementation?
 
 ## Current Validation Command
 
@@ -49,10 +52,10 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Production Identity Readiness pass with:
+Validated during the Production Token Verifier Design pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_design_final
 ```
 
 Result:
@@ -81,6 +84,7 @@ eval harness dry-run: 15 passed / 0 failed
 | Dashboard contract fixtures | `examples/dashboard_contract/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
 | Dashboard UI and hardening | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |
 | Production identity readiness | `src/threatprism/auth/production.py`, `tests/test_production_identity_readiness.py` |
+| Production token verifier design | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` |
 
 ## Known Evaluation Limits
 

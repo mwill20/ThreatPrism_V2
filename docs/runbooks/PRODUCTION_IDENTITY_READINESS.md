@@ -3,6 +3,11 @@
 Use this runbook to review the static production identity readiness boundary.
 It is not a production deployment procedure.
 
+For the future verifier contract, read
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
+`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md`. Those files are
+design-only; the current runtime still fails closed under `external_oidc`.
+
 ## Safety Rules
 
 - Use fake example values only.

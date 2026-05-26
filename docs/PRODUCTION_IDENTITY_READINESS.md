@@ -8,6 +8,11 @@ tenant administration, or non-demo data handling.
 The goal is to make production identity harder to misconfigure before a real
 identity provider slice exists.
 
+The follow-on `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` document defines the
+future verifier implementation contract. It does not change the runtime
+behavior described here: protected routes still fail closed under
+`external_oidc`.
+
 ## Implemented Scope
 
 - Adds `API_AUTH_MODE=external_oidc` as the only production-compatible auth

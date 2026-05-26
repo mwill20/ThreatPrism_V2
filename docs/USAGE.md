@@ -197,3 +197,18 @@ python -c "from threatprism.config import Settings; s=Settings.from_env(); s.val
 
 Use fake example values only. Protected API routes still fail closed under
 `external_oidc` until a future live token-verifier slice is implemented.
+
+## Review Production Token Verifier Design
+
+The verifier design is documentation-only. It describes how a future
+implementation must validate bearer tokens, map verified claims to ThreatPrism
+roles, and audit decisions without leaking raw JWTs or claims.
+
+```text
+docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md
+```
+
+Do not use live issuer URLs, live JWKS endpoints, real tokens, or real tenant
+data while reviewing this design.

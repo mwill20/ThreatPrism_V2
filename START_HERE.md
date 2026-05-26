@@ -52,6 +52,10 @@ Read deeper files only when the task needs them:
   `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md` when the task involves
   production auth readiness, OIDC-shaped settings, or future live token
   verification.
+- `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
+  `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` when the task involves
+  future live token verification, claim-to-role production authorization, JWKS
+  cache design, or production identity implementation planning.
 - `DECISIONS.md`
 - `LIMITATIONS.md`
 - `README.md`

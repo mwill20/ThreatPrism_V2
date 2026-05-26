@@ -87,6 +87,12 @@ The current live implementation includes a first backend slice:
   OIDC-shaped provider, issuer, audience, JWKS, claim, role, and algorithm
   validation. Live token verification is not implemented, and protected routes
   fail closed under `external_oidc`.
+- Production token verifier design for the future `external_oidc`
+  implementation contract, including bearer-token acceptance, asymmetric
+  signature verification, issuer/audience/time checks, tenant and role claim
+  enforcement, claim-to-role mapping, JWKS/cache boundaries, fail-closed
+  semantics, no-network validation, and sanitized audit telemetry. No runtime
+  token verifier is implemented.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -125,6 +131,10 @@ The current live implementation includes a first backend slice:
   `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md`, and
   `docs/runbooks/PRODUCTION_IDENTITY_READINESS.md` capturing the static
   production identity readiness boundary.
+- `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
+  `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, and
+  `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` capturing the
+  future verifier design without implementing live token verification.
 - `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
   reviewer-readiness docs for usage, evaluation, dataset handling,
   model/provider behavior, deployment boundary, monitoring, and
@@ -234,6 +244,19 @@ Result:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
+Production Token Verifier Design validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_design_final
+```
+
+Result:
+
+```text
+102 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
 CI follow-up on 2026-05-24: GitHub Actions run `26350740346` failed on Ubuntu
 at `tests/test_eval_harness.py::test_path_traversal_is_rejected_for_fixtures_and_outputs`.
 Root cause was Windows-style backslash traversal being treated as a literal
@@ -302,6 +325,10 @@ Read in this order:
 18. `docs/PRODUCTION_IDENTITY_READINESS.md` and
     `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md` when the task involves
     production auth readiness, OIDC-shaped settings, or future IdP planning.
+19. `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
+    `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` when the task involves
+    future live token verification, claim-to-role production authorization,
+    JWKS cache design, or production identity implementation planning.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -633,12 +660,26 @@ API_AUTH_MODE=external_oidc
   -> Protected API routes fail closed until a future token-verifier slice
 ```
 
+Production Token Verifier Design v0.1 is documented:
+
+```text
+external_oidc future verifier contract
+  -> Bearer-token extraction and malformed/oversized token rejection
+  -> Asymmetric signature, issuer, audience, exp, nbf, and iat requirements
+  -> Tenant, subject, and role claim requirements
+  -> Verified claim-to-role mapping
+  -> Existing role-view policy remains the authorization gate
+  -> JWKS/cache and future fetch boundaries
+  -> Sanitized audit events with no raw JWTs or full claims
+  -> Standard validation remains no-network
+```
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Production Identity Readiness
-v0.1 is complete as a static readiness/fail-closed boundary only. Live token
-verification, claim-to-role production authorization, production tenant
-administration, and production dashboard deployment remain gated future work.
+No new implementation slice is selected yet. Production Token Verifier Design
+v0.1 is complete as a design/readiness boundary only. Live token verification,
+claim-to-role production authorization, production tenant administration,
+live JWKS fetch, and production dashboard deployment remain gated future work.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and
@@ -805,6 +846,7 @@ docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md
 docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md
 docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/specs/28_PRODUCTION_IDENTITY_READINESS.md
+docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -837,6 +879,7 @@ docs/DASHBOARD_UI_IMPLEMENTATION.md
 docs/DASHBOARD_PRODUCTION_HARDENING.md
 docs/CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/PRODUCTION_IDENTITY_READINESS.md
+docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md
 docs/CSI_RGOI_ARCHITECTURE.md
 docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
@@ -866,6 +909,7 @@ tests/test_csi_rgoi.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
 tests/test_production_identity_readiness.py
+docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md
 examples/demo_scenarios/demo_scenario_pack.json
 examples/demo_scenarios/healthcare_safeguard_review_case.json
 examples/csi/rgoi_cognitive_objects.json
@@ -901,6 +945,7 @@ Lessons/Lesson20_Dashboard_UI_Implementation.md
 Lessons/Lesson21_Production_Dashboard_Hardening.md
 Lessons/Lesson22_Curated_Generated_Fixture_Promotion.md
 Lessons/Lesson23_Production_Identity_Readiness.md
+Lessons/Lesson24_Production_Token_Verifier_Design.md
 ```
 
 ## Next Session Recommended Prompt

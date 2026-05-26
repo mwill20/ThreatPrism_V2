@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-95 passed
+102 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-95 passed
+102 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -107,6 +107,23 @@ For dashboard contract review, use:
 ```text
 docs/runbooks/DASHBOARD_READINESS.md
 ```
+
+## Review Production Token Verifier Design
+
+The production token verifier design is documentation-only. It does not enable
+JWT parsing, JWKS fetch, live IdP calls, or production claim-to-role
+authorization.
+
+Read:
+
+```text
+docs/PRODUCTION_IDENTITY_READINESS.md
+docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md
+```
+
+Use fake OIDC example values only. Protected routes must still fail closed
+under `API_AUTH_MODE=external_oidc` until a future implementation slice lands.
 
 ## Start The Dashboard
 

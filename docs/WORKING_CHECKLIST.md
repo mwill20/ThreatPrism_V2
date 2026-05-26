@@ -553,6 +553,34 @@ Production Identity Readiness v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_production_identity_final2`.
 
+## Completed Slice
+
+Production Token Verifier Design v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation
+  planning.
+- [x] Keep this as design/readiness only; do not add JWT parsing, signature
+  verification, JWKS fetch, live OIDC calls, Entra calls, real credentials,
+  production tenant administration, production claim-to-role authorization, or
+  non-demo data handling.
+- [x] Add `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` for the future
+  `external_oidc` token acceptance and claim-mapping contract.
+- [x] Add `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`.
+- [x] Add `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md`.
+- [x] Require future verification to check bearer token shape, asymmetric
+  signature, issuer, audience, expiration, not-before, issued-at, tenant claim,
+  subject claim, role claim, role mapping, and role-view policy before any
+  request is authorized.
+- [x] Require future tests to prove no network calls occur during standard
+  validation and no raw JWT, Authorization header, full claim payload, real
+  tenant ID, group ID, credential, or key material appears in logs or audit
+  events.
+- [x] Update README, checklist, handoff, limitations, decisions, security notes,
+  threat model notes, lessons, and validation notes.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_token_verifier_design_final`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended choices should be
@@ -564,8 +592,9 @@ selected explicitly before implementation:
   not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
   promotion, trust mutation, or source-of-truth changes.
 - [ ] Live production token verification and claim-to-role authorization only
-  after reopening production identity threat treatments and approving the
-  provider-specific design.
+  after explicitly approving implementation of the completed verifier design,
+  using fake local keys, no-network validation, threat-model updates, and
+  sanitized audit tests.
 - [ ] Production dashboard deployment, browser matrix certification, and
   accessibility certification only after explicit approval.
 - [ ] Additional curated fixture promotion only after manual license, safety,

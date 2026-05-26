@@ -57,7 +57,8 @@ eval harness dry-run: 15 passed / 0 failed
 
 Later slices implemented CSI/RGOI, dashboard preparation, dashboard UI,
 dashboard hardening, curated fixture promotion, broader curated fixture
-expansion, and static production identity readiness. Treat
+expansion, static production identity readiness, and production token verifier
+design. Treat
 `docs/THREATPRISM_V2_CODEX_HANDOFF.md` and `docs/WORKING_CHECKLIST.md` as the
 current detailed source of truth.
 
@@ -65,6 +66,19 @@ Latest validation after Production Identity Readiness v0.1 on 2026-05-26:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_production_identity_final2
+```
+
+Result:
+
+```text
+102 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Latest validation after Production Token Verifier Design v0.1 on 2026-05-26:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_design_final
 ```
 
 Result:
@@ -977,6 +991,12 @@ data realism work. It keeps fake hand-written fixtures, adds sanitized
 ThreatPrism-native synthetic fixture generation, supports Synthea-style,
 OTRF-style, PINT-style, and Giskard-style source-shape samples only after
 manual review, and avoids automatic downloads or raw dataset commits.
+
+Production Identity Readiness v0.1 is implemented as static readiness and
+fail-closed protected-route behavior. Production Token Verifier Design v0.1 is
+documented as a future implementation contract only; it does not add JWT
+parsing, JWKS fetch, live IdP calls, or production claim-to-role
+authorization.
 
 No new implementation slice is selected yet. Pick the next slice explicitly
 before adding live providers, live production token verification, non-demo

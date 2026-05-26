@@ -80,3 +80,10 @@ That left two risks:
 - Production-like startup cannot fall back to disabled or demo API-key auth.
 - Request authorization remains fail-closed until a future trusted principal
   extraction path exists.
+
+## Follow-On Design
+
+Production Token Verifier Design v0.1 is captured in
+`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`. That follow-on slice defines the
+future verifier contract but does not change the runtime fail-closed behavior.

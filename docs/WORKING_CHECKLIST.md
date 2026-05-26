@@ -412,12 +412,38 @@ Intelligence (RGOI) Foundation v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_csi_final_validation`.
 
+## Completed Slice
+
+Dashboard UI Preparation v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep this slice backend-contract only; do not implement frontend UI.
+- [x] Add `docs/DASHBOARD_DATA_CONTRACT.md` for exact API surfaces a future
+  UI can consume.
+- [x] Add `docs/specs/24_DASHBOARD_UI_PREPARATION.md`.
+- [x] Add `docs/runbooks/DASHBOARD_READINESS.md` with fake demo credential
+  examples and route checks.
+- [x] Add fake sample response fixtures for analyst, manager/GRC,
+  legal/privacy, audit/debug, engineer, and CSI/RGOI views under
+  `examples/dashboard_contract/`.
+- [x] Add route and response contract tests for CSI/RGOI endpoints alongside
+  the existing API contract freeze.
+- [x] Ensure fixtures remain fake-data only and do not contain real
+  organization, workplace, tenant, user, host, domain, IP, PHI, PII, secrets,
+  raw payloads, or token vault mappings.
+- [x] Update README, checklist, handoff, limitations, lessons, and validation
+  notes.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_dashboard_prep_final_validation`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should
 be selected explicitly before implementation:
 
-- [ ] Dashboard UI preparation if the user explicitly approves frontend work.
+- [ ] Dashboard UI implementation only if the user explicitly approves
+  frontend work.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Curated generated-fixture promotion only after manual license, safety,
   and content review.
@@ -453,7 +479,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-82 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

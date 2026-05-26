@@ -7,6 +7,9 @@ All notable repository-level changes should be recorded here.
 - Added CSI/RGOI read-only governed cognition foundation with schemas,
   retrieval governance, trust scoring, evidence alignment, lineage, replay,
   observability, divergence telemetry, fake fixtures, docs, and tests.
+- Added dashboard UI preparation docs, fake persona response fixtures,
+  dashboard-readiness runbook, and CSI route contract tests without building a
+  frontend dashboard.
 - Added repository standards readiness audit and reviewer-focused docs.
 - Documented usage, evaluation, dataset, model/provider, deployment,
   monitoring, and troubleshooting entry points.

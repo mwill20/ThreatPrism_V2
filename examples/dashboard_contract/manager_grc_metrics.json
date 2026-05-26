@@ -1,0 +1,59 @@
+{
+  "fixture_id": "dashboard_contract_manager_grc_metrics",
+  "persona": "manager_grc",
+  "source_route": "GET /metrics",
+  "headers": {
+    "X-ThreatPrism-Demo-Key": "demo-manager-key"
+  },
+  "response": {
+    "window": {
+      "start": null,
+      "end": null
+    },
+    "case_counts": {
+      "total": 3,
+      "by_source": {
+        "generic_soar": 3
+      },
+      "by_status": {
+        "triage_completed": 2,
+        "needs_analyst_review": 1
+      }
+    },
+    "triage": {
+      "queued": 0,
+      "running": 0,
+      "completed": 2,
+      "failed": 0,
+      "blocked_by_guardrail": 1,
+      "needs_review": 0
+    },
+    "guardrails": {
+      "blocked_cases": 1,
+      "healthcare_review_required": 1,
+      "potential_sensitive_data_exposure": 1,
+      "secret_exposure_detected": 0,
+      "rehydration_denied_events": 1,
+      "role_view_policy_applied_events": 4,
+      "authorization_allowed_events": 5,
+      "authorization_denied_events": 1
+    },
+    "disagreement": {
+      "feedback_count": 1,
+      "determination_mismatch_count": 1,
+      "severity_mismatch_count": 1,
+      "disposition_mismatch_count": 1,
+      "manager_review_required_count": 1
+    },
+    "grc": {
+      "mapping_count": 2,
+      "mappings_with_evidence_count": 2,
+      "review_required_count": 2
+    }
+  },
+  "safety": {
+    "fake_data_only": true,
+    "compliance_claim": "none",
+    "frontend_not_implemented": true
+  }
+}

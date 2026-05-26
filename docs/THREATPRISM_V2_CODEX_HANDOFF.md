@@ -73,6 +73,8 @@ The current live implementation includes a first backend slice:
 - `examples/demo_scenarios/` with the fake role-specific demo scenario pack.
 - `examples/csi/` with tiny fake CSI/RGOI cognitive object fixture
   descriptions.
+- `examples/dashboard_contract/` with fake persona response fixtures for
+  dashboard contract review.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -90,6 +92,9 @@ The current live implementation includes a first backend slice:
   evidence alignment, trust scoring, quarantine exclusion, stale cognition,
   lineage, replay, observability, divergence telemetry, demo auth, and OpenAPI
   routes.
+- `tests/test_demo_scenarios_and_api_contract.py` covering demo workflows,
+  route contract freeze, CSI/RGOI route contracts, and dashboard contract
+  fixture safety.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
@@ -135,6 +140,19 @@ Result:
 
 ```text
 82 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Dashboard UI Preparation validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_prep_final_validation
+```
+
+Result:
+
+```text
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -199,6 +217,10 @@ Read in this order:
 16. `docs/CSI_RGOI_ARCHITECTURE.md` and `docs/specs/23_CSI_RGOI_FOUNDATION.md`
     when the task involves governed cognition, RAG, retrieval, memory,
     lineage, or institutional learning.
+17. `docs/DASHBOARD_DATA_CONTRACT.md` and
+    `docs/specs/24_DASHBOARD_UI_PREPARATION.md` when the task involves
+    dashboard contracts, UI readiness, persona response fixtures, or frontend
+    planning.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -461,6 +483,19 @@ examples/csi/rgoi_cognitive_objects.json
   -> tiny fake fixture description
 ```
 
+Dashboard UI Preparation v0.1 is implemented:
+
+```text
+docs/DASHBOARD_DATA_CONTRACT.md
+  -> backend surfaces a future dashboard can consume
+docs/runbooks/DASHBOARD_READINESS.md
+  -> fake credential and route-check workflow for future UI work
+examples/dashboard_contract/
+  -> static fake persona response fixtures
+tests/test_demo_scenarios_and_api_contract.py
+  -> route/response contract checks for CSI/RGOI and dashboard fixtures
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
@@ -474,7 +509,7 @@ Do not implement:
 
 - real remediation actions
 - full threat intelligence integrations
-- a frontend dashboard
+- dashboard UI implementation beyond backend contract preparation
 - MSSP multi-tenancy
 - live SOAR credential flows
 - CSI/RGOI write-back, live RAG, autonomous knowledge approval, trust mutation,
@@ -622,6 +657,8 @@ docs/specs/17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md
 docs/specs/19_DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
 docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
+docs/specs/23_CSI_RGOI_FOUNDATION.md
+docs/specs/24_DASHBOARD_UI_PREPARATION.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -649,6 +686,9 @@ docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md
 docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
 docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
+docs/DASHBOARD_DATA_CONTRACT.md
+docs/CSI_RGOI_ARCHITECTURE.md
+docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
 threatprism_v2_codex_spec_prompt.md
 ```
@@ -677,6 +717,7 @@ tests/evals/malformed_cases.jsonl
 examples/demo_scenarios/demo_scenario_pack.json
 examples/demo_scenarios/healthcare_safeguard_review_case.json
 examples/csi/rgoi_cognitive_objects.json
+examples/dashboard_contract/*.json
 tools/check_demo_safety.py
 tools/validate-threatprism.ps1
 tools/generate-compact-handoff.ps1
@@ -700,6 +741,7 @@ Lessons/Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md
 Lessons/Lesson16_Data_Strategy_And_Synthetic_Fixture_Factory.md
 Lessons/Lesson17_Repo_Standards_Readiness_Pass.md
 Lessons/Lesson18_CSI_RGOI_Foundation.md
+Lessons/Lesson19_Dashboard_UI_Preparation.md
 ```
 
 ## Next Session Recommended Prompt

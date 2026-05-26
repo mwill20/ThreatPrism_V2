@@ -35,6 +35,12 @@ EXPECTED_ROUTE_METHODS = {
     "/cases/{case_id}/grc-controls": {"get"},
     "/cases/{case_id}/audit-events": {"get"},
     "/cases/{case_id}/analyst-feedback": {"post"},
+    "/csi/objects": {"get"},
+    "/csi/objects/{object_id}": {"get"},
+    "/csi/lineage/{object_id}": {"get"},
+    "/csi/replay/{object_id}": {"get"},
+    "/csi/observability": {"get"},
+    "/csi/divergence": {"get"},
 }
 READ_MODEL_FILTERS = {
     "source",
@@ -51,6 +57,34 @@ READ_MODEL_FILTERS = {
     "limit",
     "cursor",
     "role",
+}
+CSI_OBJECT_FILTERS = {
+    "tenant_id",
+    "query",
+    "object_type",
+    "retrieval_zone",
+    "purpose",
+    "include_stale",
+    "limit",
+    "role",
+}
+CSI_DETAIL_FILTERS = {"object_id", "tenant_id", "purpose", "role"}
+CSI_OBJECT_DETAIL_FILTERS = {*CSI_DETAIL_FILTERS, "include_stale"}
+CSI_RESPONSE_MODELS = {
+    "/csi/objects": "CognitiveRetrievalResponse",
+    "/csi/objects/{object_id}": "CognitiveObjectDetailEnvelope",
+    "/csi/lineage/{object_id}": "ReasoningLineageGraph",
+    "/csi/replay/{object_id}": "CognitiveReplayEnvelope",
+    "/csi/observability": "CognitiveObservabilitySnapshot",
+    "/csi/divergence": "AIVsHumanDivergenceEnvelope",
+}
+REQUIRED_DASHBOARD_CONTRACT_FIXTURES = {
+    "analyst_case_read_model.json",
+    "manager_grc_metrics.json",
+    "legal_privacy_healthcare_queue.json",
+    "audit_debug_audit_events.json",
+    "engineer_case_detail.json",
+    "csi_rgoi_retrieval.json",
 }
 
 
@@ -129,6 +163,40 @@ def test_current_openapi_contract_freeze_matches_documented_routes() -> None:
     ]:
         params = _parameter_names(paths[path]["get"])
         assert {"case_id", "role"} <= params
+
+    assert CSI_OBJECT_FILTERS <= _parameter_names(paths["/csi/objects"]["get"])
+    assert CSI_OBJECT_DETAIL_FILTERS <= _parameter_names(paths["/csi/objects/{object_id}"]["get"])
+    for path in ["/csi/lineage/{object_id}", "/csi/replay/{object_id}"]:
+        assert CSI_DETAIL_FILTERS <= _parameter_names(paths[path]["get"])
+    for path in ["/csi/observability", "/csi/divergence"]:
+        assert {"tenant_id", "purpose", "role"} <= _parameter_names(paths[path]["get"])
+
+    for path, response_model in CSI_RESPONSE_MODELS.items():
+        schema = _response_schema(paths[path]["get"])
+        assert schema["$ref"].endswith(f"/{response_model}")
+
+
+def test_dashboard_contract_fixtures_are_fake_and_persona_complete() -> None:
+    fixture_dir = REPO_ROOT / "examples" / "dashboard_contract"
+    fixture_names = {path.name for path in fixture_dir.glob("*.json")}
+
+    assert REQUIRED_DASHBOARD_CONTRACT_FIXTURES <= fixture_names
+
+    personas = set()
+    for fixture_path in sorted(fixture_dir.glob("*.json")):
+        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+        personas.add(payload["persona"])
+        payload_json = json.dumps(payload, sort_keys=True)
+        assert payload["fixture_id"].startswith("dashboard_contract_")
+        assert payload["source_route"].startswith(("GET ", "POST "))
+        assert payload["safety"]["fake_data_only"] is True
+        assert payload["safety"]["frontend_not_implemented"] is True
+        assert "allow_real_actions\": true" not in payload_json
+        assert "sk-" not in payload_json
+        assert "raw_payload" not in payload_json
+        assert "vault_mappings" not in payload_json
+
+    assert {"analyst", "manager_grc", "legal_privacy", "audit_debug", "engineer", "csi_rgoi"} <= personas
 
 
 def test_demo_scenarios_smoke_current_role_workflows() -> None:

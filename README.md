@@ -82,6 +82,10 @@ tenant namespace filtering, retrieval-zone policy, lineage, replay
 scaffolding, observability, AI-vs-human divergence telemetry, fake fixtures,
 and tests.
 
+The latest dashboard-preparation slice adds a backend data contract, fake
+persona response fixtures, CSI route contract tests, and a dashboard-readiness
+runbook without implementing a frontend dashboard.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -125,6 +129,8 @@ src/threatprism/
 docs/specs/       Product, architecture, API, data, security, and demo specs
 examples/         Fake demo SOAR payloads and scenario packs
 examples/csi/     Tiny fake CSI/RGOI cognitive object fixture descriptions
+examples/dashboard_contract/
+                  Fake dashboard response fixtures for persona contract review
 tests/            API, guardrail, read-model, eval, and safety tests
 tools/            Safe local validation and demo safety checks
 tools/fixture_factory/
@@ -146,6 +152,7 @@ docker-compose.yml Local demo backend service
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
+| Dashboard data contract | [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
 | Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
@@ -212,7 +219,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-82 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -383,7 +390,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-82 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -440,6 +447,13 @@ CSI/RGOI Foundation v0.1 is implemented. See
 `docs/CSI_RGOI_ARCHITECTURE.md`, `docs/CSI_RGOI_WORKFLOWS.md`,
 `docs/specs/23_CSI_RGOI_FOUNDATION.md`, `src/threatprism/csi/`, and
 `tests/test_csi_rgoi.py`.
+
+Dashboard UI Preparation v0.1 is implemented. See
+`docs/DASHBOARD_DATA_CONTRACT.md`,
+`docs/specs/24_DASHBOARD_UI_PREPARATION.md`,
+`docs/runbooks/DASHBOARD_READINESS.md`, `examples/dashboard_contract/`, and
+the API contract tests in `tests/test_demo_scenarios_and_api_contract.py`.
+This is a backend contract slice only; no frontend dashboard is implemented.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

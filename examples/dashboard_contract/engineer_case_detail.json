@@ -1,0 +1,48 @@
+{
+  "fixture_id": "dashboard_contract_engineer_case_detail",
+  "persona": "engineer",
+  "source_route": "GET /cases/{case_id}",
+  "headers": {
+    "X-ThreatPrism-Demo-Key": "demo-engineer-key"
+  },
+  "response": {
+    "case_id": "case_demo_dashboard_001",
+    "source": "generic_soar",
+    "source_case_id": "SOAR-DASH-001",
+    "title": "Synthetic suspicious sign-in review",
+    "description": "Fake case used for dashboard readiness contract review.",
+    "status": "triage_completed",
+    "triage_status": "completed",
+    "evidence": [
+      {
+        "evidence_id": "ev-demo-dashboard-001",
+        "evidence_type": "log",
+        "summary": "Synthetic sign-in telemetry with documentation-range network detail.",
+        "source_uri": "demo://dashboard/evidence/ev-demo-dashboard-001",
+        "event_ids": [
+          "evt-demo-dashboard-001"
+        ],
+        "sensitivity": "demo"
+      }
+    ],
+    "audit_trail": [
+      {
+        "audit_event_id": "audit_demo_dashboard_002",
+        "event_type": "role_view_policy_applied",
+        "actor": "system",
+        "summary": "Role-based view policy was applied.",
+        "metadata": {
+          "role": "engineer"
+        }
+      }
+    ],
+    "role_view": {
+      "role": "engineer"
+    }
+  },
+  "safety": {
+    "fake_data_only": true,
+    "real_action_executed": false,
+    "frontend_not_implemented": true
+  }
+}

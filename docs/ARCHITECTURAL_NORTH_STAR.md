@@ -211,7 +211,9 @@ Current direction:
    fixtures.
 10. Completed: CSI/RGOI Foundation v0.1 for read-only retrieval-governed
     organizational cognition.
-11. Dashboard UI or live-integration preparation only after explicit user
+11. Completed: Dashboard UI Preparation v0.1 for backend data contracts,
+    persona fixtures, readiness runbook, and route contract coverage.
+12. Dashboard UI implementation or live-integration preparation only after explicit user
     approval and any required threat-model treatment updates.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live

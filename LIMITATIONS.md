@@ -55,6 +55,8 @@ Current implemented baseline:
 - Read-only CSI/RGOI governed cognition schemas, retrieval governance, trust
   scoring, evidence alignment, lineage, replay, observability, divergence
   telemetry, API routes, fake fixtures, and tests.
+- Dashboard UI preparation docs, fake persona response fixtures, dashboard
+  readiness runbook, and API contract tests for CSI/RGOI routes.
 
 Validation command confirmed on 2026-05-26:
 
@@ -65,7 +67,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseT
 Result after CSI/RGOI Foundation v0.1:
 
 ```text
-82 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -277,6 +279,21 @@ isolation. They do not make ThreatPrism an MSSP multi-tenant platform.
 Replay is scaffolding only. It returns visible governed inputs and a
 deterministic hash. It does not rerun a model and does not mutate evidence,
 trust, lifecycle state, or knowledge.
+
+## Dashboard Preparation Limitations
+
+Dashboard UI Preparation v0.1 is a backend contract slice only.
+
+Current boundaries:
+
+- No frontend dashboard UI is implemented.
+- No dashboard routes, pages, components, charts, state management, build
+  tooling, browser tests, or dev server are added.
+- Static fixtures under `examples/dashboard_contract/` are fake response
+  examples for contract review, not runtime captures or production data.
+- The future dashboard must consume the existing role-safe API surfaces and
+  must not bypass authorization, masking, evidence alignment, or CSI/RGOI
+  retrieval governance.
 
 ## Known Open Items
 

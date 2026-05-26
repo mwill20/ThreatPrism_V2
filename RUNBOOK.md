@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-82 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-82 passed
+83 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -72,7 +72,8 @@ If a reused temp directory is locked on Windows, use a new ignored
 ## Run Demo Scenario And Contract Checks
 
 Use this focused check when changing routes, response models, demo payloads, or
-role-view behavior:
+role-view behavior. It also checks CSI/RGOI route contracts and dashboard
+contract fixtures:
 
 ```powershell
 Set-Location C:\Projects\ThreatPrismV2
@@ -94,6 +95,18 @@ examples/demo_scenarios/demo_scenario_pack.json
 
 They cover analyst, manager/GRC, legal/privacy, audit/debug, and engineer
 workflows using fake payloads and fake demo credentials only.
+
+Dashboard readiness contract fixtures live at:
+
+```text
+examples/dashboard_contract/
+```
+
+For future UI planning without building the dashboard, use:
+
+```text
+docs/runbooks/DASHBOARD_READINESS.md
+```
 
 ## Start The API
 

@@ -1,0 +1,78 @@
+{
+  "fixture_id": "dashboard_contract_csi_rgoi_retrieval",
+  "persona": "csi_rgoi",
+  "source_route": "GET /csi/objects",
+  "headers": {
+    "X-ThreatPrism-Demo-Key": "demo-analyst-key"
+  },
+  "query": {
+    "tenant_id": "tenant_demo_alpha",
+    "query": "identity",
+    "purpose": "analyst_investigation"
+  },
+  "response": {
+    "items": [
+      {
+        "object": {
+          "id": "cog_reason_alpha_human_001",
+          "tenant_id": "tenant_demo_alpha",
+          "tier": "approved_knowledge",
+          "object_type": "reasoning",
+          "title": "Human-approved interpretation for synthetic identity case",
+          "author_type": "human",
+          "review_status": "approved",
+          "retrieval_zone": "soc_operational",
+          "validation_state": "valid",
+          "lifecycle_state": "active",
+          "evidence_refs": [
+            {
+              "evidence_id": "ev-csi-alpha-login-burst",
+              "source_ref": "case:case-demo-csi-alpha-001:evidence:ev-csi-alpha-login-burst",
+              "immutable": true
+            }
+          ],
+          "competes_with": [
+            "cog_reason_alpha_ai_001"
+          ]
+        },
+        "trust": {
+          "overall": 0.88,
+          "evidence_alignment": 1.0,
+          "provenance_quality": 0.9,
+          "review_strength": 1.0,
+          "freshness": 0.9,
+          "adversarial_risk": 0.95,
+          "reasons": []
+        },
+        "authority_state": "human_approved",
+        "stale": false,
+        "retrieval_decision": {
+          "allowed": true,
+          "applied_controls": [
+            "read_only_cognition",
+            "tenant_id_filter",
+            "role_purpose_policy",
+            "retrieval_zone_policy"
+          ]
+        }
+      }
+    ],
+    "total": 1,
+    "explanation": {
+      "tenant_id": "tenant_demo_alpha",
+      "purpose": "analyst_investigation",
+      "view_role": "analyst",
+      "query": "identity",
+      "include_stale": false,
+      "cross_tenant_objects_suppressed": 1,
+      "notes": [
+        "Retrieval is read-only; this API does not mutate knowledge, trust, suppressions, or evidence."
+      ]
+    }
+  },
+  "safety": {
+    "fake_data_only": true,
+    "read_only_cognition": true,
+    "frontend_not_implemented": true
+  }
+}

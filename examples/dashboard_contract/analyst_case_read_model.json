@@ -1,0 +1,45 @@
+{
+  "fixture_id": "dashboard_contract_analyst_case_read_model",
+  "persona": "analyst",
+  "source_route": "GET /cases/read-model",
+  "headers": {
+    "X-ThreatPrism-Demo-Key": "demo-analyst-key"
+  },
+  "response": {
+    "items": [
+      {
+        "case_id": "case_demo_dashboard_001",
+        "source": "generic_soar",
+        "source_case_id": "SOAR-DASH-001",
+        "title": "Synthetic suspicious sign-in review",
+        "status": "analyst_feedback_submitted",
+        "triage_status": "completed",
+        "triage": {
+          "determination": "suspicious",
+          "severity": "high",
+          "disposition": "monitor",
+          "confidence": 0.82
+        },
+        "manager_review_required": true,
+        "healthcare_review_required": false,
+        "guardrail_blocked": false,
+        "authorization_denied": false,
+        "created_at": "2026-05-26T00:00:00Z",
+        "updated_at": "2026-05-26T00:20:00Z"
+      }
+    ],
+    "next_cursor": null,
+    "total": 1,
+    "filters": {
+      "limit": 25
+    },
+    "role_view": {
+      "role": "analyst"
+    }
+  },
+  "safety": {
+    "fake_data_only": true,
+    "allow_real_actions": false,
+    "frontend_not_implemented": true
+  }
+}

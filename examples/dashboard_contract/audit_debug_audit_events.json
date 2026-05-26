@@ -1,0 +1,36 @@
+{
+  "fixture_id": "dashboard_contract_audit_debug_audit_events",
+  "persona": "audit_debug",
+  "source_route": "GET /cases/{case_id}/audit-events",
+  "headers": {
+    "X-ThreatPrism-Demo-Key": "demo-audit-key"
+  },
+  "response": {
+    "case_id": "case_demo_dashboard_001",
+    "detail": "audit_events",
+    "items": [
+      {
+        "audit_event_id": "audit_demo_dashboard_001",
+        "case_id": "case_demo_dashboard_001",
+        "event_type": "authorization_decision",
+        "actor": "demo_audit",
+        "summary": "Authorization decision: allow.",
+        "created_at": "2026-05-26T00:10:00Z",
+        "metadata": {
+          "decision": "allow",
+          "reason": "role_view_allowed",
+          "endpoint": "get_case_audit_events",
+          "request_metadata_hash": "sha256:demo_dashboard_redacted_request_metadata"
+        }
+      }
+    ],
+    "role_view": {
+      "role": "audit_debug"
+    }
+  },
+  "safety": {
+    "fake_data_only": true,
+    "raw_credentials_present": false,
+    "frontend_not_implemented": true
+  }
+}

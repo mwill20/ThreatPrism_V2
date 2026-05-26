@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-73 passed
+83 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -132,3 +132,14 @@ python -m tools.fixture_factory.factory --source synthea_sample_data --input ext
 
 Generated fixtures remain ignored under `fixtures/generated/` until a future
 manual license, safety, and content review approves promotion.
+
+## Review Dashboard Contracts
+
+Dashboard UI is not implemented. The current dashboard-preparation slice
+provides backend contracts and fake response fixtures for future UI work:
+
+```text
+docs/DASHBOARD_DATA_CONTRACT.md
+docs/runbooks/DASHBOARD_READINESS.md
+examples/dashboard_contract/
+```

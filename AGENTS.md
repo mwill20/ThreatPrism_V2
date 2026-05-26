@@ -81,6 +81,9 @@ Current baseline:
   `docs/USAGE.md`, `docs/EVALUATION.md`, `docs/DATASET.md`,
   `docs/MODEL_CARD.md`, `docs/DEPLOYMENT.md`, `docs/MONITORING.md`, and
   `docs/TROUBLESHOOTING.md`.
+- Dashboard preparation docs and fake contract fixtures exist in
+  `docs/DASHBOARD_DATA_CONTRACT.md`, `docs/runbooks/DASHBOARD_READINESS.md`,
+  and `examples/dashboard_contract/`. This is not a frontend implementation.
 - Safe validation tooling exists under `tools/`.
 - Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
@@ -233,6 +236,9 @@ source of truth.
   `docs/specs/23_CSI_RGOI_FOUNDATION.md` first. Keep CSI/RGOI read-only unless
   a future prompt explicitly reopens memory write-back, RAG, trust mutation,
   knowledge approval, suppression publication, or production tenancy.
+- For dashboard work, read `docs/DASHBOARD_DATA_CONTRACT.md` and
+  `docs/specs/24_DASHBOARD_UI_PREPARATION.md` first. Do not implement
+  frontend UI unless the user explicitly asks for dashboard implementation.
 - Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
   fake-data-only validation and artifact hygiene checks.
 - Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not

@@ -75,6 +75,8 @@ The current live implementation includes a first backend slice:
   descriptions.
 - `examples/dashboard_contract/` with fake persona response fixtures for
   dashboard contract review.
+- `src/threatprism/dashboard/static/` with the local fake-data-only dashboard
+  UI served at `GET /dashboard`.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -95,6 +97,9 @@ The current live implementation includes a first backend slice:
 - `tests/test_demo_scenarios_and_api_contract.py` covering demo workflows,
   route contract freeze, CSI/RGOI route contracts, and dashboard contract
   fixture safety.
+- `tests/test_dashboard_ui.py` covering dashboard route serving, same-origin
+  asset references, fake credential boundaries, API protection, and responsive
+  layout markers.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
@@ -153,6 +158,19 @@ Result:
 
 ```text
 83 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Dashboard UI Implementation validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_ui_final_validation2
+```
+
+Result:
+
+```text
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -424,7 +442,8 @@ Typed scenario pack
   -> Fake healthcare safeguard review payload
   -> OpenAPI route and response-model contract assertions
   -> Scenario smoke tests against local in-memory FastAPI
-  -> No dashboard UI, live integrations, production IdP, or remediation
+  -> Dashboard work was out of scope in that slice; no live integrations,
+     production IdP, or remediation were added
 ```
 
 Docker Compose & Local Demo Packaging v0.1 is implemented:
@@ -496,6 +515,21 @@ tests/test_demo_scenarios_and_api_contract.py
   -> route/response contract checks for CSI/RGOI and dashboard fixtures
 ```
 
+Dashboard UI Implementation v0.1 is implemented:
+
+```text
+GET /dashboard
+  -> local fake-data-only dashboard shell served by FastAPI
+src/threatprism/dashboard/static/
+  -> dependency-free HTML, CSS, and JavaScript
+tests/test_dashboard_ui.py
+  -> route, asset, fake credential, API protection, and responsive layout
+     checks
+Browser verification
+  -> desktop layout, mobile layout, analyst case workflow, manager/GRC
+     navigation, and CSI/RGOI cognitive retrieval view
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
@@ -509,7 +543,7 @@ Do not implement:
 
 - real remediation actions
 - full threat intelligence integrations
-- dashboard UI implementation beyond backend contract preparation
+- production dashboard hardening beyond the local fake-data UI
 - MSSP multi-tenancy
 - live SOAR credential flows
 - CSI/RGOI write-back, live RAG, autonomous knowledge approval, trust mutation,

@@ -190,7 +190,8 @@ def test_dashboard_contract_fixtures_are_fake_and_persona_complete() -> None:
         assert payload["fixture_id"].startswith("dashboard_contract_")
         assert payload["source_route"].startswith(("GET ", "POST "))
         assert payload["safety"]["fake_data_only"] is True
-        assert payload["safety"]["frontend_not_implemented"] is True
+        assert payload["safety"]["sample_contract_only"] is True
+        assert payload["safety"]["dashboard_ui_consumes_contract"] is True
         assert "allow_real_actions\": true" not in payload_json
         assert "sk-" not in payload_json
         assert "raw_payload" not in payload_json

@@ -40,6 +40,7 @@
   "safety": {
     "fake_data_only": true,
     "allow_real_actions": false,
-    "frontend_not_implemented": true
+    "sample_contract_only": true,
+    "dashboard_ui_consumes_contract": true
   }
 }

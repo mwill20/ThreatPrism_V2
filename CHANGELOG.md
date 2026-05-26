@@ -4,6 +4,8 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added local fake-data-only dashboard UI at `GET /dashboard`, same-origin
+  static assets, dashboard UI tests, and Browser verification notes.
 - Added CSI/RGOI read-only governed cognition foundation with schemas,
   retrieval governance, trust scoring, evidence alignment, lineage, replay,
   observability, divergence telemetry, fake fixtures, docs, and tests.

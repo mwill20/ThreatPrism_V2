@@ -213,12 +213,14 @@ Current direction:
     organizational cognition.
 11. Completed: Dashboard UI Preparation v0.1 for backend data contracts,
     persona fixtures, readiness runbook, and route contract coverage.
-12. Dashboard UI implementation or live-integration preparation only after explicit user
-    approval and any required threat-model treatment updates.
+12. Completed: Dashboard UI Implementation v0.1 as a local fake-data-only,
+    same-origin FastAPI-served dashboard.
+13. Production dashboard hardening or live-integration preparation only after
+    explicit user approval and any required threat-model treatment updates.
 
-Do not add a frontend dashboard, live LLM calls, live SOAR calls, live
-enrichment calls, production IdP integration, real remediation, or non-demo
-data before the security and access-control foundation is validated.
+Do not add live LLM calls, live SOAR calls, live enrichment calls, production
+IdP integration, real remediation, non-demo data, or production dashboard
+hardening before the security and access-control foundation is validated.
 
 ## Decision Rubric
 

@@ -67,7 +67,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseT
 Result after CSI/RGOI Foundation v0.1:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -83,7 +83,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Production-grade CI/CD release pipeline.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
-- Frontend dashboard.
+- Production dashboard hardening.
 - An API compatibility policy beyond the current tested local route contract.
 
 ## Product Limitations
@@ -232,7 +232,7 @@ Current boundaries:
 - SQLite demo persistence through a named Docker volume.
 - Fake demo API keys only.
 - Empty live-provider credential variables.
-- No dashboard UI.
+- Local dashboard UI is demo-only.
 - No PostgreSQL, Redis, worker, production IdP, live LLM, live SOAR, live
   enrichment, or remediation profile.
 
@@ -250,7 +250,8 @@ Known repository-readiness gaps:
 - No `LICENSE` file has been selected. Usage rights are unclear until the user
   chooses and adds a license.
 - No tracked screenshot, GIF, or rendered architecture image exists yet. Text
-  diagrams are available in docs, but dashboard UI is still out of scope.
+  diagrams are available in docs, but production dashboard hardening is still
+  out of scope.
 - Production deployment, live provider operation, production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.
@@ -280,20 +281,22 @@ Replay is scaffolding only. It returns visible governed inputs and a
 deterministic hash. It does not rerun a model and does not mutate evidence,
 trust, lifecycle state, or knowledge.
 
-## Dashboard Preparation Limitations
+## Dashboard Limitations
 
-Dashboard UI Preparation v0.1 is a backend contract slice only.
+Dashboard UI Implementation v0.1 is a local demo UI only.
 
 Current boundaries:
 
-- No frontend dashboard UI is implemented.
-- No dashboard routes, pages, components, charts, state management, build
-  tooling, browser tests, or dev server are added.
+- `GET /dashboard` is served by the existing FastAPI backend.
+- Static dashboard assets are dependency-free and same-origin.
 - Static fixtures under `examples/dashboard_contract/` are fake response
   examples for contract review, not runtime captures or production data.
-- The future dashboard must consume the existing role-safe API surfaces and
-  must not bypass authorization, masking, evidence alignment, or CSI/RGOI
-  retrieval governance.
+- The dashboard consumes the existing role-safe API surfaces and must not
+  bypass authorization, masking, evidence alignment, or CSI/RGOI retrieval
+  governance.
+- No production IdP integration, external telemetry, frontend package manager,
+  browser matrix certification, production deployment, or real data handling is
+  implemented.
 
 ## Known Open Items
 

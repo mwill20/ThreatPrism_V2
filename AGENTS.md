@@ -83,7 +83,9 @@ Current baseline:
   `docs/TROUBLESHOOTING.md`.
 - Dashboard preparation docs and fake contract fixtures exist in
   `docs/DASHBOARD_DATA_CONTRACT.md`, `docs/runbooks/DASHBOARD_READINESS.md`,
-  and `examples/dashboard_contract/`. This is not a frontend implementation.
+  and `examples/dashboard_contract/`.
+- A local fake-data-only dashboard UI exists under
+  `src/threatprism/dashboard/static/` and is served at `GET /dashboard`.
 - Safe validation tooling exists under `tools/`.
 - Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
@@ -237,8 +239,10 @@ source of truth.
   a future prompt explicitly reopens memory write-back, RAG, trust mutation,
   knowledge approval, suppression publication, or production tenancy.
 - For dashboard work, read `docs/DASHBOARD_DATA_CONTRACT.md` and
-  `docs/specs/24_DASHBOARD_UI_PREPARATION.md` first. Do not implement
-  frontend UI unless the user explicitly asks for dashboard implementation.
+  `docs/specs/24_DASHBOARD_UI_PREPARATION.md` first. For implementation
+  work, also read `docs/DASHBOARD_UI_IMPLEMENTATION.md` and
+  `docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md`. Do not add production
+  dashboard hardening unless the user explicitly asks for it.
 - Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
   fake-data-only validation and artifact hygiene checks.
 - Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not

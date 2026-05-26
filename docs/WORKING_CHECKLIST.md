@@ -437,13 +437,33 @@ Dashboard UI Preparation v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_dashboard_prep_final_validation`.
 
+## Completed Slice
+
+Dashboard UI Implementation v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Build the UI against `docs/DASHBOARD_DATA_CONTRACT.md`.
+- [x] Add same-origin FastAPI route `GET /dashboard`.
+- [x] Add dependency-free static assets under
+  `src/threatprism/dashboard/static/`.
+- [x] Use fake demo credentials only.
+- [x] Keep `ALLOW_REAL_ACTIONS=false`.
+- [x] Add persona views for analyst, manager/GRC, legal/privacy, audit/debug,
+  engineer, and CSI/RGOI.
+- [x] Add frontend/unit/contract tests in `tests/test_dashboard_ui.py`.
+- [x] Start the local app and use the Browser workflow to verify desktop,
+  mobile, and role-specific views.
+- [x] Fix optional detail-panel degradation found during Browser verification.
+- [x] Run `tools/validate-threatprism.ps1` with
+  `-BaseTemp .pytest_tmp_dashboard_ui_final_validation2`.
+- [x] Run repo-standards cleanup pass.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should
 be selected explicitly before implementation:
 
-- [ ] Dashboard UI implementation only if the user explicitly approves
-  frontend work.
+- [ ] Production dashboard hardening only after explicit approval.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Curated generated-fixture promotion only after manual license, safety,
   and content review.
@@ -479,7 +499,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -500,7 +520,7 @@ fresh ignored base temp directory.
 - [ ] Live cloud or enrichment provider calls.
 - [ ] Production credentials.
 - [ ] Real workplace, tenant, user, host, domain, IP, or secret data.
-- [ ] Frontend dashboard implementation.
+- [ ] Production dashboard hardening.
 - [ ] Strict CI gates that fail before the inherited baseline is ready.
 
 ## Definition Of Done For The Current Slice

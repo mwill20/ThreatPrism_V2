@@ -73,6 +73,7 @@
   "safety": {
     "fake_data_only": true,
     "read_only_cognition": true,
-    "frontend_not_implemented": true
+    "sample_contract_only": true,
+    "dashboard_ui_consumes_contract": true
   }
 }

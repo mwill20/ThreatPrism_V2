@@ -20,6 +20,9 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
    AI-vs-human divergence telemetry?
 7. Do dashboard-prep fixtures and API contract tests preserve the documented
    backend surfaces without adding frontend UI or unsafe data?
+8. Does the local dashboard serve same-origin assets, use fake demo
+   credentials, preserve API protection, reference the documented contract, and
+   remain responsive across desktop and mobile breakpoints?
 
 ## Current Validation Command
 
@@ -47,7 +50,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseT
 Result:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -67,6 +70,7 @@ eval harness dry-run: 15 passed / 0 failed
 | Fixture factory | `tests/test_fixture_factory.py` |
 | CSI/RGOI governed cognition | `tests/test_csi_rgoi.py` |
 | Dashboard contract fixtures | `examples/dashboard_contract/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
+| Dashboard UI | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |
 
 ## Known Evaluation Limits
 

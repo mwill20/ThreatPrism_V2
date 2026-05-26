@@ -31,6 +31,7 @@
   "safety": {
     "fake_data_only": true,
     "raw_credentials_present": false,
-    "frontend_not_implemented": true
+    "sample_contract_only": true,
+    "dashboard_ui_consumes_contract": true
   }
 }

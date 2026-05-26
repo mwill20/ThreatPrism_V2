@@ -82,9 +82,10 @@ tenant namespace filtering, retrieval-zone policy, lineage, replay
 scaffolding, observability, AI-vs-human divergence telemetry, fake fixtures,
 and tests.
 
-The latest dashboard-preparation slice adds a backend data contract, fake
-persona response fixtures, CSI route contract tests, and a dashboard-readiness
-runbook without implementing a frontend dashboard.
+The latest dashboard slice adds a same-origin, fake-data-only dashboard served
+by FastAPI at `GET /dashboard`. It consumes the documented role-safe API
+contract without adding live providers, external frontend dependencies, real
+data, production identity, or remediation.
 
 ## Current Boundaries
 
@@ -117,6 +118,7 @@ src/threatprism/
   api/            FastAPI application factory and routes
   auth/           Demo authentication and role-view authorization
   cases/          Case, triage report, feedback, read models, and service orchestration
+  dashboard/      Static fake-data dashboard UI served by FastAPI
   evals/          Local dry-run regression evaluation harness
   csi/            Read-only governed cognition, trust, lineage, replay, and retrieval policy
   demo/           Typed fake scenario-pack loading
@@ -152,7 +154,7 @@ docker-compose.yml Local demo backend service
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
-| Dashboard data contract | [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
+| Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
 | Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
@@ -219,7 +221,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -269,6 +271,33 @@ Expected focused result:
 ```text
 4 passed
 ```
+
+## Run The Dashboard
+
+The local dashboard is served by the FastAPI backend and uses fake demo
+credentials only:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+$env:THREATPRISM_ENV='demo'
+$env:API_AUTH_MODE='demo_key'
+$env:DEMO_API_KEYS='demo-analyst-key:demo_analyst:analyst,demo-engineer-key:demo_engineer:engineer,demo-manager-key:demo_manager:manager_grc,demo-legal-key:demo_legal:legal_privacy,demo-audit-key:demo_audit:audit_debug,demo-admin-key:demo_admin:admin'
+$env:THREATPRISM_AUTH_REQUIRED='true'
+$env:LLM_PROVIDER='deterministic_demo'
+$env:ALLOW_REAL_ACTIONS='false'
+$env:DATABASE_URL='sqlite:///:memory:'
+python -m uvicorn threatprism.api.app:create_app --factory --host 127.0.0.1 --port 8765
+```
+
+Open:
+
+```text
+http://127.0.0.1:8765/dashboard
+```
+
+Use `Load demo case` to create a synthetic case through the existing fake-data
+API flow.
 
 ## Run The API
 
@@ -390,7 +419,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -453,7 +482,14 @@ Dashboard UI Preparation v0.1 is implemented. See
 `docs/specs/24_DASHBOARD_UI_PREPARATION.md`,
 `docs/runbooks/DASHBOARD_READINESS.md`, `examples/dashboard_contract/`, and
 the API contract tests in `tests/test_demo_scenarios_and_api_contract.py`.
-This is a backend contract slice only; no frontend dashboard is implemented.
+
+Dashboard UI Implementation v0.1 is implemented. See
+`docs/DASHBOARD_UI_IMPLEMENTATION.md`,
+`docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md`,
+`src/threatprism/dashboard/static/`, and `tests/test_dashboard_ui.py`.
+This dashboard is local and demo-only. Production dashboard hardening,
+production identity, live integrations, external telemetry, and real data are
+still out of scope.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

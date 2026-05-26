@@ -5,9 +5,11 @@ import threading
 import time
 from collections import deque
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from threatprism import __version__
 from threatprism.auth.demo import AuthorizationError, authorize_role_view
@@ -42,6 +44,7 @@ from threatprism.guardrails.views import ViewRole
 
 
 logger = logging.getLogger(__name__)
+DASHBOARD_STATIC_DIR = Path(__file__).resolve().parents[1] / "dashboard" / "static"
 
 AUTH_ERROR_RESPONSES = {
     401: {"description": "Missing or invalid demo credential"},
@@ -86,6 +89,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if active_settings.api_auth_mode == "none":
         logger.warning("API authentication is disabled for explicit local-development use only.")
 
+    if DASHBOARD_STATIC_DIR.exists():
+        app.mount(
+            "/dashboard/assets",
+            StaticFiles(directory=str(DASHBOARD_STATIC_DIR)),
+            name="dashboard-assets",
+        )
+
     @app.middleware("http")
     async def case_ingress_limits(request: Request, call_next):  # noqa: ANN001
         if request.method.upper() == "POST" and request.url.path == "/cases":
@@ -122,6 +132,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "mode": active_settings.env,
             "allow_real_actions": active_settings.allow_real_actions,
         }
+
+    @app.get("/dashboard", include_in_schema=False)
+    def dashboard() -> FileResponse:
+        if not DASHBOARD_STATIC_DIR.exists():
+            raise HTTPException(status_code=404, detail="Dashboard assets are not available.")
+        return FileResponse(DASHBOARD_STATIC_DIR / "index.html")
 
     @app.post(
         "/cases",

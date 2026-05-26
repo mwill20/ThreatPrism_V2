@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-83 passed
+87 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -102,10 +102,34 @@ Dashboard readiness contract fixtures live at:
 examples/dashboard_contract/
 ```
 
-For future UI planning without building the dashboard, use:
+For dashboard contract review, use:
 
 ```text
 docs/runbooks/DASHBOARD_READINESS.md
+```
+
+## Start The Dashboard
+
+The local dashboard is served by the FastAPI backend and uses fake demo
+credentials only:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+$env:THREATPRISM_ENV='demo'
+$env:API_AUTH_MODE='demo_key'
+$env:DEMO_API_KEYS='demo-analyst-key:demo_analyst:analyst,demo-engineer-key:demo_engineer:engineer,demo-manager-key:demo_manager:manager_grc,demo-legal-key:demo_legal:legal_privacy,demo-audit-key:demo_audit:audit_debug,demo-admin-key:demo_admin:admin'
+$env:THREATPRISM_AUTH_REQUIRED='true'
+$env:LLM_PROVIDER='deterministic_demo'
+$env:ALLOW_REAL_ACTIONS='false'
+$env:DATABASE_URL='sqlite:///:memory:'
+python -m uvicorn threatprism.api.app:create_app --factory --host 127.0.0.1 --port 8765
+```
+
+Open:
+
+```text
+http://127.0.0.1:8765/dashboard
 ```
 
 ## Start The API

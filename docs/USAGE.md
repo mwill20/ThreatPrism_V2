@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-83 passed
+87 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -133,12 +133,39 @@ python -m tools.fixture_factory.factory --source synthea_sample_data --input ext
 Generated fixtures remain ignored under `fixtures/generated/` until a future
 manual license, safety, and content review approves promotion.
 
-## Review Dashboard Contracts
+## Run The Dashboard
 
-Dashboard UI is not implemented. The current dashboard-preparation slice
-provides backend contracts and fake response fixtures for future UI work:
+The dashboard is a local, fake-data-only UI served by the FastAPI backend:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+$env:THREATPRISM_ENV='demo'
+$env:API_AUTH_MODE='demo_key'
+$env:DEMO_API_KEYS='demo-analyst-key:demo_analyst:analyst,demo-engineer-key:demo_engineer:engineer,demo-manager-key:demo_manager:manager_grc,demo-legal-key:demo_legal:legal_privacy,demo-audit-key:demo_audit:audit_debug,demo-admin-key:demo_admin:admin'
+$env:THREATPRISM_AUTH_REQUIRED='true'
+$env:LLM_PROVIDER='deterministic_demo'
+$env:ALLOW_REAL_ACTIONS='false'
+$env:DATABASE_URL='sqlite:///:memory:'
+python -m uvicorn threatprism.api.app:create_app --factory --host 127.0.0.1 --port 8765
+```
+
+Open:
 
 ```text
+http://127.0.0.1:8765/dashboard
+```
+
+The dashboard uses only same-origin API calls and fake demo credentials. Use
+`Load demo case` to create a synthetic case for UI review.
+
+## Review Dashboard Contracts
+
+The dashboard consumes the documented backend contracts and fake response
+fixtures:
+
+```text
+docs/DASHBOARD_UI_IMPLEMENTATION.md
 docs/DASHBOARD_DATA_CONTRACT.md
 docs/runbooks/DASHBOARD_READINESS.md
 examples/dashboard_contract/

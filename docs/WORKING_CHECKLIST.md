@@ -373,6 +373,45 @@ Repo Standards Readiness Pass v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_repo_standards_final_fresh`.
 
+## Completed Slice
+
+Cognitive Security Infrastructure (CSI) and Retrieval-Governed Organizational
+Intelligence (RGOI) Foundation v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Read the CSI/RGOI source specs under `CSI/`.
+- [x] Add `src/threatprism/csi/` schemas, governance controls, trust scoring,
+  evidence alignment validation, and read-only retrieval service.
+- [x] Implement four-tier cognitive architecture scaffolding: immutable
+  evidence, structured intelligence, approved knowledge, and ephemeral
+  cognitive workspace.
+- [x] Add cognitive object metadata for tenant namespace, provenance, evidence
+  references, lineage, retrieval zone, validation state, lifecycle state,
+  review status, trust, confidence, and competing interpretations.
+- [x] Enforce read-only retrieval: no write APIs, no trust mutation, no
+  autonomous knowledge approval, no suppression publication, and no
+  remediation.
+- [x] Add retrieval governance for tenant namespace, role/purpose policy,
+  retrieval-zone policy, trust threshold, stale cognition, and quarantine
+  exclusion.
+- [x] Add evidence citation enforcement, unsupported claim rejection,
+  prompt-injection checks, and healthcare safeguard scanning for cognitive
+  objects.
+- [x] Add lineage graph, replay scaffolding, observability snapshot, and
+  AI-vs-human divergence telemetry routes.
+- [x] Preserve competing interpretations and mark AI-authored cognition
+  non-authoritative unless human approved.
+- [x] Add fake demo fixtures under `examples/csi/` with no real organization,
+  tenant, workplace, user, host, domain, IP, PHI, PII, or secret data.
+- [x] Add tests for tenant isolation, RBAC/ABAC-style retrieval policy,
+  evidence alignment, trust scoring, quarantine exclusion, stale cognition,
+  lineage, replay, observability, divergence, demo auth, and OpenAPI routes.
+- [x] Update docs, specs, threat model, workflows, README, handoff,
+  limitations, decisions, lessons, and checklist.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_csi_final_validation`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should
@@ -414,7 +453,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

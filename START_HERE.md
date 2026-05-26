@@ -34,6 +34,10 @@ Read deeper files only when the task needs them:
 - `docs/specs/` for any other implementation spec.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` when the task involves datasets
   or synthetic fixtures.
+- `docs/CSI_RGOI_ARCHITECTURE.md` and
+  `docs/specs/23_CSI_RGOI_FOUNDATION.md` when the task involves governed
+  cognition, RAG, retrieval, memory, lineage, replay, or institutional
+  learning.
 - `DECISIONS.md`
 - `LIMITATIONS.md`
 - `README.md`
@@ -54,7 +58,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

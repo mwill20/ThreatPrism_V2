@@ -11,6 +11,8 @@ it does not yet have production monitoring.
 | Tokenization audit events | Case audit trail | Track sensitive-data detection and tokenization. |
 | Role-view audit events | Case audit trail | Track role-view access decisions. |
 | Eval artifacts | `.eval_runs/` | Sanitized dry-run eval results, ignored by git. |
+| CSI/RGOI observability | `GET /csi/observability` | Visible cognitive object counts, stale cognition, AI non-authority, competing interpretation groups, and active controls. |
+| CSI/RGOI divergence telemetry | `GET /csi/divergence` | AI-vs-human disagreement records for governed cognition. |
 | Pytest output | local validation | Regression results for the current fake-data test suite. |
 | Demo safety scanner | `tools/check_demo_safety.py` | Detect unsafe environment, artifact, and secret-looking repo states. |
 

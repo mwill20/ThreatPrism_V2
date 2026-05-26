@@ -35,6 +35,7 @@ The total threat count increased substantially because v0.2 enumerates per-categ
 | [`stride-threat-model.md`](stride-threat-model.md) | **STRIDE** | Traditional application and API risks across spoofing/tampering/repudiation/info-disclosure/DoS/elevation |
 | [`llm-agent-threat-model.md`](llm-agent-threat-model.md) | **MITRE ATLAS + OWASP LLM Top 10** | AI-specific risks: prompt injection, output handling, training poisoning, model DoS, supply chain, sensitive disclosure, plugins/tools, excessive agency, overreliance, model theft |
 | [`healthcare-data-threat-model.md`](healthcare-data-threat-model.md) | **LINDDUN** | Privacy threats: linkability, identifiability, non-repudiation, detectability, disclosure, unawareness, non-compliance |
+| [`csi-rgoi-threat-model.md`](csi-rgoi-threat-model.md) | **CSI/RGOI** | Read-only governed cognition risks: retrieval overreach, poisoned memory, unsupported claims, stale cognition, lineage disclosure, and AI-vs-human divergence |
 | [`mitigations-traceability.md`](mitigations-traceability.md) | (matrix) | Every threat ID → mitigation `file:function` → test file. Surfaces gaps where threats exist without tests |
 
 ---
@@ -87,6 +88,7 @@ This pack covers the implemented local backend at commit `fea5f9f`:
 - Deterministic demo provider under `src/threatprism/llm/`
 - Fake SOAR and demo scenario inputs under `examples/`
 - Dry-run eval harness and fake fixtures under `src/threatprism/evals/` and `tests/evals/`
+- Read-only CSI/RGOI retrieval-governed cognition under `src/threatprism/csi/`
 
 ---
 

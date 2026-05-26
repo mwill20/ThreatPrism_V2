@@ -24,7 +24,9 @@ normalizes evidence and provenance; applies deterministic guardrails and
 healthcare safeguard checks; produces structured, evidence-linked triage and
 GRC alignment outputs; captures analyst feedback and disagreement signals; and
 exposes role-safe views for analysts, engineers, managers, GRC, legal/privacy,
-audit/debug, and AI processing.
+audit/debug, and AI processing. It can also expose read-only,
+retrieval-governed organizational cognition when evidence, provenance, trust,
+role, purpose, and tenant namespace controls all permit retrieval.
 
 ThreatPrism must remain analyst-controlled. It may recommend or simulate
 response actions, but it must not execute real remediation or containment in
@@ -58,6 +60,11 @@ V2.
   mappings into reports or role views.
 - Do not treat role-based rendering as authorization until identity-to-role
   enforcement exists.
+- Do not treat CSI/RGOI as unrestricted AI memory. Humans own truth; AI
+  cognition is non-authoritative unless approved by a human governance path.
+- Do not add memory write-back, RAG corpus expansion, trust mutation,
+  suppression publication, or autonomous knowledge changes without reopening
+  the threat model treatment register.
 - Use healthcare safeguard and evidence-alignment language only.
 - Do not claim HIPAA compliance, HIPAA certification, HITRUST compliance,
   HITRUST certification, control satisfaction, certification readiness, or that
@@ -121,6 +128,22 @@ Reviewed source sample
 ```
 
 Do not couple runtime case processing directly to public dataset schemas.
+
+Read-only CSI/RGOI retrieval must flow through a governed cognition path:
+
+```text
+Retrieval request
+  -> Demo identity and role authorization
+  -> Tenant namespace filter
+  -> Purpose and retrieval-zone policy
+  -> Evidence citation validation
+  -> Prompt-injection and healthcare safeguard scan
+  -> Trust scoring and stale cognition check
+  -> Explained read-only response
+```
+
+CSI/RGOI v0.1 must not persist new memory, mutate trust, approve knowledge,
+publish suppressions, run live RAG, or execute remediation.
 
 ## Role And Access Direction
 
@@ -186,7 +209,9 @@ Current direction:
 9. Completed: Data Strategy & Synthetic Fixture Factory v0.1 for local-only
    reviewed source-shape conversion into sanitized ThreatPrism-native
    fixtures.
-10. Dashboard UI or live-integration preparation only after explicit user
+10. Completed: CSI/RGOI Foundation v0.1 for read-only retrieval-governed
+    organizational cognition.
+11. Dashboard UI or live-integration preparation only after explicit user
     approval and any required threat-model treatment updates.
 
 Do not add a frontend dashboard, live LLM calls, live SOAR calls, live

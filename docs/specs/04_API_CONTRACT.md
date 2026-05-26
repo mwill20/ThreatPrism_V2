@@ -570,6 +570,55 @@ Example response:
 }
 ```
 
+## CSI/RGOI Read-Only Routes
+
+These routes expose retrieval-governed cognition only. They do not write
+memory, mutate trust, approve knowledge, publish suppressions, or execute
+remediation.
+
+All CSI routes require `tenant_id` and apply demo authorization, role/purpose
+policy, retrieval-zone policy, evidence alignment, trust scoring, stale
+cognition handling, and quarantine exclusion.
+
+### GET /csi/objects
+
+Searches visible cognitive objects.
+
+Query parameters:
+
+- `tenant_id`
+- `query`
+- `object_type`
+- `retrieval_zone`
+- `purpose`
+- `include_stale`
+- `limit`
+- `role`
+
+### GET /csi/objects/{object_id}
+
+Returns one retrievable cognitive object with trust, evidence-alignment, and
+authority-state metadata.
+
+### GET /csi/lineage/{object_id}
+
+Returns a visible reasoning lineage graph. Hidden cross-tenant, quarantined,
+or unauthorized-zone objects are not disclosed.
+
+### GET /csi/replay/{object_id}
+
+Returns deterministic replay inputs and hashes for reconstruction. It does not
+rerun an LLM.
+
+### GET /csi/observability
+
+Returns visible cognitive state metrics, stale counts, AI non-authoritative
+counts, competing interpretation groups, and active controls.
+
+### GET /csi/divergence
+
+Returns AI-vs-human divergence telemetry for visible objects.
+
 ### POST /evals/run
 
 Starts an evaluation run. The first implementation may support fixture or dry-run mode only.

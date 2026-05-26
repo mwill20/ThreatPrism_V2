@@ -68,6 +68,8 @@ Current baseline:
 - Operational read-model response types exist under
   `src/threatprism/cases/read_models.py`.
 - Local dry-run eval harness code exists under `src/threatprism/evals/`.
+- CSI/RGOI read-only governed cognition code exists under
+  `src/threatprism/csi/`.
 - Demo scenario-pack helpers exist under `src/threatprism/demo/`.
 - Fake eval fixtures exist under `tests/evals/`.
 - Synthetic fixture factory tooling exists under `tools/fixture_factory/`.
@@ -84,6 +86,7 @@ Current baseline:
 - Lightweight fake-data-only CI exists under `.github/workflows/`.
 - Fake SOAR demo payloads exist under `examples/soar_payloads/`.
 - Fake role-specific demo scenarios exist under `examples/demo_scenarios/`.
+- Tiny fake CSI/RGOI cognitive fixtures exist under `examples/csi/`.
 - API and guardrail tests exist under `tests/`.
 - The preferred local validation command is:
 
@@ -187,6 +190,17 @@ role escalation denial, and authorization audit events.
 This reviewer must enforce that role-based views are not security controls
 until identity and authorization enforce the effective role.
 
+### CSI/RGOI Reviewer Agent
+
+Reviews governed cognition, retrieval policy, evidence citations, trust
+scoring, lineage, replay, drift/stale cognition, tenant namespace isolation,
+and AI-vs-human divergence telemetry.
+
+This reviewer must enforce that CSI/RGOI is not unrestricted AI memory. AI may
+retrieve, correlate, summarize, and propose, but may not autonomously mutate
+knowledge, publish suppressions, execute remediation, modify trust, or become
+source of truth.
+
 ## Development Rules For Later Phases
 
 - Keep application behavior evidence-first and analyst-controlled.
@@ -215,6 +229,10 @@ until identity and authorization enforce the effective role.
 - Keep synthetic fixture factory inputs under `external_datasets/` and outputs
   under `fixtures/generated/`; reject path traversal and avoid auto-scanning
   ignored generated folders by default.
+- For CSI/RGOI work, read `docs/CSI_RGOI_ARCHITECTURE.md` and
+  `docs/specs/23_CSI_RGOI_FOUNDATION.md` first. Keep CSI/RGOI read-only unless
+  a future prompt explicitly reopens memory write-back, RAG, trust mutation,
+  knowledge approval, suppression publication, or production tenancy.
 - Use `tools/check_demo_safety.py` and `tools/validate-threatprism.ps1` for
   fake-data-only validation and artifact hygiene checks.
 - Keep `.github/workflows/safe-validation.yml` fake-data-only. It must not

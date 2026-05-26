@@ -44,6 +44,10 @@ review, penetration testing, or production hardening.
 - Audit trail on every authorization decision, tokenization event, and role-view
   access.
 - Eval harness with regression tests across 16 security-relevant categories.
+- Read-only CSI/RGOI retrieval governance with tenant namespace filtering,
+  role/purpose policy, retrieval-zone policy, evidence alignment, trust
+  scoring, stale cognition controls, quarantine exclusion, lineage, replay,
+  observability, and AI-vs-human divergence telemetry.
 - Production environment startup guard (rejects demo auth modes).
 - POC-grade HTTP request body limits, in-process `POST /cases` rate limiting,
   and triage concurrency caps.
@@ -116,6 +120,8 @@ review, penetration testing, or production hardening.
 | Eval fixture path traversal | `_resolve_under_approved_dir()` rejects paths outside `tests/evals/` and `.eval_runs/` | `evals/runner.py` |
 | Demo auth used in production | `validate_runtime()` raises on startup if env is `prod`/`production` with `none` or `demo_key` auth; `demo_key` requires explicit `DEMO_API_KEYS`; `none` requires explicit local-dev acknowledgement | `config.py` |
 | HTTP payload abuse | `POST /cases` enforces request body cap, in-process rate limit, and triage concurrency cap | `api/app.py`, `config.py` |
+| CSI/RGOI retrieval overreach | Tenant namespace filter, role/purpose policy, retrieval-zone policy, trust thresholding, stale cognition controls, and quarantine exclusion | `csi/governance.py`, `csi/service.py` |
+| Unsupported or poisoned cognition becomes truth | Evidence alignment rejects unsupported claims; AI-authored cognition remains non-authoritative unless human approved | `csi/governance.py`, `tests/test_csi_rgoi.py` |
 
 ### Assets requiring protection
 
@@ -130,6 +136,9 @@ review, penetration testing, or production hardening.
   values. If exposed, all tokenization is defeated.
 - **API credentials**: demo API keys in `.env` files. Real API keys for future
   threat intelligence integrations (VirusTotal, AbuseIPDB, URLScan, etc.).
+- **Cognitive objects**: evidence-linked CSI/RGOI records used for read-only
+  retrieval. They must preserve tenant namespace, provenance, trust, lifecycle,
+  and authority metadata.
 
 ---
 
@@ -177,6 +186,10 @@ these is a security defect.
     limit, per-process rate limit, and triage concurrency cap. Production still
     needs edge enforcement and durable queue backpressure.
 
+11. **CSI/RGOI is read-only.** CSI/RGOI routes must not write memory, mutate
+    trust, approve knowledge, publish suppressions, execute remediation, or
+    call live RAG providers.
+
 ---
 
 ## Credential Handling
@@ -218,6 +231,7 @@ source code.
 | Secret tokens | Critical | Permanently tokenized; display shows `[REDACTED_SECRET]` |
 | Token vault mappings | Critical | In-memory only; never persisted or serialized to API responses |
 | Audit events | Operational | Recorded for all security decisions; sanitized of raw credentials |
+| CSI/RGOI cognitive objects | Demo operational cognition | Read-only retrieval; tenant-scoped; evidence-linked; AI cognition non-authoritative unless approved |
 | Demo API keys | Low (fake) | Environment variables only; not valid outside demo system |
 | Eval fixtures | Test data | Fake payloads only; path-sandboxed to `tests/evals/` |
 

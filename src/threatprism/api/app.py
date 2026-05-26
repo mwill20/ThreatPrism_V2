@@ -25,6 +25,19 @@ from threatprism.cases.schemas import (
 )
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
+from threatprism.csi.schemas import (
+    AIVsHumanDivergenceEnvelope,
+    CognitiveObjectDetailEnvelope,
+    CognitiveObjectType,
+    CognitiveObservabilitySnapshot,
+    CognitiveReplayEnvelope,
+    CognitiveRetrievalResponse,
+    ReasoningLineageGraph,
+    RetrievalContext,
+    RetrievalPurpose,
+    RetrievalZone,
+)
+from threatprism.csi.service import CognitiveRetrievalService
 from threatprism.guardrails.views import ViewRole
 
 
@@ -66,6 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="ThreatPrism API", version=__version__)
     app.state.settings = active_settings
     app.state.case_service = CaseService(active_settings)
+    app.state.cognitive_service = CognitiveRetrievalService.demo()
     app.state.case_rate_limiter = InMemoryRateLimiter(active_settings.case_post_rate_limit_per_minute)
     app.state.triage_semaphore = threading.BoundedSemaphore(active_settings.triage_concurrency_limit)
     logger.info("ThreatPrism API auth mode: %s", active_settings.api_auth_mode)
@@ -136,6 +150,103 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def get_metrics(request: Request) -> OperationalMetrics:
         _authorized_global_view_role(request, "get_metrics", None)
         return _service(request).get_operational_metrics()
+
+    @app.get("/csi/objects", response_model=CognitiveRetrievalResponse, responses=AUTH_ERROR_RESPONSES)
+    def list_cognitive_objects(
+        request: Request,
+        tenant_id: str,
+        query: str | None = None,
+        object_type: CognitiveObjectType | None = None,
+        retrieval_zone: RetrievalZone | None = None,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        include_stale: bool = False,
+        limit: int = 20,
+        role: ViewRole | None = None,
+    ) -> CognitiveRetrievalResponse:
+        context = _authorized_csi_context(request, "list_cognitive_objects", tenant_id, purpose, role)
+        return _csi_service(request).search(
+            context=context,
+            query=query,
+            object_type=object_type,
+            retrieval_zone=retrieval_zone,
+            include_stale=include_stale,
+            limit=limit,
+        )
+
+    @app.get(
+        "/csi/objects/{object_id}",
+        response_model=CognitiveObjectDetailEnvelope,
+        responses={**AUTH_ERROR_RESPONSES, 404: {"description": "Cognitive object not found or not retrievable"}},
+    )
+    def get_cognitive_object(
+        object_id: str,
+        request: Request,
+        tenant_id: str,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        include_stale: bool = False,
+        role: ViewRole | None = None,
+    ) -> CognitiveObjectDetailEnvelope:
+        context = _authorized_csi_context(request, "get_cognitive_object", tenant_id, purpose, role)
+        detail = _csi_service(request).get_object(context=context, object_id=object_id, include_stale=include_stale)
+        if detail is None:
+            raise HTTPException(status_code=404, detail="Cognitive object not found or not retrievable.")
+        return detail
+
+    @app.get(
+        "/csi/lineage/{object_id}",
+        response_model=ReasoningLineageGraph,
+        responses={**AUTH_ERROR_RESPONSES, 404: {"description": "Lineage not found or not retrievable"}},
+    )
+    def get_cognitive_lineage(
+        object_id: str,
+        request: Request,
+        tenant_id: str,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        role: ViewRole | None = None,
+    ) -> ReasoningLineageGraph:
+        context = _authorized_csi_context(request, "get_cognitive_lineage", tenant_id, purpose, role)
+        graph = _csi_service(request).lineage(context=context, object_id=object_id)
+        if graph is None:
+            raise HTTPException(status_code=404, detail="Lineage not found or not retrievable.")
+        return graph
+
+    @app.get(
+        "/csi/replay/{object_id}",
+        response_model=CognitiveReplayEnvelope,
+        responses={**AUTH_ERROR_RESPONSES, 404: {"description": "Replay not found or not retrievable"}},
+    )
+    def get_cognitive_replay(
+        object_id: str,
+        request: Request,
+        tenant_id: str,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        role: ViewRole | None = None,
+    ) -> CognitiveReplayEnvelope:
+        context = _authorized_csi_context(request, "get_cognitive_replay", tenant_id, purpose, role)
+        replay = _csi_service(request).replay(context=context, object_id=object_id)
+        if replay is None:
+            raise HTTPException(status_code=404, detail="Replay not found or not retrievable.")
+        return replay
+
+    @app.get("/csi/observability", response_model=CognitiveObservabilitySnapshot, responses=AUTH_ERROR_RESPONSES)
+    def get_cognitive_observability(
+        request: Request,
+        tenant_id: str,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        role: ViewRole | None = None,
+    ) -> CognitiveObservabilitySnapshot:
+        context = _authorized_csi_context(request, "get_cognitive_observability", tenant_id, purpose, role)
+        return _csi_service(request).observability(context=context)
+
+    @app.get("/csi/divergence", response_model=AIVsHumanDivergenceEnvelope, responses=AUTH_ERROR_RESPONSES)
+    def get_cognitive_divergence(
+        request: Request,
+        tenant_id: str,
+        purpose: RetrievalPurpose = RetrievalPurpose.analyst_investigation,
+        role: ViewRole | None = None,
+    ) -> AIVsHumanDivergenceEnvelope:
+        context = _authorized_csi_context(request, "get_cognitive_divergence", tenant_id, purpose, role)
+        return _csi_service(request).divergence(context=context)
 
     @app.get("/cases/read-model", response_model=CaseReadModelEnvelope, responses=AUTH_ERROR_RESPONSES)
     def list_case_read_models(
@@ -341,6 +452,10 @@ def _service(request: Request) -> CaseService:
     return request.app.state.case_service
 
 
+def _csi_service(request: Request) -> CognitiveRetrievalService:
+    return request.app.state.cognitive_service
+
+
 def _run_triage_with_limit(service: CaseService, case_id: str, semaphore: threading.BoundedSemaphore) -> None:
     with semaphore:
         service.run_triage(case_id)
@@ -395,3 +510,35 @@ def _authorized_global_view_role(
     except AuthorizationError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
     return result.view_role
+
+
+def _authorized_csi_context(
+    request: Request,
+    endpoint: str,
+    tenant_id: str,
+    purpose: RetrievalPurpose,
+    requested_role: ViewRole | None,
+) -> RetrievalContext:
+    settings: Settings = request.app.state.settings
+    try:
+        result = authorize_role_view(
+            settings=settings,
+            headers=request.headers,
+            method=request.method,
+            path=request.url.path,
+            query_keys=list(request.query_params.keys()),
+            requested_role=requested_role,
+            case_id=None,
+            endpoint=endpoint,
+        )
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
+
+    view_role: ViewRole = result.view_role or requested_role or "analyst"
+    return RetrievalContext(
+        tenant_id=tenant_id,
+        principal_id=result.principal.identity,
+        effective_role=result.principal.role,
+        view_role=view_role,
+        purpose=purpose,
+    )

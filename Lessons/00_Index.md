@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `73 passed`.
+- The current validated baseline is `82 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -40,6 +40,7 @@ Fake SOAR payload
   -> Docker Compose local demo packaging
   -> Synthetic fixture factory for ignored reviewed source-shape conversion
   -> Repository standards audit and reviewer-readiness docs
+  -> CSI/RGOI read-only governed cognition and retrieval policy
   -> API responses and tests
 ```
 
@@ -65,6 +66,7 @@ Fake SOAR payload
 | ✅ | [Lesson 15](Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md) | Threat Model Treatment And Demo Hardening | `docs/threat-models/*.md`, `docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md`, `docs/runbooks/PATTERN_REFRESH.md`, hardening tests |
 | ✅ | [Lesson 16](Lesson16_Data_Strategy_And_Synthetic_Fixture_Factory.md) | Data Strategy And Synthetic Fixture Factory | `data_sources/registry.json`, `tools/fixture_factory/*.py`, `tests/test_fixture_factory.py` |
 | yes | [Lesson 17](Lesson17_Repo_Standards_Readiness_Pass.md) | Repo Standards Readiness Pass | `REPO_AUDIT.md`, `README.md`, `docs/USAGE.md`, `docs/EVALUATION.md`, `docs/DEPLOYMENT.md` |
+| yes | [Lesson 18](Lesson18_CSI_RGOI_Foundation.md) | CSI/RGOI Foundation | `src/threatprism/csi/*.py`, `tests/test_csi_rgoi.py`, `docs/CSI_RGOI_ARCHITECTURE.md` |
 
 ## File Coverage Map
 
@@ -102,6 +104,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\fixture_factory\*.py` -> Lesson 16
+- `C:\Projects\ThreatPrismV2\src\threatprism\csi\*.py` -> Lesson 18
 - `C:\Projects\ThreatPrismV2\data_sources\registry.json` -> Lesson 16
 - `C:\Projects\ThreatPrismV2\external_datasets\README.md` -> Lesson 16
 - `C:\Projects\ThreatPrismV2\REPO_AUDIT.md` -> Lesson 17
@@ -112,6 +115,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\docs\DEPLOYMENT.md` -> Lesson 17
 - `C:\Projects\ThreatPrismV2\docs\MONITORING.md` -> Lesson 17
 - `C:\Projects\ThreatPrismV2\docs\TROUBLESHOOTING.md` -> Lesson 17
+- `C:\Projects\ThreatPrismV2\docs\CSI_RGOI_ARCHITECTURE.md` -> Lesson 18
+- `C:\Projects\ThreatPrismV2\docs\CSI_RGOI_WORKFLOWS.md` -> Lesson 18
+- `C:\Projects\ThreatPrismV2\docs\specs\23_CSI_RGOI_FOUNDATION.md` -> Lesson 18
 - `C:\Projects\ThreatPrismV2\Dockerfile` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\docker-compose.yml` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\.dockerignore` -> Lesson 14
@@ -138,6 +144,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_stage1_no_rehydration.py` -> Lessons 05, 08, and 15
 - `C:\Projects\ThreatPrismV2\tests\test_token_vault_isolation.py` -> Lessons 05, 08, and 15
 - `C:\Projects\ThreatPrismV2\tests\test_fixture_factory.py` -> Lessons 08 and 16
+- `C:\Projects\ThreatPrismV2\tests\test_csi_rgoi.py` -> Lessons 08 and 18
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -166,12 +173,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-73 passed
+82 passed
 ```
 
 ## What To Study Next
 
-After Lesson 17, use the working checklist to choose the next requested slice:
+After Lesson 18, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

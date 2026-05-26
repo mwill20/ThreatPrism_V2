@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-73 passed
+82 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -172,6 +172,19 @@ Invoke-RestMethod http://127.0.0.1:8000/metrics
 Invoke-RestMethod http://127.0.0.1:8000/queues/manager-review
 Invoke-RestMethod http://127.0.0.1:8000/queues/healthcare-review
 ```
+
+Query read-only CSI/RGOI cognition:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/csi/objects?tenant_id=tenant_demo_alpha&query=identity"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/lineage/cog_reason_alpha_human_001?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/replay/cog_reason_alpha_human_001?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/observability?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/divergence?tenant_id=tenant_demo_alpha"
+```
+
+CSI/RGOI routes are retrieval-only. They do not write memory, mutate trust,
+approve knowledge, publish suppressions, run live RAG, or execute remediation.
 
 Submit analyst feedback:
 

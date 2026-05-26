@@ -112,7 +112,7 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 | ID | Threat (short) | Proposed Treatment | Slice | Owner | Notes |
 |----|----------------|---------------------|-------|-------|-------|
 | L1 / RR-L1 / OT-L5 | Quarantine flag did not abort service-layer triage | **Mitigated** (OT-L5 closed); **Gated Mitigation** remains for semantic RR-L1 | Slice G (implemented) | Codex | `run_triage()` now blocks on `operation="quarantine"` before provider execution and records `triage_blocked_by_prompt_firewall`; semantic prompt-injection bypass remains RR-L1 until real LLM work |
-| L2 / OT-L1 | No indirect prompt injection defenses (RAG) | **Gated Mitigation** | Gated (RAG) | Project owner (POC), 2026-05-24 | Source-trust registry + retrieved-content sanitization + evidence-ID binding. Per [LLM threat model "Before RAG"](../threat-models/llm-agent-threat-model.md#before-rag--retrieval) |
+| L2 / OT-L1 | No indirect prompt injection defenses (RAG) | **Gated Mitigation**; read-only CSI/RGOI foundation implemented | Gated (live RAG) | Project owner (POC), 2026-05-24 | CSI/RGOI v0.1 adds read-only retrieval governance, tenant namespace filtering, retrieved-object sanitization, evidence-ID binding, trust scoring, and quarantine exclusion for fake in-memory cognition. Live RAG, external corpora, and production retrieval remain gated per [LLM threat model "Before RAG"](../threat-models/llm-agent-threat-model.md#before-rag--retrieval). |
 | L3 | Insecure output handling | **Mitigated** (current) | n/a | n/a | Already implemented via three-layer validation. No further treatment required |
 | L4 / OT-L2 | Training data poisoning | **Avoid** (current) → **Gated Mitigation** (if fine-tuning added) | Gated (fine-tuning) | Project owner (POC), 2026-05-24 | Current avoid is "no fine-tuning pipeline exists." If that changes, treat per LLM threat model "Before Memory / Write-Back" preconditions |
 | L5 / OT-L3 | LLM DoS (cost, context, recursion) | **Gated Mitigation** | Gated (real LLM) | Project owner (POC), 2026-05-24 | Token budget per request + context size cap + provider-level rate limiting |
@@ -124,8 +124,8 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 | L11 | Model theft | **N/A** | n/a | n/a | ThreatPrism does not expose a model API |
 | L12 | Hallucinated citations | **Mitigated** (current) | n/a | n/a | Already implemented via `validate_report_evidence()` |
 | L13 | Compliance overclaim | **Mitigated** (current pattern set) | n/a | n/a | Pattern-set refresh handled by OT-5 / Slice F |
-| OT-L8 | Memory / write-back unspecified | **Avoid** (current) → **Gated Mitigation** (if memory added) | Gated (memory layer) | Project owner (POC), 2026-05-24 | Per LLM threat model "Before Memory" preconditions |
-| OT-L9 | Cross-tenant isolation unspecified | **Avoid** (current) → **Gated Mitigation** (if multi-tenancy added) | Gated (multi-tenancy) | Project owner (POC), 2026-05-24 | Per LLM threat model "Before Multi-Tenancy" preconditions |
+| OT-L8 | Memory / write-back unspecified | **Avoid** for write-back; read-only CSI/RGOI foundation implemented | Gated (memory write-back) | Project owner (POC), 2026-05-24 | CSI/RGOI v0.1 is not unrestricted AI memory and exposes no write APIs, trust mutation, knowledge approval, or suppression publication. Any memory write-back remains gated per LLM threat model "Before Memory" preconditions. |
+| OT-L9 | Cross-tenant isolation unspecified | **Avoid** for production multi-tenancy; defensive CSI namespace implemented | Gated (multi-tenancy) | Project owner (POC), 2026-05-24 | CSI/RGOI v0.1 requires tenant IDs as defensive cognition namespaces and tests cross-tenant suppression. This is not MSSP multi-tenancy or production tenant administration, which remains gated per LLM threat model "Before Multi-Tenancy" preconditions. |
 
 ### From LINDDUN
 
@@ -466,6 +466,7 @@ This spec does not:
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | CSI/RGOI read-only foundation implemented | Added governed cognition without write-back, live RAG, trust mutation, suppressions, remediation, production tenancy, or real data. Live RAG, memory write-back, and production multi-tenancy remain gated. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F implemented | Followed the owner-approved POC treatment order after Slice G. Closed POC-scope auth hardening, HTTP resource controls, test-gap closure, pattern refresh process, and dependency hardening. Gated MVP/production/enterprise controls remain out of scope. |
 | 2026-05-24 | Codex | POC owner decision pass recorded | Under user direction, replaced owner-decision placeholders with POC owner decisions. Scheduled near-term mitigations in order: Slice D, Slice A, Slice B, Slice F, Slice E. Kept MVP/production/enterprise, real LLM, RAG, memory, multi-tenancy, non-demo data, and real PHI risks gated. |
 | 2026-05-24 | Codex | Slice G implemented; original register draft state | Implemented quarantine enforcement and tests, updated LLM lens and traceability. This row records the pre-owner-pass state and is superseded by the later POC owner pass. |

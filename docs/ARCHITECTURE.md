@@ -329,6 +329,47 @@ subject to authorization.
 
 ---
 
+## CSI/RGOI Read-Only Cognition
+
+**Modules:** `csi/schemas.py`, `csi/governance.py`, `csi/service.py`
+
+CSI/RGOI adds a governed cognition layer without adding unrestricted AI memory.
+The current implementation is read-only and uses fake demo cognitive objects
+seeded in memory.
+
+The cognitive architecture has four tiers:
+
+- Immutable evidence.
+- Structured intelligence.
+- Approved knowledge.
+- Ephemeral cognitive workspace.
+
+Retrieval is governed by:
+
+- tenant namespace filtering,
+- role and purpose policy,
+- retrieval zone policy,
+- evidence citation validation,
+- prompt-injection and healthcare safeguard checks,
+- deterministic trust scoring,
+- stale cognition handling,
+- quarantine exclusion.
+
+The API routes are:
+
+- `GET /csi/objects`
+- `GET /csi/objects/{object_id}`
+- `GET /csi/lineage/{object_id}`
+- `GET /csi/replay/{object_id}`
+- `GET /csi/observability`
+- `GET /csi/divergence`
+
+These routes do not mutate knowledge, trust, suppressions, evidence, or case
+state. AI-authored cognition is marked non-authoritative unless a future human
+approval workflow approves it.
+
+---
+
 ## Eval Harness
 
 **Modules:** `evals/runner.py`, `evals/schemas.py`, `evals/cli.py`

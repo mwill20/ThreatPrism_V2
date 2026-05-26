@@ -52,17 +52,20 @@ Current implemented baseline:
   backend.
 - Data source registry, local-only synthetic fixture factory, fixture models,
   sanitizers, validators, adapters, CLI entry point, and fixture-factory tests.
+- Read-only CSI/RGOI governed cognition schemas, retrieval governance, trust
+  scoring, evidence alignment, lineage, replay, observability, divergence
+  telemetry, API routes, fake fixtures, and tests.
 
-Validation command confirmed on 2026-05-25:
+Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_fixture_factory_validation_done
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_csi_final_validation
 ```
 
-Result after Data Strategy & Synthetic Fixture Factory v0.1:
+Result after CSI/RGOI Foundation v0.1:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -249,6 +252,31 @@ Known repository-readiness gaps:
 - Production deployment, live provider operation, production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.
+
+## CSI/RGOI Limitations
+
+The CSI/RGOI foundation is read-only and demo-safe. It is not unrestricted AI
+memory, production RAG, a knowledge-base approval workflow, or production
+multi-tenancy.
+
+Current boundaries:
+
+- No CSI write APIs.
+- No autonomous memory persistence.
+- No trust mutation API.
+- No autonomous suppression publication.
+- No remediation or containment.
+- No live LLM, RAG, SOAR, cloud, or enrichment calls.
+- No production IdP or production tenant administration.
+- No real PHI, PII, credentials, tenant data, workplace data, provider output,
+  or organization data.
+
+Tenant IDs in CSI/RGOI are defensive demo namespaces used to prove retrieval
+isolation. They do not make ThreatPrism an MSSP multi-tenant platform.
+
+Replay is scaffolding only. It returns visible governed inputs and a
+deterministic hash. It does not rerun a model and does not mutate evidence,
+trust, lifecycle state, or knowledge.
 
 ## Known Open Items
 

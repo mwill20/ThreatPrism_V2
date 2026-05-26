@@ -15,6 +15,9 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
 4. Does the eval harness reject unsafe paths and produce sanitized artifacts?
 5. Does the fixture factory generate deterministic, sanitized, schema-valid
    ThreatPrism-native fixtures without network calls?
+6. Does CSI/RGOI enforce read-only retrieval governance, tenant isolation,
+   evidence alignment, trust scoring, stale cognition controls, and
+   AI-vs-human divergence telemetry?
 
 ## Current Validation Command
 
@@ -33,16 +36,16 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Repo Standards Readiness Pass with:
+Validated during the CSI/RGOI Foundation pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_repo_standards_final_fresh
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_csi_final_validation
 ```
 
 Result:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -60,6 +63,7 @@ eval harness dry-run: 15 passed / 0 failed
 | Demo scenarios and API contract | `tests/test_demo_scenarios_and_api_contract.py` |
 | Docker packaging | `tests/test_docker_packaging.py` |
 | Fixture factory | `tests/test_fixture_factory.py` |
+| CSI/RGOI governed cognition | `tests/test_csi_rgoi.py` |
 
 ## Known Evaluation Limits
 

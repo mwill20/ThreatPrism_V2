@@ -53,6 +53,9 @@ The current live implementation includes a first backend slice:
 - `src/threatprism/persistence/sqlite.py` with SQLite demo persistence.
 - `src/threatprism/reports/render.py` with deterministic report rendering.
 - `src/threatprism/evals/` with the local dry-run regression eval harness.
+- `src/threatprism/csi/` with read-only CSI/RGOI cognitive schemas,
+  retrieval governance, trust scoring, evidence alignment validation, lineage,
+  replay, observability, divergence telemetry, and fake demo seed objects.
 - `src/threatprism/demo/` with typed fake scenario-pack loading.
 - `tools/` with fake-data-only safety checks and local validation wrapper.
 - `tools/generate-compact-handoff.ps1` with compact fresh-chat prompt
@@ -68,6 +71,8 @@ The current live implementation includes a first backend slice:
 - `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
 - `examples/soar_payloads/` with fake demo payloads only.
 - `examples/demo_scenarios/` with the fake role-specific demo scenario pack.
+- `examples/csi/` with tiny fake CSI/RGOI cognitive object fixture
+  descriptions.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -81,6 +86,10 @@ The current live implementation includes a first backend slice:
 - `tests/test_fixture_factory.py` covering registry metadata, fixture models,
   sanitizer behavior, adapters, CLI behavior, path safety, deterministic
   output, no-network behavior, schema validity, and leakage prevention.
+- `tests/test_csi_rgoi.py` covering tenant isolation, retrieval policy,
+  evidence alignment, trust scoring, quarantine exclusion, stale cognition,
+  lineage, replay, observability, divergence telemetry, demo auth, and OpenAPI
+  routes.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
@@ -113,6 +122,19 @@ Result:
 
 ```text
 73 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+CSI/RGOI Foundation validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_csi_final_validation
+```
+
+Result:
+
+```text
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -174,6 +196,9 @@ Read in this order:
 14. `AGENTS.md`
 15. `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` when the task involves
     datasets, synthetic fixtures, or data realism.
+16. `docs/CSI_RGOI_ARCHITECTURE.md` and `docs/specs/23_CSI_RGOI_FOUNDATION.md`
+    when the task involves governed cognition, RAG, retrieval, memory,
+    lineage, or institutional learning.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -422,6 +447,20 @@ README.md
      and support summary
 ```
 
+CSI/RGOI Foundation v0.1 is implemented:
+
+```text
+src/threatprism/csi/
+  -> read-only cognitive object schemas, retrieval governance, trust scoring,
+     evidence alignment, lineage, replay, observability, and divergence
+     telemetry
+GET /csi/objects, /csi/objects/{object_id}, /csi/lineage/{object_id},
+/csi/replay/{object_id}, /csi/observability, /csi/divergence
+  -> retrieval-governed cognition APIs
+examples/csi/rgoi_cognitive_objects.json
+  -> tiny fake fixture description
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
@@ -438,6 +477,8 @@ Do not implement:
 - a frontend dashboard
 - MSSP multi-tenancy
 - live SOAR credential flows
+- CSI/RGOI write-back, live RAG, autonomous knowledge approval, trust mutation,
+  or suppression publication
 
 ## Recommended Initial Module Layout
 
@@ -447,6 +488,7 @@ Use a clean structure rather than copying V1 layout wholesale:
 src/threatprism/
   api/
   cases/
+  csi/
   guardrails/
   llm/
   reports/
@@ -629,10 +671,12 @@ tests/test_operational_read_models.py
 tests/test_eval_harness.py
 tests/test_demo_scenarios_and_api_contract.py
 tests/test_fixture_factory.py
+tests/test_csi_rgoi.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
 examples/demo_scenarios/demo_scenario_pack.json
 examples/demo_scenarios/healthcare_safeguard_review_case.json
+examples/csi/rgoi_cognitive_objects.json
 tools/check_demo_safety.py
 tools/validate-threatprism.ps1
 tools/generate-compact-handoff.ps1
@@ -655,6 +699,7 @@ Lessons/Lesson14_Docker_Compose_Local_Demo_Packaging.md
 Lessons/Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md
 Lessons/Lesson16_Data_Strategy_And_Synthetic_Fixture_Factory.md
 Lessons/Lesson17_Repo_Standards_Readiness_Pass.md
+Lessons/Lesson18_CSI_RGOI_Foundation.md
 ```
 
 ## Next Session Recommended Prompt

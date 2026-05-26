@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added CSI/RGOI read-only governed cognition foundation with schemas,
+  retrieval governance, trust scoring, evidence alignment, lineage, replay,
+  observability, divergence telemetry, fake fixtures, docs, and tests.
 - Added repository standards readiness audit and reviewer-focused docs.
 - Documented usage, evaluation, dataset, model/provider, deployment,
   monitoring, and troubleshooting entry points.

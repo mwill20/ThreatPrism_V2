@@ -76,6 +76,12 @@ factory that converts explicit local, manually reviewed source-shape samples
 into sanitized ThreatPrism-native JSONL fixtures without downloads, live
 providers, raw dataset commits, or baseline test auto-scanning.
 
+The latest CSI/RGOI slice adds read-only retrieval-governed organizational
+cognition with cognitive object schemas, evidence alignment, trust scoring,
+tenant namespace filtering, retrieval-zone policy, lineage, replay
+scaffolding, observability, AI-vs-human divergence telemetry, fake fixtures,
+and tests.
+
 ## Current Boundaries
 
 - Demo data only.
@@ -108,6 +114,7 @@ src/threatprism/
   auth/           Demo authentication and role-view authorization
   cases/          Case, triage report, feedback, read models, and service orchestration
   evals/          Local dry-run regression evaluation harness
+  csi/            Read-only governed cognition, trust, lineage, replay, and retrieval policy
   demo/           Typed fake scenario-pack loading
   guardrails/     Prompt firewall, tokenization, policy, and evidence checks
   llm/            Provider interface and deterministic demo provider
@@ -117,6 +124,7 @@ src/threatprism/
   enrichment/     Demo enrichment stubs
 docs/specs/       Product, architecture, API, data, security, and demo specs
 examples/         Fake demo SOAR payloads and scenario packs
+examples/csi/     Tiny fake CSI/RGOI cognitive object fixture descriptions
 tests/            API, guardrail, read-model, eval, and safety tests
 tools/            Safe local validation and demo safety checks
 tools/fixture_factory/
@@ -138,6 +146,7 @@ docker-compose.yml Local demo backend service
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
+| Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
 | Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
 | Model/provider behavior | [docs/MODEL_CARD.md](docs/MODEL_CARD.md) |
@@ -203,7 +212,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -323,6 +332,23 @@ Invoke-RestMethod "http://127.0.0.1:8000/queues/manager-review"
 Invoke-RestMethod "http://127.0.0.1:8000/queues/healthcare-review"
 ```
 
+## Query CSI/RGOI
+
+CSI/RGOI routes are read-only. They require a `tenant_id` and return governed
+cognitive objects only when tenant namespace, role, purpose, retrieval zone,
+evidence alignment, trust, stale cognition, and quarantine controls permit it.
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/csi/objects?tenant_id=tenant_demo_alpha&query=identity"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/lineage/cog_reason_alpha_human_001?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/replay/cog_reason_alpha_human_001?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/observability?tenant_id=tenant_demo_alpha"
+Invoke-RestMethod "http://127.0.0.1:8000/csi/divergence?tenant_id=tenant_demo_alpha"
+```
+
+CSI/RGOI does not write memory, approve knowledge, mutate trust, publish
+suppressions, run live RAG, or execute remediation.
+
 Submit analyst feedback:
 
 ```powershell
@@ -357,7 +383,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-73 passed
+82 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -409,6 +435,11 @@ Data Strategy & Synthetic Fixture Factory v0.1 is implemented. See
 `data_sources/registry.json`, and `tools/fixture_factory/`. Public or
 synthetic datasets must be manually reviewed, kept out of git as raw data, and
 converted into sanitized ThreatPrism-native fixtures before use.
+
+CSI/RGOI Foundation v0.1 is implemented. See
+`docs/CSI_RGOI_ARCHITECTURE.md`, `docs/CSI_RGOI_WORKFLOWS.md`,
+`docs/specs/23_CSI_RGOI_FOUNDATION.md`, `src/threatprism/csi/`, and
+`tests/test_csi_rgoi.py`.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

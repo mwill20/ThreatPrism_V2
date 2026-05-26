@@ -530,3 +530,31 @@ Generated fixtures are ignored by default and must not silently affect baseline
 tests or evals. Any generated fixture promoted into tracked tests or eval
 fixtures requires a separate manual review of license, safety, and data
 content.
+
+## D-037 CSI/RGOI Read-Only Cognition Boundary
+
+Cognitive Security Infrastructure (CSI) with Retrieval-Governed Organizational
+Intelligence (RGOI) is implemented as a read-only governed cognition
+foundation.
+
+CSI/RGOI is not unrestricted AI memory. Humans own truth. AI-authored cognition
+is non-authoritative unless approved through a future human governance path.
+
+The current implementation may retrieve, correlate, explain, reconstruct
+lineage, expose replay scaffolding, surface stale cognition, preserve
+competing interpretations, and report AI-vs-human divergence telemetry.
+
+The current implementation must not:
+
+- Persist autonomous memory writes.
+- Modify trust scores through an API.
+- Approve knowledge.
+- Publish suppressions.
+- Execute remediation.
+- Use live LLM, SOAR, cloud, enrichment, or RAG providers.
+- Handle real PHI, real PII, credentials, real tenant data, or real workplace
+  data.
+
+Tenant IDs in CSI/RGOI v0.1 are defensive cognition namespaces for testable
+isolation. They are not MSSP multi-tenancy or production tenant
+administration.

@@ -1,0 +1,65 @@
+{
+  "schema_version": "csi-rgoi-demo-fixtures/0.1",
+  "description": "Tiny fake CSI/RGOI cognitive object fixture pack. These examples are synthetic and contain no real organization data.",
+  "tenant_ids": [
+    "tenant_demo_alpha",
+    "tenant_demo_beta"
+  ],
+  "objects": [
+    {
+      "id": "cog_ev_alpha_001",
+      "tenant_id": "tenant_demo_alpha",
+      "object_type": "evidence",
+      "retrieval_zone": "soc_operational",
+      "title": "Immutable evidence for synthetic login burst",
+      "evidence_ids": [
+        "ev-csi-alpha-login-burst"
+      ],
+      "demo_only": true
+    },
+    {
+      "id": "cog_reason_alpha_ai_001",
+      "tenant_id": "tenant_demo_alpha",
+      "object_type": "reasoning",
+      "retrieval_zone": "soc_operational",
+      "title": "AI-proposed interpretation for synthetic identity case",
+      "authority": "non_authoritative_until_human_approved",
+      "competes_with": [
+        "cog_reason_alpha_human_001"
+      ],
+      "demo_only": true
+    },
+    {
+      "id": "cog_reason_alpha_human_001",
+      "tenant_id": "tenant_demo_alpha",
+      "object_type": "reasoning",
+      "retrieval_zone": "soc_operational",
+      "title": "Human-approved interpretation for synthetic identity case",
+      "authority": "human_approved",
+      "competes_with": [
+        "cog_reason_alpha_ai_001"
+      ],
+      "demo_only": true
+    },
+    {
+      "id": "cog_quarantine_alpha_001",
+      "tenant_id": "tenant_demo_alpha",
+      "object_type": "reasoning",
+      "retrieval_zone": "quarantine",
+      "title": "Quarantined adversarial memory fixture",
+      "authority": "rejected",
+      "demo_only": true
+    },
+    {
+      "id": "cog_ev_beta_001",
+      "tenant_id": "tenant_demo_beta",
+      "object_type": "evidence",
+      "retrieval_zone": "soc_operational",
+      "title": "Immutable evidence for isolated synthetic mail rule case",
+      "evidence_ids": [
+        "ev-csi-beta-mail-rule"
+      ],
+      "demo_only": true
+    }
+  ]
+}

@@ -28,6 +28,10 @@ output as untrusted. Output must pass:
 - action-safety checks
 - role-aware rendering and authorization checks before display
 
+CSI/RGOI also treats AI-authored cognition as non-authoritative unless a human
+approval path approves it. The current CSI/RGOI slice does not call a live
+model, write memory, mutate trust, publish suppressions, or run RAG.
+
 ## Future Live Providers
 
 Future live LLM provider work must be explicitly approved and must re-open the

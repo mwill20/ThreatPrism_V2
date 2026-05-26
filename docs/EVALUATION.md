@@ -25,6 +25,9 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
    remain responsive across desktop and mobile breakpoints?
 9. Do dashboard hardening checks enforce security headers, same-origin request
    targets, timeout-bounded API calls, and keyboard persona navigation markers?
+10. Does curated fixture promotion require explicit manifest review, reject
+    generated-folder paths, and keep promoted fixtures schema-valid and
+    sanitized?
 
 ## Current Validation Command
 
@@ -43,16 +46,16 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Production Dashboard Hardening pass with:
+Validated during the Curated Generated-Fixture Promotion pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_fixture_promotion_final
 ```
 
 Result:
 
 ```text
-89 passed
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -70,6 +73,7 @@ eval harness dry-run: 15 passed / 0 failed
 | Demo scenarios and API contract | `tests/test_demo_scenarios_and_api_contract.py` |
 | Docker packaging | `tests/test_docker_packaging.py` |
 | Fixture factory | `tests/test_fixture_factory.py` |
+| Curated fixture promotion | `fixtures/curated/*.jsonl`, `tests/test_curated_fixture_promotion.py` |
 | CSI/RGOI governed cognition | `tests/test_csi_rgoi.py` |
 | Dashboard contract fixtures | `examples/dashboard_contract/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
 | Dashboard UI and hardening | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |

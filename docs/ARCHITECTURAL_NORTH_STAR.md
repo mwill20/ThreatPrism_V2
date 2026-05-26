@@ -225,8 +225,11 @@ Current direction:
     surface: security headers, same-origin request enforcement,
     timeout-bounded fetches, keyboard persona navigation, and threat-model
     traceability updates.
-14. Production dashboard deployment, production identity, live-integration
-    preparation, or curated fixture promotion only after explicit user
+14. Completed: Curated Generated-Fixture Promotion v0.1 for one tiny tracked,
+    hand-reviewed fake SOC fixture with manifest review and path-safe
+    promotion tests.
+15. Production dashboard deployment, production identity, live-integration
+    preparation, or broader curated fixture promotion only after explicit user
     approval and any required threat-model treatment updates.
 
 Do not add live LLM calls, live SOAR calls, live enrichment calls, production

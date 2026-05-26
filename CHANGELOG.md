@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added Curated Generated-Fixture Promotion v0.1 with a tracked fake SOC
+  fixture, manifest review gate, path-safe promotion loader, tests, and docs
+  while keeping `fixtures/generated/` ignored and out of automatic scans.
 - Documented Exa.ai or equivalent public-web research providers as optional
   future enhancement candidates only, outside the current CSI/RGOI, validation,
   demo, RAG, memory write-back, fixture-promotion, and source-of-truth paths.

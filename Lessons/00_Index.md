@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `89 passed`.
+- The current validated baseline is `93 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -39,6 +39,7 @@ Fake SOAR payload
   -> Demo scenario pack and API contract freeze tests
   -> Docker Compose local demo packaging
   -> Synthetic fixture factory for ignored reviewed source-shape conversion
+  -> Curated generated-fixture promotion with manifest review
   -> Repository standards audit and reviewer-readiness docs
   -> CSI/RGOI read-only governed cognition and retrieval policy
   -> Dashboard data contract and fake persona response fixtures
@@ -72,6 +73,7 @@ Fake SOAR payload
 | yes | [Lesson 19](Lesson19_Dashboard_UI_Preparation.md) | Dashboard UI Preparation | `docs/DASHBOARD_DATA_CONTRACT.md`, `examples/dashboard_contract/*.json`, API contract tests |
 | yes | [Lesson 20](Lesson20_Dashboard_UI_Implementation.md) | Dashboard UI Implementation | `src/threatprism/dashboard/static/*`, `tests/test_dashboard_ui.py`, `docs/DASHBOARD_UI_IMPLEMENTATION.md` |
 | yes | [Lesson 21](Lesson21_Production_Dashboard_Hardening.md) | Production Dashboard Hardening | `src/threatprism/api/app.py`, `src/threatprism/dashboard/static/*`, `tests/test_dashboard_ui.py`, `docs/DASHBOARD_PRODUCTION_HARDENING.md` |
+| yes | [Lesson 22](Lesson22_Curated_Generated_Fixture_Promotion.md) | Curated Generated-Fixture Promotion | `fixtures/curated/*`, `tools/fixture_factory/promotions.py`, `tests/test_curated_fixture_promotion.py` |
 
 ## File Coverage Map
 
@@ -110,6 +112,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\fixture_factory\*.py` -> Lesson 16
+- `C:\Projects\ThreatPrismV2\tools\fixture_factory\promotions.py` -> Lesson 22
+- `C:\Projects\ThreatPrismV2\fixtures\curated\*` -> Lesson 22
 - `C:\Projects\ThreatPrismV2\src\threatprism\csi\*.py` -> Lesson 18
 - `C:\Projects\ThreatPrismV2\data_sources\registry.json` -> Lesson 16
 - `C:\Projects\ThreatPrismV2\external_datasets\README.md` -> Lesson 16
@@ -186,7 +190,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-89 passed
+93 passed
 ```
 
 ## What To Study Next

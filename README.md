@@ -77,6 +77,10 @@ factory that converts explicit local, manually reviewed source-shape samples
 into sanitized ThreatPrism-native JSONL fixtures without downloads, live
 providers, raw dataset commits, or baseline test auto-scanning.
 
+The latest fixture-promotion slice adds one tiny tracked curated fixture with a
+manifested fake-data review gate. Generated fixture output remains ignored and
+does not auto-feed tests or evals.
+
 The latest CSI/RGOI slice adds read-only retrieval-governed organizational
 cognition with cognitive object schemas, evidence alignment, trust scoring,
 tenant namespace filtering, retrieval-zone policy, lineage, replay
@@ -152,6 +156,8 @@ external_datasets/
                   Ignored local-only reviewed source sample staging
 fixtures/generated/
                   Ignored generated fixture output
+fixtures/curated/
+                  Tracked, manually reviewed tiny synthetic fixtures
 .github/          Fake-data-only CI workflow
 Dockerfile        Local demo backend image
 docker-compose.yml Local demo backend service
@@ -168,7 +174,7 @@ docker-compose.yml Local demo backend service
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Future enhancement options | [docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
-| Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
+| Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md), [docs/CURATED_GENERATED_FIXTURE_PROMOTION.md](docs/CURATED_GENERATED_FIXTURE_PROMOTION.md) |
 | Model/provider behavior | [docs/MODEL_CARD.md](docs/MODEL_CARD.md) |
 | Deployment boundary | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Monitoring and maintenance | [docs/MONITORING.md](docs/MONITORING.md) |
@@ -232,7 +238,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-89 passed
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -268,6 +274,10 @@ python -m tools.fixture_factory.factory --source synthea_sample_data --input ext
 Output is written under `fixtures/generated/`, which is ignored by git except
 for the placeholder file. Review generated fixtures manually before promoting
 any curated sample into tracked tests or eval fixtures.
+
+The tracked curated fixture set is under `fixtures/curated/` and is gated by
+`fixtures/curated/manifest.json`. It currently contains one tiny hand-reviewed
+fake SOC fixture.
 
 Run only the demo scenario and API contract checks:
 
@@ -435,7 +445,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-89 passed
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

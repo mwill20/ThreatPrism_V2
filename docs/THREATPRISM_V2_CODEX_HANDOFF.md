@@ -66,6 +66,8 @@ The current live implementation includes a first backend slice:
   defaults for candidate source families.
 - `external_datasets/` and `fixtures/generated/` with ignored local staging and
   generated fixture output boundaries.
+- `fixtures/curated/` with one tracked, hand-reviewed fake SOC fixture plus a
+  manifest review gate.
 - `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with local demo
   backend packaging.
 - `.github/workflows/safe-validation.yml` with lightweight fake-data-only CI.
@@ -93,6 +95,9 @@ The current live implementation includes a first backend slice:
 - `tests/test_fixture_factory.py` covering registry metadata, fixture models,
   sanitizer behavior, adapters, CLI behavior, path safety, deterministic
   output, no-network behavior, schema validity, and leakage prevention.
+- `tests/test_curated_fixture_promotion.py` covering curated manifest review,
+  explicit fixture paths, generated-folder rejection, schema validity,
+  deterministic serialization, and leakage prevention.
 - `tests/test_csi_rgoi.py` covering tenant isolation, retrieval policy,
   evidence alignment, trust scoring, quarantine exclusion, stale cognition,
   lineage, replay, observability, divergence telemetry, demo auth, and OpenAPI
@@ -107,6 +112,9 @@ The current live implementation includes a first backend slice:
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
   implemented local-only data-realism and synthetic fixture factory slice.
+- `docs/CURATED_GENERATED_FIXTURE_PROMOTION.md` and
+  `docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md` capturing the
+  reviewed tiny fixture-promotion path.
 - `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
   reviewer-readiness docs for usage, evaluation, dataset handling,
   model/provider behavior, deployment boundary, monitoring, and
@@ -187,6 +195,19 @@ Result:
 
 ```text
 89 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Curated Generated-Fixture Promotion validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_fixture_promotion_final
+```
+
+Result:
+
+```text
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -563,12 +584,10 @@ tests/test_dashboard_ui.py
 
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Recommended next choices should be
-selected explicitly before implementation.
-
-Curated generated-fixture promotion is a future reviewed action, not an
-automatic follow-on. Generated fixtures remain ignored until a tiny curated
-sample is manually reviewed for license, safety, and data content.
+No new implementation slice is selected yet. Curated Generated-Fixture
+Promotion v0.1 is complete; it promotes one tiny tracked fake fixture through
+`fixtures/curated/manifest.json`. Generated fixtures remain ignored and are
+not auto-scanned.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and

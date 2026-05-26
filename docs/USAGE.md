@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-89 passed
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

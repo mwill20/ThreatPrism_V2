@@ -13,6 +13,7 @@ and demo flows use fake data only.
 | `data_sources/registry.json` | Yes | Review-required source registry for future fixture generation. |
 | `external_datasets/` | No raw data | Ignored local staging for manually reviewed source-shape samples. |
 | `fixtures/generated/` | No generated data | Ignored output directory for deterministic sanitized fixtures. |
+| `fixtures/curated/` | Yes | Tiny tracked synthetic fixtures promoted through manifest review. |
 
 ## Source Registry Rules
 
@@ -36,6 +37,11 @@ evals, the user must review:
 - whether derivative fixtures may be committed
 - whether source content contains real organization, workplace, user, host,
   domain, IP, tenant, credential, PHI, PII, or secret data
+
+The current curated promotion uses a hand-authored fake source shape, not a
+third-party dataset row. Review status is recorded in
+`fixtures/curated/manifest.json`, and generated fixture auto-scanning remains
+disabled.
 
 ## Out Of Scope
 

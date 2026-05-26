@@ -54,7 +54,7 @@ Candidate source
   -> Sanitizer removes or rejects unsafe values
   -> Validator enforces ThreatPrism fixture model
   -> JSONL fixture written under fixtures/generated/
-  -> User manually promotes safe small samples into tracked tests if needed
+  -> User manually promotes safe small samples under fixtures/curated/ if needed
 ```
 
 ## Candidate Sources
@@ -114,6 +114,10 @@ external_datasets/
 fixtures/
   generated/
     .gitkeep
+  curated/
+    README.md
+    manifest.json
+    curated_soc_case_0001.jsonl
 
 tools/
   fixture_factory/
@@ -128,6 +132,7 @@ tools/
       otrf_adapter.py
       pint_adapter.py
       giskard_adapter.py
+    promotions.py
 ```
 
 `.gitignore` must ignore raw and generated data while allowing documentation
@@ -277,8 +282,13 @@ eval harness dry-run: 15 passed / 0 failed
 
 ## Future Expansion
 
-v0.2 may add richer adapters and curated promoted fixtures after the v0.1
-factory is validated.
+Curated Generated-Fixture Promotion v0.1 added one tracked, hand-reviewed fake
+fixture under `fixtures/curated/`, plus manifest validation and tests. The
+ignored `fixtures/generated/` folder remains staging output and is not
+auto-scanned.
+
+Future versions may add richer adapters and more curated promoted fixtures only
+after manual license, safety, and content review.
 
 v0.3 may add lab-generated telemetry from adversary emulation tools, but only
 after explicit approval and only in an isolated lab workflow.

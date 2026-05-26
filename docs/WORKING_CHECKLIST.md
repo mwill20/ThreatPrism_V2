@@ -484,12 +484,50 @@ Production Dashboard Hardening v0.1:
 
 ## Next Active Slice
 
-No new implementation slice is selected yet. Recommended next choices should
-be selected explicitly before implementation:
+Curated Generated-Fixture Promotion v0.1 is complete:
+
+- [x] Push the previously validated dashboard hardening and external research
+  future-option commits before starting the slice.
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep the slice fake-data only with no raw external dataset commits.
+- [x] Add `fixtures/curated/README.md`.
+- [x] Add `fixtures/curated/manifest.json` with explicit license, safety, and
+  content review statuses.
+- [x] Add one tiny tracked ThreatPrism-native curated fixture.
+- [x] Add `tools/fixture_factory/promotions.py` for manifest, path, and
+  fixture safety validation.
+- [x] Add `tests/test_curated_fixture_promotion.py`.
+- [x] Prove `fixtures/generated/` paths are rejected and generated output is
+  not auto-scanned.
+- [x] Run full safe validation before calling the slice complete.
+
+## Completed Slice
+
+Curated Generated-Fixture Promotion v0.1:
+
+- [x] Add `fixtures/curated/README.md`.
+- [x] Add `fixtures/curated/manifest.json` with explicit license, safety, and
+  content review statuses.
+- [x] Add `fixtures/curated/curated_soc_case_0001.jsonl`.
+- [x] Add `tools/fixture_factory/promotions.py` for manifest, path, and
+  fixture safety validation.
+- [x] Add `tests/test_curated_fixture_promotion.py`.
+- [x] Prove promoted fixtures are schema-valid, sanitized, deterministic, and
+  explicitly reviewed.
+- [x] Prove `fixtures/generated/` paths are rejected and generated output is
+  not auto-scanned.
+- [x] Keep raw datasets, auto-downloads, live providers, RAG, memory
+  write-back, real data, and remediation out of scope.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_curated_fixture_promotion_final`.
+
+Next choices after this slice should be selected explicitly before
+implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
-- [ ] Curated generated-fixture promotion only after manual license, safety,
-  and content review.
+- [ ] Broader curated generated-fixture promotion only after manual license,
+  safety, and content review for each fixture.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
   a gated future enhancement; it is not needed for the current build and must
   not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
@@ -528,7 +566,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-89 passed
+93 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

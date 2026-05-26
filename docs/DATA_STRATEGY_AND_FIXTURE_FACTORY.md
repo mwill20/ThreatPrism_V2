@@ -26,7 +26,7 @@ Public or synthetic source sample
   -> Sanitizer and validator
   -> ThreatPrism-native synthetic fixture
   -> Generated JSONL under fixtures/generated/ ignored by git
-  -> Small curated fixture promoted to tests only after review
+  -> Small curated fixture under fixtures/curated/ promoted only after review
 ```
 
 Raw third-party datasets should not be committed. Full datasets should not be
@@ -92,6 +92,10 @@ external_datasets/
 fixtures/
   generated/
     .gitkeep
+  curated/
+    README.md
+    manifest.json
+    curated_soc_case_0001.jsonl
 
 tools/
   fixture_factory/
@@ -106,6 +110,7 @@ tools/
       otrf_adapter.py
       pint_adapter.py
       giskard_adapter.py
+    promotions.py
 ```
 
 `external_datasets/**` and `fixtures/generated/**` should be ignored by git
@@ -205,6 +210,11 @@ Data Strategy & Synthetic Fixture Factory v0.1 is implemented with:
   under `fixtures/generated/`.
 - Deterministic JSONL output with sorted fixture IDs and sorted JSON keys.
 - Tests in `tests/test_fixture_factory.py`.
+
+Curated Generated-Fixture Promotion v0.1 adds one tracked, hand-reviewed fake
+fixture under `fixtures/curated/` plus manifest validation and tests in
+`tests/test_curated_fixture_promotion.py`. This does not change the rule that
+`fixtures/generated/` remains ignored and is not auto-scanned.
 
 Validation on 2026-05-25:
 

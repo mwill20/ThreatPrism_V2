@@ -1,0 +1,31 @@
+{
+  "manifest_version": "curated-fixtures/0.1",
+  "generated_fixture_auto_scan": false,
+  "promotion_policy": {
+    "raw_external_datasets_committed": false,
+    "auto_downloads_allowed": false,
+    "live_provider_output_allowed": false,
+    "real_data_allowed": false,
+    "standard_validation_auto_scans_generated_folder": false
+  },
+  "fixtures": [
+    {
+      "fixture_id": "curated_soc_case_0001",
+      "path": "fixtures/curated/curated_soc_case_0001.jsonl",
+      "source_family": "manual_fake_soc",
+      "source_sample_status": "handwritten_fake_source_shape",
+      "license_review_status": "not_third_party_local_fake",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "Codex",
+      "reviewed_at": "2026-05-26",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "allowed_uses": [
+        "fixture_factory_regression",
+        "api_schema_validation",
+        "demo_review"
+      ]
+    }
+  ]
+}

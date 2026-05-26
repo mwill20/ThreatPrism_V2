@@ -2,8 +2,9 @@
 
 ## Purpose
 
-This document defines the backend API surfaces a future ThreatPrism dashboard
-can consume. It does not implement a frontend dashboard.
+This document defines the backend API surfaces the local ThreatPrism dashboard
+consumes. Earlier dashboard preparation used this as a future-UI contract; the
+dashboard now uses these same surfaces directly.
 
 The contract is fake-data only and remains bound by the current safety model:
 
@@ -109,13 +110,14 @@ runtime outputs, baseline eval fixtures, or generated dataset promotions.
 
 ## Explicit Non-Goals
 
-This slice does not add:
+The dashboard contract and local UI still do not add:
 
-- frontend dashboard code
-- charts, components, routing, bundling, or browser tests
 - live LLM/provider calls
 - live SOAR/cloud/enrichment calls
 - production IdP integration
 - real data handling
 - remediation or containment
 - CSI/RGOI write-back or RAG corpus expansion
+- external frontend dependencies, third-party assets, analytics, or telemetry
+- production deployment, browser matrix certification, or accessibility
+  certification

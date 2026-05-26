@@ -458,15 +458,40 @@ Dashboard UI Implementation v0.1:
   `-BaseTemp .pytest_tmp_dashboard_ui_final_validation2`.
 - [x] Run repo-standards cleanup pass.
 
+## Completed Slice
+
+Production Dashboard Hardening v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep this as dashboard hardening only; do not add production IdP, live
+  providers, real data, production deployment, external telemetry, or
+  remediation.
+- [x] Add dashboard-specific security headers for `GET /dashboard` and
+  `/dashboard/assets/*`.
+- [x] Add CSP, frame blocking, no-sniff, referrer, permissions, same-origin
+  resource, and no-store cache posture.
+- [x] Add same-origin dashboard request enforcement.
+- [x] Add timeout-bounded dashboard API calls.
+- [x] Add keyboard-accessible persona navigation markers and visible focus
+  state.
+- [x] Add focused tests for headers, same-origin enforcement, timeout markers,
+  API protection, fake credentials, and responsive layout markers.
+- [x] Re-evaluate dashboard-triggered threat model notes and update
+  traceability.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_dashboard_hardening_final`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should
 be selected explicitly before implementation:
 
-- [ ] Production dashboard hardening only after explicit approval.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Curated generated-fixture promotion only after manual license, safety,
   and content review.
+- [ ] Production dashboard deployment, production IdP, browser matrix
+  certification, and accessibility certification only after explicit approval.
 
 Future planned data-realism slice:
 
@@ -499,7 +524,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -520,7 +545,7 @@ fresh ignored base temp directory.
 - [ ] Live cloud or enrichment provider calls.
 - [ ] Production credentials.
 - [ ] Real workplace, tenant, user, host, domain, IP, or secret data.
-- [ ] Production dashboard hardening.
+- [ ] Production dashboard deployment and production identity integration.
 - [ ] Strict CI gates that fail before the inherited baseline is ready.
 
 ## Definition Of Done For The Current Slice

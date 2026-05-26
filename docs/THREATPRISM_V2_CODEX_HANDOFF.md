@@ -77,6 +77,9 @@ The current live implementation includes a first backend slice:
   dashboard contract review.
 - `src/threatprism/dashboard/static/` with the local fake-data-only dashboard
   UI served at `GET /dashboard`.
+- Dashboard hardening for `GET /dashboard` and `/dashboard/assets/*` with
+  security headers, same-origin request enforcement, timeout-bounded API calls,
+  keyboard persona navigation markers, docs, threat-model updates, and tests.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -97,9 +100,9 @@ The current live implementation includes a first backend slice:
 - `tests/test_demo_scenarios_and_api_contract.py` covering demo workflows,
   route contract freeze, CSI/RGOI route contracts, and dashboard contract
   fixture safety.
-- `tests/test_dashboard_ui.py` covering dashboard route serving, same-origin
-  asset references, fake credential boundaries, API protection, and responsive
-  layout markers.
+- `tests/test_dashboard_ui.py` covering dashboard route serving, security
+  headers, same-origin asset and request boundaries, fake credential
+  boundaries, API protection, keyboard markers, and responsive layout markers.
 - `tests/test_ops_safety.py` covering the demo safety checker.
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
@@ -171,6 +174,19 @@ Result:
 
 ```text
 87 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Production Dashboard Hardening validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
+```
+
+Result:
+
+```text
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -506,9 +522,9 @@ Dashboard UI Preparation v0.1 is implemented:
 
 ```text
 docs/DASHBOARD_DATA_CONTRACT.md
-  -> backend surfaces a future dashboard can consume
+  -> backend surfaces the local dashboard consumes
 docs/runbooks/DASHBOARD_READINESS.md
-  -> fake credential and route-check workflow for future UI work
+  -> fake credential, route-check, and hardening workflow for dashboard review
 examples/dashboard_contract/
   -> static fake persona response fixtures
 tests/test_demo_scenarios_and_api_contract.py
@@ -530,6 +546,21 @@ Browser verification
      navigation, and CSI/RGOI cognitive retrieval view
 ```
 
+Production Dashboard Hardening v0.1 is implemented:
+
+```text
+GET /dashboard and /dashboard/assets/*
+  -> CSP, frame blocking, no-sniff, referrer, permissions, same-origin
+     resource, and no-store cache headers
+src/threatprism/dashboard/static/app.js
+  -> same-origin request enforcement and timeout-bounded API calls
+src/threatprism/dashboard/static/index.html and styles.css
+  -> tab semantics, keyboard persona navigation markers, and focus state
+tests/test_dashboard_ui.py
+  -> header, same-origin, timeout, keyboard, fake credential, API protection,
+     and responsive layout checks
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
@@ -543,7 +574,8 @@ Do not implement:
 
 - real remediation actions
 - full threat intelligence integrations
-- production dashboard hardening beyond the local fake-data UI
+- production dashboard deployment, production IdP, external telemetry, or
+  tracked browser/accessibility certification
 - MSSP multi-tenancy
 - live SOAR credential flows
 - CSI/RGOI write-back, live RAG, autonomous knowledge approval, trust mutation,
@@ -693,6 +725,8 @@ docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
 docs/specs/23_CSI_RGOI_FOUNDATION.md
 docs/specs/24_DASHBOARD_UI_PREPARATION.md
+docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md
+docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -721,6 +755,8 @@ docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
 docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md
 docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
 docs/DASHBOARD_DATA_CONTRACT.md
+docs/DASHBOARD_UI_IMPLEMENTATION.md
+docs/DASHBOARD_PRODUCTION_HARDENING.md
 docs/CSI_RGOI_ARCHITECTURE.md
 docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
@@ -776,6 +812,8 @@ Lessons/Lesson16_Data_Strategy_And_Synthetic_Fixture_Factory.md
 Lessons/Lesson17_Repo_Standards_Readiness_Pass.md
 Lessons/Lesson18_CSI_RGOI_Foundation.md
 Lessons/Lesson19_Dashboard_UI_Preparation.md
+Lessons/Lesson20_Dashboard_UI_Implementation.md
+Lessons/Lesson21_Production_Dashboard_Hardening.md
 ```
 
 ## Next Session Recommended Prompt
@@ -804,10 +842,11 @@ Start by inspecting `docs/specs/`, `src/threatprism/`, `tests/`,
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 
 Then continue only from evidence-backed gaps. Preserve the current fake-demo,
-analyst-controlled, no-real-remediation boundary. Do not build a frontend
-dashboard, add live integrations, or add production IdP integration unless the
-user explicitly changes scope. The scenario pack and API contract tests are now
-the quickest route/role smoke signal after the full validation wrapper.
+analyst-controlled, no-real-remediation boundary. Do not add production
+dashboard deployment, live integrations, real data, external telemetry, or
+production IdP integration unless the user explicitly changes scope. The
+scenario pack, dashboard UI tests, and API contract tests are now the quickest
+route/role smoke signals after the full validation wrapper.
 
 If the next request is about datasets or more realistic fixtures, read
 `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and

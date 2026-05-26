@@ -80,6 +80,13 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 | I2 / DI3 / NC3 | Security telemetry (IPs, URLs, emails, hashes) masked for all non-analyst/engineer roles | `render_role_view()` at [views.py:32](../../src/threatprism/guardrails/views.py); `_render_text()` at [views.py:67](../../src/threatprism/guardrails/views.py); `SECURITY_TELEMETRY_PATTERNS` at [views.py:13-18](../../src/threatprism/guardrails/views.py) | Mitigated | `tests/test_access_control.py`, `tests/test_operational_read_models.py`, `tests/test_healthcare_guardrails.py` |
 | DT2 | Role-view access generates `role_view_policy_applied` and `rehydration_denied` audit events | `render_role_view()` at [views.py:32-52](../../src/threatprism/guardrails/views.py); `_record_role_view_audit()` at [cases/service.py:593](../../src/threatprism/cases/service.py) | Mitigated | `tests/test_access_control.py`, `tests/test_operational_read_models.py` |
 
+### Dashboard Static Surface
+
+| Threat ID | Mitigation | Code Reference | State | Test File |
+|-----------|------------|----------------|-------|-----------|
+| T4 / I5 | Dashboard route and assets include CSP, frame denial, no-sniff, no-referrer, permissions, same-origin resource policy, and no-store cache headers | `DASHBOARD_SECURITY_HEADERS` and `_apply_dashboard_security_headers()` in [api/app.py](../../src/threatprism/api/app.py) | Mitigated for local dashboard scope | `tests/test_dashboard_ui.py` |
+| T4 / I5 | Dashboard JavaScript rejects non-same-origin request targets and bounds API calls with `AbortController` timeouts | `sameOriginUrl()` and `dashboardFetch()` in [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js) | Mitigated for local dashboard scope | `tests/test_dashboard_ui.py` |
+
 ### Eval Harness
 
 | Threat ID | Mitigation | Code Reference | State | Test File |
@@ -164,6 +171,7 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production dashboard hardening traceability updated | Added T4/I5 dashboard static-surface controls and mapped them to `tests/test_dashboard_ui.py`. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F traceability updated | Closed fail-closed auth, API resource controls, token-vault isolation tests, Stage 1 non-rehydration tests, pattern refresh fixtures, and dependency pinning entries for POC scope. |
 | 2026-05-24 | Codex | Slice G traceability updated | Added `tests/test_quarantine_enforcement.py` as coverage for prompt-firewall quarantine enforcement and removed OT-L5 from open threats. |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2. Threat IDs now reference the STRIDE / LLM / LINDDUN files directly. Code references updated to `file:function` granularity verified against commit `fea5f9f`. Added Open Threats section with proposed test names for each unmitigated threat. Added Coverage Gaps section surfacing 2 mitigated-but-untested threats. |

@@ -15,6 +15,7 @@ ThreatPrism's surface combines traditional API/auth/persistence risks, AI-specif
 | Component | Primary Framework | Why | Lens File |
 |-----------|-------------------|-----|-----------|
 | FastAPI ingress + routes ([api/app.py](../../src/threatprism/api/app.py)) | **STRIDE** | Request/response surface with trust boundary at ingress | [stride-threat-model.md](stride-threat-model.md) |
+| Local dashboard static surface ([dashboard/static/](../../src/threatprism/dashboard/static)) | **STRIDE** | Browser-facing route with static assets, role-aware API calls, and framing/resource-loading risks | [stride-threat-model.md](stride-threat-model.md) |
 | Demo auth + role-view authorization ([auth/demo.py](../../src/threatprism/auth/demo.py)) | **STRIDE** | Authentication, authorization, audit are classic STRIDE concerns | [stride-threat-model.md](stride-threat-model.md) |
 | Prompt firewall ([guardrails/prompt_firewall.py](../../src/threatprism/guardrails/prompt_firewall.py)) | **OWASP LLM Top 10 (LLM01)** | Prompt injection is an LLM-specific class STRIDE doesn't name | [llm-agent-threat-model.md](llm-agent-threat-model.md) |
 | Healthcare safeguard ([guardrails/healthcare.py](../../src/threatprism/guardrails/healthcare.py)) | **LINDDUN** | Privacy threats need privacy framework — Stage 1 tokenization is the PHI/PII boundary | [healthcare-data-threat-model.md](healthcare-data-threat-model.md) |
@@ -72,7 +73,7 @@ ThreatPrism should:
 | Audit/debug reviewer | Reviews decisions, hashes, token IDs, and audit metadata | Sees hashes and decision metadata; not raw PHI/PII/secrets/credentials |
 | AI/model provider | Produces structured triage assistance | Receives Stage 1 tokenized + Stage 2 tokenized payloads only — never raw security telemetry or raw PHI/PII |
 | SOAR/SIEM/webhook source | Sends case or alert payloads | Treated as untrusted and potentially contaminated |
-| Future dashboard | Consumes read models and metrics | Must use role-safe backend routes and not bypass authorization |
+| Local dashboard | Consumes read models, metrics, detail routes, and CSI/RGOI APIs | Must use same-origin role-safe backend routes, fake demo credentials, and dashboard hardening headers |
 
 **Role-view policy** is defined in [auth/demo.py:24-31](../../src/threatprism/auth/demo.py):
 
@@ -114,7 +115,7 @@ ROLE_VIEW_POLICY = {
 | Production IdP (OAuth/OIDC/Entra ID) | Planned | Production-readiness gate before non-demo deployment |
 | TLS termination at reverse proxy | Planned | Operational concern; STRIDE assumes trusted proxy |
 | Threat intelligence (VirusTotal, AbuseIPDB, URLScan) | Stub only | New trust boundary — model before activation |
-| Dashboard UI | Planned | Must consume backend role-safe routes |
+| Dashboard UI | Implemented locally | Same-origin static assets served at `/dashboard`; production deployment and production identity remain gated |
 | Production persistence (PostgreSQL) | Planned | STRIDE OT-1, OT-8 — needs tamper-evident audit |
 
 ---
@@ -129,6 +130,7 @@ ROLE_VIEW_POLICY = {
 | Pre-model boundary | Sanitized + Stage 2 tokenized case | Persisted case (could contain prompt injection or unmasked telemetry) | Prompt firewall + tokenization | `_prepare_case_for_model()` at [cases/service.py:453](../../src/threatprism/cases/service.py); `sanitize_text()` at [prompt_firewall.py:26](../../src/threatprism/guardrails/prompt_firewall.py); `tokenize_text()` at [tokenization.py:67](../../src/threatprism/guardrails/tokenization.py) |
 | Model boundary | Schema-validated output that passes all guardrails | LLM/provider output | Pydantic schema, `scan_output_policy()`, `validate_report_evidence()`, `enforce_action_safety()` | `run_triage()` at [cases/service.py:149-167](../../src/threatprism/cases/service.py) |
 | Role-view boundary | Authorized effective role | Requested `?role=` view | Identity-derived role, deny escalation, audit decisions | `authorize_role_view()` at [auth/demo.py:73](../../src/threatprism/auth/demo.py); `render_role_view()` at [views.py:32](../../src/threatprism/guardrails/views.py) |
+| Dashboard browser boundary | Same-origin static dashboard and role-safe API routes | Browser, framing contexts, cached pages, external resource targets | CSP, frame denial, no-sniff, no-referrer, no-store, same-origin request enforcement, timeout-bounded fetches | `DASHBOARD_SECURITY_HEADERS` in [api/app.py](../../src/threatprism/api/app.py); `sameOriginUrl()` in [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js) |
 | Persistence boundary | SQLite demo repository | Raw inbound payloads and token vault internals | Store sanitized case records and safe audit events only | `SQLiteRepository.save_case()` at [persistence/sqlite.py:73](../../src/threatprism/persistence/sqlite.py) — receives already-tokenized `CaseRecord` |
 | Eval artifact boundary | `.eval_runs/` sanitized outputs | Eval fixture content and failure text | Approved paths, sanitized previews, artifact scan | `_resolve_under_approved_dir()` at [evals/runner.py:334](../../src/threatprism/evals/runner.py); `_safe_preview()` at [evals/runner.py:262](../../src/threatprism/evals/runner.py) |
 | Future retrieval/memory boundary | Approved retrieval corpus and memory records | Untrusted generated summaries and source payloads | **Not implemented yet** — see LLM threat model "Pre-Implementation Requirements" | N/A |
@@ -240,7 +242,9 @@ These assumptions are the trust premises of all three threat models. Any change 
 - Role-based views are only security boundaries when effective-role authorization is enabled (`API_AUTH_MODE=demo_key`).
 - The operator is trusted not to deliberately send real PHI to ThreatPrism.
 - Operator-controlled environment overrides for `DEMO_API_KEYS` are honored before any networked deployment.
-- Memory, RAG, write-back, live SOAR callbacks, production IdP, and dashboard UI are future work and require new threat-model updates before implementation.
+- Memory, RAG, write-back, live SOAR callbacks, production IdP, production
+  dashboard deployment, and browser/accessibility certification are future work
+  and require new threat-model updates before implementation.
 
 ---
 

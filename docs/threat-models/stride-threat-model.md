@@ -49,6 +49,7 @@ Severity is `Likelihood × Impact`:
 | D3 | Denial of Service | Malicious eval fixture path attempts directory traversal. | Eval harness — `evals/runner.py` | Medium | Medium | **Medium** | `_resolve_under_approved_dir()` sandboxes fixture and output paths under `tests/evals/` and `.eval_runs/` only. | Mitigated |
 | E1 | Elevation of Privilege | Caller passes `?role=analyst` while authenticated as `manager_grc` to read raw security telemetry. | Auth + read path | High | High | **Critical** | `ROLE_VIEW_POLICY` enforcement at [auth/demo.py:158-170](../../src/threatprism/auth/demo.py); requested role checked against caller's allowed set; denials raise `AuthorizationError` and emit deny `AuditEvent`. | Mitigated |
 | E2 | Elevation of Privilege | LLM provider returns `"real_action_executed": true` in the report and acts as a real remediation channel. | LLM output | High | High | **Critical** | `enforce_action_safety()` at [policy.py:31](../../src/threatprism/guardrails/policy.py) blocks any report containing `"real_action_executed": true`; report is rejected, case status set to `blocked_by_guardrail`. | Mitigated |
+| T4 / I5 | Tampering / Information Disclosure | Dashboard static surface loads unexpected resources, can be framed, leaks referrers, or sends role/case context to non-same-origin targets. | Dashboard browser boundary - `GET /dashboard` and `/dashboard/assets/*` | Medium | Medium | **Medium** | `DASHBOARD_SECURITY_HEADERS` and `_apply_dashboard_security_headers()` in [api/app.py](../../src/threatprism/api/app.py); `sameOriginUrl()` and timeout-bounded `dashboardFetch()` in [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js); covered by `tests/test_dashboard_ui.py`. | Mitigated for local dashboard scope |
 
 ---
 
@@ -211,6 +212,33 @@ Quarantine raises `quarantined=True`, blocking triage.
 
 ---
 
+### T4 / I5 - Dashboard loads unexpected resources or leaks browser context
+
+**Scenario.** A dashboard page without hardening headers can be framed, load
+unexpected script/style/font/image resources, leak referrers, or accidentally
+send role/case context to a non-same-origin URL.
+
+**Current controls.**
+- `DASHBOARD_SECURITY_HEADERS` in [api/app.py](../../src/threatprism/api/app.py)
+  applies CSP, frame-deny, no-sniff, no-referrer, permissions policy,
+  cross-origin opener/resource policy, and no-store cache headers to
+  `/dashboard` and `/dashboard/assets/*`.
+- `sameOriginUrl()` in
+  [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js)
+  rejects non-same-origin request targets.
+- `dashboardFetch()` bounds API calls with `AbortController` timeouts.
+- `tests/test_dashboard_ui.py` checks the header set, same-origin markers,
+  timeout markers, fake credential boundaries, protected API behavior, and
+  no external URLs.
+
+**Severity.** Raw: Medium. Residual: Low for the current local dashboard. This
+does not cover production IdP, TLS, reverse proxy, browser matrix testing, or
+external security review.
+
+**State.** Mitigated for local dashboard scope.
+
+---
+
 ### D1 — Oversized HTTP request body exhausts memory
 
 **Scenario.** Attacker POSTs a 500MB JSON payload to `/cases`. FastAPI/Starlette buffers it into memory before Pydantic gets a chance to validate shape.
@@ -312,5 +340,6 @@ Architectural changes identified during modeling but outside the current sprint 
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production dashboard hardening reconciled | Added dashboard browser-boundary threat T4/I5 and mapped it to CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard markers, and `tests/test_dashboard_ui.py`. Production deployment and production identity remain gated. |
 | 2026-05-24 | Codex | Slices A, B, D, and F reconciled | Closed RR-S1, RR-S2, OT-2, OT-3, OT-4, OT-5, and OT-6 for POC scope after fail-closed auth, API ingress limits, token-vault serialization tests, and pattern refresh process landed. Production identity, durable queueing, append-only audit, and semantic prompt-injection controls remain gated. |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2 format. Added severity rubric, file:function mitigation pointers verified against code at commit `fea5f9f`, residual risk register, and open threats with target conditions. Surfaced 8 open threats (OT-1 through OT-8) and 4 residual risks. Critical findings flagged: RR-S1, RR-S2, OT-4. |

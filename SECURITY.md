@@ -48,6 +48,9 @@ review, penetration testing, or production hardening.
   role/purpose policy, retrieval-zone policy, evidence alignment, trust
   scoring, stale cognition controls, quarantine exclusion, lineage, replay,
   observability, and AI-vs-human divergence telemetry.
+- Local dashboard hardening with same-origin static assets, CSP, frame
+  blocking, no-sniff, referrer, browser permission, same-origin resource, and
+  no-store cache headers.
 - Production environment startup guard (rejects demo auth modes).
 - POC-grade HTTP request body limits, in-process `POST /cases` rate limiting,
   and triage concurrency caps.
@@ -122,6 +125,7 @@ review, penetration testing, or production hardening.
 | HTTP payload abuse | `POST /cases` enforces request body cap, in-process rate limit, and triage concurrency cap | `api/app.py`, `config.py` |
 | CSI/RGOI retrieval overreach | Tenant namespace filter, role/purpose policy, retrieval-zone policy, trust thresholding, stale cognition controls, and quarantine exclusion | `csi/governance.py`, `csi/service.py` |
 | Unsupported or poisoned cognition becomes truth | Evidence alignment rejects unsupported claims; AI-authored cognition remains non-authoritative unless human approved | `csi/governance.py`, `tests/test_csi_rgoi.py` |
+| Dashboard browser abuse | Dashboard responses enforce CSP, frame blocking, no-sniff, no-referrer, permissions, same-origin resource policy, and no-store cache behavior; JavaScript rejects non-same-origin request targets | `api/app.py`, `dashboard/static/app.js`, `tests/test_dashboard_ui.py` |
 
 ### Assets requiring protection
 
@@ -189,6 +193,10 @@ these is a security defect.
 11. **CSI/RGOI is read-only.** CSI/RGOI routes must not write memory, mutate
     trust, approve knowledge, publish suppressions, execute remediation, or
     call live RAG providers.
+
+12. **Dashboard requests stay same-origin.** The dashboard must not load
+    external scripts, styles, fonts, telemetry beacons, or provider URLs. It
+    must consume same-origin API routes with fake demo credentials only.
 
 ---
 

@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -156,8 +156,10 @@ Open:
 http://127.0.0.1:8765/dashboard
 ```
 
-The dashboard uses only same-origin API calls and fake demo credentials. Use
-`Load demo case` to create a synthetic case for UI review.
+The dashboard uses only same-origin API calls and fake demo credentials. It
+also applies dashboard-specific security headers, same-origin request
+enforcement, API request timeouts, and keyboard persona navigation markers.
+Use `Load demo case` to create a synthetic case for UI review.
 
 ## Review Dashboard Contracts
 
@@ -166,6 +168,7 @@ fixtures:
 
 ```text
 docs/DASHBOARD_UI_IMPLEMENTATION.md
+docs/DASHBOARD_PRODUCTION_HARDENING.md
 docs/DASHBOARD_DATA_CONTRACT.md
 docs/runbooks/DASHBOARD_READINESS.md
 examples/dashboard_contract/

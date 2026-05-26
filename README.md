@@ -31,7 +31,8 @@ Expected background:
 
 ## Project Status
 
-Current status: demo-safe proof-of-concept backend.
+Current status: demo-safe proof-of-concept backend with a local hardened
+dashboard surface.
 
 ThreatPrism is not production-ready. It does not process real organization
 data, run live LLM/SOAR/cloud providers, or execute remediation.
@@ -86,6 +87,11 @@ The latest dashboard slice adds a same-origin, fake-data-only dashboard served
 by FastAPI at `GET /dashboard`. It consumes the documented role-safe API
 contract without adding live providers, external frontend dependencies, real
 data, production identity, or remediation.
+
+The latest dashboard-hardening slice adds dashboard-specific security headers,
+same-origin request enforcement, timeout-bounded API calls, and keyboard
+persona navigation. It does not add production IdP, live providers,
+production deployment, or real data handling.
 
 ## Current Boundaries
 
@@ -154,7 +160,7 @@ docker-compose.yml Local demo backend service
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
-| Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
+| Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_PRODUCTION_HARDENING.md](docs/DASHBOARD_PRODUCTION_HARDENING.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
 | Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
@@ -221,7 +227,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -298,6 +304,11 @@ http://127.0.0.1:8765/dashboard
 
 Use `Load demo case` to create a synthetic case through the existing fake-data
 API flow.
+
+The dashboard route and assets include security headers for CSP, frame
+blocking, no-sniff, referrer policy, browser permissions, same-origin resource
+policy, and no-store caching. The browser code rejects non-same-origin request
+targets and bounds API calls with timeouts.
 
 ## Run The API
 
@@ -419,7 +430,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -487,9 +498,12 @@ Dashboard UI Implementation v0.1 is implemented. See
 `docs/DASHBOARD_UI_IMPLEMENTATION.md`,
 `docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md`,
 `src/threatprism/dashboard/static/`, and `tests/test_dashboard_ui.py`.
-This dashboard is local and demo-only. Production dashboard hardening,
-production identity, live integrations, external telemetry, and real data are
-still out of scope.
+
+Production Dashboard Hardening v0.1 is implemented. See
+`docs/DASHBOARD_PRODUCTION_HARDENING.md` and
+`docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md`. This is hardening for the
+local fake-data UI only. Production identity, live integrations, external
+telemetry, production deployment, and real data remain out of scope.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

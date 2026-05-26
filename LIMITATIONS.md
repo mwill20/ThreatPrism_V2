@@ -57,17 +57,20 @@ Current implemented baseline:
   telemetry, API routes, fake fixtures, and tests.
 - Dashboard UI preparation docs, fake persona response fixtures, dashboard
   readiness runbook, and API contract tests for CSI/RGOI routes.
+- Production-style hardening for the local dashboard surface, including
+  dashboard security headers, same-origin request enforcement, timeout-bounded
+  API calls, and keyboard persona navigation markers.
 
 Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_csi_final_validation
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
 ```
 
 Result after CSI/RGOI Foundation v0.1:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -83,7 +86,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Production-grade CI/CD release pipeline.
 - Production authentication and authorization beyond demo API-key mode.
 - Production deployment hardening.
-- Production dashboard hardening.
+- Production dashboard deployment and production identity integration.
 - An API compatibility policy beyond the current tested local route contract.
 
 ## Product Limitations
@@ -250,8 +253,8 @@ Known repository-readiness gaps:
 - No `LICENSE` file has been selected. Usage rights are unclear until the user
   chooses and adds a license.
 - No tracked screenshot, GIF, or rendered architecture image exists yet. Text
-  diagrams are available in docs, but production dashboard hardening is still
-  out of scope.
+  diagrams are available in docs, and local dashboard hardening is implemented,
+  but permanent visual assets are not tracked.
 - Production deployment, live provider operation, production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.
@@ -289,6 +292,10 @@ Current boundaries:
 
 - `GET /dashboard` is served by the existing FastAPI backend.
 - Static dashboard assets are dependency-free and same-origin.
+- Dashboard responses include CSP, frame blocking, no-sniff, referrer,
+  permissions, same-origin resource, and no-store cache headers.
+- Browser-side dashboard calls reject non-same-origin targets and use request
+  timeouts.
 - Static fixtures under `examples/dashboard_contract/` are fake response
   examples for contract review, not runtime captures or production data.
 - The dashboard consumes the existing role-safe API surfaces and must not

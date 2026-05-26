@@ -215,12 +215,17 @@ Current direction:
     persona fixtures, readiness runbook, and route contract coverage.
 12. Completed: Dashboard UI Implementation v0.1 as a local fake-data-only,
     same-origin FastAPI-served dashboard.
-13. Production dashboard hardening or live-integration preparation only after
-    explicit user approval and any required threat-model treatment updates.
+13. Completed: Production Dashboard Hardening v0.1 for the local dashboard
+    surface: security headers, same-origin request enforcement,
+    timeout-bounded fetches, keyboard persona navigation, and threat-model
+    traceability updates.
+14. Production dashboard deployment, production identity, live-integration
+    preparation, or curated fixture promotion only after explicit user
+    approval and any required threat-model treatment updates.
 
 Do not add live LLM calls, live SOAR calls, live enrichment calls, production
 IdP integration, real remediation, non-demo data, or production dashboard
-hardening before the security and access-control foundation is validated.
+deployment before the security and access-control foundation is validated.
 
 ## Decision Rubric
 

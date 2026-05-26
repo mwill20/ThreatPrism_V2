@@ -4,10 +4,10 @@
 
 ThreatPrism is a security-focused, AI-assisted SOC migration accelerator. The
 repository is strong on architecture, guardrails, validation, fake-data safety,
-implementation traceability, and now a local same-origin dashboard surface.
-The remaining readiness gaps are mostly reviewer-facing: license status is not
-yet selected, production deployment remains out of scope, and permanent visual
-demo assets are still not tracked.
+implementation traceability, and now a hardened local same-origin dashboard
+surface. The remaining readiness gaps are mostly reviewer-facing: license
+status is not yet selected, production deployment remains out of scope, and
+permanent visual demo assets are still not tracked.
 
 Mode used: repo-standards Documentation Fix, audit-first.
 
@@ -29,7 +29,7 @@ Mode used: repo-standards Documentation Fix, audit-first.
 | Limitations and trade-offs | PASS | High | LIMITATIONS.md is explicit about demo-only, no-remediation, no-live-provider, and dataset boundaries. |
 | License and usage rights | FAIL | High | No LICENSE file exists. README now says usage rights are unclear until a license is selected. |
 | Support/contact | PASS | Medium | README points to issues for non-security support and SECURITY.md for vulnerability handling. |
-| Visual demo/assets | PARTIAL | Medium | A local dashboard is now available at `GET /dashboard`, but no permanent screenshot, GIF, or rendered architecture asset is tracked. |
+| Visual demo/assets | PARTIAL | Medium | A hardened local dashboard is available at `GET /dashboard`, but no permanent screenshot, GIF, or rendered architecture asset is tracked. |
 | Examples | PASS | Medium | Fake SOAR payloads, demo scenarios, eval fixtures, and fixture-factory examples exist. |
 | CI/tests | PASS | High | Fake-data-only GitHub Actions workflow and safe local validation wrapper are present. |
 
@@ -39,7 +39,7 @@ Mode used: repo-standards Documentation Fix, audit-first.
 - Strong fake-data-only safety posture with explicit no-live-provider and no-real-remediation boundaries.
 - Layered guardrails for prompt injection, healthcare-adjacent contamination, sensitive-data tokenization, evidence grounding, and compliance-language overclaiming.
 - Role-aware demo authentication and authorization are covered by tests.
-- Eval harness, scenario pack, Docker packaging, fixture factory, local dashboard, and local validation wrapper make the project reproducible without live credentials.
+- Eval harness, scenario pack, Docker packaging, fixture factory, hardened local dashboard, and local validation wrapper make the project reproducible without live credentials.
 - Threat model and treatment register are unusually mature for a demo-stage repository.
 
 ## Gaps Found
@@ -103,6 +103,34 @@ Result:
 
 ```text
 87 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+## Production Dashboard Hardening Follow-Up
+
+Production Dashboard Hardening v0.1 added production-style controls to the
+local fake-data dashboard without adding production IdP, live providers, real
+data, external telemetry, frontend dependencies, or remediation:
+
+- dashboard-specific CSP, frame blocking, no-sniff, referrer, permissions,
+  same-origin resource, and no-store cache headers
+- browser-side same-origin request enforcement
+- timeout-bounded dashboard API calls
+- keyboard persona navigation markers and visible focus state
+- focused regression tests in `tests/test_dashboard_ui.py`
+- threat-model and traceability updates for the now-implemented dashboard
+  surface
+
+Validated after the dashboard hardening slice with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
+```
+
+Result:
+
+```text
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

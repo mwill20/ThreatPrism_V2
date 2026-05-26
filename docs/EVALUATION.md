@@ -23,6 +23,8 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
 8. Does the local dashboard serve same-origin assets, use fake demo
    credentials, preserve API protection, reference the documented contract, and
    remain responsive across desktop and mobile breakpoints?
+9. Do dashboard hardening checks enforce security headers, same-origin request
+   targets, timeout-bounded API calls, and keyboard persona navigation markers?
 
 ## Current Validation Command
 
@@ -41,16 +43,16 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Dashboard UI Preparation pass with:
+Validated during the Production Dashboard Hardening pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_prep_final_validation
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
 ```
 
 Result:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -70,7 +72,7 @@ eval harness dry-run: 15 passed / 0 failed
 | Fixture factory | `tests/test_fixture_factory.py` |
 | CSI/RGOI governed cognition | `tests/test_csi_rgoi.py` |
 | Dashboard contract fixtures | `examples/dashboard_contract/*.json`, `tests/test_demo_scenarios_and_api_contract.py` |
-| Dashboard UI | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |
+| Dashboard UI and hardening | `src/threatprism/dashboard/static/`, `tests/test_dashboard_ui.py` |
 
 ## Known Evaluation Limits
 

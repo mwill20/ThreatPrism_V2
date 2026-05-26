@@ -44,6 +44,10 @@ Read deeper files only when the task needs them:
 - `docs/DASHBOARD_UI_IMPLEMENTATION.md` and
   `docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md` when the task involves the
   local dashboard UI.
+- `docs/DASHBOARD_PRODUCTION_HARDENING.md` and
+  `docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md` when the task involves
+  dashboard hardening, browser risk, CSP, or production-style dashboard
+  readiness.
 - `DECISIONS.md`
 - `LIMITATIONS.md`
 - `README.md`
@@ -64,7 +68,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

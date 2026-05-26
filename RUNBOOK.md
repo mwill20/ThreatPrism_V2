@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-87 passed
+89 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-87 passed
+89 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -131,6 +131,14 @@ Open:
 ```text
 http://127.0.0.1:8765/dashboard
 ```
+
+Expected dashboard posture:
+
+- `ALLOW_REAL_ACTIONS=false` is displayed.
+- Persona tabs work by mouse and keyboard.
+- Dashboard responses include CSP, no-sniff, frame-deny, no-referrer,
+  permissions, same-origin resource, and no-store headers.
+- Dashboard requests stay same-origin and use fake demo credentials only.
 
 ## Start The API
 

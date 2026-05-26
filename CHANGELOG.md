@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added production-style hardening for the local dashboard: CSP/framing/
+  referrer/permission headers, same-origin request enforcement, API request
+  timeouts, keyboard persona navigation, tests, docs, and threat-model updates.
 - Added local fake-data-only dashboard UI at `GET /dashboard`, same-origin
   static assets, dashboard UI tests, and Browser verification notes.
 - Added CSI/RGOI read-only governed cognition foundation with schemas,

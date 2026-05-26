@@ -352,6 +352,13 @@ Risks the project owner formally accepts at the current scope. Each requires an 
 | RR-LD2 (current SOAR sources) | Role-view masking is regex-based; novel formats may leak | Current `SECURITY_TELEMETRY_PATTERNS` covers all current SOAR adapter outputs. New SOAR sources trigger pattern review | Project owner (POC) | 2026-05-24 | A new SOAR adapter is added or an existing one starts producing new identifier formats |
 | NC3 / OT-LD5 (current minimum-necessary policy) | Per-role minimum-necessary policy may not match operator workflow | Acceptable for demo scope; requires operator-workflow review session, not a code change, before any non-demo deployment | Project owner (POC) | 2026-05-24 | First deployment with a real operator workflow |
 
+**2026-05-26 dashboard re-evaluation.** ID2 was re-evaluated after the local
+dashboard became a user-facing surface. The risk remains accepted for fake-data
+POC scope because role-safe views expose token classes as exposure metadata
+without raw values, and dashboard hardening does not broaden role policy. The
+risk must be re-opened before non-demo deployment, production identity, real
+PHI, or any external dashboard consumer.
+
 **Acceptance signature format.** When an owner accepts a risk, they edit the row:
 
 - `Owner` → name (e.g., `M. Williams`)
@@ -466,6 +473,7 @@ This spec does not:
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production dashboard hardening implemented | Added local dashboard CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard persona navigation markers, and tests. Re-evaluated accepted risk ID2 for the local dashboard; production deployment, production identity, non-demo data, and real PHI remain gated. |
 | 2026-05-26 | Codex | CSI/RGOI read-only foundation implemented | Added governed cognition without write-back, live RAG, trust mutation, suppressions, remediation, production tenancy, or real data. Live RAG, memory write-back, and production multi-tenancy remain gated. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F implemented | Followed the owner-approved POC treatment order after Slice G. Closed POC-scope auth hardening, HTTP resource controls, test-gap closure, pattern refresh process, and dependency hardening. Gated MVP/production/enterprise controls remain out of scope. |
 | 2026-05-24 | Codex | POC owner decision pass recorded | Under user direction, replaced owner-decision placeholders with POC owner decisions. Scheduled near-term mitigations in order: Slice D, Slice A, Slice B, Slice F, Slice E. Kept MVP/production/enterprise, real LLM, RAG, memory, multi-tenancy, non-demo data, and real PHI risks gated. |

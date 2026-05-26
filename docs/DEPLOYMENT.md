@@ -9,9 +9,10 @@ production-ready.
 |---|---|---|
 | Local Python/FastAPI | Supported | Run with Uvicorn from the repository root. |
 | Docker Compose local demo | Supported | Single backend service with fake demo credentials. |
+| Local dashboard | Supported | Served at `GET /dashboard` with fake demo credentials and dashboard hardening headers. |
 | Production container deployment | Not implemented | Requires production auth, secrets, TLS, monitoring, and hardening. |
 | Cloud deployment | Not implemented | No Azure, AWS, GCP, or managed deployment profile exists. |
-| Dashboard UI | Not implemented | Frontend work requires explicit approval. |
+| Production dashboard deployment | Not implemented | Requires production identity, browser matrix testing, accessibility review, and deployment posture. |
 
 ## Local Docker Compose
 
@@ -28,6 +29,12 @@ The service intentionally uses:
 - `ALLOW_REAL_ACTIONS=false`
 - empty live-provider credential variables
 - SQLite demo persistence in a named Docker volume
+
+The dashboard is available from the same backend process at `/dashboard`. The
+local dashboard route and assets include CSP, frame blocking, no-sniff,
+referrer, permission, same-origin resource, and no-store cache headers. These
+headers are local production-style hardening only; they are not a substitute
+for TLS, production identity, or reverse-proxy deployment controls.
 
 ## Production Gaps
 

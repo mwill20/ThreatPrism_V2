@@ -54,6 +54,13 @@ select {
   top: 1rem;
 }
 
+button:focus-visible,
+select:focus-visible,
+.skip-link:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
 .shell {
   width: min(1500px, calc(100vw - 32px));
   margin: 0 auto;
@@ -173,7 +180,8 @@ h3 {
   padding: 0.7rem 0.55rem;
 }
 
-.role-button.active {
+.role-button.active,
+.role-button[aria-selected="true"] {
   border-color: var(--teal);
   background: var(--teal-soft);
   color: #08413d;
@@ -370,6 +378,14 @@ select {
   border-color: #fecdd3;
   color: var(--rose);
   background: #fff1f2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 1180px) {

@@ -43,6 +43,17 @@ const ROLE_PROFILES = {
   },
 };
 
+const PERSONA_TAB_IDS = {
+  analyst: "tab-analyst",
+  manager_grc: "tab-manager-grc",
+  legal_privacy: "tab-legal-privacy",
+  audit_debug: "tab-audit-debug",
+  engineer: "tab-engineer",
+  csi_rgoi: "tab-csi-rgoi",
+};
+
+const REQUEST_TIMEOUT_MS = 8000;
+
 const API_ROUTES = {
   health: "/health",
   metrics: "/metrics",
@@ -170,25 +181,63 @@ function headers() {
   };
 }
 
-function withRole(path, params = {}) {
+function sameOriginUrl(path) {
   const url = new URL(path, window.location.origin);
+  if (url.origin !== window.location.origin) {
+    throw new Error("Blocked non-same-origin dashboard request.");
+  }
+  return url;
+}
+
+function withRole(path, params = {}, includeRole = true) {
+  const url = sameOriginUrl(path);
   Object.entries(params).forEach(([key, value]) => {
     if (value !== null && value !== undefined && value !== "") {
       url.searchParams.set(key, value);
     }
   });
-  if (!url.searchParams.has("role")) {
+  if (includeRole && !url.searchParams.has("role")) {
     url.searchParams.set("role", profile().role);
   }
   return `${url.pathname}${url.search}`;
 }
 
-async function apiGet(path, params = {}) {
-  const response = await fetch(withRole(path, params), { headers: headers() });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+async function dashboardFetch(path, options = {}) {
+  const {
+    params = {},
+    method = "GET",
+    body = null,
+    auth = true,
+  } = options;
+  const requestPath = method === "GET"
+    ? withRole(path, params, auth)
+    : `${sameOriginUrl(path).pathname}${sameOriginUrl(path).search}`;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(requestPath, {
+      method,
+      headers: auth ? headers() : { Accept: "application/json" },
+      body: body === null ? undefined : JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Dashboard request timed out.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return response.json();
+}
+
+async function apiGet(path, params = {}) {
+  return dashboardFetch(path, { params });
 }
 
 async function apiGetOptional(path, params = {}) {
@@ -208,7 +257,7 @@ async function refreshDashboard() {
   renderLoading();
   try {
     const [health, metrics, cases, managerQueue, healthcareQueue, csi] = await Promise.all([
-      fetch(API_ROUTES.health).then((response) => response.json()),
+      dashboardFetch(API_ROUTES.health, { auth: false }),
       apiGet(API_ROUTES.metrics),
       apiGet(API_ROUTES.cases, caseFilters()),
       apiGet(API_ROUTES.managerQueue, { limit: 25 }),
@@ -289,15 +338,7 @@ async function seedCase() {
   try {
     const payload = JSON.parse(JSON.stringify(DEMO_CASE));
     payload.source_case_id = `SOAR-DASHBOARD-UI-${Date.now()}`;
-    const response = await fetch("/cases", {
-      method: "POST",
-      headers: headers(),
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    const accepted = await response.json();
+    const accepted = await dashboardFetch("/cases", { method: "POST", body: payload });
     state.selectedCaseId = accepted.case_id;
     window.setTimeout(refreshDashboard, 600);
   } catch (error) {
@@ -318,8 +359,12 @@ function render() {
 
 function renderRoleControls() {
   document.querySelectorAll(".role-button").forEach((button) => {
-    button.classList.toggle("active", button.dataset.persona === state.persona);
+    const isActive = button.dataset.persona === state.persona;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.setAttribute("tabindex", isActive ? "0" : "-1");
   });
+  $("main").setAttribute("aria-labelledby", PERSONA_TAB_IDS[state.persona]);
   $("queue-title").textContent = profile().queueTitle;
   $("active-persona").textContent = profile().label;
 }
@@ -351,6 +396,7 @@ function renderMetrics() {
 
 function renderCases() {
   const list = $("case-list");
+  list.setAttribute("aria-busy", "false");
   const cases = state.persona === "manager_grc"
     ? state.managerQueue
     : state.persona === "legal_privacy"
@@ -511,6 +557,7 @@ function listCard(title, items, mapper) {
 }
 
 function renderLoading() {
+  $("case-list").setAttribute("aria-busy", "true");
   $("case-list").innerHTML = `<div class="empty">Loading dashboard data.</div>`;
 }
 
@@ -537,9 +584,7 @@ function escapeHtml(value) {
 document.addEventListener("click", async (event) => {
   const roleButton = event.target.closest(".role-button");
   if (roleButton) {
-    state.persona = roleButton.dataset.persona;
-    state.selectedCaseId = null;
-    await refreshDashboard();
+    await activatePersona(roleButton.dataset.persona);
     return;
   }
 
@@ -550,6 +595,40 @@ document.addEventListener("click", async (event) => {
     render();
   }
 });
+
+document.addEventListener("keydown", async (event) => {
+  const roleButton = event.target.closest(".role-button");
+  if (!roleButton) {
+    return;
+  }
+  const buttons = Array.from(document.querySelectorAll(".role-button"));
+  const currentIndex = buttons.indexOf(roleButton);
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    nextIndex = (currentIndex + 1) % buttons.length;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+  } else if (event.key === "Home") {
+    nextIndex = 0;
+  } else if (event.key === "End") {
+    nextIndex = buttons.length - 1;
+  } else {
+    return;
+  }
+  event.preventDefault();
+  buttons[nextIndex].focus();
+  await activatePersona(buttons[nextIndex].dataset.persona);
+});
+
+async function activatePersona(persona) {
+  if (state.persona === persona) {
+    renderRoleControls();
+    return;
+  }
+  state.persona = persona;
+  state.selectedCaseId = null;
+  await refreshDashboard();
+}
 
 $("refresh").addEventListener("click", refreshDashboard);
 $("seed-case").addEventListener("click", seedCase);

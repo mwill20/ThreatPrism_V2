@@ -54,6 +54,31 @@ def test_dashboard_route_serves_static_shell_and_assets() -> None:
     assert "ALLOW_REAL_ACTIONS=false" in page.text
 
 
+def test_dashboard_responses_have_hardening_headers() -> None:
+    client = TestClient(create_app(local_auth_disabled_settings()))
+
+    page = client.get("/dashboard")
+    script = client.get("/dashboard/assets/app.js")
+    styles = client.get("/dashboard/assets/styles.css")
+
+    for response in (page, script, styles):
+        assert response.headers["cache-control"] == "no-store"
+        assert response.headers["x-content-type-options"] == "nosniff"
+        assert response.headers["x-frame-options"] == "DENY"
+        assert response.headers["referrer-policy"] == "no-referrer"
+        assert response.headers["cross-origin-opener-policy"] == "same-origin"
+        assert response.headers["cross-origin-resource-policy"] == "same-origin"
+        assert response.headers["x-permitted-cross-domain-policies"] == "none"
+        assert "camera=()" in response.headers["permissions-policy"]
+        csp = response.headers["content-security-policy"]
+        assert "default-src 'self'" in csp
+        assert "connect-src 'self'" in csp
+        assert "frame-ancestors 'none'" in csp
+        assert "object-src 'none'" in csp
+        assert "script-src 'self'" in csp
+        assert "style-src 'self'" in csp
+
+
 def test_dashboard_assets_are_same_origin_and_fake_credential_only() -> None:
     html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
     script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
@@ -71,6 +96,26 @@ def test_dashboard_assets_are_same_origin_and_fake_credential_only() -> None:
     assert '"allow_real_actions": true' not in combined
     assert "vault_mappings" not in combined
     assert "raw_payload" not in combined
+
+
+def test_dashboard_fetches_are_same_origin_timeout_bounded_and_keyboard_accessible() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+    styles = (DASHBOARD_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "role=\"tablist\"" in html
+    assert "role=\"tab\"" in html
+    assert "aria-selected=\"true\"" in html
+    assert "aria-controls=\"main\"" in html
+    assert "Blocked non-same-origin dashboard request." in script
+    assert "new URL(path, window.location.origin)" in script
+    assert "REQUEST_TIMEOUT_MS = 8000" in script
+    assert "AbortController" in script
+    assert "signal: controller.signal" in script
+    assert "keydown" in script
+    assert "ArrowRight" in script
+    assert "Home" in script
+    assert "focus-visible" in styles
 
 
 def test_dashboard_demo_key_mode_keeps_api_protected_while_serving_ui() -> None:

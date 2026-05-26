@@ -1,7 +1,7 @@
 # Dashboard Readiness Runbook
 
-This runbook prepares future dashboard work without implementing a frontend.
-Use fake demo data and fake demo credentials only.
+This runbook supports local dashboard review. Use fake demo data and fake demo
+credentials only.
 
 ## Preconditions
 
@@ -81,6 +81,22 @@ examples/dashboard_contract/
 These fixtures are for dashboard contract review. They are not generated test
 fixtures, live API captures, or production data.
 
+## Hardening Checks
+
+The local dashboard route should return dashboard-specific hardening headers:
+
+- `Content-Security-Policy`
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: no-referrer`
+- `Permissions-Policy`
+- `Cross-Origin-Opener-Policy`
+- `Cross-Origin-Resource-Policy`
+- `Cache-Control: no-store`
+
+Dashboard JavaScript should use same-origin API paths, fake demo credentials,
+and timeout-bounded requests only.
+
 ## Validation
 
 Run:
@@ -99,10 +115,11 @@ Expected current behavior:
 
 Stop and update the threat model before any work requires:
 
-- frontend dashboard implementation
 - live providers
 - production IdP
 - real data
 - remediation
 - CSI/RGOI write-back
 - RAG corpus expansion
+- production dashboard deployment
+- external telemetry or third-party frontend assets

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ThreatPrism Dashboard</title>
-    <link rel="stylesheet" href="/dashboard/assets/styles.css?v=dashboard-ui-v1" />
+    <link rel="stylesheet" href="/dashboard/assets/styles.css?v=dashboard-hardening-v1" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to dashboard</a>
@@ -14,23 +14,23 @@
           <p class="eyebrow">ThreatPrism</p>
           <h1>SOC migration dashboard</h1>
         </div>
-        <div class="status-strip" aria-label="Runtime status">
+        <div class="status-strip" aria-label="Runtime status" aria-live="polite">
           <span class="pill" id="health-status">Checking API</span>
           <span class="pill" id="action-status">ALLOW_REAL_ACTIONS=false</span>
           <span class="pill">Fake demo credentials</span>
         </div>
       </header>
 
-      <nav class="role-nav" aria-label="Dashboard persona">
-        <button class="role-button active" data-persona="analyst" type="button">Analyst</button>
-        <button class="role-button" data-persona="manager_grc" type="button">Manager/GRC</button>
-        <button class="role-button" data-persona="legal_privacy" type="button">Legal/Privacy</button>
-        <button class="role-button" data-persona="audit_debug" type="button">Audit/Debug</button>
-        <button class="role-button" data-persona="engineer" type="button">Engineer</button>
-        <button class="role-button" data-persona="csi_rgoi" type="button">CSI/RGOI</button>
+      <nav class="role-nav" aria-label="Dashboard persona" role="tablist">
+        <button id="tab-analyst" class="role-button active" data-persona="analyst" type="button" role="tab" aria-selected="true" aria-controls="main">Analyst</button>
+        <button id="tab-manager-grc" class="role-button" data-persona="manager_grc" type="button" role="tab" aria-selected="false" aria-controls="main" tabindex="-1">Manager/GRC</button>
+        <button id="tab-legal-privacy" class="role-button" data-persona="legal_privacy" type="button" role="tab" aria-selected="false" aria-controls="main" tabindex="-1">Legal/Privacy</button>
+        <button id="tab-audit-debug" class="role-button" data-persona="audit_debug" type="button" role="tab" aria-selected="false" aria-controls="main" tabindex="-1">Audit/Debug</button>
+        <button id="tab-engineer" class="role-button" data-persona="engineer" type="button" role="tab" aria-selected="false" aria-controls="main" tabindex="-1">Engineer</button>
+        <button id="tab-csi-rgoi" class="role-button" data-persona="csi_rgoi" type="button" role="tab" aria-selected="false" aria-controls="main" tabindex="-1">CSI/RGOI</button>
       </nav>
 
-      <main id="main" class="dashboard-grid">
+      <main id="main" class="dashboard-grid" role="tabpanel" aria-labelledby="tab-analyst">
         <section class="summary-band" aria-label="Operational metrics">
           <article class="metric-card">
             <span class="metric-label">Total cases</span>
@@ -117,6 +117,6 @@
         </section>
       </main>
     </div>
-    <script src="/dashboard/assets/app.js?v=dashboard-ui-v1" defer></script>
+    <script src="/dashboard/assets/app.js?v=dashboard-hardening-v1" defer></script>
   </body>
 </html>

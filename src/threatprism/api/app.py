@@ -7,7 +7,7 @@ from collections import deque
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -45,6 +45,33 @@ from threatprism.guardrails.views import ViewRole
 
 logger = logging.getLogger(__name__)
 DASHBOARD_STATIC_DIR = Path(__file__).resolve().parents[1] / "dashboard" / "static"
+DASHBOARD_CONTENT_SECURITY_POLICY = "; ".join(
+    [
+        "default-src 'self'",
+        "base-uri 'none'",
+        "connect-src 'self'",
+        "font-src 'self'",
+        "form-action 'none'",
+        "frame-ancestors 'none'",
+        "img-src 'self' data:",
+        "media-src 'none'",
+        "object-src 'none'",
+        "script-src 'self'",
+        "style-src 'self'",
+        "worker-src 'none'",
+    ]
+)
+DASHBOARD_SECURITY_HEADERS = {
+    "Cache-Control": "no-store",
+    "Content-Security-Policy": DASHBOARD_CONTENT_SECURITY_POLICY,
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-Permitted-Cross-Domain-Policies": "none",
+}
 
 AUTH_ERROR_RESPONSES = {
     401: {"description": "Missing or invalid demo credential"},
@@ -97,7 +124,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     @app.middleware("http")
-    async def case_ingress_limits(request: Request, call_next):  # noqa: ANN001
+    async def request_guards(request: Request, call_next):  # noqa: ANN001
         if request.method.upper() == "POST" and request.url.path == "/cases":
             content_length = request.headers.get("content-length")
             if content_length:
@@ -121,7 +148,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     return {"type": "http.request", "body": body, "more_body": False}
 
                 request = Request(request.scope, receive)
-        return await call_next(request)
+        response = await call_next(request)
+        return _apply_dashboard_security_headers(response, request.url.path)
 
     @app.get("/health")
     def health() -> dict[str, object]:
@@ -470,6 +498,13 @@ def _service(request: Request) -> CaseService:
 
 def _csi_service(request: Request) -> CognitiveRetrievalService:
     return request.app.state.cognitive_service
+
+
+def _apply_dashboard_security_headers(response: Response, path: str) -> Response:
+    if path == "/dashboard" or path.startswith("/dashboard/"):
+        for header, value in DASHBOARD_SECURITY_HEADERS.items():
+            response.headers[header] = value
+    return response
 
 
 def _run_triage_with_limit(service: CaseService, case_id: str, semaphore: threading.BoundedSemaphore) -> None:

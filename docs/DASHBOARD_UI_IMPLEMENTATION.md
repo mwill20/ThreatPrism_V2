@@ -43,6 +43,13 @@ that are covered by contract tests.
   PHI, PII, credential, or secret data.
 - Does not mutate CSI/RGOI knowledge, trust, suppressions, or evidence.
 
+## Hardening Follow-Up
+
+Production Dashboard Hardening v0.1 adds security headers, same-origin request
+enforcement, timeout-bounded API calls, keyboard persona navigation, and
+focused tests for the local dashboard. See
+`docs/DASHBOARD_PRODUCTION_HARDENING.md`.
+
 ## Local Verification
 
 Start the backend with fake demo settings, then open `/dashboard`:

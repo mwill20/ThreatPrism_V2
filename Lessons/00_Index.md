@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `87 passed`.
+- The current validated baseline is `89 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -42,6 +42,7 @@ Fake SOAR payload
   -> Repository standards audit and reviewer-readiness docs
   -> CSI/RGOI read-only governed cognition and retrieval policy
   -> Dashboard data contract and fake persona response fixtures
+  -> Dashboard UI hardening headers, same-origin request controls, and keyboard navigation
   -> API responses and tests
 ```
 
@@ -70,13 +71,14 @@ Fake SOAR payload
 | yes | [Lesson 18](Lesson18_CSI_RGOI_Foundation.md) | CSI/RGOI Foundation | `src/threatprism/csi/*.py`, `tests/test_csi_rgoi.py`, `docs/CSI_RGOI_ARCHITECTURE.md` |
 | yes | [Lesson 19](Lesson19_Dashboard_UI_Preparation.md) | Dashboard UI Preparation | `docs/DASHBOARD_DATA_CONTRACT.md`, `examples/dashboard_contract/*.json`, API contract tests |
 | yes | [Lesson 20](Lesson20_Dashboard_UI_Implementation.md) | Dashboard UI Implementation | `src/threatprism/dashboard/static/*`, `tests/test_dashboard_ui.py`, `docs/DASHBOARD_UI_IMPLEMENTATION.md` |
+| yes | [Lesson 21](Lesson21_Production_Dashboard_Hardening.md) | Production Dashboard Hardening | `src/threatprism/api/app.py`, `src/threatprism/dashboard/static/*`, `tests/test_dashboard_ui.py`, `docs/DASHBOARD_PRODUCTION_HARDENING.md` |
 
 ## File Coverage Map
 
 ### Source Files
 
 - `C:\Projects\ThreatPrismV2\src\threatprism\__init__.py` -> Lesson 00
-- `C:\Projects\ThreatPrismV2\src\threatprism\api\app.py` -> Lesson 01
+- `C:\Projects\ThreatPrismV2\src\threatprism\api\app.py` -> Lessons 01 and 21
 - `C:\Projects\ThreatPrismV2\src\threatprism\auth\demo.py` -> Lesson 09
 - `C:\Projects\ThreatPrismV2\src\threatprism\auth\__init__.py` -> Lesson 09
 - `C:\Projects\ThreatPrismV2\src\threatprism\cli\main.py` -> Lesson 01
@@ -103,7 +105,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\runner.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\cli.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\scenarios.py` -> Lesson 13
-- `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lesson 20
+- `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20 and 21
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
@@ -125,6 +127,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\docs\DASHBOARD_DATA_CONTRACT.md` -> Lesson 19
 - `C:\Projects\ThreatPrismV2\docs\specs\24_DASHBOARD_UI_PREPARATION.md` -> Lesson 19
 - `C:\Projects\ThreatPrismV2\docs\runbooks\DASHBOARD_READINESS.md` -> Lesson 19
+- `C:\Projects\ThreatPrismV2\docs\DASHBOARD_PRODUCTION_HARDENING.md` -> Lesson 21
+- `C:\Projects\ThreatPrismV2\docs\specs\26_PRODUCTION_DASHBOARD_HARDENING.md` -> Lesson 21
 - `C:\Projects\ThreatPrismV2\Dockerfile` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\docker-compose.yml` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\.dockerignore` -> Lesson 14
@@ -153,7 +157,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_fixture_factory.py` -> Lessons 08 and 16
 - `C:\Projects\ThreatPrismV2\tests\test_csi_rgoi.py` -> Lessons 08 and 18
 - `C:\Projects\ThreatPrismV2\examples\dashboard_contract\*.json` -> Lesson 19
-- `C:\Projects\ThreatPrismV2\tests\test_dashboard_ui.py` -> Lessons 08 and 20
+- `C:\Projects\ThreatPrismV2\tests\test_dashboard_ui.py` -> Lessons 08, 20, and 21
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -182,7 +186,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-87 passed
+89 passed
 ```
 
 ## What To Study Next

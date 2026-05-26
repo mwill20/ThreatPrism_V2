@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-93 passed
+95 passed
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored
@@ -279,6 +279,8 @@ Factory guardrails:
 - Existing output files require `--force`.
 - Generated JSONL is ignored by git and must be manually reviewed before any
   curated sample is promoted into tracked tests or eval fixtures.
+- Tracked curated fixtures live under `fixtures/curated/` and require a
+  manifest entry with approved license, safety, and content review status.
 
 ## Troubleshooting
 

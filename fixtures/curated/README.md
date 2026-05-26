@@ -4,6 +4,13 @@ This folder contains tiny, tracked, manually reviewed synthetic fixtures that
 were promoted from the fixture-factory workflow for deterministic tests and
 demo review.
 
+Current tracked scenario coverage:
+
+- fake SOC case review
+- tokenized healthcare-context exposure review
+- sanitized prompt-injection guardrail review
+- evidence-conflict and GRC category-alignment review
+
 Current boundary:
 
 - fake data only

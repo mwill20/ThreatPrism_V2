@@ -26,6 +26,60 @@
         "api_schema_validation",
         "demo_review"
       ]
+    },
+    {
+      "fixture_id": "curated_healthcare_exposure_0001",
+      "path": "fixtures/curated/curated_healthcare_exposure_0001.jsonl",
+      "source_family": "manual_fake_healthcare",
+      "source_sample_status": "handwritten_fake_source_shape",
+      "license_review_status": "not_third_party_local_fake",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "Codex",
+      "reviewed_at": "2026-05-26",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "allowed_uses": [
+        "fixture_factory_regression",
+        "api_schema_validation",
+        "demo_review"
+      ]
+    },
+    {
+      "fixture_id": "curated_prompt_injection_0001",
+      "path": "fixtures/curated/curated_prompt_injection_0001.jsonl",
+      "source_family": "manual_fake_prompt_injection",
+      "source_sample_status": "handwritten_fake_source_shape",
+      "license_review_status": "not_third_party_local_fake",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "Codex",
+      "reviewed_at": "2026-05-26",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "allowed_uses": [
+        "fixture_factory_regression",
+        "api_schema_validation",
+        "demo_review"
+      ]
+    },
+    {
+      "fixture_id": "curated_evidence_conflict_grc_0001",
+      "path": "fixtures/curated/curated_evidence_conflict_grc_0001.jsonl",
+      "source_family": "manual_fake_grc",
+      "source_sample_status": "handwritten_fake_source_shape",
+      "license_review_status": "not_third_party_local_fake",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "Codex",
+      "reviewed_at": "2026-05-26",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "allowed_uses": [
+        "fixture_factory_regression",
+        "api_schema_validation",
+        "demo_review"
+      ]
     }
   ]
 }

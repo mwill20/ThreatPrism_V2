@@ -78,7 +78,9 @@ Current baseline:
   output is `fixtures/generated/`. Both are ignored except approved
   placeholders/docs.
 - Curated fixture promotion uses `fixtures/curated/manifest.json` and tracked
-  tiny fake fixtures only after explicit review.
+  tiny fake fixtures only after explicit review. The current curated set
+  covers SOC, healthcare-context exposure, sanitized prompt-injection, and
+  evidence-conflict/GRC review.
 - Repo standards audit and reviewer-readiness docs exist in `REPO_AUDIT.md`,
   `docs/USAGE.md`, `docs/EVALUATION.md`, `docs/DATASET.md`,
   `docs/MODEL_CARD.md`, `docs/DEPLOYMENT.md`, `docs/MONITORING.md`, and

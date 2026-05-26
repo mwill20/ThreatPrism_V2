@@ -117,6 +117,9 @@ fixtures/
   curated/
     README.md
     manifest.json
+    curated_evidence_conflict_grc_0001.jsonl
+    curated_healthcare_exposure_0001.jsonl
+    curated_prompt_injection_0001.jsonl
     curated_soc_case_0001.jsonl
 
 tools/
@@ -282,13 +285,13 @@ eval harness dry-run: 15 passed / 0 failed
 
 ## Future Expansion
 
-Curated Generated-Fixture Promotion v0.1 added one tracked, hand-reviewed fake
-fixture under `fixtures/curated/`, plus manifest validation and tests. The
-ignored `fixtures/generated/` folder remains staging output and is not
-auto-scanned.
+Curated Generated-Fixture Promotion v0.1 and Broader Curated Fixture Expansion
+v0.2 added four tracked, hand-reviewed fake fixtures under `fixtures/curated/`,
+plus manifest validation and tests. The ignored `fixtures/generated/` folder
+remains staging output and is not auto-scanned.
 
 Future versions may add richer adapters and more curated promoted fixtures only
-after manual license, safety, and content review.
+after manual license, safety, and content review for each fixture.
 
 v0.3 may add lab-generated telemetry from adversary emulation tools, but only
 after explicit approval and only in an isolated lab workflow.

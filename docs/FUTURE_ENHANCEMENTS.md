@@ -68,12 +68,13 @@ Explicitly out of scope until separately approved:
 
 ## Curated Generated-Fixture Promotion
 
-Status: gated option.
+Status: v0.2 complete for four tiny fake fixtures; additional promotion remains
+a gated option.
 
-Generated fixtures remain ignored by default. A tiny generated fixture may be
-promoted only after manual review for license terms, redistribution rights,
-safety, content quality, and absence of real PHI, PII, secrets, tenant data,
-workplace data, or provider output.
+Generated fixtures remain ignored by default. Any additional generated fixture
+may be promoted only after manual review for license terms, redistribution
+rights, safety, content quality, and absence of real PHI, PII, secrets, tenant
+data, workplace data, or provider output.
 
 ## Production Dashboard Deployment
 

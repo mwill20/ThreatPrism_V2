@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Expanded the curated fixture set to four tiny hand-reviewed fake fixtures
+  covering SOC, healthcare-context exposure, sanitized prompt-injection, and
+  evidence-conflict/GRC review, with stronger manifest and scenario tests.
 - Added Curated Generated-Fixture Promotion v0.1 with a tracked fake SOC
   fixture, manifest review gate, path-safe promotion loader, tests, and docs
   while keeping `fixtures/generated/` ignored and out of automatic scans.

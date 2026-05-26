@@ -77,9 +77,10 @@ factory that converts explicit local, manually reviewed source-shape samples
 into sanitized ThreatPrism-native JSONL fixtures without downloads, live
 providers, raw dataset commits, or baseline test auto-scanning.
 
-The latest fixture-promotion slice adds one tiny tracked curated fixture with a
-manifested fake-data review gate. Generated fixture output remains ignored and
-does not auto-feed tests or evals.
+The latest fixture-promotion slice expands the tracked curated fixture set to
+four tiny hand-reviewed fake fixtures covering SOC, healthcare-context
+exposure, prompt-injection, and evidence-conflict/GRC review scenarios.
+Generated fixture output remains ignored and does not auto-feed tests or evals.
 
 The latest CSI/RGOI slice adds read-only retrieval-governed organizational
 cognition with cognitive object schemas, evidence alignment, trust scoring,
@@ -238,7 +239,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -276,8 +277,9 @@ for the placeholder file. Review generated fixtures manually before promoting
 any curated sample into tracked tests or eval fixtures.
 
 The tracked curated fixture set is under `fixtures/curated/` and is gated by
-`fixtures/curated/manifest.json`. It currently contains one tiny hand-reviewed
-fake SOC fixture.
+`fixtures/curated/manifest.json`. It currently contains four tiny
+hand-reviewed fake fixtures for SOC, healthcare-context exposure,
+prompt-injection, and evidence-conflict/GRC review.
 
 Run only the demo scenario and API contract checks:
 
@@ -445,7 +447,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -496,7 +498,9 @@ Data Strategy & Synthetic Fixture Factory v0.1 is implemented. See
 `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md`,
 `data_sources/registry.json`, and `tools/fixture_factory/`. Public or
 synthetic datasets must be manually reviewed, kept out of git as raw data, and
-converted into sanitized ThreatPrism-native fixtures before use.
+converted into sanitized ThreatPrism-native fixtures before use. Broader
+Curated Fixture Expansion v0.2 adds four tracked fake fixtures through the
+manifest review gate without enabling generated-folder auto-scanning.
 
 CSI/RGOI Foundation v0.1 is implemented. See
 `docs/CSI_RGOI_ARCHITECTURE.md`, `docs/CSI_RGOI_WORKFLOWS.md`,

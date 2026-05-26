@@ -66,7 +66,7 @@ The current live implementation includes a first backend slice:
   defaults for candidate source families.
 - `external_datasets/` and `fixtures/generated/` with ignored local staging and
   generated fixture output boundaries.
-- `fixtures/curated/` with one tracked, hand-reviewed fake SOC fixture plus a
+- `fixtures/curated/` with four tracked, hand-reviewed fake fixtures plus a
   manifest review gate.
 - `Dockerfile`, `docker-compose.yml`, and `.dockerignore` with local demo
   backend packaging.
@@ -97,7 +97,8 @@ The current live implementation includes a first backend slice:
   output, no-network behavior, schema validity, and leakage prevention.
 - `tests/test_curated_fixture_promotion.py` covering curated manifest review,
   explicit fixture paths, generated-folder rejection, schema validity,
-  deterministic serialization, and leakage prevention.
+  deterministic serialization, duplicate fixture IDs, scenario coverage, and
+  leakage prevention.
 - `tests/test_csi_rgoi.py` covering tenant isolation, retrieval policy,
   evidence alignment, trust scoring, quarantine exclusion, stale cognition,
   lineage, replay, observability, divergence telemetry, demo auth, and OpenAPI
@@ -114,7 +115,7 @@ The current live implementation includes a first backend slice:
   implemented local-only data-realism and synthetic fixture factory slice.
 - `docs/CURATED_GENERATED_FIXTURE_PROMOTION.md` and
   `docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md` capturing the
-  reviewed tiny fixture-promotion path.
+  reviewed tiny fixture-promotion and expansion path.
 - `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
   reviewer-readiness docs for usage, evaluation, dataset handling,
   model/provider behavior, deployment boundary, monitoring, and
@@ -198,16 +199,16 @@ Result:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
-Curated Generated-Fixture Promotion validation on 2026-05-26 with:
+Broader Curated Fixture Expansion validation on 2026-05-26 with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_fixture_promotion_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_v02_final_docs
 ```
 
 Result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -582,12 +583,25 @@ tests/test_dashboard_ui.py
      and responsive layout checks
 ```
 
+Broader Curated Fixture Expansion v0.2 is implemented:
+
+```text
+fixtures/curated/
+  -> four tiny hand-reviewed fake fixtures for SOC, healthcare-context
+     exposure, sanitized prompt-injection, and evidence-conflict/GRC review
+fixtures/curated/manifest.json
+  -> per-fixture license, safety, and content review status
+tests/test_curated_fixture_promotion.py
+  -> manifest, path, schema, determinism, duplicate-ID, scenario coverage, and
+     leakage checks
+```
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Curated Generated-Fixture
-Promotion v0.1 is complete; it promotes one tiny tracked fake fixture through
-`fixtures/curated/manifest.json`. Generated fixtures remain ignored and are
-not auto-scanned.
+No new implementation slice is selected yet. Broader Curated Fixture Expansion
+v0.2 is complete; it promotes four tiny tracked fake fixtures through
+`fixtures/curated/manifest.json`. Generated fixtures remain ignored and are not
+auto-scanned.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and
@@ -752,6 +766,7 @@ docs/specs/23_CSI_RGOI_FOUNDATION.md
 docs/specs/24_DASHBOARD_UI_PREPARATION.md
 docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md
 docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md
+docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -782,6 +797,7 @@ docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md
 docs/DASHBOARD_DATA_CONTRACT.md
 docs/DASHBOARD_UI_IMPLEMENTATION.md
 docs/DASHBOARD_PRODUCTION_HARDENING.md
+docs/CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/CSI_RGOI_ARCHITECTURE.md
 docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
@@ -806,6 +822,7 @@ tests/test_operational_read_models.py
 tests/test_eval_harness.py
 tests/test_demo_scenarios_and_api_contract.py
 tests/test_fixture_factory.py
+tests/test_curated_fixture_promotion.py
 tests/test_csi_rgoi.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
@@ -822,6 +839,9 @@ data_sources/registry.json
 external_datasets/README.md
 external_datasets/.gitkeep
 fixtures/generated/.gitkeep
+fixtures/curated/README.md
+fixtures/curated/manifest.json
+fixtures/curated/*.jsonl
 .claude/commands/compact-handoff.md
 Dockerfile
 docker-compose.yml
@@ -839,6 +859,7 @@ Lessons/Lesson18_CSI_RGOI_Foundation.md
 Lessons/Lesson19_Dashboard_UI_Preparation.md
 Lessons/Lesson20_Dashboard_UI_Implementation.md
 Lessons/Lesson21_Production_Dashboard_Hardening.md
+Lessons/Lesson22_Curated_Generated_Fixture_Promotion.md
 ```
 
 ## Next Session Recommended Prompt

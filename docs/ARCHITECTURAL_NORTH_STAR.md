@@ -228,9 +228,13 @@ Current direction:
 14. Completed: Curated Generated-Fixture Promotion v0.1 for one tiny tracked,
     hand-reviewed fake SOC fixture with manifest review and path-safe
     promotion tests.
-15. Production dashboard deployment, production identity, live-integration
-    preparation, or broader curated fixture promotion only after explicit user
-    approval and any required threat-model treatment updates.
+15. Completed: Broader Curated Fixture Expansion v0.2 for four tiny tracked,
+    hand-reviewed fake fixtures covering SOC, healthcare-context exposure,
+    sanitized prompt-injection, and evidence-conflict/GRC review.
+16. Production dashboard deployment, production identity, live-integration
+    preparation, external research providers, or additional curated fixture
+    promotion only after explicit user approval and any required threat-model
+    treatment updates.
 
 Do not add live LLM calls, live SOAR calls, live enrichment calls, production
 IdP integration, real remediation, non-demo data, or production dashboard

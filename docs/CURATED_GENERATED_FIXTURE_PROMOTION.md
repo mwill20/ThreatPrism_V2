@@ -2,7 +2,7 @@
 
 ## Purpose
 
-ThreatPrism now includes a tiny tracked curated fixture set that can be used by
+ThreatPrism now includes a small tracked curated fixture set that can be used by
 tests and demo review without changing the generated-fixture boundary.
 
 Generated fixture output under `fixtures/generated/` remains ignored and is not
@@ -15,11 +15,21 @@ Tracked files:
 
 - `fixtures/curated/README.md`
 - `fixtures/curated/manifest.json`
+- `fixtures/curated/curated_evidence_conflict_grc_0001.jsonl`
+- `fixtures/curated/curated_healthcare_exposure_0001.jsonl`
+- `fixtures/curated/curated_prompt_injection_0001.jsonl`
 - `fixtures/curated/curated_soc_case_0001.jsonl`
 
-The promoted fixture is a hand-authored fake SOC source-shape conversion. It is
-not a copied third-party dataset row and it does not contain raw external
+The promoted fixtures are hand-authored fake source-shape conversions. They are
+not copied third-party dataset rows and they do not contain raw external
 dataset material.
+
+Scenario coverage:
+
+- SOC case review.
+- Tokenized healthcare-context exposure review.
+- Sanitized prompt-injection guardrail review.
+- Evidence-conflict and GRC category-alignment review.
 
 Review status recorded in `fixtures/curated/manifest.json`:
 
@@ -44,6 +54,8 @@ The curated promotion loader in `tools/fixture_factory/promotions.py` enforces:
 - raw source material must not be committed
 - auto-download provenance must be false
 - each fixture is schema-valid and passes fixture-factory safety validation
+- duplicate fixture IDs are rejected
+- promoted scenarios are explicitly covered in tests
 
 ## Boundaries
 

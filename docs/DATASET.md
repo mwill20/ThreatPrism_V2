@@ -38,10 +38,11 @@ evals, the user must review:
 - whether source content contains real organization, workplace, user, host,
   domain, IP, tenant, credential, PHI, PII, or secret data
 
-The current curated promotion uses a hand-authored fake source shape, not a
-third-party dataset row. Review status is recorded in
+The current curated promotion set uses hand-authored fake source shapes, not
+third-party dataset rows. Review status is recorded in
 `fixtures/curated/manifest.json`, and generated fixture auto-scanning remains
-disabled.
+disabled. The tracked set currently covers SOC, healthcare-context exposure,
+sanitized prompt-injection, and evidence-conflict/GRC review scenarios.
 
 ## Out Of Scope
 

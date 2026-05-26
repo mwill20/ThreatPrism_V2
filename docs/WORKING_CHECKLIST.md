@@ -482,25 +482,6 @@ Production Dashboard Hardening v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_dashboard_hardening_final`.
 
-## Next Active Slice
-
-Curated Generated-Fixture Promotion v0.1 is complete:
-
-- [x] Push the previously validated dashboard hardening and external research
-  future-option commits before starting the slice.
-- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
-- [x] Keep the slice fake-data only with no raw external dataset commits.
-- [x] Add `fixtures/curated/README.md`.
-- [x] Add `fixtures/curated/manifest.json` with explicit license, safety, and
-  content review statuses.
-- [x] Add one tiny tracked ThreatPrism-native curated fixture.
-- [x] Add `tools/fixture_factory/promotions.py` for manifest, path, and
-  fixture safety validation.
-- [x] Add `tests/test_curated_fixture_promotion.py`.
-- [x] Prove `fixtures/generated/` paths are rejected and generated output is
-  not auto-scanned.
-- [x] Run full safe validation before calling the slice complete.
-
 ## Completed Slice
 
 Curated Generated-Fixture Promotion v0.1:
@@ -522,18 +503,43 @@ Curated Generated-Fixture Promotion v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_curated_fixture_promotion_final`.
 
-Next choices after this slice should be selected explicitly before
-implementation:
+## Completed Slice
+
+Broader Curated Fixture Expansion v0.2:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep the slice fake-data only with no raw external dataset commits,
+  auto-downloads, live providers, RAG, memory write-back, trust mutation, or
+  remediation.
+- [x] Add a tokenized healthcare-context exposure fixture under
+  `fixtures/curated/`.
+- [x] Add a sanitized prompt-injection fixture under `fixtures/curated/`.
+- [x] Add an evidence-conflict/GRC category-alignment fixture under
+  `fixtures/curated/`.
+- [x] Record approved license, safety, and content review status for each new
+  fixture in `fixtures/curated/manifest.json`.
+- [x] Extend curated promotion tests for the full manifest set, scenario
+  coverage, duplicate fixture IDs, deterministic serialization, generated
+  folder rejection, and leakage prevention.
+- [x] Keep `fixtures/generated/` ignored and out of automatic scanning.
+- [x] Run full safe validation before calling the slice complete:
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_curated_v02_final_docs`.
+
+## Next Active Slice
+
+No new implementation slice is selected yet. Recommended choices should be
+selected explicitly before implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
-- [ ] Broader curated generated-fixture promotion only after manual license,
-  safety, and content review for each fixture.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
   a gated future enhancement; it is not needed for the current build and must
   not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
   promotion, trust mutation, or source-of-truth changes.
 - [ ] Production dashboard deployment, production IdP, browser matrix
   certification, and accessibility certification only after explicit approval.
+- [ ] Additional curated fixture promotion only after manual license, safety,
+  and content review for each new fixture.
 
 Future planned data-realism slice:
 
@@ -566,7 +572,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

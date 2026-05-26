@@ -26,8 +26,8 @@ demo-safe backend, not a live-LLM safety proof or production-readiness claim.
 9. Do dashboard hardening checks enforce security headers, same-origin request
    targets, timeout-bounded API calls, and keyboard persona navigation markers?
 10. Does curated fixture promotion require explicit manifest review, reject
-    generated-folder paths, and keep promoted fixtures schema-valid and
-    sanitized?
+    generated-folder paths, preserve scenario coverage, and keep promoted
+    fixtures schema-valid and sanitized?
 
 ## Current Validation Command
 
@@ -46,16 +46,16 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Curated Generated-Fixture Promotion pass with:
+Validated during the Broader Curated Fixture Expansion pass with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_fixture_promotion_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_v02_final_docs
 ```
 
 Result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

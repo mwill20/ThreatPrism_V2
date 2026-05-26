@@ -52,8 +52,8 @@ Current implemented baseline:
   backend.
 - Data source registry, local-only synthetic fixture factory, fixture models,
   sanitizers, validators, adapters, CLI entry point, and fixture-factory tests.
-- Tiny curated generated-fixture promotion with manifest review, one tracked
-  fake SOC fixture, and promotion safety tests.
+- Tiny curated generated-fixture promotion with manifest review, four tracked
+  fake fixtures, and promotion safety tests.
 - Read-only CSI/RGOI governed cognition schemas, retrieval governance, trust
   scoring, evidence alignment, lineage, replay, observability, divergence
   telemetry, API routes, fake fixtures, and tests.
@@ -66,13 +66,13 @@ Current implemented baseline:
 Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_fixture_promotion_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_curated_v02_final_docs
 ```
 
-Result after Curated Generated-Fixture Promotion v0.1:
+Result after Broader Curated Fixture Expansion v0.2:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -227,7 +227,7 @@ Current dataset boundaries:
 - No automatic dataset downloads.
 - No committed raw third-party datasets.
 - Generated fixtures under `fixtures/generated/` are ignored by git unless a
-  tiny curated sample is intentionally promoted in a future reviewed change.
+  tiny curated sample is intentionally promoted in a reviewed change.
 - Curated fixtures under `fixtures/curated/` must have a manifest entry with
   approved license, safety, and content review status.
 - The eval harness and tests do not auto-scan ignored generated fixture

@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-93 passed
+95 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -132,6 +132,9 @@ python -m tools.fixture_factory.factory --source synthea_sample_data --input ext
 
 Generated fixtures remain ignored under `fixtures/generated/` until a future
 manual license, safety, and content review approves promotion.
+
+The tracked curated set under `fixtures/curated/` currently contains four tiny
+hand-reviewed fake fixtures and is gated by `fixtures/curated/manifest.json`.
 
 ## Run The Dashboard
 

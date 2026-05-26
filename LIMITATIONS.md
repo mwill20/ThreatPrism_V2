@@ -88,6 +88,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Production deployment hardening.
 - Production dashboard deployment and production identity integration.
 - An API compatibility policy beyond the current tested local route contract.
+- External research provider adapters such as Exa.ai.
 
 ## Product Limitations
 
@@ -140,6 +141,20 @@ Allowed:
 - Enrichment results should not be treated as definitive without analyst review.
 - The safe validation wrapper clears live enrichment credential variables for
   validation. It does not test live enrichment behavior.
+
+## External Research Provider Limitations
+
+Optional web research providers such as Exa.ai are not part of the current
+build. They are documented only as deferred future enhancement candidates.
+
+They must not be used for current validation, local demos, CSI/RGOI memory,
+live RAG, automatic knowledge ingestion, automatic fixture promotion, trust
+mutation, source-of-truth changes, or training dataset generation.
+
+Any future external research provider work must be disabled by default, use
+mocked provider responses in tests, avoid live calls in standard validation,
+record provenance and review status, and require human approval before any
+retrieved content becomes authoritative or curated.
 
 ## GRC Limitations
 

@@ -490,6 +490,10 @@ be selected explicitly before implementation:
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Curated generated-fixture promotion only after manual license, safety,
   and content review.
+- [ ] Optional external research provider feasibility, such as Exa.ai, only as
+  a gated future enhancement; it is not needed for the current build and must
+  not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
+  promotion, trust mutation, or source-of-truth changes.
 - [ ] Production dashboard deployment, production IdP, browser matrix
   certification, and accessibility certification only after explicit approval.
 

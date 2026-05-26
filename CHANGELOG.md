@@ -4,6 +4,9 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Documented Exa.ai or equivalent public-web research providers as optional
+  future enhancement candidates only, outside the current CSI/RGOI, validation,
+  demo, RAG, memory write-back, fixture-promotion, and source-of-truth paths.
 - Added production-style hardening for the local dashboard: CSP/framing/
   referrer/permission headers, same-origin request enforcement, API request
   timeouts, keyboard persona navigation, tests, docs, and threat-model updates.

@@ -94,6 +94,13 @@ change lifecycle state, approve knowledge, or alter evidence. It seeds fake
 demo cognitive objects in memory so the governance path can be tested without
 live providers or real data.
 
+Optional external research providers, such as Exa.ai, are not part of CSI/RGOI
+v0.1. They are deferred future enhancement candidates only. If added later,
+they must feed non-authoritative `external_unreviewed` candidates through a
+disabled-by-default adapter with provenance capture, human review, no standard
+validation network calls, and no automatic memory write-back, trust mutation,
+or source-of-truth changes.
+
 Tenant isolation is implemented as a defensive cognition namespace. It is not
 MSSP multi-tenancy, shared production tenancy, or a production tenant
 administration model.

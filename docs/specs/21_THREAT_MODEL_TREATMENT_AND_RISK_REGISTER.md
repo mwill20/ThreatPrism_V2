@@ -473,6 +473,7 @@ This spec does not:
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | External research provider deferred | Documented Exa.ai or equivalent public-web research as an optional future enhancement only. It is not needed for the current build and must not add live calls, live RAG, CSI/RGOI memory write-back, automatic fixture promotion, trust mutation, or source-of-truth changes without reopening gated treatments. |
 | 2026-05-26 | Codex | Production dashboard hardening implemented | Added local dashboard CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard persona navigation markers, and tests. Re-evaluated accepted risk ID2 for the local dashboard; production deployment, production identity, non-demo data, and real PHI remain gated. |
 | 2026-05-26 | Codex | CSI/RGOI read-only foundation implemented | Added governed cognition without write-back, live RAG, trust mutation, suppressions, remediation, production tenancy, or real data. Live RAG, memory write-back, and production multi-tenancy remain gated. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F implemented | Followed the owner-approved POC treatment order after Slice G. Closed POC-scope auth hardening, HTTP resource controls, test-gap closure, pattern refresh process, and dependency hardening. Gated MVP/production/enterprise controls remain out of scope. |

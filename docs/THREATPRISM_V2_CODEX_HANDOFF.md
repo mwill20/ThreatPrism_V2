@@ -570,6 +570,12 @@ Curated generated-fixture promotion is a future reviewed action, not an
 automatic follow-on. Generated fixtures remain ignored until a tiny curated
 sample is manually reviewed for license, safety, and data content.
 
+Optional external research provider work, such as Exa.ai feasibility, is a
+deferred future enhancement only. It is not needed for the current build and
+must not add live calls, live RAG, CSI/RGOI memory write-back, automatic
+fixture promotion, trust mutation, or source-of-truth changes without a
+separate approved slice.
+
 Do not implement:
 
 - real remediation actions

@@ -43,6 +43,8 @@ reconstruction, and human truth ownership.
 - Remediation or containment.
 - Live LLM calls.
 - Live SOAR, cloud, enrichment, or RAG calls.
+- External research provider calls, including Exa.ai or equivalent web search
+  providers.
 - Production IdP.
 - Production tenant administration.
 - Real PHI, PII, credentials, tenant data, workplace data, or provider output.

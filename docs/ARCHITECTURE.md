@@ -418,8 +418,11 @@ These are directional — they are not committed work:
 - **Async worker:** Celery or equivalent replacing in-process background tasks
 - **Real LLM provider:** implementing `TriageProvider` with OpenAI or local LLM
 - **Threat intelligence:** activating VirusTotal, AbuseIPDB, URLScan stubs
+- **External research provider adapter:** optional public-source discovery
+  through a provider such as Exa.ai, disabled by default and non-authoritative
+  until human review
 - **Frontend dashboard:** consuming the read-model and metrics endpoints
 - **CI/CD pipeline:** automated testing, linting, and security gates
 
-See `docs/ARCHITECTURAL_NORTH_STAR.md` for the decision rubric and sequencing
-guidance.
+See `docs/ARCHITECTURAL_NORTH_STAR.md` and
+`docs/FUTURE_ENHANCEMENTS.md` for the decision rubric and sequencing guidance.

@@ -65,6 +65,9 @@ V2.
 - Do not add memory write-back, RAG corpus expansion, trust mutation,
   suppression publication, or autonomous knowledge changes without reopening
   the threat model treatment register.
+- Do not add external research providers such as Exa.ai to CSI/RGOI, live RAG,
+  validation, demos, fixture promotion, or source-of-truth paths without
+  explicit approval and updated threat treatment.
 - Use healthcare safeguard and evidence-alignment language only.
 - Do not claim HIPAA compliance, HIPAA certification, HITRUST compliance,
   HITRUST certification, control satisfaction, certification readiness, or that
@@ -83,6 +86,9 @@ The core architecture should stay provider-agnostic:
 - SOAR and SIEM intake through adapters.
 - LLM access through provider interfaces.
 - Threat intelligence through optional provider interfaces.
+- External research providers, if added later, through optional disabled-by-default
+  adapters that create non-authoritative `external_unreviewed`
+  candidates only after provenance capture and human review.
 - Microsoft security integrations as first-class adapters, not hardwired core
   dependencies.
 - SQLite for demo persistence, with a future PostgreSQL path left open.

@@ -38,3 +38,8 @@ Future live LLM provider work must be explicitly approved and must re-open the
 relevant threat-model treatments. It must not bypass tokenization, prompt
 firewall checks, policy scanning, evidence grounding, action safety, or
 controlled role-view rendering.
+
+External research providers such as Exa.ai are also future-only options, not
+current model providers. They must not be used for standard validation, live
+RAG, CSI/RGOI memory write-back, automatic fixture promotion, trust mutation,
+or source-of-truth changes without a separate approved slice.

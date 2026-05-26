@@ -13,6 +13,9 @@ from threatprism.auth.production import (
 from threatprism.config import Settings
 
 
+FAKE_LOCAL_JWKS = '{"keys":[{"kty":"RSA","kid":"fake-local-key","alg":"RS256","n":"AQAB","e":"AQAB"}]}'
+
+
 def _production_identity_settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
         "env": "production",
@@ -30,6 +33,13 @@ def _production_identity_settings(**overrides: object) -> Settings:
         ),
         "production_identity_allowed_algorithms": "RS256",
         "production_identity_live_verification_enabled": False,
+        "production_identity_allowed_tenants": "",
+        "production_identity_role_mapping": "",
+        "production_identity_jwks_json": "",
+        "production_identity_jwks_fetch_enabled": False,
+        "production_identity_clock_skew_seconds": 60,
+        "production_identity_max_token_bytes": 8192,
+        "production_identity_claim_mapping_version": "local-demo-v1",
         "allow_real_actions": False,
     }
     values.update(overrides)
@@ -67,10 +77,44 @@ def test_production_identity_rejects_missing_static_config() -> None:
         settings.validate_runtime()
 
 
-def test_production_identity_rejects_live_verifier_flag_until_explicit_slice() -> None:
+def test_production_identity_rejects_verifier_enablement_without_local_config() -> None:
     settings = _production_identity_settings(production_identity_live_verification_enabled=True)
 
-    with pytest.raises(ValueError, match="Live production token verification is not implemented"):
+    with pytest.raises(ValueError, match="PRODUCTION_IDENTITY_JWKS_JSON"):
+        settings.validate_runtime()
+
+
+def test_production_identity_allows_local_no_network_verifier_config() -> None:
+    settings = _production_identity_settings(
+        production_identity_live_verification_enabled=True,
+        production_identity_allowed_tenants="tenant_demo_alpha",
+        production_identity_role_mapping="demo_analysts:analyst,demo_engineers:engineer",
+        production_identity_jwks_json=FAKE_LOCAL_JWKS,
+    )
+
+    settings.validate_runtime()
+    report = settings.production_identity_readiness()
+
+    assert report.ready_for_token_verifier is True
+    assert report.live_verification_enabled is True
+    assert report.allowed_tenants == ("tenant_demo_alpha",)
+    assert report.role_mappings == (
+        ("demo_analysts", "analyst"),
+        ("demo_engineers", "engineer"),
+    )
+    assert not report.errors
+
+
+def test_production_identity_rejects_jwks_fetch_enablement() -> None:
+    settings = _production_identity_settings(
+        production_identity_live_verification_enabled=True,
+        production_identity_allowed_tenants="tenant_demo_alpha",
+        production_identity_role_mapping="demo_analysts:analyst",
+        production_identity_jwks_json=FAKE_LOCAL_JWKS,
+        production_identity_jwks_fetch_enabled=True,
+    )
+
+    with pytest.raises(ValueError, match="JWKS_FETCH_ENABLED"):
         settings.validate_runtime()
 
 
@@ -94,7 +138,7 @@ def test_external_oidc_mode_fails_closed_on_protected_routes(caplog) -> None:
     response = client.get("/metrics", headers={"Authorization": "Bearer fake-demo-token"})
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Unsupported API auth mode."
+    assert response.json()["detail"] == "Production token is not authorized for this request."
     assert "protected requests fail closed" in caplog.text
 
 

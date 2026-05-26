@@ -6,10 +6,10 @@ Production Token Verifier Design v0.1
 
 ## Goal
 
-Define the future live production token-verifier architecture without
-implementing token parsing, signature verification, JWKS fetching, provider
-calls, production identity administration, or trusted production
-claim-to-role authorization.
+Define the production token-verifier architecture before implementation,
+without adding JWKS fetching, provider calls, production identity
+administration, real credentials, or live production claim-to-role
+authorization.
 
 ## Problem
 
@@ -38,7 +38,7 @@ This design slice creates the implementation contract before code is added.
 
 ## Out Of Scope
 
-- JWT parsing or signature verification.
+- Live JWKS fetch, OIDC discovery, or provider calls.
 - JWKS download or live discovery.
 - OAuth redirect flows.
 - Entra app registration, Microsoft Graph, or production tenant setup.
@@ -73,8 +73,8 @@ Future live verification may accept a protected request only after it:
   live token verifier is implemented.
 - A runbook exists for reviewing the design and future implementation gates
   without live IdP calls.
-- The threat model and treatment register identify live token verification as
-  the next gated production identity treatment, not as completed runtime auth.
+- The threat model and treatment register identify live JWKS/IdP integration as
+  the next gated production identity treatment after local verification.
 - README, checklist, handoff, limitations, decisions, and lessons point to the
   design.
 - Standard safe validation passes with no live provider calls.

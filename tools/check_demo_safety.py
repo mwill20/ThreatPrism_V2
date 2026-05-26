@@ -267,6 +267,22 @@ def _check_env_example(root: Path) -> list[SafetyFinding]:
                 "PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED must default to false.",
             )
         )
+    if env_values.get("PRODUCTION_IDENTITY_JWKS_FETCH_ENABLED", "").strip().lower() != "false":
+        findings.append(
+            SafetyFinding(
+                "env-template",
+                ".env.example",
+                "PRODUCTION_IDENTITY_JWKS_FETCH_ENABLED must default to false.",
+            )
+        )
+    if env_values.get("PRODUCTION_IDENTITY_JWKS_JSON", "").strip():
+        findings.append(
+            SafetyFinding(
+                "env-template",
+                ".env.example",
+                "PRODUCTION_IDENTITY_JWKS_JSON must be empty in .env.example.",
+            )
+        )
     auth_mode = env_values.get("API_AUTH_MODE", "").strip().lower()
     local_dev_ack = env_values.get("THREATPRISM_LOCAL_DEV_ACK", "").strip().lower()
     if auth_mode == "none" and local_dev_ack != "true":

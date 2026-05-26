@@ -68,12 +68,14 @@ V2.
 - Do not add external research providers such as Exa.ai to CSI/RGOI, live RAG,
   validation, demos, fixture promotion, or source-of-truth paths without
   explicit approval and updated threat treatment.
-- Do not treat production identity readiness as live authentication. The
-  `external_oidc` readiness mode validates static configuration only; protected
-  requests must fail closed until a future token-verifier slice exists.
-- Do not treat the production token verifier design as live authentication.
-  It is an implementation contract for a future slice, not JWT parsing, JWKS
-  fetching, live IdP integration, or production claim-to-role authorization.
+- Do not treat production identity readiness alone as live authentication. The
+  `external_oidc` readiness mode validates static configuration; the runtime
+  verifier authorizes only when explicit local fake-JWKS verification is
+  enabled and complete.
+- Do not treat the local production token verifier as live IdP integration. It
+  verifies fake local JWKS-backed tokens for no-network validation only; live
+  JWKS fetch, OIDC discovery, Entra calls, real credentials, and real tenant
+  administration remain gated.
 - Use healthcare safeguard and evidence-alignment language only.
 - Do not claim HIPAA compliance, HIPAA certification, HITRUST compliance,
   HITRUST certification, control satisfaction, certification readiness, or that
@@ -239,19 +241,22 @@ Current direction:
     sanitized prompt-injection, and evidence-conflict/GRC review.
 16. Completed: Production Identity Readiness v0.1 for static
     `external_oidc` configuration checks and fail-closed protected-route
-    behavior without live token verification.
+    behavior when no verifier is enabled.
 17. Completed: Production Token Verifier Design v0.1 for the future
     `external_oidc` verifier contract, claim-to-role mapping rules,
     JWKS/cache boundaries, fail-closed semantics, no-network validation, and
-    sanitized audit requirements without implementing live token verification.
-18. Production dashboard deployment, live production identity integration,
+    sanitized audit requirements without implementing live JWKS or IdP calls.
+18. Completed: Production Token Verifier Implementation v0.1 for local
+    fake-JWKS bearer-token verification, verified claim-to-role mapping,
+    role-view policy integration, sanitized audit, and no-network tests.
+19. Production dashboard deployment, live production identity integration,
     live-integration preparation, external research providers, or additional curated fixture
     promotion only after explicit user approval and any required threat-model
     treatment updates.
 
-Do not add live LLM calls, live SOAR calls, live enrichment calls, production
-token verification, real remediation, non-demo data, or production dashboard
-deployment before the relevant threat treatments are reopened and validated.
+Do not add live LLM calls, live SOAR calls, live enrichment calls, live JWKS or
+IdP calls, real remediation, non-demo data, or production dashboard deployment
+before the relevant threat treatments are reopened and validated.
 
 ## Decision Rubric
 

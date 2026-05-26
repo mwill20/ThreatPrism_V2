@@ -65,20 +65,22 @@ Current implemented baseline:
 - Static production identity readiness for `API_AUTH_MODE=external_oidc`,
   including provider, issuer, audience, JWKS, claim, role, and algorithm
   checks plus fail-closed protected-route behavior.
-- Production token verifier design for the future `external_oidc`
-  implementation contract. This is documentation only; no JWT parsing, JWKS
-  fetch, live IdP calls, or production authorization are implemented.
+- Production token verifier implementation for local no-network
+  `external_oidc` validation with fake JWKS-backed JWT verification, verified
+  claim-to-role mapping, role-view policy reuse, and sanitized audit events.
+  Live JWKS fetch, live IdP calls, real credentials, and production tenant
+  administration are not implemented.
 
 Validation command confirmed on 2026-05-26:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_design_final
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_impl_final2
 ```
 
-Result after Production Token Verifier Design v0.1:
+Result after Production Token Verifier Implementation v0.1:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -92,9 +94,7 @@ temp such as `.pytest_tmp_run_verify`.
 - Microsoft-specific production adapters.
 - Dedicated async worker or external queue.
 - Production-grade CI/CD release pipeline.
-- Live production token verification and trusted production claim-to-role
-  authorization.
-- Production token verifier runtime implementation.
+- Live JWKS fetch or live production IdP integration.
 - Production deployment hardening.
 - Production dashboard deployment and live production identity integration.
 - An API compatibility policy beyond the current tested local route contract.
@@ -168,7 +168,8 @@ retrieved content becomes authoritative or curated.
 
 ## Production Identity Limitations
 
-Production Identity Readiness v0.1 is static readiness only.
+Production Identity Readiness v0.1 is static readiness plus a local no-network
+verifier boundary.
 
 Current behavior:
 
@@ -176,24 +177,26 @@ Current behavior:
   `API_AUTH_MODE=demo_key`.
 - `API_AUTH_MODE=external_oidc` requires OIDC-shaped static configuration.
 - Unknown auth modes are rejected during startup.
-- Live verifier enablement is rejected.
-- Protected API requests still fail closed under `external_oidc` because no
-  trusted token verifier or claim-to-role mapper exists yet.
+- Verifier enablement is rejected unless fake local JWKS JSON, tenant
+  allowlist, role mapping, token size, clock skew, and no-network settings are
+  complete.
+- Protected API requests fail closed under `external_oidc` when local
+  verification is disabled or misconfigured.
+- Local verifier mode checks JWT signature, issuer, audience, time, subject,
+  tenant, role mapping, and role-view policy before authorization.
 
 Not implemented:
 
 - OAuth or OIDC redirect flows.
-- JWKS download.
-- JWT parsing or signature verification.
+- JWKS download or live OIDC discovery.
 - Entra ID integration.
 - Production RBAC/ABAC claim mapping.
 - Break-glass access governance.
 - Production tenant administration.
 
-Production Token Verifier Design v0.1 defines the future verifier contract for
-bearer-token extraction, asymmetric signature validation, issuer/audience/time
-checks, tenant and role claim enforcement, role mapping, JWKS cache behavior,
-fail-closed responses, and sanitized audit telemetry. It is design only.
+Production Token Verifier Design v0.1 defines the verifier contract, and
+Production Token Verifier Implementation v0.1 implements the local fake-JWKS
+subset. Live JWKS fetch and live IdP integration remain gated.
 
 Do not use real issuer URLs, tenant IDs, audiences, credentials, workplace
 data, or non-demo case data in this repository.
@@ -360,7 +363,7 @@ Current boundaries:
 - The dashboard consumes the existing role-safe API surfaces and must not
   bypass authorization, masking, evidence alignment, or CSI/RGOI retrieval
   governance.
-- No live production token verification, external telemetry, frontend package
+- No live IdP/JWKS integration, external telemetry, frontend package
   manager, browser matrix certification, production deployment, or real data
   handling is implemented.
 
@@ -372,8 +375,7 @@ Current boundaries:
   into tracked tests or eval fixtures after license and safety review.
 - Decide exact authentication, authorization, and future break-glass governance
   before exposing real case data or raw sensitive values.
-- Implement live production token verification only after an explicit approved
-  slice with fake-key tests, no-network validation, threat-model updates, and
-  sanitized audit coverage.
+- Implement live JWKS fetch or live IdP integration only after an explicit
+  approved slice with threat-model updates and sanitized audit coverage.
 - Keep `docs/ARCHITECTURAL_NORTH_STAR.md` updated when future workarounds or
   enhancements intentionally change architecture direction.

@@ -1,11 +1,12 @@
 # Production Token Verifier Design
 
-Production Token Verifier Design v0.1 defines the future live-token
-verification architecture for `API_AUTH_MODE=external_oidc`.
+Production Token Verifier Design v0.1 defines the production token verification
+architecture for `API_AUTH_MODE=external_oidc`.
 
-This is a design and readiness slice only. It does not parse JWTs at runtime,
-download JWKS keys, call an identity provider, integrate with Entra ID, or
-authorize production users.
+The first local implementation now exists in
+`docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`. It verifies fake local
+JWKS-backed tokens only. This design still gates live JWKS fetch, live OIDC
+discovery, Entra ID calls, real credentials, and real production users.
 
 ## Purpose
 
@@ -19,11 +20,10 @@ OIDC a first-class profile.
 
 ## Security Boundary
 
-`external_oidc` must remain fail-closed until a trusted verifier is
-implemented and tested.
+`external_oidc` must remain fail-closed unless a trusted verifier is enabled
+and all required checks pass.
 
-Future live verification may accept a request only after every check below
-passes:
+Verification may accept a request only after every check below passes:
 
 1. Extract exactly one `Authorization: Bearer <token>` credential.
 2. Reject missing, malformed, oversized, or non-bearer credentials.
@@ -75,16 +75,16 @@ PRODUCTION_IDENTITY_ALLOWED_ALGORITHMS=RS256
 PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED=false
 ```
 
-Future verifier-specific settings should be added only when the implementation
-slice lands:
+Local verifier-specific settings:
 
 ```text
 PRODUCTION_IDENTITY_ALLOWED_TENANTS=tenant_demo_alpha
 PRODUCTION_IDENTITY_ROLE_MAPPING=analysts:analyst,engineers:engineer,grc_reviewers:manager_grc
+PRODUCTION_IDENTITY_JWKS_JSON={"keys":[...fake local public keys...]}
 PRODUCTION_IDENTITY_CLOCK_SKEW_SECONDS=60
 PRODUCTION_IDENTITY_MAX_TOKEN_BYTES=8192
-PRODUCTION_IDENTITY_JWKS_CACHE_TTL_SECONDS=300
 PRODUCTION_IDENTITY_JWKS_FETCH_ENABLED=false
+PRODUCTION_IDENTITY_CLAIM_MAPPING_VERSION=local-demo-v1
 ```
 
 The repository must use fake examples only. Real tenant IDs, group IDs,
@@ -93,8 +93,8 @@ examples, and commit messages.
 
 ## JWKS And Key Handling
 
-The first implementation should verify tokens against local fake JWKS fixtures
-only. Live JWKS fetch should remain disabled in safe validation and CI.
+The first implementation verifies tokens against configured local fake JWKS
+JSON only. Live JWKS fetch remains disabled in safe validation and CI.
 
 If live JWKS fetch is later approved, it must be explicitly opt-in and must
 enforce:
@@ -206,9 +206,9 @@ Unit and contract tests should use local fake keys and fake JWKS documents.
 Any live IdP smoke test must be a separate manual runbook step outside
 `tools/validate-threatprism.ps1` and must require explicit user approval.
 
-## Future Test Plan
+## Implementation Test Plan
 
-The token verifier implementation slice should add focused tests for:
+The token verifier implementation slice adds focused tests for:
 
 - missing token.
 - malformed bearer header.
@@ -247,6 +247,8 @@ The token verifier implementation slice should add focused tests for:
 
 ## Current Status
 
-This design is ready for implementation planning, but no live verifier is
-implemented. `API_AUTH_MODE=external_oidc` must continue to deny protected
-routes until a future approved implementation slice lands.
+This design is implemented for local fake-JWKS verification. `API_AUTH_MODE=external_oidc`
+still denies protected routes unless local verification is
+explicitly enabled with complete no-network configuration. Live JWKS fetch,
+OIDC discovery, Entra calls, real credentials, production tenant
+administration, and non-demo data remain future gated work.

@@ -117,10 +117,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if active_settings.api_auth_mode == "none":
         logger.warning("API authentication is disabled for explicit local-development use only.")
     if active_settings.api_auth_mode == PRODUCTION_IDENTITY_AUTH_MODE:
-        logger.warning(
-            "Production identity readiness is configured, but live token verification is not implemented; "
-            "protected requests fail closed."
-        )
+        if active_settings.production_identity_live_verification_enabled:
+            logger.info(
+                "Production identity token verification is enabled with local no-network JWKS configuration."
+            )
+        else:
+            logger.warning(
+                "Production identity readiness is configured, but token verification is disabled; "
+                "protected requests fail closed."
+            )
 
     if DASHBOARD_STATIC_DIR.exists():
         app.mount(

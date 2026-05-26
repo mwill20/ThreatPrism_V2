@@ -81,18 +81,18 @@ data, workplace data, or provider output.
 Status: gated option.
 
 The current dashboard is local and fake-data-only. Production dashboard
-deployment, live production token verification, external telemetry, browser
-matrix certification, and accessibility certification require explicit approval
-and a separate implementation slice.
+deployment, live IdP/JWKS integration, external telemetry, browser matrix
+certification, and accessibility certification require explicit approval and a
+separate implementation slice.
 
-## Production Token Verifier Implementation
+## Live JWKS And IdP Integration
 
-Status: design complete; implementation gated.
+Status: local verifier implemented; live integration gated.
 
-`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` defines the future
-`external_oidc` verifier contract. Implementation still requires explicit
-approval and must use fake local keys, fake JWKS fixtures, no-network standard
-validation, verified-claims-only authorization, and sanitized audit events.
+`docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` implements the
+`external_oidc` verifier with fake local JWKS configuration and no-network
+validation. A future live integration slice would need to add controlled JWKS
+fetch or IdP discovery without weakening the current fail-closed behavior.
 
 Live JWKS fetch, Entra calls, real issuer URLs, real tenant IDs, real group
 IDs, production dashboard deployment, and non-demo data remain out of scope

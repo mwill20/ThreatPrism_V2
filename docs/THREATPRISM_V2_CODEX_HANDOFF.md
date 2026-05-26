@@ -85,14 +85,17 @@ The current live implementation includes a first backend slice:
   keyboard persona navigation markers, docs, threat-model updates, and tests.
 - Production identity readiness for `API_AUTH_MODE=external_oidc` with static
   OIDC-shaped provider, issuer, audience, JWKS, claim, role, and algorithm
-  validation. Live token verification is not implemented, and protected routes
-  fail closed under `external_oidc`.
+  validation. Protected routes fail closed when local verification is disabled
+  or misconfigured.
 - Production token verifier design for the future `external_oidc`
   implementation contract, including bearer-token acceptance, asymmetric
   signature verification, issuer/audience/time checks, tenant and role claim
   enforcement, claim-to-role mapping, JWKS/cache boundaries, fail-closed
-  semantics, no-network validation, and sanitized audit telemetry. No runtime
-  token verifier is implemented.
+  semantics, no-network validation, and sanitized audit telemetry.
+- Production token verifier implementation for local fake-JWKS bearer-token
+  verification, verified claim-to-role mapping, role-view policy integration,
+  sanitized audit, and no-network tests. Live JWKS fetch, OIDC discovery, Entra
+  calls, real credentials, and production tenant administration remain gated.
 - `tests/evals/` with fake JSONL eval fixtures only.
 - `tests/test_api_flow.py` and `tests/test_guardrails.py` covering the current
   API flow and guardrail behavior.
@@ -134,7 +137,11 @@ The current live implementation includes a first backend slice:
 - `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
   `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, and
   `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` capturing the
-  future verifier design without implementing live token verification.
+  verifier design without implementing live JWKS or IdP calls.
+- `docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`,
+  `docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`, and
+  `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md` capturing the
+  local no-network verifier implementation.
 - `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
   reviewer-readiness docs for usage, evaluation, dataset handling,
   model/provider behavior, deployment boundary, monitoring, and
@@ -257,6 +264,19 @@ Result:
 eval harness dry-run: 15 passed / 0 failed
 ```
 
+Production Token Verifier Implementation validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_impl_final2
+```
+
+Result:
+
+```text
+112 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
 CI follow-up on 2026-05-24: GitHub Actions run `26350740346` failed on Ubuntu
 at `tests/test_eval_harness.py::test_path_traversal_is_rejected_for_fixtures_and_outputs`.
 Root cause was Windows-style backslash traversal being treated as a literal
@@ -327,8 +347,11 @@ Read in this order:
     production auth readiness, OIDC-shaped settings, or future IdP planning.
 19. `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
     `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` when the task involves
-    future live token verification, claim-to-role production authorization,
-    JWKS cache design, or production identity implementation planning.
+    token-verifier architecture, claim-to-role authorization, JWKS cache
+    design, or production identity implementation planning.
+20. `docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` and
+    `docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` when the task
+    involves the local no-network token verifier.
 
 The older root handoff and prompt files were updated for path and repo target, but this current handoff should be treated as the latest continuation brief.
 
@@ -654,10 +677,10 @@ Production Identity Readiness v0.1 is implemented:
 API_AUTH_MODE=external_oidc
   -> Static OIDC-shaped readiness config validation
   -> Provider, issuer, audience, JWKS, claim, role, and algorithm checks
-  -> Live verifier enablement rejected
+  -> Verifier enablement rejected unless local fake-JWKS config is complete
   -> Unknown auth modes rejected
   -> Production environments still reject none/demo_key
-  -> Protected API routes fail closed until a future token-verifier slice
+  -> Protected API routes fail closed when local verification is disabled
 ```
 
 Production Token Verifier Design v0.1 is documented:
@@ -674,12 +697,24 @@ external_oidc future verifier contract
   -> Standard validation remains no-network
 ```
 
+Production Token Verifier Implementation v0.1 is implemented:
+
+```text
+external_oidc local verifier
+  -> Fake local JWKS-backed RSA signature validation
+  -> Verified issuer, audience, time, tenant, subject, and role claims
+  -> External role/group to ThreatPrism role mapping
+  -> Existing role-view policy integration
+  -> Sanitized audit metadata
+  -> No live JWKS fetch, OIDC discovery, Entra calls, or real credentials
+```
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Production Token Verifier Design
-v0.1 is complete as a design/readiness boundary only. Live token verification,
-claim-to-role production authorization, production tenant administration,
-live JWKS fetch, and production dashboard deployment remain gated future work.
+No new implementation slice is selected yet. Production Token Verifier
+Implementation v0.1 is complete for local fake-JWKS validation only. Live JWKS
+fetch, live IdP integration, production tenant administration, and production
+dashboard deployment remain gated future work.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and
@@ -847,6 +882,7 @@ docs/specs/26_PRODUCTION_DASHBOARD_HARDENING.md
 docs/specs/27_CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/specs/28_PRODUCTION_IDENTITY_READINESS.md
 docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md
 docs/specs/SPEC_REVIEW_SUMMARY.md
 docs/specs/V1_REUSE_ANALYSIS.md
 ```
@@ -880,6 +916,7 @@ docs/DASHBOARD_PRODUCTION_HARDENING.md
 docs/CURATED_GENERATED_FIXTURE_PROMOTION.md
 docs/PRODUCTION_IDENTITY_READINESS.md
 docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md
 docs/CSI_RGOI_ARCHITECTURE.md
 docs/CSI_RGOI_WORKFLOWS.md
 threatprism_v2_codex_handoff_brief.md
@@ -909,7 +946,9 @@ tests/test_csi_rgoi.py
 tests/evals/regression_cases.jsonl
 tests/evals/malformed_cases.jsonl
 tests/test_production_identity_readiness.py
+tests/test_production_token_verifier.py
 docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md
+docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md
 examples/demo_scenarios/demo_scenario_pack.json
 examples/demo_scenarios/healthcare_safeguard_review_case.json
 examples/csi/rgoi_cognitive_objects.json
@@ -946,6 +985,7 @@ Lessons/Lesson21_Production_Dashboard_Hardening.md
 Lessons/Lesson22_Curated_Generated_Fixture_Promotion.md
 Lessons/Lesson23_Production_Identity_Readiness.md
 Lessons/Lesson24_Production_Token_Verifier_Design.md
+Lessons/Lesson25_Production_Token_Verifier_Implementation.md
 ```
 
 ## Next Session Recommended Prompt

@@ -61,6 +61,7 @@ This installs the direct dependencies pinned in `requirements.txt`:
 | `uvicorn==0.34.2` | ASGI server for running FastAPI |
 | `pytest==8.2.0` | Test framework |
 | `httpx==0.28.1` | HTTP client used by FastAPI's `TestClient` |
+| `cryptography==44.0.2` | Local fake-JWKS JWT signature verification |
 
 ### 4. Copy the environment template
 
@@ -86,7 +87,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-73 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -97,7 +98,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 ```
 
-Expected current result: **73 passed**.
+Expected current result: **112 passed**.
 
 If Windows locks a pytest cache directory, use a fresh `--basetemp`:
 

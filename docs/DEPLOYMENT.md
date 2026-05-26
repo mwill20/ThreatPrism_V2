@@ -11,7 +11,7 @@ production-ready.
 | Docker Compose local demo | Supported | Single backend service with fake demo credentials. |
 | Local dashboard | Supported | Served at `GET /dashboard` with fake demo credentials and dashboard hardening headers. |
 | Production identity readiness | Static-only scaffold | `API_AUTH_MODE=external_oidc` validates OIDC-shaped config but does not verify tokens. |
-| Production token verifier | Design only | Future verifier contract exists, but no JWT verification, JWKS fetch, or production claim mapping is implemented. |
+| Production token verifier | Local no-network only | Fake local JWKS-backed JWT verification exists; live JWKS fetch, IdP discovery, real credentials, and production tenant administration remain gated. |
 | Production container deployment | Not implemented | Requires production auth, secrets, TLS, monitoring, and hardening. |
 | Cloud deployment | Not implemented | No Azure, AWS, GCP, or managed deployment profile exists. |
 | Production dashboard deployment | Not implemented | Requires production identity, browser matrix testing, accessibility review, and deployment posture. |

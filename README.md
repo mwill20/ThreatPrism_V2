@@ -101,15 +101,15 @@ providers, production deployment, or real data handling.
 The latest production-identity-readiness slice adds a static
 `API_AUTH_MODE=external_oidc` readiness boundary, production auth-mode
 validation, OIDC-shaped configuration checks, and fail-closed protected-route
-behavior. It does not add live token verification, OAuth flows, Entra calls, or
-real credentials.
+behavior. It does not add live JWKS fetch, OAuth flows, Entra calls, or real
+credentials.
 
-The latest production-token-verifier-design slice documents the future
-`external_oidc` verifier contract: bearer-token acceptance, asymmetric
-signature verification, issuer/audience/time checks, claim-to-role mapping,
-JWKS cache boundaries, fail-closed error semantics, no-network validation, and
-sanitized audit telemetry. It does not implement JWT verification or live IdP
-calls.
+The latest production-token-verifier slice implements local no-network
+`external_oidc` bearer-token verification against fake local JWKS JSON,
+including asymmetric signature checks, issuer/audience/time checks,
+claim-to-role mapping, role-view policy integration, fail-closed errors, and
+sanitized audit telemetry. It does not implement live JWKS fetch, OIDC
+discovery, Entra calls, real credentials, or production tenant administration.
 
 Optional external research providers, such as Exa.ai, are documented only as a
 deferred future enhancement. They are not needed for the current build and are
@@ -185,7 +185,7 @@ docker-compose.yml Local demo backend service
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
 | Dashboard | [docs/DASHBOARD_UI_IMPLEMENTATION.md](docs/DASHBOARD_UI_IMPLEMENTATION.md), [docs/DASHBOARD_PRODUCTION_HARDENING.md](docs/DASHBOARD_PRODUCTION_HARDENING.md), [docs/DASHBOARD_DATA_CONTRACT.md](docs/DASHBOARD_DATA_CONTRACT.md), [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md) |
-| Production identity readiness | [docs/PRODUCTION_IDENTITY_READINESS.md](docs/PRODUCTION_IDENTITY_READINESS.md), [docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/specs/28_PRODUCTION_IDENTITY_READINESS.md](docs/specs/28_PRODUCTION_IDENTITY_READINESS.md), [docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/runbooks/PRODUCTION_IDENTITY_READINESS.md](docs/runbooks/PRODUCTION_IDENTITY_READINESS.md), [docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md](docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md) |
+| Production identity readiness | [docs/PRODUCTION_IDENTITY_READINESS.md](docs/PRODUCTION_IDENTITY_READINESS.md), [docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md](docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md), [docs/specs/28_PRODUCTION_IDENTITY_READINESS.md](docs/specs/28_PRODUCTION_IDENTITY_READINESS.md), [docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md](docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md), [docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md](docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md), [docs/runbooks/PRODUCTION_IDENTITY_READINESS.md](docs/runbooks/PRODUCTION_IDENTITY_READINESS.md), [docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md](docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md) |
 | Governed cognition | [docs/CSI_RGOI_ARCHITECTURE.md](docs/CSI_RGOI_ARCHITECTURE.md), [docs/CSI_RGOI_WORKFLOWS.md](docs/CSI_RGOI_WORKFLOWS.md), [docs/specs/23_CSI_RGOI_FOUNDATION.md](docs/specs/23_CSI_RGOI_FOUNDATION.md) |
 | Future enhancement options | [docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
@@ -253,7 +253,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -461,7 +461,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -545,12 +545,15 @@ Production Identity Readiness v0.1 is implemented. See
 only. Live production token verification and trusted claim-to-role mapping are
 still future work.
 
-Production Token Verifier Design v0.1 is documented. See
+Production Token Verifier Design v0.1 is documented. Production Token Verifier
+Implementation v0.1 is implemented for local fake-JWKS verification. See
 `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
-`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, and
-`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md`. This is design
-only. Live token verification, JWKS fetch, Entra calls, and production
-authorization remain future gated work.
+`docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`,
+`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
+`docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`, and
+`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md`. Live JWKS fetch,
+Entra calls, real credentials, and production tenant administration remain
+future gated work.
 
 Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,

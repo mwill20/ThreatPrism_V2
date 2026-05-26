@@ -5,6 +5,11 @@ import json
 from dataclasses import dataclass
 from typing import Mapping
 
+from threatprism.auth.production import (
+    PRODUCTION_IDENTITY_AUTH_MODE,
+    ProductionTokenVerificationError,
+    verify_production_bearer_token,
+)
 from threatprism.cases.schemas import AuditEvent
 from threatprism.config import Settings
 from threatprism.guardrails.views import ViewRole
@@ -101,7 +106,55 @@ def authorize_role_view(
             audit_event=None,
         )
 
-    if settings.api_auth_mode != "demo_key":
+    extra_audit_metadata: dict[str, object] = {}
+
+    if settings.api_auth_mode == PRODUCTION_IDENTITY_AUTH_MODE:
+        bearer_token, token_error = _extract_bearer_token(headers)
+        if token_error is not None:
+            event = _authorization_event(
+                principal=DemoPrincipal(identity="anonymous", role="none", auth_mode=PRODUCTION_IDENTITY_AUTH_MODE),
+                requested_role=requested_role,
+                view_role=None,
+                case_id=case_id,
+                endpoint=endpoint,
+                decision="deny",
+                reason=token_error,
+                request_metadata=request_metadata,
+                extra_metadata={
+                    "auth_mode": PRODUCTION_IDENTITY_AUTH_MODE,
+                    "verifier_decision": "deny",
+                    "verifier_reason": token_error,
+                    "claim_mapping_version": settings.production_identity_claim_mapping_version,
+                },
+            )
+            raise AuthorizationError(401, "Missing or invalid production bearer token.", event)
+        try:
+            production_principal = verify_production_bearer_token(bearer_token, settings=settings)
+        except ProductionTokenVerificationError as exc:
+            event = _authorization_event(
+                principal=DemoPrincipal(identity="unknown", role="unknown", auth_mode=PRODUCTION_IDENTITY_AUTH_MODE),
+                requested_role=requested_role,
+                view_role=None,
+                case_id=case_id,
+                endpoint=endpoint,
+                decision="deny",
+                reason=exc.reason,
+                request_metadata=request_metadata,
+                extra_metadata=exc.audit_metadata,
+            )
+            message = (
+                "Invalid production bearer token."
+                if exc.status_code == 401
+                else "Production token is not authorized for this request."
+            )
+            raise AuthorizationError(exc.status_code, message, event) from exc
+        principal = DemoPrincipal(
+            identity=production_principal.subject_hash,
+            role=production_principal.effective_role,
+            auth_mode=PRODUCTION_IDENTITY_AUTH_MODE,
+        )
+        extra_audit_metadata = production_principal.audit_metadata
+    elif settings.api_auth_mode != "demo_key":
         event = _authorization_event(
             principal=DemoPrincipal(identity="unknown", role="unknown", auth_mode=settings.api_auth_mode),
             requested_role=requested_role,
@@ -113,8 +166,7 @@ def authorize_role_view(
             request_metadata=request_metadata,
         )
         raise AuthorizationError(403, "Unsupported API auth mode.", event)
-
-    if credential is None:
+    elif credential is None:
         event = _authorization_event(
             principal=DemoPrincipal(identity="anonymous", role="none", auth_mode="demo_key"),
             requested_role=requested_role,
@@ -127,8 +179,7 @@ def authorize_role_view(
         )
         raise AuthorizationError(401, "Missing demo API key.", event)
 
-    principal = _principal_for_credential(credential, settings)
-    if principal is None:
+    elif (principal := _principal_for_credential(credential, settings)) is None:
         event = _authorization_event(
             principal=DemoPrincipal(identity="unknown", role="unknown", auth_mode="demo_key"),
             requested_role=requested_role,
@@ -152,6 +203,7 @@ def authorize_role_view(
             decision="deny",
             reason="no_default_view_role",
             request_metadata=request_metadata,
+            extra_metadata=extra_audit_metadata,
         )
         raise AuthorizationError(403, "No default view role is available.", event)
 
@@ -166,6 +218,7 @@ def authorize_role_view(
             decision="deny",
             reason="role_view_not_allowed",
             request_metadata=request_metadata,
+            extra_metadata=extra_audit_metadata,
         )
         raise AuthorizationError(403, "Requested role view is not allowed for this caller.", event)
 
@@ -178,6 +231,7 @@ def authorize_role_view(
         decision="allow",
         reason="role_view_allowed",
         request_metadata=request_metadata,
+        extra_metadata=extra_audit_metadata,
     )
     return AuthorizationResult(
         principal=principal,
@@ -197,6 +251,18 @@ def _extract_credential(headers: Mapping[str, str]) -> str | None:
     if authorization and authorization.lower().startswith("bearer "):
         return authorization.split(" ", 1)[1].strip()
     return None
+
+
+def _extract_bearer_token(headers: Mapping[str, str]) -> tuple[str, str | None]:
+    authorization = headers.get("authorization") or headers.get("Authorization")
+    if not authorization:
+        return "", "missing_bearer_token"
+    if not authorization.lower().startswith("bearer "):
+        return "", "malformed_bearer_token"
+    token = authorization.split(" ", 1)[1].strip()
+    if not token:
+        return "", "malformed_bearer_token"
+    return token, None
 
 
 def _principal_for_credential(credential: str, settings: Settings) -> DemoPrincipal | None:
@@ -239,24 +305,28 @@ def _authorization_event(
     decision: str,
     reason: str,
     request_metadata: RequestMetadata,
+    extra_metadata: dict[str, object] | None = None,
 ) -> AuditEvent:
+    metadata = {
+        "caller_identity": principal.identity,
+        "requested_role": requested_role,
+        "effective_role": principal.role,
+        "view_role": view_role,
+        "endpoint": endpoint,
+        "method": request_metadata.method,
+        "case_id": case_id,
+        "decision": decision,
+        "reason": reason,
+        "request_metadata_hash": _request_metadata_hash(request_metadata),
+    }
+    if extra_metadata:
+        metadata.update(extra_metadata)
     return AuditEvent(
         case_id=case_id,
         event_type="authorization_decision",
         actor=principal.identity,
         summary=f"Authorization decision: {decision}.",
-        metadata={
-            "caller_identity": principal.identity,
-            "requested_role": requested_role,
-            "effective_role": principal.role,
-            "view_role": view_role,
-            "endpoint": endpoint,
-            "method": request_metadata.method,
-            "case_id": case_id,
-            "decision": decision,
-            "reason": reason,
-            "request_metadata_hash": _request_metadata_hash(request_metadata),
-        },
+        metadata=metadata,
     )
 
 

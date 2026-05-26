@@ -4,7 +4,7 @@
 
 Threat Model Treatment & Risk Register v0.1
 
-Status: owner decision pass recorded for POC scope; Slices A, B, D, E, F, and G plus Production Identity Readiness v0.1 and Production Token Verifier Design v0.1 implemented for current POC/readiness scope.
+Status: owner decision pass recorded for POC scope; Slices A, B, D, E, F, and G plus Production Identity Readiness v0.1, Production Token Verifier Design v0.1, and Production Token Verifier Implementation v0.1 implemented for current POC/readiness scope.
 
 ## Goal
 
@@ -93,8 +93,8 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 |----|----------------|---------------------|-------|-------|-------|
 | S1 / RR-S1 | Default `demo_api_keys` are public in source | **Mitigated** | Slice A | Project owner (POC), 2026-05-24 | Defaults removed from `Settings`; `demo_key` mode now requires explicit `DEMO_API_KEYS`; covered by `tests/test_ops_safety.py` |
 | S2 / RR-S2 / OT-4 | `API_AUTH_MODE=none` default + narrow prod guard | **Mitigated** | Slice A | Project owner (POC), 2026-05-24 | Disabled auth now requires explicit local-dev acknowledgement; startup warns; covered by `tests/test_ops_safety.py` |
-| S3 | Production identity readiness misconfiguration | **Mitigated for readiness scope** | Production Identity Readiness v0.1 | Codex, 2026-05-26 | `external_oidc` now requires static readiness config, rejects live verifier enablement, and keeps protected routes fail-closed; live token verification remains gated |
-| S4 / OT-9 | Production token verifier trusts unverified or unauthorized claims | **Design complete; gated mitigation** | Production Token Verifier Design v0.1 | Codex, 2026-05-26 | Future implementation must verify signature, issuer, audience, time claims, tenant claim, subject claim, role claim, role mapping, and sanitized audit before any production authorization |
+| S3 | Production identity readiness misconfiguration | **Mitigated for readiness scope** | Production Identity Readiness v0.1 | Codex, 2026-05-26 | `external_oidc` now requires static readiness config, rejects incomplete verifier enablement, and keeps protected routes fail-closed when local verification is disabled; live IdP/JWKS integration remains gated |
+| S4 / OT-9 | Production token verifier trusts unverified or unauthorized claims | **Mitigated for local no-network verifier scope; live integration gated** | Production Token Verifier Implementation v0.1 | Codex, 2026-05-26 | Local verifier verifies signature, issuer, audience, time claims, tenant claim, subject claim, role claim, role mapping, and sanitized audit before authorization; live JWKS/IdP integration remains gated |
 | T1 / OT-1 | SQLite blob tampering not detectable | **Gated Mitigation** | Gated (real persistence) | Project owner (POC), 2026-05-24 | Append-only audit table + hash chain. Not warranted while the system is demo-only with SQLite; required before any non-demo persistence |
 | T2 | LLM provider returns report with unsupported evidence | **Mitigated** (current) | n/a | n/a | Already implemented via `validate_report_evidence()`. No further treatment required |
 | T3 / OT-5 / RR-LD3 | `PROHIBITED_PATTERNS` regex needs refresh process | **Mitigated** | Slice F | Project owner (POC), 2026-05-24 | Quarterly review runbook and overclaim fixtures added; first review scheduled 2026-08-24 |
@@ -330,7 +330,7 @@ These treatments are **Mitigate** decisions whose implementation is deliberately
 | Gate (precondition) | Treatments triggered | Spec entry point |
 |---------------------|----------------------|-------------------|
 | Real LLM provider integration | OT-L3 (LLM DoS), OT-L7 (output regurgitation), I4/RR-I4/OT-7 (semantic firewall) | New spec required before provider work begins |
-| Production token verifier implementation | S4 / OT-9 (verified claims before authority, sanitized audit, no-network validation) | Per `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` |
+| Live JWKS / IdP integration | S4 / OT-9 live-integration residuals after local verifier (JWKS fetch, discovery, production tenant operations) | New spec required before live provider work begins |
 | RAG / retrieval layer | OT-L1 (indirect prompt injection) | Per [LLM threat model "Before RAG"](../threat-models/llm-agent-threat-model.md#before-rag--retrieval) |
 | Memory / write-back layer | OT-L8 (memory schema, approval, scoping) | Per [LLM threat model "Before Memory"](../threat-models/llm-agent-threat-model.md#before-memory--write-back) |
 | Tool / plugin / function-calling | OT-L4 (allowlist, validation, approval) | Per [LLM threat model "Before Tools"](../threat-models/llm-agent-threat-model.md#before-tool--plugin--function-calling) |
@@ -476,8 +476,9 @@ This spec does not:
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
-| 2026-05-26 | Codex | Production token verifier design documented | Added design-only `external_oidc` verifier contract, S4/OT-9 treatment row, no-network validation requirement, and future test expectations. Runtime token verification remains gated. |
-| 2026-05-26 | Codex | Production identity readiness implemented | Added static `external_oidc` readiness config checks, unknown auth-mode rejection, live-verifier rejection, and fail-closed protected-route behavior. Live token verification and production claim mapping remain gated. |
+| 2026-05-26 | Codex | Production token verifier implementation landed | Added local fake-JWKS `external_oidc` verifier, verified claim-to-role mapping, role-view policy integration, no-network tests, and sanitized audit coverage. Live JWKS fetch and live IdP integration remain gated. |
+| 2026-05-26 | Codex | Production token verifier design documented | Added the `external_oidc` verifier contract, S4/OT-9 treatment row, no-network validation requirement, and future test expectations. Superseded by the local implementation row above for fake-JWKS runtime scope. |
+| 2026-05-26 | Codex | Production identity readiness implemented | Added static `external_oidc` readiness config checks, unknown auth-mode rejection, incomplete-verifier rejection, and fail-closed protected-route behavior when verification is disabled. |
 | 2026-05-26 | Codex | Curated fixture promotion implemented | Added one tracked fake SOC fixture through an explicit manifest review gate. Generated fixture output remains ignored and is not auto-scanned; no raw datasets, downloads, live providers, RAG, memory write-back, or real data were added. |
 | 2026-05-26 | Codex | External research provider deferred | Documented Exa.ai or equivalent public-web research as an optional future enhancement only. It is not needed for the current build and must not add live calls, live RAG, CSI/RGOI memory write-back, automatic fixture promotion, trust mutation, or source-of-truth changes without reopening gated treatments. |
 | 2026-05-26 | Codex | Production dashboard hardening implemented | Added local dashboard CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard persona navigation markers, and tests. Re-evaluated accepted risk ID2 for the local dashboard; production deployment, production identity, non-demo data, and real PHI remain gated. |

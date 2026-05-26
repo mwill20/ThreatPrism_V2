@@ -54,21 +54,24 @@ review, penetration testing, or production hardening.
 - Production environment startup guard (rejects disabled and demo auth modes).
 - Static production identity readiness for `API_AUTH_MODE=external_oidc`,
   including provider, issuer, audience, JWKS, claim, role, and algorithm
-  checks. Protected requests still fail closed until a live token verifier is
-  implemented.
-- Production token verifier design for the future `external_oidc` runtime path:
+  checks. Protected requests fail closed when local verification is disabled or
+  incomplete.
+- Production token verifier design for the `external_oidc` runtime path:
   bearer-token acceptance, asymmetric signature validation,
   issuer/audience/time checks, tenant and role claim enforcement, role mapping,
   JWKS cache boundaries, fail-closed error semantics, no-network validation,
   and sanitized audit telemetry.
+- Local no-network production token verifier implementation for
+  `external_oidc` using fake local JWKS JSON, verified claim-to-role mapping,
+  existing role-view policy enforcement, and sanitized audit events.
 - POC-grade HTTP request body limits, in-process `POST /cases` rate limiting,
   and triage concurrency caps.
 - Exact-pinned direct dependencies plus a transitive `requirements-lock.txt`.
 
 ### What is not implemented
 
-- Live production token verification and production IdP integration (OAuth,
-  OIDC, Entra ID).
+- Live production IdP integration (OAuth, OIDC discovery, live JWKS fetch,
+  Entra ID).
 - TLS termination or transport security (expected from a reverse proxy).
 - Edge or distributed rate limiting beyond the in-process POC limiter.
 - Network-level access controls.
@@ -129,7 +132,7 @@ review, penetration testing, or production hardening.
 | Role escalation (lower-privilege caller requests higher-privilege view) | `ROLE_VIEW_POLICY` enforcement; caller's effective role derived from credential, not request parameter | `auth/demo.py` |
 | Unauthorized access to case data | Demo API-key auth required when `API_AUTH_MODE=demo_key`; production env rejects demo auth | `auth/demo.py`, `config.py` |
 | Production identity misconfiguration | `external_oidc` requires static OIDC-shaped readiness config and rejects live verifier enablement until an approved verifier slice exists | `auth/production.py`, `config.py`, `tests/test_production_identity_readiness.py` |
-| Future token verifier trust mistakes | Design requires signature, issuer, audience, time, tenant, and role checks before claims become authority; no runtime verifier exists yet | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` |
+| Production token verifier trust mistakes | Local verifier requires signature, issuer, audience, time, tenant, and role checks before claims become authority; live JWKS/IdP integration remains gated | `auth/production.py`, `tests/test_production_token_verifier.py` |
 | Security telemetry visible to non-analyst roles | Role-based view masking replaces IPs, URLs, emails, hashes with `[SECURITY_TELEMETRY:TYPE:masked]` for non-analyst roles | `guardrails/views.py` |
 | Token vault mapping exposure (raw-to-token map leaked) | Vault mappings stay in-memory on `CaseService`; never serialized to database, API responses, or eval artifacts | `guardrails/tokenization.py` |
 | Eval fixture path traversal | `_resolve_under_approved_dir()` rejects paths outside `tests/evals/` and `.eval_runs/` | `evals/runner.py` |
@@ -193,15 +196,16 @@ these is a security defect.
    `validate_runtime()` blocks `THREATPRISM_ENV=prod` or `production` when
    `API_AUTH_MODE` is `none` or `demo_key`.
 
-9. **Production identity readiness is static and fail-closed.**
+9. **Production identity readiness is fail-closed.**
    `API_AUTH_MODE=external_oidc` requires static OIDC-shaped configuration and
-   rejects live verifier enablement. Protected API routes still deny requests
-   until a future trusted token verifier is implemented.
+   rejects incomplete verifier enablement. Protected API routes deny requests
+   unless local fake-JWKS verification is explicitly enabled and complete.
 
-10. **Production token verifier design is not runtime authentication.**
-    The design requires verified signatures, issuer and audience checks, tenant
-    and role claim enforcement, and sanitized audit events before claims become
-    authority, but current protected routes still fail closed.
+10. **Production token verifier trusts verified claims only.**
+    The runtime verifier requires local JWKS-backed signatures, issuer and
+    audience checks, time checks, tenant and role claim enforcement, explicit
+    role mapping, and sanitized audit events before claims become authority.
+    Live JWKS fetch and live IdP calls remain gated.
 
 11. **Disabled auth requires explicit local acknowledgement.**
    `API_AUTH_MODE=none` is rejected unless local development is explicitly
@@ -237,7 +241,7 @@ source code.
 | `VIRUSTOTAL_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
 | `URLSCAN_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
 | `ABUSEIPDB_API_KEY` | Threat intelligence enrichment | Stub returns `not_configured` |
-| `PRODUCTION_IDENTITY_*` | Static production identity readiness shape | Empty or fake examples only; no live verifier |
+| `PRODUCTION_IDENTITY_*` | Static production identity readiness and local fake-JWKS verifier shape | Empty or fake examples only; no live IdP/JWKS fetch |
 
 ### Rules
 
@@ -299,6 +303,7 @@ Current direct dependencies are minimal and exact-pinned in `requirements.txt`:
 - `uvicorn==0.34.2`
 - `pytest==8.2.0`
 - `httpx==0.28.1`
+- `cryptography==44.0.2`
 
 `requirements-lock.txt` records the reviewed transitive versions used for local
 validation. `tools/validate-threatprism.ps1` runs an advisory-only `pip-audit`
@@ -316,10 +321,10 @@ When adding dependencies:
 
 Before ThreatPrism handles non-demo data, these items must be addressed:
 
-- [ ] Live production token verification and production IdP integration
-  (OAuth/OIDC/Entra ID).
-- [ ] Production token verifier implementation with fake-key tests,
+- [x] Production token verifier implementation with fake-key tests,
   no-network validation, claim-to-role mapping, and sanitized audit coverage.
+- [ ] Live production IdP integration (OAuth/OIDC discovery, live JWKS fetch,
+  Entra ID).
 - [ ] TLS termination (reverse proxy or direct).
 - [ ] Edge or distributed rate limiting and durable queue backpressure beyond
   the current in-process POC controls.

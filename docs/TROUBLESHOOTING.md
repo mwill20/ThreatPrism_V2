@@ -33,8 +33,9 @@ real action settings.
 
 This is intentional. `THREATPRISM_ENV=prod` or `production` cannot use
 `API_AUTH_MODE=none` or `API_AUTH_MODE=demo_key`. Use
-`API_AUTH_MODE=external_oidc` only for static production identity readiness.
-Live production token verification is not implemented yet.
+`API_AUTH_MODE=external_oidc` with static readiness settings. Protected routes
+still fail closed unless local fake-JWKS verification is explicitly enabled
+with complete no-network configuration.
 
 ## Demo Auth Fails Closed
 

@@ -1,7 +1,9 @@
 # Production Token Verifier Design Review Runbook
 
-Use this runbook to review the approved production token verifier design before
-any implementation work starts.
+Use this runbook to review the approved production token verifier design. The
+local no-network implementation now exists; use
+`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md` for focused
+runtime validation.
 
 This is not a live IdP setup guide.
 
@@ -12,8 +14,8 @@ This is not a live IdP setup guide.
 - Do not use real issuer URLs, tenant IDs, audiences, groups, users, secrets,
   credentials, workplace data, or production telemetry.
 - Do not call live OIDC discovery, JWKS, Entra, Graph, or cloud endpoints.
-- Do not expect `API_AUTH_MODE=external_oidc` to authorize protected requests;
-  the current runtime still fails closed.
+- Do not expect `API_AUTH_MODE=external_oidc` to authorize protected requests
+  unless local verification is explicitly enabled with fake local JWKS config.
 
 ## Review Inputs
 
@@ -79,7 +81,8 @@ True
 
 ## Fail-Closed Confirmation
 
-Protected routes still deny requests under `external_oidc`:
+With local verification disabled, protected routes still deny requests under
+`external_oidc`:
 
 ```powershell
 python -m uvicorn threatprism.api.app:create_app --factory --host 127.0.0.1 --port 8766
@@ -94,10 +97,11 @@ Invoke-RestMethod -Headers @{ Authorization = 'Bearer fake-demo-token' } -Uri ht
 Expected behavior:
 
 ```text
-HTTP 403 Unsupported API auth mode.
+HTTP 403 Production token is not authorized for this request.
 ```
 
-This is correct until a future token-verifier implementation lands.
+This is correct when the verifier is disabled. To validate the implemented
+local verifier, use the local validation runbook.
 
 ## Future Implementation Gate
 

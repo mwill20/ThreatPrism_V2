@@ -564,21 +564,20 @@ administration.
 Production Identity Readiness v0.1 defines `API_AUTH_MODE=external_oidc` as the
 explicit production identity readiness mode.
 
-This is a static readiness boundary only. It validates provider, issuer,
-audience, JWKS URI, claim names, role coverage, and safe asymmetric algorithms.
-It rejects live verifier enablement because no trusted production token
-verifier exists yet.
+This readiness boundary validates provider, issuer, audience, JWKS URI, claim
+names, role coverage, and safe asymmetric algorithms. It rejects verifier
+enablement unless complete local fake-JWKS configuration is present.
 
 Production-like environments still reject `API_AUTH_MODE=none` and
 `API_AUTH_MODE=demo_key`. Protected API routes under `external_oidc` fail closed
-with `403 Unsupported API auth mode.` until a future approved slice implements
-token validation, trusted principal extraction, claim-to-role mapping, and
-production authorization policy.
+unless local token validation, trusted principal extraction, claim-to-role
+mapping, and role-view authorization are explicitly enabled with no-network
+configuration.
 
 ## D-039 Production Token Verifier Design Boundary
 
-Production Token Verifier Design v0.1 is an implementation contract, not live
-authentication.
+Production Token Verifier Design v0.1 is the implementation contract for local
+no-network authentication, not live IdP integration.
 
 The future `external_oidc` verifier must:
 
@@ -595,3 +594,29 @@ The future `external_oidc` verifier must:
 This decision does not approve live JWKS fetch, Entra calls, real credentials,
 production tenant administration, production dashboard deployment, or non-demo
 data. Those remain gated until explicitly approved.
+
+## D-040 Production Token Verifier Local Implementation
+
+Production Token Verifier Implementation v0.1 implements the `external_oidc`
+verifier for local fake-JWKS validation only.
+
+The runtime may authorize protected routes under `API_AUTH_MODE=external_oidc`
+only when:
+
+- `PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED=true`.
+- `PRODUCTION_IDENTITY_JWKS_FETCH_ENABLED=false`.
+- A configured local fake JWKS JSON contains the public key.
+- The token passes compact JWT shape, size, `alg`, `kid`, RSA signature,
+  issuer, audience, expiration, issued-at, optional not-before, subject,
+  tenant, and role checks.
+- Verified external roles or groups map to exactly one ThreatPrism effective
+  role.
+- The existing role-view policy allows the requested view.
+
+Audit metadata must use hashes and reason codes. It must not include raw JWTs,
+raw Authorization headers, full claim payloads, raw subjects, raw tenant IDs,
+raw external groups, credentials, private keys, or JWKS key material.
+
+Live JWKS fetch, OIDC discovery, Entra calls, real credentials, production
+tenant administration, production dashboard deployment, and non-demo data
+remain gated.

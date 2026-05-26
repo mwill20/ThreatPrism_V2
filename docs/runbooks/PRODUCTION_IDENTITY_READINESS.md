@@ -3,10 +3,11 @@
 Use this runbook to review the static production identity readiness boundary.
 It is not a production deployment procedure.
 
-For the future verifier contract, read
+For the verifier contract and local implementation, read
 `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
-`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md`. Those files are
-design-only; the current runtime still fails closed under `external_oidc`.
+`docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`. The runtime still fails
+closed under `external_oidc` unless local fake-JWKS verification is explicitly
+enabled and complete.
 
 ## Safety Rules
 
@@ -15,7 +16,8 @@ design-only; the current runtime still fails closed under `external_oidc`.
 - Do not use real issuer URLs, tenant IDs, audiences, users, groups, roles,
   secrets, or credentials.
 - Do not expect protected API routes to authorize requests under
-  `external_oidc`; live token verification is not implemented.
+  `external_oidc` unless local no-network verification is enabled with fake
+  JWKS config.
 
 ## Static Readiness Smoke Test
 
@@ -49,8 +51,9 @@ True
 
 ## Fail-Closed API Check
 
-Starting the API with the fake readiness values is allowed for configuration
-shape review, but protected API routes must still deny requests:
+Starting the API with fake readiness values and verifier disabled is allowed
+for configuration shape review, but protected API routes must still deny
+requests:
 
 ```powershell
 python -m uvicorn threatprism.api.app:create_app --factory --host 127.0.0.1 --port 8766
@@ -65,10 +68,12 @@ Invoke-RestMethod -Headers @{ Authorization = 'Bearer fake-demo-token' } -Uri ht
 Expected behavior:
 
 ```text
-HTTP 403 Unsupported API auth mode.
+HTTP 403 Production token is not authorized for this request.
 ```
 
-This is correct until a future approved production token-verifier slice exists.
+This is correct when local verification is disabled. Use
+`docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md` for the focused
+verifier test workflow.
 
 ## Standard Validation
 

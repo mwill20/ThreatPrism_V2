@@ -32,7 +32,7 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 | E1 | `ROLE_VIEW_POLICY` enforces requested-role ⊆ caller's-allowed-set; escalation raises 403 | `ROLE_VIEW_POLICY` at [auth/demo.py:24-31](../../src/threatprism/auth/demo.py); enforcement at [auth/demo.py:158-170](../../src/threatprism/auth/demo.py) | Mitigated | `tests/test_access_control.py`, `tests/test_operational_read_models.py` |
 | R1 / DI4 | Authorization decisions (allow and deny) emit `AuditEvent` with hashed metadata (no raw credential) | `_authorization_event()` at [auth/demo.py:232](../../src/threatprism/auth/demo.py); `_request_metadata_hash()` (SHA-256) at [auth/demo.py:263](../../src/threatprism/auth/demo.py) | Mitigated | `tests/test_access_control.py`, `tests/test_healthcare_guardrails.py`, `tests/test_operational_read_models.py` |
 | S3 | Production identity readiness requires static `external_oidc` config and keeps protected routes fail-closed until a token verifier exists | `evaluate_production_identity_readiness()` in [auth/production.py](../../src/threatprism/auth/production.py); `validate_runtime()` in [config.py](../../src/threatprism/config.py); startup warning in [api/app.py](../../src/threatprism/api/app.py) | Mitigated for readiness scope | `tests/test_production_identity_readiness.py`, `tests/test_ops_safety.py` |
-| S4 | Future production token verifier must validate signature, issuer, audience, time, tenant, and role claims before claims become authority | [PRODUCTION_TOKEN_VERIFIER_DESIGN.md](../PRODUCTION_TOKEN_VERIFIER_DESIGN.md) | Design complete; runtime gated | Proposed: `tests/test_production_token_verifier.py` |
+| S4 | Local production token verifier validates signature, issuer, audience, time, tenant, and role claims before claims become authority | `verify_production_bearer_token()` in [auth/production.py](../../src/threatprism/auth/production.py); production integration in [auth/demo.py](../../src/threatprism/auth/demo.py) | Mitigated for local no-network verifier scope; live JWKS/IdP gated | `tests/test_production_token_verifier.py` |
 
 ### API Resource Controls
 
@@ -132,7 +132,6 @@ These threats have been identified in the three lens files but no code-level con
 | OT-1 | T1 — SQLite blob tampering not detectable | Medium | Non-demo data | `Proposed: tests/test_audit_integrity.py` |
 | OT-7 | I4 — No semantic prompt-injection classifier | High (post real-LLM) | Real LLM rollout | `Proposed: tests/test_semantic_prompt_firewall.py` |
 | OT-8 | R1 — No append-only audit log, no export, no retention | High | Non-demo data | `Proposed: tests/test_audit_integrity.py` |
-| OT-9 | S4 — Production token verifier runtime not implemented | High | Production identity deployment or non-demo data | `Proposed: tests/test_production_token_verifier.py` |
 | OT-L1 | L2 — No indirect prompt injection defenses | High | RAG implementation | `Proposed: tests/test_retrieval_guardrails.py` |
 | OT-L2 | L4 — No training-data curation / provenance | High | Fine-tuning | `Proposed: tests/test_training_curation.py` |
 | OT-L3 | L5 — No LLM-layer DoS protection | High | Real LLM rollout | `Proposed: tests/test_llm_dos.py` |
@@ -174,6 +173,7 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production token verifier implementation traceability updated | Closed S4 for local no-network verifier scope with fake JWKS tests. Live JWKS fetch and live IdP integration remain gated. |
 | 2026-05-26 | Codex | Production token verifier design traceability updated | Added S4 design-only verifier entry and proposed future implementation tests. Runtime token verification remains gated. |
 | 2026-05-26 | Codex | Production identity readiness traceability updated | Added S3 readiness control references and mapped them to `tests/test_production_identity_readiness.py` plus runtime guard checks. |
 | 2026-05-26 | Codex | Production dashboard hardening traceability updated | Added T4/I5 dashboard static-surface controls and mapped them to `tests/test_dashboard_ui.py`. |

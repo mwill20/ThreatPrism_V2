@@ -541,12 +541,12 @@ Production Identity Readiness v0.1:
 - [x] Reject unknown auth modes.
 - [x] Validate static provider, issuer, audience, JWKS, claim, role, and
   algorithm readiness settings.
-- [x] Reject live verifier enablement until a future approved token-verifier
-  slice exists.
+- [x] Reject verifier enablement unless local fake-JWKS verifier config is
+  complete.
 - [x] Keep protected routes fail-closed under `external_oidc`.
 - [x] Add focused tests for readiness validation, unsafe config rejection,
-  live-verifier rejection, unknown auth mode rejection, and protected-route
-  fail-closed behavior.
+  incomplete-verifier rejection, unknown auth mode rejection, and
+  protected-route fail-closed behavior.
 - [x] Update docs, README, runbook, lesson, checklist, handoff, limitations,
   security notes, threat model traceability, and validation notes.
 - [x] Validate with
@@ -581,6 +581,34 @@ Production Token Verifier Design v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_token_verifier_design_final`.
 
+## Completed Slice
+
+Production Token Verifier Implementation v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Keep this as local fake-JWKS verification only; do not add live JWKS
+  fetch, OIDC discovery, Entra calls, real credentials, production tenant
+  administration, production dashboard deployment, non-demo data, or
+  remediation.
+- [x] Add verifier configuration for allowed tenants, role mapping, local JWKS
+  JSON, JWKS fetch disablement, clock skew, token size, and claim mapping
+  version.
+- [x] Verify compact JWT bearer tokens with configured RSA local JWKS keys.
+- [x] Reject malformed, oversized, unsafe-algorithm, missing/unknown `kid`, bad
+  signature, issuer, audience, time, subject, tenant, role, tenant mismatch,
+  unmapped role, and conflicting-role failures.
+- [x] Map verified external role/group claims to exactly one ThreatPrism
+  effective role.
+- [x] Reuse existing role-view policy so requested `?role=` is never authority.
+- [x] Add sanitized audit metadata without raw JWTs, raw Authorization headers,
+  full claims, raw subject, raw tenant, raw group, credential, or key material.
+- [x] Add focused tests in `tests/test_production_token_verifier.py`.
+- [x] Update docs, README, checklist, handoff, limitations, decisions, security
+  notes, threat model notes, lessons, and validation notes.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_token_verifier_impl_final2`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended choices should be
@@ -591,10 +619,8 @@ selected explicitly before implementation:
   a gated future enhancement; it is not needed for the current build and must
   not add live calls, CSI/RGOI memory write-back, live RAG, automatic fixture
   promotion, trust mutation, or source-of-truth changes.
-- [ ] Live production token verification and claim-to-role authorization only
-  after explicitly approving implementation of the completed verifier design,
-  using fake local keys, no-network validation, threat-model updates, and
-  sanitized audit tests.
+- [ ] Live JWKS fetch or real IdP integration only after explicitly approving a
+  separate live-integration slice with updated threat treatment.
 - [ ] Production dashboard deployment, browser matrix certification, and
   accessibility certification only after explicit approval.
 - [ ] Additional curated fixture promotion only after manual license, safety,
@@ -631,7 +657,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

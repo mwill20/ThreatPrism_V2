@@ -50,12 +50,14 @@ Read deeper files only when the task needs them:
   readiness.
 - `docs/PRODUCTION_IDENTITY_READINESS.md` and
   `docs/specs/28_PRODUCTION_IDENTITY_READINESS.md` when the task involves
-  production auth readiness, OIDC-shaped settings, or future live token
-  verification.
+  production auth readiness or OIDC-shaped settings.
 - `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
   `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` when the task involves
-  future live token verification, claim-to-role production authorization, JWKS
-  cache design, or production identity implementation planning.
+  production token-verifier architecture, claim-to-role authorization, or JWKS
+  cache design.
+- `docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` and
+  `docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` when the task
+  involves the local no-network `external_oidc` verifier implementation.
 - `DECISIONS.md`
 - `LIMITATIONS.md`
 - `README.md`
@@ -76,7 +78,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

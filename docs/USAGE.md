@@ -27,7 +27,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-102 passed
+112 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -196,18 +196,22 @@ python -c "from threatprism.config import Settings; s=Settings.from_env(); s.val
 ```
 
 Use fake example values only. Protected API routes still fail closed under
-`external_oidc` until a future live token-verifier slice is implemented.
+`external_oidc` unless local fake-JWKS verification is explicitly enabled with
+complete no-network configuration.
 
-## Review Production Token Verifier Design
+## Review Production Token Verifier
 
-The verifier design is documentation-only. It describes how a future
-implementation must validate bearer tokens, map verified claims to ThreatPrism
-roles, and audit decisions without leaking raw JWTs or claims.
+The verifier implementation validates fake local JWKS-backed bearer tokens,
+maps verified claims to ThreatPrism roles, and audits decisions without leaking
+raw JWTs or claims. Live JWKS fetch and live IdP calls remain out of scope.
 
 ```text
 docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md
 docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md
+docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md
 docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md
+docs/runbooks/PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md
 ```
 
 Do not use live issuer URLs, live JWKS endpoints, real tokens, or real tenant

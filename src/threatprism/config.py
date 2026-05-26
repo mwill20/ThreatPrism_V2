@@ -35,6 +35,13 @@ class Settings:
     production_identity_required_roles: str = "analyst,engineer,manager_grc,legal_privacy,audit_debug,admin"
     production_identity_allowed_algorithms: str = "RS256"
     production_identity_live_verification_enabled: bool = False
+    production_identity_allowed_tenants: str = ""
+    production_identity_role_mapping: str = ""
+    production_identity_jwks_json: str = ""
+    production_identity_jwks_fetch_enabled: bool = False
+    production_identity_clock_skew_seconds: int = 60
+    production_identity_max_token_bytes: int = 8192
+    production_identity_claim_mapping_version: str = "local-demo-v1"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -71,6 +78,21 @@ class Settings:
             production_identity_live_verification_enabled=_parse_bool(
                 os.getenv("PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED"), default=False
             ),
+            production_identity_allowed_tenants=os.getenv("PRODUCTION_IDENTITY_ALLOWED_TENANTS", ""),
+            production_identity_role_mapping=os.getenv("PRODUCTION_IDENTITY_ROLE_MAPPING", ""),
+            production_identity_jwks_json=os.getenv("PRODUCTION_IDENTITY_JWKS_JSON", ""),
+            production_identity_jwks_fetch_enabled=_parse_bool(
+                os.getenv("PRODUCTION_IDENTITY_JWKS_FETCH_ENABLED"), default=False
+            ),
+            production_identity_clock_skew_seconds=_parse_int(
+                os.getenv("PRODUCTION_IDENTITY_CLOCK_SKEW_SECONDS"), default=60
+            ),
+            production_identity_max_token_bytes=_parse_int(
+                os.getenv("PRODUCTION_IDENTITY_MAX_TOKEN_BYTES"), default=8192
+            ),
+            production_identity_claim_mapping_version=os.getenv(
+                "PRODUCTION_IDENTITY_CLAIM_MAPPING_VERSION", "local-demo-v1"
+            ),
         )
 
     def production_identity_readiness(self) -> ProductionIdentityReadinessReport:
@@ -86,6 +108,13 @@ class Settings:
             required_roles=self.production_identity_required_roles,
             allowed_algorithms=self.production_identity_allowed_algorithms,
             live_verification_enabled=self.production_identity_live_verification_enabled,
+            allowed_tenants=self.production_identity_allowed_tenants,
+            role_mapping=self.production_identity_role_mapping,
+            jwks_json=self.production_identity_jwks_json,
+            jwks_fetch_enabled=self.production_identity_jwks_fetch_enabled,
+            clock_skew_seconds=self.production_identity_clock_skew_seconds,
+            max_token_bytes=self.production_identity_max_token_bytes,
+            claim_mapping_version=self.production_identity_claim_mapping_version,
         )
 
     def validate_runtime(self) -> None:

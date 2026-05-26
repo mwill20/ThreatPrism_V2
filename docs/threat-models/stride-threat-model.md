@@ -51,7 +51,7 @@ Severity is `Likelihood × Impact`:
 | E1 | Elevation of Privilege | Caller passes `?role=analyst` while authenticated as `manager_grc` to read raw security telemetry. | Auth + read path | High | High | **Critical** | `ROLE_VIEW_POLICY` enforcement at [auth/demo.py:158-170](../../src/threatprism/auth/demo.py); requested role checked against caller's allowed set; denials raise `AuthorizationError` and emit deny `AuditEvent`. | Mitigated |
 | E2 | Elevation of Privilege | LLM provider returns `"real_action_executed": true` in the report and acts as a real remediation channel. | LLM output | High | High | **Critical** | `enforce_action_safety()` at [policy.py:31](../../src/threatprism/guardrails/policy.py) blocks any report containing `"real_action_executed": true`; report is rejected, case status set to `blocked_by_guardrail`. | Mitigated |
 | T4 / I5 | Tampering / Information Disclosure | Dashboard static surface loads unexpected resources, can be framed, leaks referrers, or sends role/case context to non-same-origin targets. | Dashboard browser boundary - `GET /dashboard` and `/dashboard/assets/*` | Medium | Medium | **Medium** | `DASHBOARD_SECURITY_HEADERS` and `_apply_dashboard_security_headers()` in [api/app.py](../../src/threatprism/api/app.py); `sameOriginUrl()` and timeout-bounded `dashboardFetch()` in [dashboard/static/app.js](../../src/threatprism/dashboard/static/app.js); covered by `tests/test_dashboard_ui.py`. | Mitigated for local dashboard scope |
-| S4 | Spoofing / Elevation | Future verifier trusts unsigned, unverified, wrong-issuer, wrong-audience, expired, wrong-tenant, or unmapped-role token claims. | Future production token verifier | Medium | High | **High** | Design requires bearer extraction, asymmetric signature verification, issuer/audience/time enforcement, tenant and role claim validation, claim-to-role mapping, role-view policy enforcement, fail-closed errors, no-network validation, and sanitized audit telemetry. | Design complete; runtime gated |
+| S4 | Spoofing / Elevation | Verifier trusts unsigned, unverified, wrong-issuer, wrong-audience, expired, wrong-tenant, or unmapped-role token claims. | Production token verifier | Medium | High | **High** | `verify_production_bearer_token()` enforces local JWKS-backed signature verification, issuer/audience/time checks, tenant and role claims, role mapping, role-view policy enforcement, fail-closed errors, no-network validation, and sanitized audit telemetry. | Mitigated for local no-network verifier scope; live JWKS/IdP gated |
 
 ---
 
@@ -109,32 +109,34 @@ token verification and production claim mapping are implemented.
 **State.** Mitigated for readiness scope. Live token verification remains a
 future gated treatment before non-demo deployment.
 
-### S4 - Future token verifier trusts unverified or unauthorized claims
+### S4 - Token verifier trusts unverified or unauthorized claims
 
-**Scenario.** A future verifier accepts a token before validating its
+**Scenario.** A verifier accepts a token before validating its
 signature, issuer, audience, expiration, not-before, issued-at, tenant claim,
 subject claim, or role claim. A caller then gets a ThreatPrism role or view
 based on attacker-controlled claims.
 
 **Current controls.**
-- Runtime verifier code does not exist, so protected routes still fail closed
-  under `external_oidc`.
-- `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md` defines the future verifier
-  contract: bearer extraction, asymmetric algorithm allowlist, `kid` handling,
-  signature verification, issuer/audience/time checks, tenant and role claim
-  enforcement, role mapping, role-view policy enforcement, fail-closed errors,
-  and sanitized audit events.
+- `verify_production_bearer_token()` accepts only compact JWT bearer tokens
+  that pass local JWKS-backed RSA signature verification.
+- It rejects malformed, oversized, unsafe-algorithm, missing/unknown `kid`, bad
+  signature, issuer, audience, time, missing subject, missing tenant, missing
+  role, tenant mismatch, unmapped role, and conflicting-role failures.
+- `authorize_role_view()` still applies `ROLE_VIEW_POLICY`, so the requested
+  `?role=` parameter is never authority.
 - The design forbids raw JWTs, raw Authorization headers, full claim payloads,
   real tenant IDs, real group IDs, credentials, and JWKS key material in audit
   events or logs.
 - Standard validation must remain no-network with local fake keys and fake
   JWKS fixtures.
 
-**Severity.** Raw: High. Residual: Medium until runtime verifier code and
-focused tests are implemented.
+**Severity.** Raw: High. Residual: Low for local no-network verifier scope;
+Medium until live JWKS fetch or real IdP integration is implemented and
+reviewed.
 
-**State.** Design complete; runtime gated. Implementation requires a separate
-approved slice and tests before any non-demo deployment.
+**State.** Mitigated for local no-network verifier scope. Live JWKS fetch,
+live IdP integration, production tenant administration, and non-demo data
+remain gated.
 
 ---
 
@@ -373,7 +375,6 @@ For threats rated Medium-or-higher whose mitigation is `Partial` or has gaps.
 | OT-1 | T1 — SQLite blob tampering not detectable | Medium | Project owner (POC), 2026-05-24 | Before any non-demo data |
 | OT-7 | I4 — No semantic prompt-injection classifier; pattern firewall bypassable | High (post real LLM) | Project owner (POC), 2026-05-24 | Before real LLM provider rollout |
 | OT-8 | R1 — No append-only audit log, no centralized export, no retention policy | High | Project owner (POC), 2026-05-24 | Before any non-demo data |
-| OT-9 | S4 — Production token verifier runtime not implemented | High | Project owner (POC), 2026-05-26 | Before any production identity deployment or non-demo data |
 
 ---
 
@@ -393,6 +394,7 @@ Architectural changes identified during modeling but outside the current sprint 
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-26 | Codex | Production token verifier implementation reconciled | Closed S4 for local no-network verifier scope with fake JWKS tests. Live JWKS fetch and live IdP integration remain gated. |
 | 2026-05-26 | Codex | Production token verifier design reconciled | Added S4 design-only threat for future token verification. Runtime JWT verification, JWKS fetch, live IdP calls, and production authorization remain gated. |
 | 2026-05-26 | Codex | Production identity readiness reconciled | Added S3 for static `external_oidc` readiness and fail-closed protected-route behavior. Live token verification remains gated. |
 | 2026-05-26 | Codex | Production dashboard hardening reconciled | Added dashboard browser-boundary threat T4/I5 and mapped it to CSP/framing/referrer/permission headers, same-origin request enforcement, request timeouts, keyboard markers, and `tests/test_dashboard_ui.py`. Production deployment and production identity remain gated. |

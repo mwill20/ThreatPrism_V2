@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `102 passed`.
+- The current validated baseline is `112 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -45,7 +45,8 @@ Fake SOAR payload
   -> Dashboard data contract and fake persona response fixtures
   -> Dashboard UI hardening headers, same-origin request controls, and keyboard navigation
   -> Production identity readiness static config and fail-closed external_oidc boundary
-  -> Production token verifier design for future external_oidc verification
+  -> Production token verifier design for external_oidc verification
+  -> Production token verifier implementation with local fake-JWKS verification
   -> API responses and tests
 ```
 
@@ -78,6 +79,7 @@ Fake SOAR payload
 | yes | [Lesson 22](Lesson22_Curated_Generated_Fixture_Promotion.md) | Curated Generated-Fixture Promotion And Expansion | `fixtures/curated/*`, `tools/fixture_factory/promotions.py`, `tests/test_curated_fixture_promotion.py` |
 | yes | [Lesson 23](Lesson23_Production_Identity_Readiness.md) | Production Identity Readiness | `src/threatprism/auth/production.py`, `src/threatprism/config.py`, `tests/test_production_identity_readiness.py` |
 | yes | [Lesson 24](Lesson24_Production_Token_Verifier_Design.md) | Production Token Verifier Design | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` |
+| yes | [Lesson 25](Lesson25_Production_Token_Verifier_Implementation.md) | Production Token Verifier Implementation | `src/threatprism/auth/production.py`, `src/threatprism/auth/demo.py`, `tests/test_production_token_verifier.py` |
 
 ## File Coverage Map
 
@@ -144,6 +146,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\docs\PRODUCTION_TOKEN_VERIFIER_DESIGN.md` -> Lesson 24
 - `C:\Projects\ThreatPrismV2\docs\specs\29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` -> Lesson 24
 - `C:\Projects\ThreatPrismV2\docs\runbooks\PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` -> Lesson 24
+- `C:\Projects\ThreatPrismV2\docs\PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` -> Lesson 25
+- `C:\Projects\ThreatPrismV2\docs\specs\30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md` -> Lesson 25
+- `C:\Projects\ThreatPrismV2\docs\runbooks\PRODUCTION_TOKEN_VERIFIER_LOCAL_VALIDATION.md` -> Lesson 25
 - `C:\Projects\ThreatPrismV2\Dockerfile` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\docker-compose.yml` -> Lesson 14
 - `C:\Projects\ThreatPrismV2\.dockerignore` -> Lesson 14
@@ -174,6 +179,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\examples\dashboard_contract\*.json` -> Lesson 19
 - `C:\Projects\ThreatPrismV2\tests\test_dashboard_ui.py` -> Lessons 08, 20, and 21
 - `C:\Projects\ThreatPrismV2\tests\test_production_identity_readiness.py` -> Lessons 08, 23, and 24
+- `C:\Projects\ThreatPrismV2\tests\test_production_token_verifier.py` -> Lessons 08 and 25
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -202,12 +208,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-102 passed
+112 passed
 ```
 
 ## What To Study Next
 
-After Lesson 24, use the working checklist to choose the next requested slice:
+After Lesson 25, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

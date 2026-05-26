@@ -7,9 +7,9 @@ Production Identity Readiness v0.1
 ## Goal
 
 Add a safe, testable production identity readiness boundary without adding live
-identity-provider behavior. This slice prepares ThreatPrism for a future
-production token-verifier implementation while preserving the current fake-data
-and fail-closed posture.
+identity-provider behavior. This slice prepared ThreatPrism for the local
+production token-verifier implementation while preserving the fake-data and
+fail-closed posture.
 
 ## Problem
 
@@ -31,8 +31,10 @@ That left two risks:
 - Reject unknown auth modes.
 - Keep production environments blocked from `none` and `demo_key`.
 - Validate fake/demo-safe OIDC-style configuration shape.
-- Reject live token verification enablement until a future approved slice.
-- Prove protected routes fail closed under `external_oidc`.
+- Reject token verification enablement unless local fake-JWKS verifier
+  configuration is complete.
+- Prove protected routes fail closed under `external_oidc` when verification is
+  disabled or misconfigured.
 - Update docs, runbooks, threat model notes, checklist, lessons, and
   limitations.
 
@@ -54,10 +56,12 @@ That left two risks:
 - `prod` and `production` still reject `none` and `demo_key`.
 - `external_oidc` requires static provider, issuer, audience, JWKS URI, claims,
   role coverage, and safe asymmetric algorithms.
-- `PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED=true` is rejected.
-- `external_oidc` app startup logs that protected requests fail closed.
-- Protected routes return `403 Unsupported API auth mode.` until a future live
-  verifier slice is implemented.
+- `PRODUCTION_IDENTITY_LIVE_VERIFICATION_ENABLED=true` is rejected unless the
+  local verifier has fake JWKS JSON, tenant allowlist, role mapping, safe token
+  size, safe clock skew, and JWKS fetch disabled.
+- `external_oidc` app startup logs whether local verification is enabled or
+  protected requests fail closed.
+- Protected routes fail closed until local fake-JWKS verification is enabled.
 - `.env.example` documents empty, fake-safe production identity placeholders.
 - The safe validation wrapper passes.
 
@@ -74,16 +78,18 @@ That left two risks:
 ## Security Properties
 
 - No network calls are added.
-- No token validation is simulated as real.
+- Local token validation is fake-JWKS and no-network only.
 - No real provider values are required.
-- Live token verification cannot be enabled accidentally.
+- Local token verification cannot be enabled accidentally or with live JWKS
+  fetch.
 - Production-like startup cannot fall back to disabled or demo API-key auth.
-- Request authorization remains fail-closed until a future trusted principal
-  extraction path exists.
+- Request authorization remains fail-closed until a trusted local verifier
+  produces a verified principal.
 
 ## Follow-On Design
 
-Production Token Verifier Design v0.1 is captured in
-`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md` and
-`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`. That follow-on slice defines the
-future verifier contract but does not change the runtime fail-closed behavior.
+Production Token Verifier Design v0.1 and Implementation v0.1 are captured in
+`docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`,
+`docs/specs/30_PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`,
+`docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, and
+`docs/PRODUCTION_TOKEN_VERIFIER_IMPLEMENTATION.md`.

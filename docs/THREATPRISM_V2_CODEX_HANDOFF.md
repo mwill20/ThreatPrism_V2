@@ -85,11 +85,28 @@ The current live implementation includes a first backend slice:
 - `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md` and
   `docs/specs/20_DATA_STRATEGY_AND_FIXTURE_FACTORY.md` capturing the
   implemented local-only data-realism and synthetic fixture factory slice.
+- `REPO_AUDIT.md`, `CHANGELOG.md`, root `CONTRIBUTING.md`, and focused
+  reviewer-readiness docs for usage, evaluation, dataset handling,
+  model/provider behavior, deployment boundary, monitoring, and
+  troubleshooting.
 
 Validated on 2026-05-25 with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_fixture_factory_validation_done
+```
+
+Result:
+
+```text
+73 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+Repo Standards Readiness Pass validation on 2026-05-26 with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_repo_standards_final_fresh
 ```
 
 Result:
@@ -392,6 +409,19 @@ fixtures/generated/
   -> ignored deterministic sanitized JSONL fixture output
 ```
 
+Repo Standards Readiness Pass v0.1 is implemented:
+
+```text
+REPO_AUDIT.md
+  -> audit-first repository standards scorecard and gap list
+docs/USAGE.md, docs/EVALUATION.md, docs/DATASET.md, docs/MODEL_CARD.md,
+docs/DEPLOYMENT.md, docs/MONITORING.md, docs/TROUBLESHOOTING.md
+  -> reviewer-focused entry points
+README.md
+  -> purpose, audience, status, requirements, doc map, evaluation, license,
+     and support summary
+```
+
 ## Next Implementation Slice
 
 No new implementation slice is selected yet. Recommended next choices should be
@@ -562,6 +592,16 @@ START_HERE.md
 DECISIONS.md
 LIMITATIONS.md
 README.md
+REPO_AUDIT.md
+CHANGELOG.md
+CONTRIBUTING.md
+docs/USAGE.md
+docs/EVALUATION.md
+docs/DATASET.md
+docs/MODEL_CARD.md
+docs/DEPLOYMENT.md
+docs/MONITORING.md
+docs/TROUBLESHOOTING.md
 docs/OPERATIONAL_READ_MODELS_AND_METRICS.md
 docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md
 docs/DEMO_SCENARIO_PACK_AND_API_CONTRACT.md
@@ -613,6 +653,8 @@ Lessons/Lesson12_Demo_Operations_And_CI_Hardening.md
 Lessons/Lesson13_Demo_Scenarios_And_API_Contract.md
 Lessons/Lesson14_Docker_Compose_Local_Demo_Packaging.md
 Lessons/Lesson15_Threat_Model_Treatment_And_Demo_Hardening.md
+Lessons/Lesson16_Data_Strategy_And_Synthetic_Fixture_Factory.md
+Lessons/Lesson17_Repo_Standards_Readiness_Pass.md
 ```
 
 ## Next Session Recommended Prompt

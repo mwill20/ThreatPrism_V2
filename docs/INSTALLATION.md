@@ -86,17 +86,18 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Expected current result:
 
 ```text
-66 passed
+73 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 
 ### Run the test suite directly
 
 ```powershell
-pytest
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 ```
 
-Expected current result: **66 passed**.
+Expected current result: **73 passed**.
 
 If Windows locks a pytest cache directory, use a fresh `--basetemp`:
 

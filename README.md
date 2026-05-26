@@ -3,6 +3,39 @@
 ThreatPrism is a demo-safe SOC migration accelerator for organizations moving
 from outsourced SOC operations toward an internal SOC model.
 
+It demonstrates a case-centric security backend that ingests fake SOAR-style
+payloads, normalizes evidence, applies deterministic guardrails, produces
+structured triage/GRC outputs, and exposes role-safe API views for local review.
+
+## Purpose
+
+ThreatPrism helps reviewers evaluate how a SOC migration assistant can combine
+case intake, provenance, AI guardrails, analyst feedback, operational metrics,
+and healthcare-adjacent data safeguards without using live providers or real
+organizational data.
+
+## Intended Audience
+
+This repository is intended for:
+
+- security engineering and SOC workflow reviewers
+- AI safety and guardrail reviewers
+- GRC and healthcare safeguard reviewers
+- engineering reviewers evaluating local reproducibility
+
+Expected background:
+
+- Python 3.11+
+- basic FastAPI and pytest usage
+- defensive security and SOC workflow concepts
+
+## Project Status
+
+Current status: demo-safe proof-of-concept backend.
+
+ThreatPrism is not production-ready. It does not process real organization
+data, run live LLM/SOAR/cloud providers, or execute remediation.
+
 The current repository contains the V2 spec pack plus the first backend slice:
 generic SOAR case intake, case normalization, guardrails, deterministic demo
 triage, SQLite persistence, FastAPI routes, fake SOAR payloads, and initial
@@ -55,6 +88,18 @@ providers, raw dataset commits, or baseline test auto-scanning.
 - V2 uses a clean architecture with selective V1 concept porting. Do not
   full-copy V1 into this repository.
 
+## Requirements
+
+| Requirement | Version / Notes |
+|---|---|
+| Python | 3.11 or later |
+| Package manager | `pip` |
+| OS | Developed and validated with Windows PowerShell commands; code is Python/FastAPI and should remain platform-portable. |
+| External services | None for current local validation and demos |
+| Docker | Optional, for Docker Compose local demo packaging |
+| GPU | Not required |
+| Live credentials | Not required and should not be used for current validation |
+
 ## Project Layout
 
 ```text
@@ -86,11 +131,31 @@ Dockerfile        Local demo backend image
 docker-compose.yml Local demo backend service
 ```
 
+## Documentation Map
+
+| Need | Start Here |
+|---|---|
+| Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
+| Usage examples | [docs/USAGE.md](docs/USAGE.md) |
+| Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
+| Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
+| Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md) |
+| Model/provider behavior | [docs/MODEL_CARD.md](docs/MODEL_CARD.md) |
+| Deployment boundary | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| Monitoring and maintenance | [docs/MONITORING.md](docs/MONITORING.md) |
+| Security policy | [SECURITY.md](SECURITY.md) |
+| Limitations | [LIMITATIONS.md](LIMITATIONS.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md), [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Troubleshooting | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| Repository audit | [REPO_AUDIT.md](REPO_AUDIT.md) |
+
 ## Setup
 
 From PowerShell:
 
 ```powershell
+git clone https://github.com/mwill20/ThreatPrism_V2.git C:\Projects\ThreatPrismV2
 Set-Location C:\Projects\ThreatPrismV2
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -286,6 +351,20 @@ python -m threatprism.evals.cli --fixtures regression_cases.jsonl
 Eval artifacts are written under `.eval_runs/<run_id>/` and contain sanitized
 previews only.
 
+## Evaluation
+
+Current local validation evidence is documented in
+[docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
+
+```text
+73 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+This is deterministic fake-data regression evidence only. It is not a live LLM
+safety proof, production-readiness claim, HIPAA compliance claim, HITRUST
+certification claim, or audit opinion.
+
 ## Active Checklist
 
 Track current work in `docs/WORKING_CHECKLIST.md`.
@@ -335,3 +414,16 @@ Docker Compose & Local Demo Packaging v0.1 is implemented. See
 `docs/DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`,
 `docs/specs/22_DOCKER_COMPOSE_LOCAL_DEMO_PACKAGING.md`, `Dockerfile`, and
 `docker-compose.yml`.
+
+## License
+
+TODO: Add a license. Until a license is selected and a `LICENSE` file is added,
+usage rights are unclear.
+
+## Support
+
+For questions, bugs, or feature requests, open a GitHub issue in
+`mwill20/ThreatPrism_V2`.
+
+Security issues should follow [SECURITY.md](SECURITY.md). Do not open public
+issues for vulnerabilities or sensitive data exposure.

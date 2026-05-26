@@ -75,6 +75,10 @@ Current baseline:
 - Local reviewed source staging is `external_datasets/`; generated fixture
   output is `fixtures/generated/`. Both are ignored except approved
   placeholders/docs.
+- Repo standards audit and reviewer-readiness docs exist in `REPO_AUDIT.md`,
+  `docs/USAGE.md`, `docs/EVALUATION.md`, `docs/DATASET.md`,
+  `docs/MODEL_CARD.md`, `docs/DEPLOYMENT.md`, `docs/MONITORING.md`, and
+  `docs/TROUBLESHOOTING.md`.
 - Safe validation tooling exists under `tools/`.
 - Compact handoff generation tooling exists under `tools/`.
 - Lightweight fake-data-only CI exists under `.github/workflows/`.

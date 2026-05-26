@@ -234,6 +234,22 @@ Current boundaries:
 Any production-style packaging profile must re-open the relevant threat-model
 treatments before implementation.
 
+## Repository Readiness Limitations
+
+The repo-standards readiness pass improves reviewer entry points and documents
+the current validation posture, but it does not make ThreatPrism production
+ready.
+
+Known repository-readiness gaps:
+
+- No `LICENSE` file has been selected. Usage rights are unclear until the user
+  chooses and adds a license.
+- No tracked screenshot, GIF, or rendered architecture image exists yet. Text
+  diagrams are available in docs, but dashboard UI is still out of scope.
+- Production deployment, live provider operation, production identity,
+  monitoring, and remediation remain gated future work.
+- Performance, latency, throughput, and load behavior are not yet measured.
+
 ## Known Open Items
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.

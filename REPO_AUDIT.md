@@ -1,0 +1,91 @@
+# Repository Audit
+
+## Summary
+
+ThreatPrism is a security-focused, AI-assisted SOC migration accelerator. The
+repository is strong on architecture, guardrails, validation, fake-data safety,
+and implementation traceability. The readiness gaps are mostly reviewer-facing:
+license status is not yet selected, several standard docs were missing as
+standalone entry points, and current evaluation/deployment/monitoring claims
+needed clearer "demo only" boundaries.
+
+Mode used: repo-standards Documentation Fix, audit-first.
+
+## Scorecard
+
+| Area | Status | Priority | Notes |
+|---|---|---|---|
+| Purpose and audience | PASS | High | README and North Star describe the SOC migration use case and demo-safe scope. |
+| Installation and quickstart | PASS | High | README and docs/INSTALLATION.md include PowerShell setup, validation, API, and Docker commands. |
+| Usage examples | PASS | High | README, RUNBOOK.md, and docs/USAGE.md cover API, eval, scenario, and fixture workflows. |
+| Architecture documentation | PASS | High | docs/ARCHITECTURE.md, docs/ARCHITECTURAL_NORTH_STAR.md, and specs cover system design and trust boundaries. |
+| Dependencies and environment | PASS | High | requirements.txt uses exact pins; .env.example uses fake or empty values; requirements-lock.txt exists. |
+| Evaluation and results | PASS | High | docs/EVALUATION.md and validation wrapper document the current fake-data regression evidence. |
+| Dataset documentation | PASS | Medium | docs/DATASET.md clarifies that public datasets are reviewed source material only, not runtime dependencies. |
+| Model documentation | PASS | Medium | docs/MODEL_CARD.md documents the deterministic demo provider and absence of live model use. |
+| Security documentation | PASS | High | SECURITY.md and docs/threat-models/ cover guardrails, reporting, and threat model treatment. |
+| Deployment documentation | PARTIAL | Medium | docs/DEPLOYMENT.md covers local demo and Docker Compose only; production deployment remains out of scope. |
+| Monitoring/maintenance | PARTIAL | Medium | docs/MONITORING.md covers current logs, audit events, and future production monitoring gaps. |
+| Limitations and trade-offs | PASS | High | LIMITATIONS.md is explicit about demo-only, no-remediation, no-live-provider, and dataset boundaries. |
+| License and usage rights | FAIL | High | No LICENSE file exists. README now says usage rights are unclear until a license is selected. |
+| Support/contact | PASS | Medium | README points to issues for non-security support and SECURITY.md for vulnerability handling. |
+| Visual demo/assets | PARTIAL | Medium | Text diagrams exist in docs, but no screenshot, GIF, or rendered architecture asset is tracked. |
+| Examples | PASS | Medium | Fake SOAR payloads, demo scenarios, eval fixtures, and fixture-factory examples exist. |
+| CI/tests | PASS | High | Fake-data-only GitHub Actions workflow and safe local validation wrapper are present. |
+
+## Strengths
+
+- Clear source-of-truth files: START_HERE.md, AGENTS.md, docs/THREATPRISM_V2_CODEX_HANDOFF.md, and docs/WORKING_CHECKLIST.md.
+- Strong fake-data-only safety posture with explicit no-live-provider and no-real-remediation boundaries.
+- Layered guardrails for prompt injection, healthcare-adjacent contamination, sensitive-data tokenization, evidence grounding, and compliance-language overclaiming.
+- Role-aware demo authentication and authorization are covered by tests.
+- Eval harness, scenario pack, Docker packaging, fixture factory, and local validation wrapper make the project reproducible without live credentials.
+- Threat model and treatment register are unusually mature for a demo-stage repository.
+
+## Gaps Found
+
+1. No `LICENSE` file exists, so usage rights are unclear.
+2. Standard reviewer entry points for usage, evaluation, deployment, monitoring, dataset handling, model/provider behavior, and troubleshooting were either missing or distributed across longer docs.
+3. `docs/INSTALLATION.md` had stale validation counts from an earlier slice.
+4. No visual screenshot or rendered diagram asset is tracked. Text diagrams exist and are acceptable for now, but a reviewer cannot inspect a UI because no dashboard has been approved.
+5. Production-readiness boundaries needed a central deployment and monitoring summary.
+
+## Changes Applied In This Pass
+
+- Added this audit file.
+- Added focused standalone docs:
+  - `docs/USAGE.md`
+  - `docs/EVALUATION.md`
+  - `docs/DATASET.md`
+  - `docs/MODEL_CARD.md`
+  - `docs/DEPLOYMENT.md`
+  - `docs/MONITORING.md`
+  - `docs/TROUBLESHOOTING.md`
+- Added root-level reviewer files:
+  - `CONTRIBUTING.md`
+  - `CHANGELOG.md`
+- Updated README links, reviewer status, requirements, evaluation, license, and support sections.
+- Updated installation validation counts and current direct pytest guidance.
+- Updated working checklist, handoff, limitations, and lesson index for this readiness pass.
+- Validated with `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_repo_standards_final_fresh`.
+
+## Validation Performed
+
+Successful result:
+
+```text
+73 passed
+eval harness dry-run: 15 passed / 0 failed
+```
+
+An earlier run using the reused `.pytest_tmp_repo_standards_final` directory hit
+the known Windows pytest temp cleanup failure (`WinError 5`) while deleting a
+locked file. The fresh base temp rerun passed.
+
+## Remaining Recommended Fixes
+
+1. Select and add a real `LICENSE` file before presenting the repository as reusable open source.
+2. Add a static architecture diagram image or a short demo recording after a dashboard or fuller demo surface exists.
+3. Keep validation counts current after each slice.
+4. Do not promote generated fixtures until the user manually reviews license, safety, and content.
+5. Keep production deployment, live provider, RAG, memory/write-back, production IdP, non-demo data, and remediation work gated behind explicit future approval.

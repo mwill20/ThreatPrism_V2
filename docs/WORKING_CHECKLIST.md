@@ -352,6 +352,27 @@ Implemented with `data_sources/registry.json`, `external_datasets/README.md`,
 `fixtures/generated/.gitkeep`, `tools/fixture_factory/`, and
 `tests/test_fixture_factory.py`.
 
+## Completed Slice
+
+Repo Standards Readiness Pass v0.1:
+
+- [x] Run an audit-first repository standards pass in documentation-fix mode.
+- [x] Create `REPO_AUDIT.md` with strengths, gaps, scorecard, priority order,
+  and remaining reviewer-readiness risks.
+- [x] Add reviewer-focused entry points for usage, evaluation, dataset
+  handling, model/provider behavior, deployment boundary, monitoring, and
+  troubleshooting.
+- [x] Add root-level `CONTRIBUTING.md` and `CHANGELOG.md`.
+- [x] Update README with purpose, audience, project status, requirements,
+  documentation map, evaluation summary, license status, and support path.
+- [x] Keep the pass documentation-only; no app-code changes, live providers,
+  real credentials, real data, or remediation work.
+- [x] Leave license selection explicit and unresolved until the user chooses a
+  license.
+- [x] Validate with
+  `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
+  -BaseTemp .pytest_tmp_repo_standards_final_fresh`.
+
 ## Next Active Slice
 
 No new implementation slice is selected yet. Recommended next choices should

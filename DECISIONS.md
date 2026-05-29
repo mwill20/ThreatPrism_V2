@@ -620,3 +620,27 @@ raw external groups, credentials, private keys, or JWKS key material.
 Live JWKS fetch, OIDC discovery, Entra calls, real credentials, production
 tenant administration, production dashboard deployment, and non-demo data
 remain gated.
+
+## D-041 Dataset-Backed Demo Seeder
+
+Dataset-Backed Demo Seeder v0.1 replays hand-reviewed curated fixtures through
+the real `POST /cases` intake path to populate a demo database.
+
+Locked decisions:
+
+- The seeder is runtime-owned. Runtime code (`src/threatprism/demo/seeding.py`)
+  reads committed fixture data under `fixtures/curated/` directly and must not
+  import the dev-time fixture factory under `tools/`. The dependency direction
+  stays one-way: tooling may import the running app, never the reverse.
+- Only manifest entries approved for `demo_review` with `approved_demo_safe` and
+  `approved_for_tests` review status are seedable. The generated fixture folder
+  is never auto-scanned.
+- Seeded cases run the full four-layer guardrail pipeline; `ALLOW_REAL_ACTIONS`
+  stays `false`.
+- The startup seed hook (`THREATPRISM_DEMO_SEED`) defaults off and is refused in
+  production by `Settings.validate_runtime()`.
+- A `FixtureSource` Protocol is the only extension point for a future
+  dataset-ingest source. Building an ingest source requires re-opening the
+  relevant threat treatment.
+
+See `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md`.

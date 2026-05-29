@@ -367,6 +367,29 @@ Current boundaries:
   manager, browser matrix certification, production deployment, or real data
   handling is implemented.
 
+## Demo Seeder Limitations
+
+Dataset-Backed Demo Seeder v0.1 replays hand-reviewed curated fixtures through
+the real `POST /cases` intake path. Boundaries:
+
+- It seeds only fixtures whose manifest entry is approved for `demo_review`; it
+  never auto-scans the generated fixture folder and never reads raw external
+  datasets.
+- It adds no live providers, network calls, real data, or remediation.
+- Curated fixtures are **post-sanitization snapshots**. Their unsafe content
+  (e.g., a prompt-injection instruction) was already reduced to a redacted
+  marker by the fixture factory, so replaying them does not re-trigger the
+  prompt firewall's quarantine or input-redaction path. Those fixtures triage to
+  `completed`. Fixtures that retain rehydratable Stage-2 telemetry still
+  exercise live tokenization. Demonstrating a live quarantine/redaction requires
+  an unsanitized input, which curated-fixture replay intentionally does not
+  provide.
+- The startup seed hook is off by default and refused in production
+  environments; seeding is local/demo only.
+- The `FixtureSource` Protocol is an extension seam only. No dataset-ingest
+  source is implemented; adding one requires its own review gate and a
+  threat-treatment check.
+
 ## Known Open Items
 
 - Selectively port additional V1 concepts where useful; do not full-copy V1.

@@ -103,6 +103,15 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 |-----------|------------|----------------|-------|-----------|
 | I4 / L1 (via SOAR) | SOAR payload normalized to canonical `CaseCreate` before sanitization; source hash preserved | `normalize_soar_payload()` in `soar/generic.py`; `_payload_hash()` at [cases/service.py:714](../../src/threatprism/cases/service.py) | Mitigated | `tests/test_soar_adapters.py`, `tests/test_healthcare_guardrails.py`, `tests/test_guardrails.py` |
 
+### Demo Seeder (Curated Fixture Replay)
+
+| Threat ID | Mitigation | Code Reference | State | Test File |
+|-----------|------------|----------------|-------|-----------|
+| T (unreviewed/unsafe fixture seeded) | Seeds only manifest entries approved for `demo_review` with `approved_demo_safe` / `approved_for_tests` status; generated folder never auto-scanned | `CuratedFixtureSource._is_demo_seedable()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py) | Mitigated | `tests/test_demo_seeding.py` |
+| I/T (path traversal to non-fixture file) | Path sandbox rejects absolute, drive, traversal, non-`.jsonl`, and escaping paths before read | `CuratedFixtureSource._resolve_curated_path()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py) | Mitigated | `tests/test_demo_seeding.py` |
+| Bypassing guardrails via seed path | Seeder replays through real `create_case` + `run_triage`; full four-layer pipeline runs; `ALLOW_REAL_ACTIONS` unchanged | `DemoSeeder.seed()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py); `create_case()` / `run_triage()` in [cases/service.py](../../src/threatprism/cases/service.py) | Mitigated | `tests/test_demo_seeding.py` |
+| Demo seeding enabled in production | Startup hook defaults off; `validate_runtime()` refuses `THREATPRISM_DEMO_SEED` in prod | `Settings.validate_runtime()` in [config.py](../../src/threatprism/config.py); startup hook in [api/app.py](../../src/threatprism/api/app.py) | Mitigated | `tests/test_demo_seeding.py` |
+
 ### Enrichment Stubs
 
 | Threat ID | Mitigation | Code Reference | State | Test File |

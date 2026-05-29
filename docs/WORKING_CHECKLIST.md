@@ -583,6 +583,34 @@ Production Token Verifier Design v0.1:
 
 ## Completed Slice
 
+Dataset-Backed Demo Seeder v0.1:
+
+- [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
+- [x] Add a runtime-owned curated loader (`src/threatprism/demo/seeding.py`) that
+  reads `fixtures/curated/manifest.json` directly and never imports `tools/`,
+  keeping the dependency direction one-way (tooling may import the app, not the
+  reverse).
+- [x] Seed only fixtures whose manifest entry includes `demo_review` in
+  `allowed_uses` and carries `approved_demo_safe` / `approved_for_tests` review
+  status; never auto-scan the generated fixture folder.
+- [x] Enforce a path sandbox that rejects absolute, drive, traversal, non-`.jsonl`,
+  and escaping fixture paths.
+- [x] Replay each fixture through the real `create_case` + `run_triage` intake
+  path so the full four-layer guardrail pipeline runs.
+- [x] Add a `FixtureSource` Protocol seam for a future dataset-ingest source
+  (interface only; no speculative adapter).
+- [x] Add an env-gated startup seed hook (`THREATPRISM_DEMO_SEED`), default off,
+  refused in production by `validate_runtime()`.
+- [x] Add `python -m threatprism.demo.seed_cli` with `--source` and
+  `--skip-existing/--no-skip-existing`; idempotent via `source_case_id` match.
+- [x] Add focused tests in `tests/test_demo_seeding.py`.
+- [x] Record the finding that curated fixtures are post-sanitization snapshots,
+  so replay does not re-trigger quarantine/redaction for already-sanitized
+  fixtures (see `LIMITATIONS.md`).
+- [x] Update spec (`docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md`), README,
+  checklist, handoff, limitations, decisions, `.env.example`, mitigations
+  traceability, and lessons.
+
 Production Token Verifier Implementation v0.1:
 
 - [x] Re-check `docs/ARCHITECTURAL_NORTH_STAR.md` before implementation.
@@ -628,6 +656,10 @@ selected explicitly before implementation:
 
 Future planned data-realism slice:
 
+- [x] Dataset-Backed Demo Seeder v0.1 replays hand-reviewed curated fixtures
+  through the real intake path; see
+  `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md`. A future dataset-ingest source
+  can implement the `FixtureSource` seam after its own review gate.
 - [x] Data Strategy & Synthetic Fixture Factory v0.1.
 - [x] Capture the dataset strategy in
   `docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md`.
@@ -657,7 +689,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-112 passed
+123 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

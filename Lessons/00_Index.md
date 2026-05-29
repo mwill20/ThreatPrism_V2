@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `112 passed`.
+- The current validated baseline is `123 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -47,6 +47,7 @@ Fake SOAR payload
   -> Production identity readiness static config and fail-closed external_oidc boundary
   -> Production token verifier design for external_oidc verification
   -> Production token verifier implementation with local fake-JWKS verification
+  -> Dataset-backed demo seeder replaying curated fixtures through real intake
   -> API responses and tests
 ```
 
@@ -80,6 +81,7 @@ Fake SOAR payload
 | yes | [Lesson 23](Lesson23_Production_Identity_Readiness.md) | Production Identity Readiness | `src/threatprism/auth/production.py`, `src/threatprism/config.py`, `tests/test_production_identity_readiness.py` |
 | yes | [Lesson 24](Lesson24_Production_Token_Verifier_Design.md) | Production Token Verifier Design | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` |
 | yes | [Lesson 25](Lesson25_Production_Token_Verifier_Implementation.md) | Production Token Verifier Implementation | `src/threatprism/auth/production.py`, `src/threatprism/auth/demo.py`, `tests/test_production_token_verifier.py` |
+| yes | [Lesson 26](Lesson26_Dataset_Backed_Demo_Seeder.md) | Dataset-Backed Demo Seeder | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tests/test_demo_seeding.py`, `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md` |
 
 ## File Coverage Map
 
@@ -114,6 +116,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\runner.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\cli.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\scenarios.py` -> Lesson 13
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seeding.py` -> Lesson 26
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seed_cli.py` -> Lesson 26
 - `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20 and 21
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
@@ -180,6 +184,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_dashboard_ui.py` -> Lessons 08, 20, and 21
 - `C:\Projects\ThreatPrismV2\tests\test_production_identity_readiness.py` -> Lessons 08, 23, and 24
 - `C:\Projects\ThreatPrismV2\tests\test_production_token_verifier.py` -> Lessons 08 and 25
+- `C:\Projects\ThreatPrismV2\tests\test_demo_seeding.py` -> Lessons 08 and 26
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -208,12 +213,12 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-112 passed
+123 passed
 ```
 
 ## What To Study Next
 
-After Lesson 25, use the working checklist to choose the next requested slice:
+After Lesson 26, use the working checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

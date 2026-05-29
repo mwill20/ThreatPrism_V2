@@ -375,6 +375,33 @@ Stop the container:
 docker compose down
 ```
 
+## Seed The Demo Database
+
+Populate a fresh demo database with hand-reviewed curated fixtures by replaying
+them through the real intake path. Local/demo only; refused in production.
+
+Seed from the CLI:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+$env:API_AUTH_MODE='none'
+$env:THREATPRISM_LOCAL_DEV_ACK='true'
+python -m threatprism.demo.seed_cli
+```
+
+Or seed automatically at API startup:
+
+```powershell
+$env:THREATPRISM_DEMO_SEED='true'
+python -m uvicorn threatprism.api.app:create_app --factory
+```
+
+Re-running is idempotent: fixtures whose `source_case_id` already exists are
+skipped. Curated fixtures are post-sanitization snapshots, so replay does not
+re-trigger prompt-firewall quarantine for already-sanitized fixtures. See
+`docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md`.
+
 ## Demo SOAR Intake
 
 Submit the fake generic SOAR payload:

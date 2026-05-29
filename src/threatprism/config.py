@@ -20,6 +20,7 @@ class Settings:
     auth_required: bool = True
     local_dev_ack: bool = False
     demo_role_override_enabled: bool = False
+    demo_seed_enabled: bool = False
     llm_provider: str = "deterministic_demo"
     allow_real_actions: bool = False
     max_request_body_bytes: int = 262_144
@@ -54,6 +55,7 @@ class Settings:
             auth_required=_parse_bool(os.getenv("THREATPRISM_AUTH_REQUIRED"), default=True),
             local_dev_ack=_parse_bool(os.getenv("THREATPRISM_LOCAL_DEV_ACK"), default=False),
             demo_role_override_enabled=_parse_bool(os.getenv("DEMO_ROLE_OVERRIDE_ENABLED"), default=False),
+            demo_seed_enabled=_parse_bool(os.getenv("THREATPRISM_DEMO_SEED"), default=False),
             llm_provider=os.getenv("LLM_PROVIDER", "deterministic_demo"),
             allow_real_actions=_parse_bool(os.getenv("ALLOW_REAL_ACTIONS"), default=False),
             max_request_body_bytes=_parse_int(os.getenv("MAX_REQUEST_BODY_BYTES"), default=262_144),
@@ -121,6 +123,8 @@ class Settings:
         auth_mode = self.api_auth_mode.strip().lower()
         if auth_mode not in {"none", "demo_key", PRODUCTION_IDENTITY_AUTH_MODE}:
             raise ValueError("Unsupported API_AUTH_MODE.")
+        if self.demo_seed_enabled and self.env.strip().lower() in {"prod", "production"}:
+            raise ValueError("Demo seeding (THREATPRISM_DEMO_SEED) cannot be enabled in production environments.")
         if self.env.strip().lower() in {"prod", "production"} and auth_mode in {"none", "demo_key"}:
             raise ValueError("Production environments cannot use disabled or demo API authentication.")
         if auth_mode == PRODUCTION_IDENTITY_AUTH_MODE:

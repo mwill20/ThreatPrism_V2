@@ -28,6 +28,7 @@ from threatprism.cases.schemas import (
 )
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
+from threatprism.demo.seeding import CuratedFixtureSource, DemoSeeder
 from threatprism.csi.schemas import (
     AIVsHumanDivergenceEnvelope,
     CognitiveObjectDetailEnvelope,
@@ -126,6 +127,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "Production identity readiness is configured, but token verification is disabled; "
                 "protected requests fail closed."
             )
+
+    if active_settings.demo_seed_enabled:
+        seeder = DemoSeeder(app.state.case_service)
+        seed_result = seeder.seed([CuratedFixtureSource()])
+        logger.info(
+            "Demo seed complete: %d seeded, %d skipped (existing).",
+            seed_result.seeded_count,
+            seed_result.skipped_count,
+        )
 
     if DASHBOARD_STATIC_DIR.exists():
         app.mount(

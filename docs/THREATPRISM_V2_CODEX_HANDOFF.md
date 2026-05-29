@@ -709,12 +709,28 @@ external_oidc local verifier
   -> No live JWKS fetch, OIDC discovery, Entra calls, or real credentials
 ```
 
+Dataset-Backed Demo Seeder v0.1 is implemented:
+
+```text
+fixtures/curated/manifest.json (demo_review-approved only)
+  -> runtime-owned loader (src/threatprism/demo/seeding.py; no tools/ import)
+  -> path sandbox + CaseCreate validation
+  -> DemoSeeder replays through real create_case + run_triage
+  -> env-gated startup hook (THREATPRISM_DEMO_SEED, off by default, prod-refused)
+  -> python -m threatprism.demo.seed_cli (--source, --skip-existing)
+  -> FixtureSource Protocol seam for a future dataset-ingest source
+```
+
+Note: curated fixtures are post-sanitization snapshots, so replay does not
+re-trigger prompt-firewall quarantine for already-sanitized fixtures. See
+`docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md` and `LIMITATIONS.md`.
+
 ## Next Implementation Slice
 
-No new implementation slice is selected yet. Production Token Verifier
-Implementation v0.1 is complete for local fake-JWKS validation only. Live JWKS
-fetch, live IdP integration, production tenant administration, and production
-dashboard deployment remain gated future work.
+No new implementation slice is selected yet. Dataset-Backed Demo Seeder v0.1
+and Production Token Verifier Implementation v0.1 are complete. Live JWKS fetch,
+live IdP integration, dataset ingest, production tenant administration, and
+production dashboard deployment remain gated future work.
 
 Optional external research provider work, such as Exa.ai feasibility, is a
 deferred future enhancement only. It is not needed for the current build and

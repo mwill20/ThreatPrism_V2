@@ -249,7 +249,11 @@ Current direction:
 18. Completed: Production Token Verifier Implementation v0.1 for local
     fake-JWKS bearer-token verification, verified claim-to-role mapping,
     role-view policy integration, sanitized audit, and no-network tests.
-19. Production dashboard deployment, live production identity integration,
+19. Completed: Dataset-Backed Demo Seeder v0.1 for replaying hand-reviewed
+    curated fixtures through the real intake path via a runtime-owned loader,
+    an env-gated startup hook (default off, refused in production), a CLI, and
+    a `FixtureSource` seam for a future dataset-ingest source.
+20. Production dashboard deployment, live production identity integration,
     live-integration preparation, external research providers, or additional curated fixture
     promotion only after explicit user approval and any required threat-model
     treatment updates.

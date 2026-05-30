@@ -60,6 +60,30 @@
         "fixture_factory_regression",
         "api_schema_validation"
       ]
+    },
+    {
+      "fixture_id": "otrf_soc_telemetry",
+      "path": "fixtures/curated_datasets/otrf_soc_telemetry.jsonl",
+      "fixture_count": 8,
+      "source_family": "otrf",
+      "source_dataset": "OTRF/Security-Datasets",
+      "source_sample_status": "third_party_mit_lab_telemetry_field_projected",
+      "license_review_status": "approved_third_party_mit_lab_telemetry",
+      "license_review_reference": "docs/DATASET.md -> OTRF Security-Datasets (otrf_security_datasets), MIT, reviewed 2026-05-30",
+      "license_attribution": "Copyright (c) Open Threat Research Forge (OTRF), Security-Datasets, MIT License. https://github.com/OTRF/Security-Datasets/blob/master/LICENSE",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "mwill-AImission",
+      "reviewed_at": "2026-05-30",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "field_projection": "fail_closed_safe_fields_allowlist",
+      "identifier_handling": "host, Hostname, UserID/SID, AccountName, Domain, port, *Guid, ThreadID, RecordNumber, and TargetObject are dropped before sanitization; Image is reduced to basename; SID and user-profile paths are scrubbed as defense-in-depth.",
+      "allowed_uses": [
+        "demo_review",
+        "fixture_factory_regression",
+        "api_schema_validation"
+      ]
     }
   ]
 }

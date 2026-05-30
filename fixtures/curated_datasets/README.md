@@ -54,6 +54,18 @@ Promoted derivatives:
   the deterministic layer misses — they reach the inert demo provider but never
   leak into reports/audit (see `tests/test_deepset_injection_corpus.py`). The
   planned next defense is `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`.
+- `otrf_soc_telemetry.jsonl` — 8 SOC-telemetry fixtures derived from the
+  **MIT-licensed** OTRF Security-Datasets lab event logs (`otrf_security_datasets`).
+  Unlike the Apache-2.0 synthetic families, OTRF is real lab telemetry, so the
+  `otrf_adapter` applies a **fail-closed `SAFE_FIELDS` allowlist** that drops
+  every identifying field (host, Hostname, UserID/SID, AccountName, Domain, port,
+  `*Guid`, `TargetObject`) before sanitization; `Image` is reduced to its
+  basename and SIDs / user-profile paths are scrubbed as defense-in-depth. Its
+  `license_review_status` is `approved_third_party_mit_lab_telemetry` — a
+  separate code-allowlisted status (`DATASET_ALLOWED_LICENSE_REVIEW`), not the
+  Apache synthetic status. MIT attribution is recorded in the manifest entry.
+  No-leak and projection guarantees are proven in
+  `tests/test_otrf_telemetry_corpus.py`.
 
 Each promoted file carries a manifest entry with full provenance. Raw third-party
 rows remain in the gitignored `external_datasets/` staging area.

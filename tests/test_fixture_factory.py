@@ -117,7 +117,7 @@ def test_adapters_convert_local_source_shape_samples_without_network(monkeypatch
 
     assert [fixture.fixture_id for fixture in fixtures] == [
         "synthea_healthcare_0001",
-        "otrf_soc_case_0001",
+        "otrf_soc_telemetry_0001",
         "pint_prompt_injection_0001",
         "giskard_prompt_injection_0001",
     ]

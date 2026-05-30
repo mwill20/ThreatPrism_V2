@@ -637,9 +637,9 @@ Production Token Verifier Implementation v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_token_verifier_impl_final2`.
 
-## In Progress
+## Completed Slice
 
-Option A — Separate Third-Party Dataset Fixture Source (uncommitted working tree):
+Option A — Separate Third-Party Dataset Fixture Source (committed `ac361b4`):
 
 This is a parallel contract to the hand-authored curated fixture path. The
 existing `CuratedFixtureSource` deliberately rejects third-party licenses, so
@@ -651,8 +651,13 @@ in the manifest, so a tampered manifest cannot self-certify a license.
 
 Hard boundary: `tools/fixture_factory/promotions.py` and
 `tests/test_curated_fixture_promotion.py` are intentionally untouched and must
-stay that way. No commit/push without explicit instruction. Synthetic/fake data
-only, no auto-download, no raw third-party data committed.
+stay that way. Synthetic/fake data only, no auto-download, no raw third-party
+data committed.
+
+Dataset onboarding status: **3 of 3 source families promoted.**
+`synthea_healthcare` (healthcare context, Apache-2.0), `deepset_prompt_injection`
+(prompt injection, Apache-2.0), and `otrf_soc_telemetry` (SOC telemetry, **MIT**)
+are all promoted into `fixtures/curated_datasets/manifest.json`.
 
 Done (validated GREEN — 134 passed, eval harness dry-run 15/15, demo safety passed):
 
@@ -705,10 +710,38 @@ Done (validated GREEN — 149 passed, eval harness dry-run 15/15, demo safety pa
   local`). Nothing committed: `external_datasets/**` stays gitignored and the
   source only reads. Tests: `tests/test_local_dataset_seeding.py` (10 tests).
 
+## Completed Slice
+
+OTRF SOC-Telemetry Onboarding (3rd dataset family) — validated GREEN
+(156 passed, eval harness dry-run 15/15, demo safety passed):
+
+- [x] Verified OTRF/Security-Datasets license is **MIT** from the repo `LICENSE`
+  file (residual: re-confirm at pinned commit at build time).
+- [x] Replaced the unsafe OTRF adapter stub with a fail-closed `SAFE_FIELDS`
+  allowlist + streaming JSONL reader (`tools/fixture_factory/adapters/otrf_adapter.py`);
+  drops host/Hostname/UserID(SID)/AccountName/Domain/port/`*Guid`/`TargetObject`,
+  reduces `Image` to basename, scrubs SIDs + user-profile paths.
+- [x] Fixed a bug where the shared domain normalizer mangled process basenames
+  (`powershell.exe` -> `example.org`) by attaching the validated basename after
+  sanitization.
+- [x] Generated + inspected 8 distinct-EventID fixtures; confirmed zero raw
+  identifier leakage before promoting
+  `fixtures/curated_datasets/otrf_soc_telemetry.jsonl`.
+- [x] Added a new code-authoritative license status
+  `approved_third_party_mit_lab_telemetry` to `DATASET_ALLOWED_LICENSE_REVIEW`
+  and a manifest entry with MIT attribution.
+- [x] Added `tests/test_otrf_telemetry_corpus.py` (7 tests: no-leak, projection,
+  SID scrub, basename regression, license gate, real-intake seed); updated
+  startup-hook count (28 -> 36) and the fixture-factory adapter id test.
+- [x] Updated `docs/DATASET.md`, `fixtures/curated_datasets/README.md`, and this
+  checklist.
+
 ## Next Active Slice
 
-No additional implementation slice beyond the in-progress Option A work is
-selected yet. Recommended choices should be selected explicitly before
+Remaining ordered queue (user decision): **(2) Option A closeout** → **(3)
+Semantic-layer enablement plan** targeting **Meta Prompt Guard 2 — 86M**
+(multilingual; owner-approved 2026-05-30, Llama Community License accepted; see
+`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` §3). Beyond that: Recommended choices should be selected explicitly before
 implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.

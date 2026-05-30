@@ -14,7 +14,7 @@ and demo flows use fake data only.
 | `external_datasets/` | No raw data | Ignored local staging for manually reviewed source-shape samples. |
 | `fixtures/generated/` | No generated data | Ignored output directory for deterministic sanitized fixtures. |
 | `fixtures/curated/` | Yes | Tiny tracked synthetic fixtures promoted through manifest review. |
-| `fixtures/curated_datasets/` | Yes | Tracked derivatives of reviewed third-party synthetic datasets (Synthea, deepset), gated by an in-code license allowlist. |
+| `fixtures/curated_datasets/` | Yes | Tracked derivatives of reviewed third-party datasets (Synthea + deepset, Apache-2.0 synthetic; OTRF, MIT lab telemetry), gated by an in-code license allowlist. |
 
 ## Source Registry Rules
 
@@ -104,6 +104,39 @@ derivative fixtures are promoted.
   defense. No injection text leaks into triage reports or audit trails because
   the demo provider builds reports from evidence summaries/IDs, not excerpts —
   proven by `tests/test_deepset_injection_corpus.py`.
+
+### OTRF Security-Datasets (`otrf_security_datasets`) — reviewed 2026-05-30
+
+- **License:** **MIT** (Open Threat Research Forge, `OTRF/Security-Datasets`,
+  confirmed from the repository `LICENSE` file). MIT permits redistribution of
+  derivatives provided the copyright notice is retained; attribution is recorded
+  in the `otrf_soc_telemetry` `manifest.json` entry (`license_attribution`).
+  *Residual check:* re-confirm the `LICENSE` at the pinned source commit at build
+  time — secondary commentary occasionally mislabels OTRF repos as GPL.
+- **Data nature:** Real **lab** telemetry (Windows Sysmon / Security event logs
+  from simulated adversary techniques — empire/mimikatz/LSASS dump). It is *not*
+  generated-synthetic like Synthea: raw events carry realistic identifiers (lab
+  hostnames such as `WORKSTATION5.theshire.local`, collector `wec.internal.cloudapp.net`,
+  Windows SIDs `S-1-5-21-...`, account names, domains, ports). These are
+  fictional/lab values but match the identifier shapes this project forbids in
+  committed fixtures, so they are removed, not merely sanitized.
+- **Acquisition:** Sample event files staged manually under
+  `external_datasets/OTRF/` (gitignored, not committed). The 43 MB
+  `empire_mimikatz_sam_access` file is streamed line-by-line; raw rows are never
+  committed.
+- **Decision:** Approved for committed derivative fixtures under a **separate**
+  license-review status, `approved_third_party_mit_lab_telemetry`, added to the
+  in-code allowlist `DATASET_ALLOWED_LICENSE_REVIEW` (the Apache "synthetic"
+  status would be a dishonest label for MIT lab telemetry). The `otrf_adapter`
+  applies a fail-closed `SAFE_FIELDS` allowlist (only EventID, Channel,
+  SourceName, Category, Severity, Task, RuleName, Opcode, EventType, tags, and
+  the EventTime/UtcTime timestamps survive), reduces `Image` to its basename,
+  and scrubs SIDs / user-profile
+  paths as defense-in-depth before the shared sanitizer runs. Promoted on
+  2026-05-30 into `fixtures/curated_datasets/otrf_soc_telemetry.jsonl`
+  (8 distinct-EventID fixtures). No-leak, projection, and
+  basename-not-mangled-to-domain guarantees are proven by
+  `tests/test_otrf_telemetry_corpus.py`.
 
 ### Lakera PINT and Giskard — not acquirable
 

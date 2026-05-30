@@ -31,9 +31,19 @@ _SAFE_SAFETY_REVIEW = "approved_demo_safe"
 _SAFE_CONTENT_REVIEW = "approved_for_tests"
 
 # Authoritative allowlist of accepted license-review statuses for committed
-# third-party synthetic derivatives. This lives in code -- not in the manifest --
-# so a tampered manifest cannot self-certify a license it was never granted.
-DATASET_ALLOWED_LICENSE_REVIEW = frozenset({"approved_third_party_apache2_synthetic"})
+# third-party derivatives. This lives in code -- not in the manifest -- so a
+# tampered manifest cannot self-certify a license it was never granted.
+#   - approved_third_party_apache2_synthetic: Synthea (healthcare), deepset
+#     (prompt injection). Apache-2.0, generated-synthetic source material.
+#   - approved_third_party_mit_lab_telemetry: OTRF Security-Datasets (SOC
+#     telemetry). MIT-licensed lab event logs; identifying fields are dropped by
+#     a fail-closed SAFE_FIELDS projection before the committed derivative.
+DATASET_ALLOWED_LICENSE_REVIEW = frozenset(
+    {
+        "approved_third_party_apache2_synthetic",
+        "approved_third_party_mit_lab_telemetry",
+    }
+)
 
 
 class CuratedFixtureLoadError(RuntimeError):

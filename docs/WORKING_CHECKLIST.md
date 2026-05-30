@@ -736,12 +736,34 @@ OTRF SOC-Telemetry Onboarding (3rd dataset family) — validated GREEN
 - [x] Updated `docs/DATASET.md`, `fixtures/curated_datasets/README.md`, and this
   checklist.
 
+## Completed Slice
+
+Option A Closeout — Part A (Lesson + docs sweep):
+
+- [x] Authored `Lessons/Lesson27_Dataset_Onboarding_And_Fixture_Sources.md`
+  (parallel curated vs curated_datasets contracts, code-authoritative license
+  allowlist, three families/three treatments, drop-vs-tokenize, off-by-default
+  local source). Exercises verified against live output.
+- [x] Updated `Lessons/00_Index.md` (Lesson 27 row, coverage map, baseline
+  `123 -> 156 passed`).
+- [x] Docs consistency sweep: `README.md` (3 families incl. OTRF + MIT framing),
+  `docs/WORKING_CHECKLIST.md` validation count `149 -> 156`, `docs/DATASET.md`
+  and `fixtures/curated_datasets/README.md` already carry the OTRF review.
+
 ## Next Active Slice
 
-Remaining ordered queue (user decision): **(2) Option A closeout** → **(3)
-Semantic-layer enablement plan** targeting **Meta Prompt Guard 2 — 86M**
-(multilingual; owner-approved 2026-05-30, Llama Community License accepted; see
-`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` §3). Beyond that: Recommended choices should be selected explicitly before
+**Option A Closeout — Part B (its own small slice): threat-model traceability
+touch.** Record the new third-party-dataset onboarding trust boundary (OTRF MIT
+lab telemetry) and its controls (in-code license allowlist, fail-closed field
+projection, no-leak regression tests, sanitization-at-intake) in
+`docs/threat-models/mitigations-traceability.md`; confirm STRIDE/LINDDUN/
+supply-chain coverage and SECURITY.md alignment. Then:
+
+- **Semantic-layer enablement plan** targeting **Meta Prompt Guard 2 — 86M**
+  (multilingual; owner-approved 2026-05-30, Llama Community License accepted; see
+  `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` §3).
+
+Beyond that: Recommended choices should be selected explicitly before
 implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
@@ -791,7 +813,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-149 passed
+156 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

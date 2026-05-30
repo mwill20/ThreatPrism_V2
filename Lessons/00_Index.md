@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `123 passed`.
+- The current validated baseline is `156 passed`.
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -82,6 +82,7 @@ Fake SOAR payload
 | yes | [Lesson 24](Lesson24_Production_Token_Verifier_Design.md) | Production Token Verifier Design | `docs/PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/specs/29_PRODUCTION_TOKEN_VERIFIER_DESIGN.md`, `docs/runbooks/PRODUCTION_TOKEN_VERIFIER_DESIGN_REVIEW.md` |
 | yes | [Lesson 25](Lesson25_Production_Token_Verifier_Implementation.md) | Production Token Verifier Implementation | `src/threatprism/auth/production.py`, `src/threatprism/auth/demo.py`, `tests/test_production_token_verifier.py` |
 | yes | [Lesson 26](Lesson26_Dataset_Backed_Demo_Seeder.md) | Dataset-Backed Demo Seeder | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tests/test_demo_seeding.py`, `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md` |
+| ✅ | [Lesson 27](Lesson27_Dataset_Onboarding_And_Fixture_Sources.md) | Dataset Onboarding And Fixture Source Contracts | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tools/fixture_factory/adapters/{synthea,deepset,otrf}_adapter.py`, `fixtures/curated_datasets/*`, `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, `tests/test_local_dataset_seeding.py` |
 
 ## File Coverage Map
 
@@ -116,8 +117,10 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\runner.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\cli.py` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\scenarios.py` -> Lesson 13
-- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seeding.py` -> Lesson 26
-- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seed_cli.py` -> Lesson 26
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seeding.py` -> Lessons 26 and 27
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\seed_cli.py` -> Lessons 26 and 27
+- `C:\Projects\ThreatPrismV2\tools\fixture_factory\adapters\*_adapter.py` -> Lessons 16 and 27
+- `C:\Projects\ThreatPrismV2\fixtures\curated_datasets\*` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20 and 21
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
@@ -185,6 +188,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_production_identity_readiness.py` -> Lessons 08, 23, and 24
 - `C:\Projects\ThreatPrismV2\tests\test_production_token_verifier.py` -> Lessons 08 and 25
 - `C:\Projects\ThreatPrismV2\tests\test_demo_seeding.py` -> Lessons 08 and 26
+- `C:\Projects\ThreatPrismV2\tests\test_curated_dataset_seeding.py` -> Lesson 27
+- `C:\Projects\ThreatPrismV2\tests\test_otrf_telemetry_corpus.py` -> Lesson 27
+- `C:\Projects\ThreatPrismV2\tests\test_local_dataset_seeding.py` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -213,7 +219,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-123 passed
+156 passed
 ```
 
 ## What To Study Next

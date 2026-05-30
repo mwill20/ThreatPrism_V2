@@ -295,14 +295,18 @@ The tracked curated fixture set is under `fixtures/curated/` and is gated by
 hand-reviewed fake fixtures for SOC, healthcare-context exposure,
 prompt-injection, and evidence-conflict/GRC review.
 
-Sanitized derivatives of reviewed third-party *synthetic* datasets live under
+Sanitized derivatives of reviewed third-party datasets live under
 `fixtures/curated_datasets/` (a separate trust gate that accepts only an in-code
-license allowlist): 12 column-projected Synthea healthcare fixtures and 12
-`deepset/prompt-injections` fixtures. The deepset set deliberately retains
-attacker-controlled injection text un-redacted so the runtime prompt firewall is
-exercised on replay; its bucket mix (1 quarantine, 5 redact, 6 unrecognized)
-gives RR-L1 a measured baseline for the planned semantic layer
-(`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`). See `docs/DATASET.md`.
+license allowlist): 12 column-projected Synthea healthcare fixtures (Apache-2.0),
+12 `deepset/prompt-injections` fixtures (Apache-2.0), and 8 OTRF
+Security-Datasets SOC-telemetry fixtures (MIT lab telemetry — identifiers such as
+host, SID, account, and domain are dropped by a fail-closed field allowlist, not
+just tokenized). The deepset set deliberately retains attacker-controlled
+injection text un-redacted so the runtime prompt firewall is exercised on replay;
+its bucket mix (1 quarantine, 5 redact, 6 unrecognized) gives RR-L1 a measured
+baseline for the planned semantic layer
+(`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`). See `docs/DATASET.md` and
+`Lessons/Lesson27_Dataset_Onboarding_And_Fixture_Sources.md`.
 
 Run only the demo scenario and API contract checks:
 

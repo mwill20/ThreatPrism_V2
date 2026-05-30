@@ -781,11 +781,31 @@ Semantic-Layer Enablement Plan + OT-L2 / Supply-Chain Documentation (design/thre
 - [x] Updated `docs/threat-models/mitigations-traceability.md` Open Threats
   (OT-L10, OT-L11) and the OT-7 row. Owner signatures pending on OT-L10/OT-L11.
 
+## Completed Slice
+
+End-to-End SOC Dataset Run (the "does it actually work" capstone) — validated
+GREEN (160 passed, eval harness dry-run 15/15, demo safety passed):
+
+- [x] Added `src/threatprism/demo/run_soc_demo.py`: replays all 3
+  `curated_datasets` families (32 cases) through the real `create_case` +
+  `run_triage` pipeline, then reports metrics, severity/determination
+  distributions, guardrail blocks, and review-queue counts. Self-contained,
+  in-memory, no SOAR/LLM/prod. `python -m threatprism.demo.run_soc_demo`.
+- [x] Proven end-to-end: 32 seeded, 31 completed, **1 blocked by the prompt
+  firewall** (a retained deepset injection row quarantined on replay); OTRF
+  credential-dumping telemetry triages `high`. Honest artifact surfaced: review
+  queues are empty because curated fixtures are post-sanitization snapshots.
+- [x] `tests/test_soc_dataset_run.py` (4 tests: seeded counts, terminal-status
+  invariant, prompt-firewall-fired, no-leakage on summary).
+- [x] `docs/runbooks/RUN_AGAINST_SOC_DATASET.md` (one-command run + interactive
+  HTTP path + honest scope) and a README "Run Against A SOC Dataset" section.
+
 ## Next Active Slice
 
-The dataset-onboarding thread and the semantic-layer enablement plan are complete
-(all design/threat-model only; no gated code built). Remaining work is gated and
-must be selected explicitly before implementation:
+The dataset-onboarding thread, semantic-layer enablement plan, and end-to-end SOC
+dataset run are complete (the run is the demonstrable proof the build works on
+real-shaped data). Remaining work is gated and must be selected explicitly before
+implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
@@ -834,7 +854,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-156 passed
+160 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

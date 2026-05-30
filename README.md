@@ -410,6 +410,26 @@ $env:THREATPRISM_DEMO_SEED='true'
 python -m uvicorn threatprism.api.app:create_app --factory
 ```
 
+## Run Against A SOC Dataset (End-to-End)
+
+Prove the system works end-to-end on a realistic SOC dataset — no SOAR, no live
+LLM, no production environment. This replays all three reviewed
+`fixtures/curated_datasets/` families (Synthea, deepset, OTRF — 32 cases) through
+the real intake + four-layer guardrail + triage pipeline and prints an
+observable summary:
+
+```powershell
+$env:PYTHONPATH='src'
+python -m threatprism.demo.run_soc_demo
+```
+
+It reports cases seeded per family, the terminal triage outcome (including the one
+deepset injection case the prompt firewall quarantines end-to-end), severity and
+determination distributions, and review-queue counts. This demonstrates pipeline,
+guardrail, persistence, and observability correctness — not LLM reasoning quality,
+which is gated on real-LLM rollout. Full walkthrough:
+[`docs/runbooks/RUN_AGAINST_SOC_DATASET.md`](docs/runbooks/RUN_AGAINST_SOC_DATASET.md).
+
 Re-running is idempotent: fixtures whose `source_case_id` already exists are
 skipped. Curated fixtures are post-sanitization snapshots, so replay does not
 re-trigger prompt-firewall quarantine for already-sanitized fixtures. See

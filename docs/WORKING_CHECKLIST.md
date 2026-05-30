@@ -750,21 +750,42 @@ Option A Closeout — Part A (Lesson + docs sweep):
   `docs/WORKING_CHECKLIST.md` validation count `149 -> 156`, `docs/DATASET.md`
   and `fixtures/curated_datasets/README.md` already carry the OTRF review.
 
+## Completed Slice
+
+Option A Closeout — Part B (threat-model traceability touch):
+
+- [x] Added "Third-Party Dataset Onboarding (Curated Datasets)" section to
+  `docs/threat-models/mitigations-traceability.md` (license allowlist anti-tamper,
+  OTRF fail-closed identifier drop, sha256 provenance, real-intake replay,
+  off-by-default local source → tests).
+- [x] New Trust Boundaries row in `docs/threat-models/system-context.md`; new
+  data-handling row in `SECURITY.md`. Committed `8c74e73`.
+
+## Completed Slice
+
+Semantic-Layer Enablement Plan + OT-L2 / Supply-Chain Documentation (design/threat-model only, no code):
+
+- [x] Documented that **OT-L2** (full training-data curation) stays gated to
+  fine-tuning, with how-to-address; distinguished it from dataset-onboarding
+  supply chain. Added **OT-L10** (L6.1 — dataset corpus supply chain) with
+  demo-scope controls and a "Before Non-Demo Dataset Onboarding" remediation in
+  `docs/threat-models/llm-agent-threat-model.md`.
+- [x] Added **OT-L11** (L1.1 — semantic classifier model-evasion / FP-DoS) per
+  spec 32 §9, with detector-not-gate containment and a "Before the Semantic
+  Firewall Ships" remediation. RR-L1 now points to spec 32
+  (`Llama-Prompt-Guard-2-86M`) as the gated control.
+- [x] Re-opened the `I4/RR-I4/OT-7` treatment in
+  `docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md` (named control +
+  OT-L11); added Non-demo dataset onboarding (OT-L10) to the Gated Treatments
+  table.
+- [x] Updated `docs/threat-models/mitigations-traceability.md` Open Threats
+  (OT-L10, OT-L11) and the OT-7 row. Owner signatures pending on OT-L10/OT-L11.
+
 ## Next Active Slice
 
-**Option A Closeout — Part B (its own small slice): threat-model traceability
-touch.** Record the new third-party-dataset onboarding trust boundary (OTRF MIT
-lab telemetry) and its controls (in-code license allowlist, fail-closed field
-projection, no-leak regression tests, sanitization-at-intake) in
-`docs/threat-models/mitigations-traceability.md`; confirm STRIDE/LINDDUN/
-supply-chain coverage and SECURITY.md alignment. Then:
-
-- **Semantic-layer enablement plan** targeting **Meta Prompt Guard 2 — 86M**
-  (multilingual; owner-approved 2026-05-30, Llama Community License accepted; see
-  `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` §3).
-
-Beyond that: Recommended choices should be selected explicitly before
-implementation:
+The dataset-onboarding thread and the semantic-layer enablement plan are complete
+(all design/threat-model only; no gated code built). Remaining work is gated and
+must be selected explicitly before implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as

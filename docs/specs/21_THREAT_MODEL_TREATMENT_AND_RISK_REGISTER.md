@@ -102,7 +102,7 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 | I1 | Raw PHI/PII reaches LLM | **Mitigated** (current) | n/a | n/a | Already implemented via Stage 1 tokenization. No further treatment required |
 | I2 / DI3 | Security telemetry leaks to non-analyst roles | **Mitigated** (current) | n/a | n/a | Already implemented via `render_role_view()`. No further treatment required |
 | I3 / OT-6 | No test asserts `TokenVault` is never serialized | **Mitigated** | Slice D | Project owner (POC), 2026-05-24 | `tests/test_token_vault_isolation.py` added |
-| I4 / RR-I4 / OT-7 | Prompt firewall is pattern-based, bypassable | **Gated Mitigation** | Gated (real LLM) | Project owner (POC), 2026-05-24 | Semantic classifier or LLM-based output review. Not warranted while `DeterministicDemoProvider` is the only provider |
+| I4 / RR-I4 / OT-7 | Prompt firewall is pattern-based, bypassable | **Gated Mitigation** (control now specified) | Gated (real LLM) | Project owner (POC), 2026-05-24; control selection 2026-05-30 | Named control: local semantic classifier `meta-llama/Llama-Prompt-Guard-2-86M` per [spec 32](32_SEMANTIC_PROMPT_INJECTION_LAYER.md) (design-only, detector-not-gate). The classifier adds a new surface tracked as OT-L11 (model evasion / FP-DoS). Build still not warranted while `DeterministicDemoProvider` is the only provider; gated on real-LLM rollout |
 | D1 / OT-2 | No HTTP request body size limit | **Mitigated** | Slice B | Project owner (POC), 2026-05-24 | `/cases` now rejects oversized bodies with 413; covered by `tests/test_api_limits.py` |
 | D2 / OT-3 | No rate limiting / concurrency cap | **Mitigated** | Slice B | Project owner (POC), 2026-05-24 | In-process rate limiter and triage semaphore added; covered by `tests/test_api_limits.py` |
 | D3 | Eval fixture path traversal | **Mitigated** (current) | n/a | n/a | Already implemented via `_resolve_under_approved_dir()`. No further treatment required |
@@ -329,7 +329,8 @@ These treatments are **Mitigate** decisions whose implementation is deliberately
 
 | Gate (precondition) | Treatments triggered | Spec entry point |
 |---------------------|----------------------|-------------------|
-| Real LLM provider integration | OT-L3 (LLM DoS), OT-L7 (output regurgitation), I4/RR-I4/OT-7 (semantic firewall) | New spec required before provider work begins |
+| Real LLM provider integration | OT-L3 (LLM DoS), OT-L7 (output regurgitation), I4/RR-I4/OT-7 + OT-L11 (semantic firewall — [spec 32](32_SEMANTIC_PROMPT_INJECTION_LAYER.md), `Llama-Prompt-Guard-2-86M`) | Spec 32 authored (design-only); build gated on provider work |
+| Non-demo dataset onboarding | OT-L10 (corpus provenance: manifest signing, CI license/PII scan gate, integrity verification) | Per [LLM threat model "Before Non-Demo Dataset Onboarding"](../threat-models/llm-agent-threat-model.md#before-non-demo-dataset-onboarding-addresses-ot-l10) |
 | Live JWKS / IdP integration | S4 / OT-9 live-integration residuals after local verifier (JWKS fetch, discovery, production tenant operations) | New spec required before live provider work begins |
 | RAG / retrieval layer | OT-L1 (indirect prompt injection) | Per [LLM threat model "Before RAG"](../threat-models/llm-agent-threat-model.md#before-rag--retrieval) |
 | Memory / write-back layer | OT-L8 (memory schema, approval, scoping) | Per [LLM threat model "Before Memory"](../threat-models/llm-agent-threat-model.md#before-memory--write-back) |

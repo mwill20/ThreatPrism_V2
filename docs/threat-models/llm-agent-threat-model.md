@@ -104,7 +104,23 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 
 **Severity.** Current: Low (demo provider doesn't follow instructions). Post real-LLM: **High**.
 
-**Residual risk (RR-L1).** Pattern-based detection remains bypassable by paraphrase, encoding, language switching, or multi-turn manipulation. Detected quarantine patterns now halt service-layer triage before provider execution; RR-L1 is limited to undetected semantic bypass.
+**Residual risk (RR-L1).** Pattern-based detection remains bypassable by paraphrase, encoding, language switching, or multi-turn manipulation. Detected quarantine patterns now halt service-layer triage before provider execution; RR-L1 is limited to undetected semantic bypass. The planned remediation is the semantic classifier in [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) (`meta-llama/Llama-Prompt-Guard-2-86M`), gated on real-LLM rollout — which itself introduces the new attacker surface modeled in L1.1.
+
+---
+
+### L1.1 — Semantic Prompt-Injection Classifier (Planned, Gated) — Model Evasion & False-Positive DoS
+
+**Status.** Design-only, gated on real-LLM rollout. See [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md). The chosen detector is `meta-llama/Llama-Prompt-Guard-2-86M` — a local encoder classifier, no egress.
+
+**New attacker surface introduced by the control.** Adding an ML classifier to the intake path creates its own adversary surface (MITRE ATLAS model-evasion tactics):
+- **Evasion (AML.T0015 craft-adversarial-data / model evasion):** adversarial paraphrase or obfuscation crafted to score *below* the quarantine threshold — the classifier is a detector, not a guarantee, so RR-L1 is narrowed but not fully closed.
+- **False-positive DoS:** input crafted to *trigger* the classifier on benign-looking SOC text (trigger words like `ignore`, `system`, `powershell -enc …`), forcing legitimate cases into quarantine/manager-review — an availability attack.
+
+**Containment (per spec 32 §2).** The classifier is a **detector, not a gate**: its probabilistic score feeds a deterministic threshold, it may only ever *escalate* (`max(deterministic, semantic)`), never de-escalate, and the existing deterministic guardrails remain authoritative. Quarantine-on-high-score is the fail-safe direction (a false positive blocks a legitimate case — annoying, recoverable — never executes an unsafe action). The false-positive rate is bounded by the NotInject-style SOC trigger-word test (spec 32 §8 item 4). As an encoder, the model has no generative/instruction-following head, so the classifier itself cannot be prompt-injected — only evaded or over-triggered.
+
+**How to address.** Pin the model revision by SHA, load in eval mode (deterministic), assert no network egress, and ship the §8 evasion-recovery + false-positive-bound tests before enabling. Re-open the I4/RR-I4/OT-7 treatment in [spec 21](../specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) when the layer lands.
+
+**Severity.** N/A today (not built). Post real-LLM: **Medium** (evasion keeps RR-L1 partially open; FP-DoS is a bounded availability risk). Tracked as OT-L11.
 
 ---
 
@@ -153,6 +169,20 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 
 **Severity.** Current: N/A. Post-fine-tuning: **High**. Tracked as OT-L2.
 
+**Why OT-L2 stays gated to fine-tuning.** OT-L2 covers *training* data — it only
+becomes a live threat if a fine-tuning pipeline is ever built, which does not exist
+today (no case data is fed back into model training). Onboarding a third-party
+dataset as *demo/eval replay* data (Synthea, deepset, OTRF) is a **different**
+supply-chain facet, tracked separately as **OT-L10** under L6 below. The demo-scope
+onboarding controls (in-code license allowlist, fail-closed identifier projection,
+`sha256` provenance) mitigate OT-L10 for fake/synthetic data; they do **not** satisfy
+OT-L2's training-curation requirements, and the two must not be conflated.
+
+**How to address OT-L2 (when fine-tuning is added):** land a new spec implementing
+the four "Required if fine-tuning is added" controls above, add adversarial-input
+regression fixtures under `tests/evals/`, and re-open the Fine-tuning gate in
+[`docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md`](../specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md).
+
 ---
 
 ### L5 — Model Denial of Service
@@ -178,6 +208,33 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 **Severity.** Current: Low. Post real-LLM: **High**.
 
 **State.** Mitigated for POC scope. Before shared deployment or real LLM integration, dependency scanning should become a CI-visible gate after the baseline is reviewed.
+
+---
+
+### L6.1 — Dataset Corpus Supply Chain (Third-Party Onboarding)
+
+**Scenario.** A third-party dataset onboarded into the demo/eval corpus carries a
+tampered license claim, smuggles real identifiers (lab hostnames, SIDs) into
+committed fixtures, or injects mislabeled/adversarial content that later becomes
+model-visible input. This is distinct from L6 (compromised SDK/weights) and L4
+(training poisoning): it is the **provenance and content integrity of an onboarded
+data corpus**.
+
+**Current controls (demo scope).**
+- Code-authoritative license allowlist (`DATASET_ALLOWED_LICENSE_REVIEW` in [demo/seeding.py](../../src/threatprism/demo/seeding.py)) — the manifest cannot self-certify a license.
+- Per-family sanitization: Synthea column-projection + SSN tokenization; deepset scoped injection-retention; OTRF fail-closed `SAFE_FIELDS` drop of every identifier ([tools/fixture_factory/adapters/otrf_adapter.py](../../tools/fixture_factory/adapters/otrf_adapter.py)).
+- `sha256` provenance per fixture; raw rows never committed (gitignored `external_datasets/`).
+- Replay through the real four-layer guardrail pipeline at intake.
+- Traceability: see "Third-Party Dataset Onboarding" in [mitigations-traceability.md](mitigations-traceability.md).
+
+**Residual / open (OT-L10).** These controls are human-review-based and tuned for
+**fake/synthetic** data. There is no cryptographic manifest signing, no automated
+license/PII scan as a CI gate, and no formal corpus-integrity verification —
+acceptable while every onboarded source is fake/synthetic, but insufficient before
+any **non-demo** dataset is onboarded. How to address: see
+"Before Non-Demo Dataset Onboarding" below.
+
+**Severity.** Current: Low (all sources fake/synthetic). Pre-non-demo: **Medium-High**. Tracked as OT-L10.
 
 ---
 
@@ -289,6 +346,8 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 | OT-L7 | L7 — No general data-regurgitation detection in output (current regex is credential-shape only) | High (post real-LLM) | Project owner (POC), 2026-05-24 | Before real LLM rollout |
 | OT-L8 | Memory/write-back layer entirely unspecified — see preconditions below | High | Project owner (POC), 2026-05-24 | Before any memory implementation |
 | OT-L9 | Cross-tenant isolation entirely unspecified — see preconditions below | High | Project owner (POC), 2026-05-24 | Before any multi-tenant work |
+| OT-L10 | L6.1 — Third-party dataset onboarding has only demo-scope provenance controls (no manifest signing, no CI license/PII scan gate, no corpus-integrity verification) | Medium-High (pre-non-demo) | Project owner (POC), 2026-05-30 (awaiting signature) | Before any non-demo dataset is onboarded |
+| OT-L11 | L1.1 — Planned semantic prompt-injection classifier adds a model-evasion + false-positive-DoS surface | Medium (post real-LLM) | Project owner (POC), 2026-05-30 (awaiting signature) | Before the semantic firewall (spec 32) ships |
 
 ---
 
@@ -331,11 +390,30 @@ Before any of these features land in code, this threat model must be re-reviewed
 - Cross-tenant retrieval prevention
 - Tests for: tenant ID forgery, cross-tenant data leak in metrics/queues/reports, tenant deletion completeness
 
+### Before Non-Demo Dataset Onboarding (addresses OT-L10)
+
+The demo-scope dataset onboarding controls are tuned for fake/synthetic sources.
+Before any real/non-demo dataset is onboarded into `fixtures/curated_datasets/`:
+
+- Cryptographic manifest signing (e.g., Sigstore/cosign) so provenance is verifiable, not just `sha256`-hashed
+- An automated license + PII/identifier scan as a CI-visible promotion gate (not human-review-only)
+- A per-source data-classification + retention decision (ties to the LINDDUN non-demo gates in [healthcare-data-threat-model.md](healthcare-data-threat-model.md))
+- Promote OT-L10 from Accept(demo) to Mitigate in [spec 21](../specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) and add corpus-integrity regression tests
+
+### Before the Semantic Firewall Ships (addresses OT-L11 / RR-L1)
+
+Per [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), gated on real-LLM rollout:
+
+- Pin the model revision by commit SHA; load in eval mode (deterministic, no sampling); assert no network egress
+- Keep the detector-not-gate contract: deterministic threshold, escalate-only `max(deterministic, semantic)`, deterministic guardrails remain authoritative
+- Ship the §8 tests: RR-L1 evasion recovery (≥ defined fraction of deepset RR-L1 rows), no-regression on caught rows, and the NotInject-style false-positive/over-defense bound
+- Re-open the I4/RR-I4/OT-7 treatment in spec 21 and record the model id + revision in the case audit trail on any semantic detection
+
 ---
 
 ## Out-of-Scope Improvements
 
-- **Semantic prompt-injection classifier** to replace or supplement pattern firewall — research-grade work, defer until real LLM lands
+- **Semantic prompt-injection classifier** — no longer merely out-of-scope: it is now a **planned, gated** control (`meta-llama/Llama-Prompt-Guard-2-86M`) specified in [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) and modeled as L1.1 / OT-L11. Build is gated on real-LLM rollout.
 - **LLM-based output review** as a second-pass check on `scan_output_policy()` — adds dependency on the thing being checked, requires careful design
 - **Prompt template versioning** with hash-chained history — useful for forensic reconstruction; nice-to-have
 - **Token-budget enforcement** at the provider abstraction layer — should live in the `TriageProvider` interface once real providers exist
@@ -346,6 +424,6 @@ Before any of these features land in code, this threat model must be re-reviewed
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
-| 2026-05-24 | Codex | Slice E reconciled | Exact-pinned direct dependencies, added transitive lock file, added advisory dependency audit hook, and closed RR-L2 / OT-L6 for POC scope. Real-provider supply chain review remains required before live LLM work. |
+| 2026-05-30 | Claude (auto-generated, awaiting human review) | Semantic-layer enablement + dataset supply-chain refresh | Added L6.1 / **OT-L10** (third-party dataset corpus supply chain) with demo-scope controls and "Before Non-Demo Dataset Onboarding" remediation; clarified OT-L2 stays gated to fine-tuning and how to address it. Added L1.1 / **OT-L11** (semantic classifier model-evasion + false-positive DoS) per spec 32 §9, with the detector-not-gate containment and "Before the Semantic Firewall Ships" remediation. RR-L1 now points to spec 32 (`Llama-Prompt-Guard-2-86M`) as the gated remediation. Owner signatures pending. |
 | 2026-05-24 | Codex | Slice G implemented | Prompt firewall quarantine now blocks service-layer triage before provider execution and is covered by `tests/test_quarantine_enforcement.py`. OT-L5 closed; RR-L1 remains for semantic prompt-injection bypass. |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2 format. Reframed under MITRE ATLAS + OWASP LLM Top 10. Added explicit walk through LLM01-LLM10 + 11 ATLAS tactics. Surfaced 9 open threats (OT-L1 through OT-L9) and 3 residual risks. Critical post-real-LLM finding: OT-L4 (tool/plugin design entirely absent). Initially surfaced service-layer quarantine enforcement as a gap, later closed by Slice G. |

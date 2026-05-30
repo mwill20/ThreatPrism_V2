@@ -156,7 +156,7 @@ These threats have been identified in the three lens files but no code-level con
 | Threat ID | Description | Severity | Required Before | Proposed Test |
 |-----------|-------------|----------|------------------|---------------|
 | OT-1 | T1 — SQLite blob tampering not detectable | Medium | Non-demo data | `Proposed: tests/test_audit_integrity.py` |
-| OT-7 | I4 — No semantic prompt-injection classifier | High (post real-LLM) | Real LLM rollout | `Proposed: tests/test_semantic_prompt_firewall.py` |
+| OT-7 | I4 — No semantic prompt-injection classifier; control now specified (`Llama-Prompt-Guard-2-86M`, [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), design-only) | High (post real-LLM) | Real LLM rollout | `Proposed: tests/test_semantic_prompt_firewall.py` |
 | OT-8 | R1 — No append-only audit log, no export, no retention | High | Non-demo data | `Proposed: tests/test_audit_integrity.py` |
 | OT-L1 | L2 — No indirect prompt injection defenses | High | RAG implementation | `Proposed: tests/test_retrieval_guardrails.py` |
 | OT-L2 | L4 — No training-data curation / provenance | High | Fine-tuning | `Proposed: tests/test_training_curation.py` |
@@ -165,6 +165,8 @@ These threats have been identified in the three lens files but no code-level con
 | OT-L7 | L7 — No general data-regurgitation detection in output | High (post real-LLM) | Real LLM rollout | `Proposed: tests/test_output_regurgitation.py` |
 | OT-L8 | Memory/write-back unspecified | High | Memory implementation | `Proposed: tests/test_memory_guardrails.py` |
 | OT-L9 | Cross-tenant isolation unspecified | High | Multi-tenancy | `Proposed: tests/test_tenant_isolation.py` |
+| OT-L10 | L6.1 — Third-party dataset onboarding has only demo-scope provenance controls (no manifest signing, no CI license/PII scan gate, no corpus-integrity verification) | Medium-High (pre-non-demo) | Non-demo dataset onboarding | `Proposed: tests/test_dataset_corpus_integrity.py` |
+| OT-L11 | L1.1 — Planned semantic prompt-injection classifier adds model-evasion + false-positive-DoS surface ([spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md)) | Medium (post real-LLM) | Semantic firewall ships | `Proposed: tests/test_semantic_prompt_firewall.py` |
 | OT-LD1 | NC2 — System not HIPAA-compliant for real PHI | Critical (real PHI) | Real PHI handling | External compliance review |
 | OT-LD2 | RR-LD1 — `raw_value_hash` unsalted | Medium | Non-demo data | `Proposed: tests/test_hash_salting.py` |
 | OT-LD5 | NC3 — Minimum-necessary policy review | Medium | Non-demo deployment | Review only |
@@ -199,7 +201,8 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
-| 2026-05-30 | Claude (auto-generated, awaiting human review) | Third-party dataset onboarding traceability added | OTRF Security-Datasets (MIT lab telemetry) onboarding introduced a supply-chain / data-provenance trust boundary. Added a "Third-Party Dataset Onboarding (Curated Datasets)" section mapping the code-authoritative license allowlist, fail-closed identifier-drop projection, `sha256` provenance, real-intake replay, and off-by-default `LocalDatasetSource` to `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, and `tests/test_local_dataset_seeding.py`. OT-L2 (full training-data curation) remains gated to fine-tuning; a dedicated lens-level supply-chain threat ID (currently mapped descriptively to L4/L5) is recommended before any non-demo dataset is onboarded. |
+| 2026-05-30 | Claude (auto-generated, awaiting human review) | Third-party dataset onboarding traceability added | OTRF Security-Datasets (MIT lab telemetry) onboarding introduced a supply-chain / data-provenance trust boundary. Added a "Third-Party Dataset Onboarding (Curated Datasets)" section mapping the code-authoritative license allowlist, fail-closed identifier-drop projection, `sha256` provenance, real-intake replay, and off-by-default `LocalDatasetSource` to `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, and `tests/test_local_dataset_seeding.py`. OT-L2 (full training-data curation) remains gated to fine-tuning; the recommended dedicated supply-chain threat ID is now formalized as **OT-L10** (L6.1) in the LLM lens with a "Before Non-Demo Dataset Onboarding" remediation. |
+| 2026-05-30 | Claude (auto-generated, awaiting human review) | Semantic-layer enablement plan reconciled | Added **OT-L10** (dataset corpus supply chain) and **OT-L11** (semantic classifier model-evasion / FP-DoS) to the Open Threats table; updated OT-7 to name the spec 32 control (`Llama-Prompt-Guard-2-86M`). Mirrors the LLM lens L6.1/L1.1 additions and the spec 21 re-opened I4/RR-I4/OT-7 treatment. Owner signatures pending. |
 | 2026-05-26 | Codex | Production token verifier implementation traceability updated | Closed S4 for local no-network verifier scope with fake JWKS tests. Live JWKS fetch and live IdP integration remain gated. |
 | 2026-05-26 | Codex | Production token verifier design traceability updated | Added S4 design-only verifier entry and proposed future implementation tests. Runtime token verification remains gated. |
 | 2026-05-26 | Codex | Production identity readiness traceability updated | Added S3 readiness control references and mapped them to `tests/test_production_identity_readiness.py` plus runtime guard checks. |

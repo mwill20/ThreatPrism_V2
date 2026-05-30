@@ -97,16 +97,41 @@ requires an unsanitized input, which is out of scope for curated-fixture replay.
 
 ## 8. Interfaces
 
-- Startup: set `THREATPRISM_DEMO_SEED=true` (local/demo only).
-- CLI: `python -m threatprism.demo.seed_cli [--source curated]
+- Startup: set `THREATPRISM_DEMO_SEED=true` (local/demo only). The startup hook
+  only ever builds the committed, reviewed sources (`CuratedFixtureSource` +
+  `CuratedDatasetSource`); it never activates the local source.
+- CLI: `python -m threatprism.demo.seed_cli
+  [--source curated | curated_datasets | local | all] [--limit N]
   [--skip-existing | --no-skip-existing]`.
 
-## 9. Future extension
+## 9. Future extension and the local developer source
 
 A dataset-ingest source implements `FixtureSource.list_demo_fixtures()` and
 returns `SeedCase` objects whose payloads passed its own review gate. It plugs
-into `DemoSeeder.seed([...])` with no seeder changes. Adding such a source
-requires re-opening the relevant threat treatment before shipping.
+into `DemoSeeder.seed([...])` with no seeder changes. Adding a *committed*
+source requires re-opening the relevant threat treatment before shipping.
+
+`LocalDatasetSource` is the implemented developer-loop instance of this seam. It
+replays uncommitted `.jsonl` staging files under gitignored `external_datasets/`
+on the fly, so a reviewed projection produced by the fixture factory can be
+exercised end-to-end **without committing or promoting it**. Because that data
+is local-only and unreviewed, it is deliberately OFF by default and carries
+extra guards:
+
+- It is never the default `--source`, never part of `--source all`, and never
+  part of the startup seed hook — it must be selected explicitly with
+  `--source local`.
+- `_ensure_source_allowed()` in `seed_cli.py` refuses it in `prod`/`production`.
+- `--limit N` bounds how many staged fixtures are replayed (valid only with
+  `--source local`).
+- It only ever reads; it writes and commits nothing (`external_datasets/**` is
+  gitignored).
+
+The safety net is unchanged: replayed cases still pass the full four-layer
+guardrail pipeline at intake, so even unreviewed local content is tokenized,
+firewalled, and evidence-validated before persistence. There is no manifest or
+license gate here precisely because this path is non-promoting and local-only;
+committing any of this data still requires the curated/dataset review gates.
 
 ## 10. Tests
 

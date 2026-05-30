@@ -100,6 +100,17 @@
       "notes": "Preferred first prompt-injection CSV source family after manual license and safety review."
     },
     {
+      "source_id": "deepset_prompt_injections",
+      "name": "deepset Prompt Injections",
+      "url": "https://huggingface.co/datasets/deepset/prompt-injections",
+      "category": "prompt_injection_research",
+      "intended_use": "Manually reviewed labelled prompt-injection corpus (Apache-2.0). Injection text is retained un-redacted in committed fixtures so the runtime prompt firewall is exercised on replay; the bypass rate demonstrates RR-L1.",
+      "license_review_required": true,
+      "allowed_for_auto_download": false,
+      "raw_data_committed": false,
+      "notes": "First promoted prompt-injection source family (Slice 6). Source-scoped exception to fixture redaction; see tools/fixture_factory/adapters/deepset_adapter.py and docs/DATASET.md."
+    },
+    {
       "source_id": "mindgard_evasion_samples",
       "name": "Mindgard Evasion Samples",
       "url": "https://huggingface.co/datasets/Mindgard/evaded-prompt-injection-and-jailbreak-samples",

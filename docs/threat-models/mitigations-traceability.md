@@ -60,7 +60,7 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 
 | Threat ID | Mitigation | Code Reference | State | Test File |
 |-----------|------------|----------------|-------|-----------|
-| I4 / L1 | 6 regex rules detect prompt injection in inbound text; `ignore_previous`, `system_prompt_request`, `prompt_exfil` trigger quarantine and block provider execution before triage generation | `sanitize_text()` at [prompt_firewall.py:26](../../src/threatprism/guardrails/prompt_firewall.py); `PROMPT_INJECTION_RULES` at [prompt_firewall.py:8-15](../../src/threatprism/guardrails/prompt_firewall.py); `sanitize_value()` at [prompt_firewall.py:39](../../src/threatprism/guardrails/prompt_firewall.py); quarantine enforcement in `run_triage()` at [cases/service.py:145](../../src/threatprism/cases/service.py) | Partial (RR-I4, RR-L1 semantic bypass only) | `tests/test_guardrails.py`, `tests/test_eval_harness.py`, `tests/test_quarantine_enforcement.py` |
+| I4 / L1 | 6 regex rules detect prompt injection in inbound text; `ignore_previous`, `system_prompt_request`, `prompt_exfil` trigger quarantine and block provider execution before triage generation. RR-L1 bypass rate measured against a real third-party corpus (deepset/prompt-injections): 1 quarantine, 5 redact, 6 unrecognized — the unrecognized rows reach the inert provider but never leak into reports/audit. | `sanitize_text()` at [prompt_firewall.py:26](../../src/threatprism/guardrails/prompt_firewall.py); `PROMPT_INJECTION_RULES` at [prompt_firewall.py:8-15](../../src/threatprism/guardrails/prompt_firewall.py); `sanitize_value()` at [prompt_firewall.py:39](../../src/threatprism/guardrails/prompt_firewall.py); quarantine enforcement in `run_triage()` at [cases/service.py:145](../../src/threatprism/cases/service.py) | Partial (RR-I4, RR-L1 semantic bypass only) | `tests/test_guardrails.py`, `tests/test_eval_harness.py`, `tests/test_quarantine_enforcement.py`, `tests/test_deepset_injection_corpus.py` |
 
 ### Healthcare Safeguard (Stage 1 Tokenization)
 
@@ -163,7 +163,7 @@ For tracking purposes only. Full details in the source files.
 |---------------|-------------|---------|
 | RR-R1 | STRIDE | Audit events not tamper-evident (stored in same blob they describe) |
 | RR-I4 | STRIDE | Prompt firewall is pattern-based, bypassable |
-| RR-L1 | LLM | Pattern firewall is bypassable by semantic prompt injection; detected quarantine patterns now block provider execution |
+| RR-L1 | LLM | Pattern firewall is bypassable by semantic prompt injection; detected quarantine patterns now block provider execution. Bypass rate measured against deepset/prompt-injections corpus (6 of 12 promoted rows unrecognized); semantic layer specified in `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` |
 | RR-L3 | LLM | Output regex catches only known credential shapes |
 | RR-LD1 | LINDDUN | `raw_value_hash` is unsalted SHA-256 |
 | RR-LD2 | LINDDUN | Role-view masking is regex-based; novel formats may leak |
@@ -188,4 +188,5 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 | 2026-05-26 | Codex | Production dashboard hardening traceability updated | Added T4/I5 dashboard static-surface controls and mapped them to `tests/test_dashboard_ui.py`. |
 | 2026-05-24 | Codex | Slices A, B, D, E, and F traceability updated | Closed fail-closed auth, API resource controls, token-vault isolation tests, Stage 1 non-rehydration tests, pattern refresh fixtures, and dependency pinning entries for POC scope. |
 | 2026-05-24 | Codex | Slice G traceability updated | Added `tests/test_quarantine_enforcement.py` as coverage for prompt-firewall quarantine enforcement and removed OT-L5 from open threats. |
+| 2026-05-29 | Claude (auto-generated, awaiting human review) | Slice 6 traceability updated | Promoted deepset/prompt-injections corpus (12 fixtures) gives RR-L1 a measured bypass baseline; added `tests/test_deepset_injection_corpus.py` coverage and referenced the proposed semantic layer spec (`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`). |
 | 2026-05-24 | Claude (auto-generated, awaiting human review) | Draft — needs review | Refreshed from v0.1 to v0.2. Threat IDs now reference the STRIDE / LLM / LINDDUN files directly. Code references updated to `file:function` granularity verified against commit `fea5f9f`. Added Open Threats section with proposed test names for each unmitigated threat. Added Coverage Gaps section surfacing 2 mitigated-but-untested threats. |

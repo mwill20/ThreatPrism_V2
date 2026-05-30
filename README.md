@@ -295,6 +295,15 @@ The tracked curated fixture set is under `fixtures/curated/` and is gated by
 hand-reviewed fake fixtures for SOC, healthcare-context exposure,
 prompt-injection, and evidence-conflict/GRC review.
 
+Sanitized derivatives of reviewed third-party *synthetic* datasets live under
+`fixtures/curated_datasets/` (a separate trust gate that accepts only an in-code
+license allowlist): 12 column-projected Synthea healthcare fixtures and 12
+`deepset/prompt-injections` fixtures. The deepset set deliberately retains
+attacker-controlled injection text un-redacted so the runtime prompt firewall is
+exercised on replay; its bucket mix (1 quarantine, 5 redact, 6 unrecognized)
+gives RR-L1 a measured baseline for the planned semantic layer
+(`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`). See `docs/DATASET.md`.
+
 Run only the demo scenario and API contract checks:
 
 ```powershell

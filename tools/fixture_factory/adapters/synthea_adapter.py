@@ -20,6 +20,30 @@ SOURCE_ID = "synthea_sample_data"
 SOURCE_FAMILY = "synthea"
 ADAPTER_NAME = "synthea_adapter"
 
+# Regex-based PHI detection cannot catch generated names or free-text street
+# addresses, so Synthea direct identifiers are removed by a fail-closed column
+# allowlist before the row enters the sanitization pipeline. Only non-identifying
+# demographic/financial fields and the SSN (which the healthcare safeguard
+# tokenizes, demonstrating Stage-1 redaction) are retained; every other column —
+# names, address, city, county, ZIP, geo, birth/death dates, license numbers — is
+# dropped so it can never reach the stored fixture, evidence excerpt, or metadata.
+SAFE_COLUMNS = frozenset(
+    {
+        "Id",
+        "SSN",
+        "GENDER",
+        "MARITAL",
+        "RACE",
+        "ETHNICITY",
+        "HEALTHCARE_EXPENSES",
+        "HEALTHCARE_COVERAGE",
+    }
+)
+
+
+def _project_safe_columns(row: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in row.items() if key in SAFE_COLUMNS}
+
 
 def convert(input_path: Path, limit: int) -> list[HealthcareExposureFixture]:
     rows = load_source_rows(input_path, limit)
@@ -27,7 +51,7 @@ def convert(input_path: Path, limit: int) -> list[HealthcareExposureFixture]:
     input_root = input_path if input_path.is_dir() else input_path.parent
     for idx, (source_file, record_index, row) in enumerate(rows):
         fixture_id = stable_fixture_id("synthea_healthcare", idx)
-        sanitized = sanitize_fixture_source(row, case_id=fixture_id)
+        sanitized = sanitize_fixture_source(_project_safe_columns(row), case_id=fixture_id)
         payload = _build_payload(fixture_id, sanitized.value, sanitized.healthcare_summary)
         fixture = HealthcareExposureFixture(
             fixture_id=fixture_id,

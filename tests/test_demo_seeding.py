@@ -144,7 +144,10 @@ def test_startup_hook_seeds_when_enabled() -> None:
     response = client.get("/cases")
 
     assert response.status_code == 200
-    assert len(response.json()) == 4
+    # Startup seeds both wired sources: 4 hand-authored curated fixtures plus the
+    # dataset derivatives -- 12 promoted Synthea + 12 promoted deepset
+    # prompt-injection fixtures (see api/app.py seed hook).
+    assert len(response.json()) == 28
 
 
 def test_startup_hook_disabled_by_default() -> None:

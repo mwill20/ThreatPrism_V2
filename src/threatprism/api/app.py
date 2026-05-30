@@ -28,7 +28,7 @@ from threatprism.cases.schemas import (
 )
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
-from threatprism.demo.seeding import CuratedFixtureSource, DemoSeeder
+from threatprism.demo.seeding import CuratedDatasetSource, CuratedFixtureSource, DemoSeeder
 from threatprism.csi.schemas import (
     AIVsHumanDivergenceEnvelope,
     CognitiveObjectDetailEnvelope,
@@ -130,7 +130,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     if active_settings.demo_seed_enabled:
         seeder = DemoSeeder(app.state.case_service)
-        seed_result = seeder.seed([CuratedFixtureSource()])
+        seed_result = seeder.seed([CuratedFixtureSource(), CuratedDatasetSource()])
         logger.info(
             "Demo seed complete: %d seeded, %d skipped (existing).",
             seed_result.seeded_count,

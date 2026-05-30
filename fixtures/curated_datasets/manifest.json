@@ -1,0 +1,65 @@
+{
+  "manifest_version": "curated-datasets/0.1",
+  "generated_fixture_auto_scan": false,
+  "promotion_policy": {
+    "raw_external_datasets_committed": false,
+    "auto_downloads_allowed": false,
+    "live_provider_output_allowed": false,
+    "real_data_allowed": false,
+    "third_party_synthetic_allowed": true,
+    "standard_validation_auto_scans_generated_folder": false
+  },
+  "license_review_note": "Accepted license-review statuses are enforced by the runtime loader (DATASET_ALLOWED_LICENSE_REVIEW in src/threatprism/demo/seeding.py), not by this manifest. Fields below are descriptive provenance only.",
+  "fixtures": [
+    {
+      "fixture_id": "synthea_healthcare",
+      "path": "fixtures/curated_datasets/synthea_healthcare.jsonl",
+      "fixture_count": 12,
+      "source_family": "synthea",
+      "source_dataset": "synthea_sample_data",
+      "source_sample_status": "third_party_synthetic_column_projected",
+      "license_review_status": "approved_third_party_apache2_synthetic",
+      "license_review_reference": "docs/DATASET.md -> Synthea (synthea_sample_data), reviewed 2026-05-29",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "mwill-AImission",
+      "reviewed_at": "2026-05-29",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "allowed_uses": [
+        "demo_review",
+        "fixture_factory_regression",
+        "api_schema_validation"
+      ]
+    },
+    {
+      "fixture_id": "deepset_prompt_injection",
+      "path": "fixtures/curated_datasets/deepset_prompt_injection.jsonl",
+      "fixture_count": 12,
+      "source_family": "deepset",
+      "source_dataset": "deepset/prompt-injections",
+      "source_sample_status": "third_party_synthetic_injection_text_retained",
+      "license_review_status": "approved_third_party_apache2_synthetic",
+      "license_review_reference": "docs/DATASET.md -> deepset/prompt-injections, reviewed 2026-05-29",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "mwill-AImission",
+      "reviewed_at": "2026-05-29",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "injection_text_retained": true,
+      "injection_text_retention_reason": "Source-scoped exception (see deepset_adapter docstring and docs/DATASET.md): attacker-controlled injection strings are kept un-redacted so the runtime prompt firewall is exercised on replay. Credential, healthcare, and infrastructure sanitization still apply.",
+      "deterministic_firewall_bucket_distribution": {
+        "quarantine": 1,
+        "redact": 5,
+        "none": 6
+      },
+      "residual_risk_demonstrated": "RR-L1 (deterministic firewall misses semantic injections; see docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md)",
+      "allowed_uses": [
+        "demo_review",
+        "fixture_factory_regression",
+        "api_schema_validation"
+      ]
+    }
+  ]
+}

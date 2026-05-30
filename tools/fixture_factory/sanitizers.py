@@ -47,17 +47,37 @@ class FixtureSanitizationResult:
     removed_fields: list[str] = field(default_factory=list)
 
 
-def sanitize_fixture_source(value: Any, *, case_id: str | None = None) -> FixtureSanitizationResult:
+def sanitize_fixture_source(
+    value: Any,
+    *,
+    case_id: str | None = None,
+    apply_prompt_firewall: bool = True,
+) -> FixtureSanitizationResult:
     stripped, removed_fields, replacements = _strip_forbidden_fields(value)
-    prompt_result = sanitize_value(stripped)
-    healthcare_result = safeguard_value(prompt_result.value, case_id=case_id)
+    if apply_prompt_firewall:
+        prompt_result = sanitize_value(stripped)
+        prompt_value, prompt_flags, prompt_quarantined = (
+            prompt_result.value,
+            prompt_result.flags,
+            prompt_result.quarantined,
+        )
+    else:
+        # Deliberate, source-scoped exception: the prompt firewall is NOT run over
+        # the source text so attacker-controlled injection content survives intact
+        # into the committed fixture. The point is to give the *runtime* firewall
+        # live content to detect on replay (and to expose the rows it misses --
+        # RR-L1). Credential stripping, healthcare safeguard, and infrastructure
+        # normalization below still apply. Only approved third-party injection
+        # corpora may use this path.
+        prompt_value, prompt_flags, prompt_quarantined = stripped, [], False
+    healthcare_result = safeguard_value(prompt_value, case_id=case_id)
     normalized, infra_counts = _normalize_infrastructure(healthcare_result.value)
     for key, count in infra_counts.items():
         replacements[key] = replacements.get(key, 0) + count
     return FixtureSanitizationResult(
         value=normalized,
-        prompt_flags=prompt_result.flags,
-        prompt_quarantined=prompt_result.quarantined,
+        prompt_flags=prompt_flags,
+        prompt_quarantined=prompt_quarantined,
         healthcare_summary=healthcare_result.summary,
         replacements={key: replacements[key] for key in sorted(replacements)},
         removed_fields=sorted(removed_fields),

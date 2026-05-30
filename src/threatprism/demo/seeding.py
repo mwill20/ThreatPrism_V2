@@ -22,10 +22,18 @@ from threatprism.cases.service import CaseService
 
 
 CURATED_RELATIVE_ROOT = "fixtures/curated"
+DATASET_RELATIVE_ROOT = "fixtures/curated_datasets"
+LOCAL_DATASET_RELATIVE_ROOT = "external_datasets"
+DATASET_MANIFEST_VERSION = "curated-datasets/0.1"
 MANIFEST_FILENAME = "manifest.json"
 DEMO_REVIEW_USE = "demo_review"
 _SAFE_SAFETY_REVIEW = "approved_demo_safe"
 _SAFE_CONTENT_REVIEW = "approved_for_tests"
+
+# Authoritative allowlist of accepted license-review statuses for committed
+# third-party synthetic derivatives. This lives in code -- not in the manifest --
+# so a tampered manifest cannot self-certify a license it was never granted.
+DATASET_ALLOWED_LICENSE_REVIEW = frozenset({"approved_third_party_apache2_synthetic"})
 
 
 class CuratedFixtureLoadError(RuntimeError):
@@ -172,6 +180,118 @@ def _is_within(path: Path, root: Path) -> bool:
     except ValueError:
         return False
     return True
+
+
+class CuratedDatasetSource:
+    """Loads demo-review-approved derivatives of reviewed third-party synthetic datasets.
+
+    This is a parallel contract to :class:`CuratedFixtureSource`. It reads
+    ``fixtures/curated_datasets/`` and additionally requires an approved
+    third-party ``license_review_status`` (see ``DATASET_ALLOWED_LICENSE_REVIEW``).
+    The hand-authored curated contract deliberately rejects third-party licenses,
+    so committed synthetic derivatives onboard here instead.
+    """
+
+    name = "curated_datasets"
+
+    def __init__(self, *, repo_root: Path | None = None) -> None:
+        self._repo_root = (repo_root or _default_repo_root()).resolve()
+        self._dataset_root = (self._repo_root / DATASET_RELATIVE_ROOT).resolve()
+
+    def list_demo_fixtures(self) -> list[SeedCase]:
+        manifest = self._load_manifest()
+        seeds: list[SeedCase] = []
+        for entry in manifest.get("fixtures", []):
+            if not self._is_dataset_seedable(entry):
+                continue
+            fixture_path = self._resolve_dataset_path(str(entry.get("path", "")))
+            seeds.extend(
+                CuratedFixtureSource._read_seed_cases(str(entry["fixture_id"]), fixture_path)
+            )
+        seeds.sort(key=lambda seed: (seed.fixture_id, seed.source_case_id))
+        return seeds
+
+    def _load_manifest(self) -> dict[str, Any]:
+        manifest_path = self._dataset_root / MANIFEST_FILENAME
+        if not manifest_path.is_file():
+            raise CuratedFixtureLoadError(
+                f"Dataset manifest not found at {DATASET_RELATIVE_ROOT}/{MANIFEST_FILENAME}."
+            )
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise CuratedFixtureLoadError("Dataset manifest must be a JSON object.")
+        if manifest.get("manifest_version") != DATASET_MANIFEST_VERSION:
+            raise CuratedFixtureLoadError(
+                f"Dataset manifest must declare manifest_version {DATASET_MANIFEST_VERSION!r}."
+            )
+        return manifest
+
+    @staticmethod
+    def _is_dataset_seedable(entry: dict[str, Any]) -> bool:
+        if not CuratedFixtureSource._is_demo_seedable(entry):
+            return False
+        return entry.get("license_review_status") in DATASET_ALLOWED_LICENSE_REVIEW
+
+    def _resolve_dataset_path(self, candidate: str) -> Path:
+        normalized = candidate.replace("\\", "/")
+        if not normalized:
+            raise CuratedFixtureLoadError("Dataset fixture entry is missing a path.")
+        path = Path(normalized)
+        if path.is_absolute() or path.drive or ".." in path.parts:
+            raise CuratedFixtureLoadError(f"Unsafe dataset fixture path rejected: {candidate}")
+        if path.suffix.lower() != ".jsonl":
+            raise CuratedFixtureLoadError(f"Dataset fixtures must be .jsonl files: {candidate}")
+        resolved = (self._repo_root / path).resolve()
+        if not _is_within(resolved, self._dataset_root):
+            raise CuratedFixtureLoadError(
+                f"Dataset fixture path escapes {DATASET_RELATIVE_ROOT}: {candidate}"
+            )
+        if not resolved.is_file():
+            raise CuratedFixtureLoadError(f"Dataset fixture file not found: {candidate}")
+        return resolved
+
+
+class LocalDatasetSource:
+    """Replays uncommitted, gitignored ``.jsonl`` staging files under ``external_datasets/``.
+
+    This is the local developer loop. A reviewed projection produced by the
+    dev-time fixture factory can be dropped under ``external_datasets/`` and
+    replayed through the real intake path **without committing or promoting it**
+    (``external_datasets/**`` is gitignored). It is intentionally OFF by default:
+    it is never part of the startup seed hook, never part of ``--source all``,
+    and must be selected explicitly with ``--source local``. It only ever reads
+    -- it writes and commits nothing.
+
+    Unlike the curated/dataset sources there is no manifest and no license gate
+    here: this is unreviewed local-only data, which is exactly why it must never
+    activate implicitly and is refused in production environments by the CLI.
+    """
+
+    name = "local"
+
+    def __init__(self, *, repo_root: Path | None = None, limit: int | None = None) -> None:
+        self._repo_root = (repo_root or _default_repo_root()).resolve()
+        self._local_root = (self._repo_root / LOCAL_DATASET_RELATIVE_ROOT).resolve()
+        if limit is not None and limit <= 0:
+            raise CuratedFixtureLoadError("Local dataset limit must be greater than zero.")
+        self._limit = limit
+
+    def list_demo_fixtures(self) -> list[SeedCase]:
+        if not self._local_root.is_dir():
+            return []
+        seeds: list[SeedCase] = []
+        for fixture_path in sorted(self._local_root.rglob("*.jsonl")):
+            resolved = fixture_path.resolve()
+            # Defense-in-depth against symlinks resolving outside the sandbox.
+            if not resolved.is_file() or not _is_within(resolved, self._local_root):
+                continue
+            relative = resolved.relative_to(self._local_root).with_suffix("")
+            fixture_id = "local/" + str(relative).replace("\\", "/")
+            seeds.extend(CuratedFixtureSource._read_seed_cases(fixture_id, resolved))
+        seeds.sort(key=lambda seed: (seed.fixture_id, seed.source_case_id))
+        if self._limit is not None:
+            seeds = seeds[: self._limit]
+        return seeds
 
 
 class DemoSeeder:

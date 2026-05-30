@@ -637,10 +637,79 @@ Production Token Verifier Implementation v0.1:
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_token_verifier_impl_final2`.
 
+## In Progress
+
+Option A — Separate Third-Party Dataset Fixture Source (uncommitted working tree):
+
+This is a parallel contract to the hand-authored curated fixture path. The
+existing `CuratedFixtureSource` deliberately rejects third-party licenses, so
+reviewed third-party *synthetic* derivatives onboard through a separate
+`CuratedDatasetSource` over `fixtures/curated_datasets/` instead of weakening
+the known-good curated boundary. The accepted license-review allowlist lives in
+code (`DATASET_ALLOWED_LICENSE_REVIEW` in `src/threatprism/demo/seeding.py`), not
+in the manifest, so a tampered manifest cannot self-certify a license.
+
+Hard boundary: `tools/fixture_factory/promotions.py` and
+`tests/test_curated_fixture_promotion.py` are intentionally untouched and must
+stay that way. No commit/push without explicit instruction. Synthetic/fake data
+only, no auto-download, no raw third-party data committed.
+
+Done (validated GREEN — 134 passed, eval harness dry-run 15/15, demo safety passed):
+
+- [x] Slice 1: `fixtures/curated_datasets/manifest.json` + `README.md` parallel
+  contract; `manifest_version` `curated-datasets/0.1`.
+- [x] Slice 2: `CuratedDatasetSource` in `src/threatprism/demo/seeding.py`,
+  reusing `CuratedFixtureSource._is_demo_seedable` and `._read_seed_cases` and
+  layering the code-authoritative `DATASET_ALLOWED_LICENSE_REVIEW` allowlist.
+- [x] Slice 3: wired alongside `CuratedFixtureSource()` in `api/app.py` startup
+  and `seed_cli.py` (`--source curated|curated_datasets|all`).
+- [x] Tests: `tests/test_curated_dataset_seeding.py` (8 tests; mirrors
+  `tests/test_demo_seeding.py` with `repo_root=` override + tmp manifests).
+- [x] Slice 4: ran the `SAFE_COLUMNS` synthea adapter against
+  `external_datasets/synthea_sample_data/csv/patients.csv`; inspected all 12
+  outputs (only the 8 `SAFE_COLUMNS`, SSN Stage-1 tokenized, no raw identifiers
+  leaked); wrote committed `fixtures/curated_datasets/synthea_healthcare.jsonl`
+  (12 lines) + one `manifest.json` entry with
+  `license_review_status=approved_third_party_apache2_synthetic`. Updated the
+  startup-hook count test (4 -> 16) and the committed-manifest test (empty ->
+  loads 12). `docs/DATASET.md` and the dataset `README.md` updated from
+  "pending" to "promoted".
+
+- [x] Slice 6: `deepset/prompt-injections` source (Apache-2.0 parquet staged in
+  gitignored `external_datasets/`). Built `tools/fixture_factory/adapters/deepset_adapter.py`
+  + added an `apply_prompt_firewall=False` source-scoped exception to
+  `sanitizers.py` (injection text stays UN-redacted on replay; credential,
+  healthcare, and infra sanitization still apply). Promoted 12 fixtures to
+  `fixtures/curated_datasets/deepset_prompt_injection.jsonl` (bucket mix:
+  **1 quarantine, 5 redact, 6 none/RR-L1**), added the `manifest.json` and
+  `data_sources/registry.json` entries. The honest finding: the deterministic
+  firewall recognizes only the quarantine+redact rows; the 6 `none` rows are
+  real injections it misses (RR-L1) — they reach the inert demo provider but
+  never leak into reports/audit. Tests: `tests/test_deepset_injection_corpus.py`
+  (5 tests). Updated count tests (startup hook 16 -> 28; committed-manifest
+  synthea test scoped to family). Full suite 139 passed, evals 15/15, demo
+  safety passed. Authored `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` as
+  the forward-looking next defense layer. Throwaway `_inspect.py`/`_promote.py`
+  helpers deleted.
+
+Done (validated GREEN — 149 passed, eval harness dry-run 15/15, demo safety passed):
+
+- [x] Slice 5: `LocalDatasetSource` in `src/threatprism/demo/seeding.py` replays
+  uncommitted `.jsonl` staging under gitignored `external_datasets/` on the fly
+  through the real `create_case` + `run_triage` intake path. OFF by default —
+  not the default `--source`, excluded from `--source all`, never in the startup
+  seed hook, and refused in `prod`/`production` by `_ensure_source_allowed()` in
+  `seed_cli.py`. No manifest/license gate (this is unreviewed local-only data),
+  but the four-layer guardrail pipeline still sanitizes it at intake. Added
+  `seed_cli --source local` and `--limit N` (limit valid only with `--source
+  local`). Nothing committed: `external_datasets/**` stays gitignored and the
+  source only reads. Tests: `tests/test_local_dataset_seeding.py` (10 tests).
+
 ## Next Active Slice
 
-No new implementation slice is selected yet. Recommended choices should be
-selected explicitly before implementation:
+No additional implementation slice beyond the in-progress Option A work is
+selected yet. Recommended choices should be selected explicitly before
+implementation:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
@@ -689,7 +758,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-123 passed
+149 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

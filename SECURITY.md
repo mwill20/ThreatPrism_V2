@@ -272,6 +272,7 @@ source code.
 | CSI/RGOI cognitive objects | Demo operational cognition | Read-only retrieval; tenant-scoped; evidence-linked; AI cognition non-authoritative unless approved |
 | Demo API keys | Low (fake) | Environment variables only; not valid outside demo system |
 | Eval fixtures | Test data | Fake payloads only; path-sandboxed to `tests/evals/` |
+| Third-party dataset derivatives | Reviewed external data | Sanitized derivatives only under `fixtures/curated_datasets/` (Synthea/deepset Apache-2.0, OTRF MIT lab telemetry); raw rows never committed (gitignored `external_datasets/`); accepted licenses enforced by an in-code allowlist, not the manifest; lab identifiers dropped by a fail-closed field allowlist |
 
 ---
 

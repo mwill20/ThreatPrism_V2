@@ -112,6 +112,23 @@ For threat enumeration, see [`stride-threat-model.md`](stride-threat-model.md), 
 | Bypassing guardrails via seed path | Seeder replays through real `create_case` + `run_triage`; full four-layer pipeline runs; `ALLOW_REAL_ACTIONS` unchanged | `DemoSeeder.seed()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py); `create_case()` / `run_triage()` in [cases/service.py](../../src/threatprism/cases/service.py) | Mitigated | `tests/test_demo_seeding.py` |
 | Demo seeding enabled in production | Startup hook defaults off; `validate_runtime()` refuses `THREATPRISM_DEMO_SEED` in prod | `Settings.validate_runtime()` in [config.py](../../src/threatprism/config.py); startup hook in [api/app.py](../../src/threatprism/api/app.py) | Mitigated | `tests/test_demo_seeding.py` |
 
+### Third-Party Dataset Onboarding (Curated Datasets)
+
+These controls govern the **second** fixture contract (`fixtures/curated_datasets/`),
+which admits sanitized derivatives of reviewed third-party datasets (Synthea +
+deepset, Apache-2.0 synthetic; OTRF, MIT lab telemetry). Onboarding a non-synthetic
+third-party source is a new **supply-chain / data-provenance** trust boundary layered
+on top of the hand-authored curated path above. The accepted-license decision is
+anchored in code, not in the manifest the data ships with.
+
+| Threat ID | Mitigation | Code Reference | State | Test File |
+|-----------|------------|----------------|-------|-----------|
+| L5 / T (tampered manifest self-certifies a license) | Accepted `license_review_status` values are a code-authoritative `frozenset`, not a manifest field; a tampered manifest cannot grant a license the code never allowed ("data describes, code decides") | `DATASET_ALLOWED_LICENSE_REVIEW` and `CuratedDatasetSource._is_dataset_seedable()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py) | Mitigated | `tests/test_curated_dataset_seeding.py` |
+| I1 / I2 / DI1 / LD1 (identifier disclosure from third-party lab telemetry) | OTRF lab events pass a fail-closed `SAFE_FIELDS` allowlist that **drops** every identifier (host, Hostname, UserID/SID, AccountName, Domain, port, `*Guid`, `TargetObject`) rather than tokenizing it; `Image` reduced to basename; SID and user-profile-path scrubbers as defense-in-depth | `SAFE_FIELDS`, `_project_safe()`, `_scrub_identifiers()` in [tools/fixture_factory/adapters/otrf_adapter.py](../../tools/fixture_factory/adapters/otrf_adapter.py) | Mitigated | `tests/test_otrf_telemetry_corpus.py` |
+| L4 / OT-L2 (provenance — partial) | Each promoted fixture carries source id, source file, record index, and a `sha256` of the sanitized row; raw third-party rows are never committed (gitignored `external_datasets/`) | `source_metadata()` in [tools/fixture_factory/adapters/shared.py](../../tools/fixture_factory/adapters/shared.py); manifest provenance in `fixtures/curated_datasets/manifest.json` | Partial — provenance for the demo/eval corpus; full training-data curation remains gated to fine-tuning (OT-L2) | `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py` |
+| Bypassing guardrails via dataset seed path | `CuratedDatasetSource` replays through real `create_case` + `run_triage` (full four-layer pipeline) and reuses the same `.jsonl` path sandbox as the curated path | `CuratedDatasetSource` and `DemoSeeder.seed()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py) | Mitigated | `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py` |
+| T (unreviewed local data implicitly seeded) | `LocalDatasetSource` (gitignored `external_datasets/` replay) is off by default — never the default `--source`, excluded from `--source all`, never in the startup hook, and refused in production | `LocalDatasetSource` in [demo/seeding.py](../../src/threatprism/demo/seeding.py); `_ensure_source_allowed()` in [demo/seed_cli.py](../../src/threatprism/demo/seed_cli.py) | Mitigated | `tests/test_local_dataset_seeding.py` |
+
 ### Enrichment Stubs
 
 | Threat ID | Mitigation | Code Reference | State | Test File |
@@ -182,6 +199,7 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-30 | Claude (auto-generated, awaiting human review) | Third-party dataset onboarding traceability added | OTRF Security-Datasets (MIT lab telemetry) onboarding introduced a supply-chain / data-provenance trust boundary. Added a "Third-Party Dataset Onboarding (Curated Datasets)" section mapping the code-authoritative license allowlist, fail-closed identifier-drop projection, `sha256` provenance, real-intake replay, and off-by-default `LocalDatasetSource` to `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, and `tests/test_local_dataset_seeding.py`. OT-L2 (full training-data curation) remains gated to fine-tuning; a dedicated lens-level supply-chain threat ID (currently mapped descriptively to L4/L5) is recommended before any non-demo dataset is onboarded. |
 | 2026-05-26 | Codex | Production token verifier implementation traceability updated | Closed S4 for local no-network verifier scope with fake JWKS tests. Live JWKS fetch and live IdP integration remain gated. |
 | 2026-05-26 | Codex | Production token verifier design traceability updated | Added S4 design-only verifier entry and proposed future implementation tests. Runtime token verification remains gated. |
 | 2026-05-26 | Codex | Production identity readiness traceability updated | Added S3 readiness control references and mapped them to `tests/test_production_identity_readiness.py` plus runtime guard checks. |

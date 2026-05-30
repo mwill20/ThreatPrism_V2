@@ -1,0 +1,177 @@
+# What ThreatPrism Produces, How It's Used, and Where It's Going
+
+This document answers three questions directly: **what is the output, what does
+the tool provide to a user, and how is it usable** — then lays out the three
+runtime evolutions toward a real-LLM, analyst-in-the-loop deployment.
+
+---
+
+## 1. What ThreatPrism is, in one sentence
+
+ThreatPrism is a **SOC triage co-pilot**: it takes a raw case (an alert plus its
+evidence, events, and entities) and produces a structured, evidence-grounded,
+guardrail-validated **first-pass triage report** — so an analyst starts from a
+completed first analysis instead of a blank alert, and a manager gets governance
+and tuning signal without touching raw sensitive data.
+
+It is **not** an autonomous responder. It never executes actions
+(`ALLOW_REAL_ACTIONS=false`), every report is marked `analyst_review_required`,
+and a human decision is always the authority.
+
+---
+
+## 2. What it produces — the concrete output
+
+### 2.1 The Triage Report (the core deliverable)
+
+For each case, `run_triage()` produces a `TriageReport`
+([cases/schemas.py](../src/threatprism/cases/schemas.py)). The fields are the
+output an analyst consumes:
+
+| Field | What it gives the analyst |
+|-------|---------------------------|
+| `determination` | The verdict: benign / suspicious / malicious-class |
+| `severity` | low / medium / high / critical |
+| `disposition` | Recommended next step (e.g., escalate, close) |
+| `confidence` | 0.0–1.0 — how sure the tool is |
+| `findings[]` | Each a titled, severity-rated observation **with cited `evidence_ids`** — no claim without evidence |
+| `mitre_mappings[]` | ATT&CK techniques, each evidence-cited and confidence-scored |
+| `grc_controls[]` | Category alignment only — explicitly *"not a compliance determination"* |
+| `hypotheses[]` | Alternative explanations with confidence, so the analyst sees competing reads |
+| `recommended_actions[]` / `simulated_actions[]` | Suggested next steps — **simulated, never executed** |
+| `limitations[]` | What the tool did **not** access or check — honesty about blind spots |
+| `analyst_review_required` | Always `true` — the human is the decision-maker |
+
+The discipline that makes this trustworthy: **every cited `evidence_id` must
+exist** (`validate_report_evidence()`), the output is regex-scanned for
+overclaiming/compliance/secret leakage (`scan_output_policy()`), and any claim of
+a real action is blocked (`enforce_action_safety()`).
+
+### 2.2 The platform layer (around the report)
+
+- **Role-filtered views** — analysts/engineers see security telemetry; manager/GRC,
+  legal/privacy, audit, and AI views get it masked. Same record, different lens.
+- **Operational metrics** (`GET /metrics`) — volumes, severity/determination
+  distributions, guardrail blocks, and **disagreement rates**.
+- **Review queues** (`GET /queues/manager-review`, `/queues/healthcare-review`).
+- **Audit events** — every authorization and guardrail decision is recorded.
+- **The analyst feedback loop** — see §4. This is the tuning backbone.
+
+### 2.3 See it now
+
+`python -m threatprism.demo.run_soc_demo` runs 32 SOC cases end-to-end and prints
+exactly these outputs in aggregate (see
+[runbooks/RUN_AGAINST_SOC_DATASET.md](runbooks/RUN_AGAINST_SOC_DATASET.md)).
+
+---
+
+## 3. How an analyst uses it ("hit the ground running")
+
+Without ThreatPrism, an analyst opens a raw alert and starts from zero: pivot the
+logs, look up indicators, map to ATT&CK, decide severity, write it up.
+
+With ThreatPrism, the analyst opens the case and already has: a determination and
+severity to confirm or overturn, findings each tied to the exact evidence that
+supports them, the ATT&CK mapping pre-drawn, competing hypotheses surfaced, a list
+of what the tool did *not* check, and recommended next steps to accept or reject.
+The analyst's job shifts from *produce the first analysis* to *verify, correct,
+and decide* — faster, and with a documented starting point.
+
+The SOC analogy: it is the difference between a SIEM alert firing raw versus a
+SOAR playbook having already enriched, correlated, and drafted the case — except
+the draft is an evidence-grounded triage report, and the analyst's disagreement is
+captured as tuning signal.
+
+---
+
+## 4. The feedback / tuning loop (already built)
+
+This is the mechanism the evolutions below depend on, and it exists today:
+
+```
+Analyst reviews the report
+  -> POST /cases/{id}/analyst-feedback   (analyst_determination, severity,
+                                          confidence, final_disposition)
+  -> submit_feedback()                   (cases/service.py)
+  -> DisagreementRecord                  (determination_mismatch, severity_mismatch,
+                                          disposition_mismatch, confidence_delta)
+  -> disagreement metrics                (GET /metrics)
+```
+
+When the analyst's verdict differs from ThreatPrism's, that disagreement is
+recorded structurally and aggregated. **That is the "where did the analyst and the
+tool differ" signal** your tuning loop needs — already wired, currently exercised
+against the deterministic provider.
+
+---
+
+## 5. The three runtime evolutions (roadmap)
+
+> **All three are gated on opening the real-LLM gate** (a real `TriageProvider`
+> implementation + the semantic firewall in
+> [specs/32](specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), per the threat-model
+> re-review). Until then they are design targets. Each "pretends" a curated SOC
+> dataset is the SOAR feed — no live SOAR integration is required to prove value.
+
+### Evolution 1 — Batched benign (SOAR catch-all auto-close)
+
+**Pattern.** Feed the high-volume benign stream a SOAR would auto-close.
+**Goal.** Show ThreatPrism agrees (benign/low) at volume, and — more valuable —
+surface the rare case the catch-all would have auto-closed but ThreatPrism flags
+suspicious. This is throughput + safety-net validation.
+**Reuses today:** batch seeding via `DemoSeeder`, metrics distributions, the
+`run_soc_demo` aggregate summary.
+**Needs:** a real provider; a benign-heavy dataset; an "auto-close vs flagged"
+delta report.
+
+### Evolution 2 — Batch over analyst-handled cases (backtest + tuning)
+
+**Pattern.** Replay cases that were already worked by analysts, where the analyst
+outcome is the ground truth. Because real analyst labels may be unavailable, the
+analyst can be **mocked by a *different* LLM** producing the "analyst" verdict, so
+ThreatPrism is never grading itself.
+**Goal.** Compare every case ThreatPrism marked suspicious/malicious against the
+analyst (or mock-analyst) outcome, and measure where they diverged — the cases an
+analyst worked longer or decided differently. This is the **tuning/feedback loop
+at batch scale**.
+**Reuses today:** the entire feedback loop in §4 (`submit_feedback` →
+`DisagreementRecord` → disagreement metrics).
+**Needs:** a real provider; a mock-analyst harness (second LLM) that emits
+`AnalystFeedbackCreate`; a divergence report aggregating disagreements by
+determination/severity. **Independence rule:** the mock-analyst LLM must be a
+different model/prompt path than the triage provider, or the comparison is
+circular.
+
+### Evolution 3 — Single event-driven (live co-pilot, human-in-the-loop)
+
+**Pattern.** An analyst self-assigns a case, immediately pulls ThreatPrism's report
+and triage details, and works it with the human in the loop — then submits
+feedback.
+**Goal.** Real-time analyst acceleration, with the **same disagreement/tuning loop
+as Evolution 2** running continuously on live decisions.
+**Reuses today:** the per-case API (`POST /cases`, `GET /cases/{id}/triage-report`,
+the detail routes, role views), and the feedback loop in §4.
+**Needs:** a real provider; an assignment/ownership concept; the feedback UI on the
+dashboard.
+
+### The common thread
+
+Evolutions 2 and 3 are the **same tuning loop** at different cadences (batch vs.
+live). Evolution 1 is the throughput/safety-net proof. None of them require a live
+SOAR — a curated SOC dataset stands in for the feed. The single missing
+foundation under all three is the **real `TriageProvider`** (and its gated
+semantic-firewall defense), which is why that gate is the next real decision.
+
+---
+
+## 6. Honest scope today
+
+- The provider is the inert `DeterministicDemoProvider` (keyword-based). The
+  pipeline, guardrails, persistence, observability, and feedback loop are real and
+  proven end-to-end ([run_soc_demo](../src/threatprism/demo/run_soc_demo.py)); the
+  *quality of the verdict* is not, because no real model is wired.
+- Opening the real-LLM gate requires the threat-model re-review already staged in
+  [specs/21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) and the
+  classifier surface modeled as OT-L11.
+- Until then, "pretend the dataset is the SOAR feed" is the correct way to
+  demonstrate every evolution without a live integration.

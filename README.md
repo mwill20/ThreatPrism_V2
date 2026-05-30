@@ -14,6 +14,29 @@ case intake, provenance, AI guardrails, analyst feedback, operational metrics,
 and healthcare-adjacent data safeguards without using live providers or real
 organizational data.
 
+## What ThreatPrism Produces (and how it's used)
+
+ThreatPrism is a **SOC triage co-pilot**. Given a raw case (an alert plus its
+evidence, events, and entities), it produces a structured, evidence-grounded
+**triage report**: a determination (benign/suspicious/malicious-class), severity,
+disposition, confidence, findings that each cite the exact evidence supporting
+them, ATT&CK mappings, competing hypotheses, recommended (simulated, never
+executed) next steps, and an explicit list of what it did **not** check.
+
+So instead of starting from a blank alert, an analyst starts from a completed
+first-pass analysis to **verify, correct, and decide** — and every disagreement
+they record (`POST /cases/{id}/analyst-feedback`) becomes structured tuning signal
+(`DisagreementRecord` → `/metrics`). Managers get role-masked metrics, review
+queues, and disagreement rates without touching raw sensitive data.
+
+It is not an autonomous responder: `ALLOW_REAL_ACTIONS=false`, every report is
+`analyst_review_required`, and the human is always the decision authority.
+
+**Full explanation, the output anatomy, and the roadmap toward real-LLM,
+analyst-in-the-loop deployment:**
+[`docs/PRODUCT_VALUE_AND_ROADMAP.md`](docs/PRODUCT_VALUE_AND_ROADMAP.md). **See it
+run:** `python -m threatprism.demo.run_soc_demo`.
+
 ## Intended Audience
 
 This repository is intended for:
@@ -181,6 +204,8 @@ docker-compose.yml Local demo backend service
 
 | Need | Start Here |
 |---|---|
+| **What the tool produces + roadmap** | [docs/PRODUCT_VALUE_AND_ROADMAP.md](docs/PRODUCT_VALUE_AND_ROADMAP.md) |
+| Run end-to-end on a SOC dataset | [docs/runbooks/RUN_AGAINST_SOC_DATASET.md](docs/runbooks/RUN_AGAINST_SOC_DATASET.md) |
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |

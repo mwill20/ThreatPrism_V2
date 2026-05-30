@@ -83,6 +83,7 @@ Fake SOAR payload
 | yes | [Lesson 25](Lesson25_Production_Token_Verifier_Implementation.md) | Production Token Verifier Implementation | `src/threatprism/auth/production.py`, `src/threatprism/auth/demo.py`, `tests/test_production_token_verifier.py` |
 | yes | [Lesson 26](Lesson26_Dataset_Backed_Demo_Seeder.md) | Dataset-Backed Demo Seeder | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tests/test_demo_seeding.py`, `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md` |
 | ✅ | [Lesson 27](Lesson27_Dataset_Onboarding_And_Fixture_Sources.md) | Dataset Onboarding And Fixture Source Contracts | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tools/fixture_factory/adapters/{synthea,deepset,otrf}_adapter.py`, `fixtures/curated_datasets/*`, `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, `tests/test_local_dataset_seeding.py` |
+| ✅ | [Lesson 28](Lesson28_Running_End_To_End_And_The_Feedback_Loop.md) | Running End-to-End And The Analyst Feedback Loop | `src/threatprism/demo/run_soc_demo.py`, `tests/test_soc_dataset_run.py`, `docs/PRODUCT_VALUE_AND_ROADMAP.md`, `docs/runbooks/RUN_AGAINST_SOC_DATASET.md` |
 
 ## File Coverage Map
 
@@ -121,6 +122,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\seed_cli.py` -> Lessons 26 and 27
 - `C:\Projects\ThreatPrismV2\tools\fixture_factory\adapters\*_adapter.py` -> Lessons 16 and 27
 - `C:\Projects\ThreatPrismV2\fixtures\curated_datasets\*` -> Lesson 27
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\run_soc_demo.py` -> Lesson 28
+- `C:\Projects\ThreatPrismV2\tests\test_soc_dataset_run.py` -> Lesson 28
+- `C:\Projects\ThreatPrismV2\docs\PRODUCT_VALUE_AND_ROADMAP.md` -> Lesson 28
 - `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20 and 21
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12

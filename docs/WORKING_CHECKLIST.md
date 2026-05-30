@@ -800,12 +800,39 @@ GREEN (160 passed, eval harness dry-run 15/15, demo safety passed):
 - [x] `docs/runbooks/RUN_AGAINST_SOC_DATASET.md` (one-command run + interactive
   HTTP path + honest scope) and a README "Run Against A SOC Dataset" section.
 
+## Completed Slice
+
+Product Value & Roadmap Documentation (answers "what does this produce / how is
+it usable"):
+
+- [x] Added `docs/PRODUCT_VALUE_AND_ROADMAP.md`: the triage-report output anatomy,
+  how an analyst uses it, the already-built analyst feedback/disagreement tuning
+  loop, and the three gated runtime evolutions.
+- [x] README "What ThreatPrism Produces (and how it's used)" section + Documentation
+  Map entries.
+- [x] `Lessons/Lesson28_Running_End_To_End_And_The_Feedback_Loop.md` + index.
+
 ## Next Active Slice
 
-The dataset-onboarding thread, semantic-layer enablement plan, and end-to-end SOC
-dataset run are complete (the run is the demonstrable proof the build works on
-real-shaped data). Remaining work is gated and must be selected explicitly before
-implementation:
+The dataset-onboarding thread, semantic-layer enablement plan, end-to-end SOC
+dataset run, and product-value/roadmap documentation are complete. Remaining work
+is gated and must be selected explicitly before implementation.
+
+**Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
+dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
+
+- [ ] Evolution 1 — Batched benign (SOAR catch-all auto-close): triage the benign
+  volume a SOAR would auto-close; prove agreement at volume + surface the rare
+  flagged case. Needs a real `TriageProvider` + an auto-close-vs-flagged delta report.
+- [ ] Evolution 2 — Batch over analyst-handled cases (backtest + tuning): replay
+  cases with analyst ground truth (mock-analyst via a *different, independent* LLM
+  emitting `AnalystFeedbackCreate`); aggregate `DisagreementRecord`s where ThreatPrism
+  said suspicious/malicious vs the analyst. Reuses the existing feedback loop at scale.
+- [ ] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
+  pulls the triage report, works it human-in-the-loop, submits feedback; same tuning
+  loop as Evolution 2 at live cadence. Needs assignment/ownership + dashboard feedback UI.
+
+Other gated work:
 
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as

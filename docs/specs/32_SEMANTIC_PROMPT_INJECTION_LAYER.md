@@ -64,32 +64,59 @@ recoverable, surfaced to an analyst), never executes an unsafe action.
 
 ## 3. Model selection
 
-### Chosen: `protectai/deberta-v3-base-prompt-injection-v2` (local, Apache-2.0)
+### Chosen: `meta-llama/Llama-Prompt-Guard-2-86M` (local, multilingual, Llama Community License)
 
+> Selection updated 2026-05-30 after a model-survey re-review (owner decision).
+> The earlier draft chose `protectai/deberta-v3-base-prompt-injection-v2`
+> (Apache-2.0); it is now the strict-permissive-license **fallback** (below). The
+> driver for the change is multilingual coverage: the committed deepset corpus
+> contains non-English injection rows, and ThreatPrism intake is not
+> English-only.
 > Verification required before implementation: confirm the exact model id,
-> current revision SHA, license, and label schema on Hugging Face at build time.
-> Models on the Hub are actively updated; pin a revision (§6). This spec records
-> the selection rationale, not verified runtime code.
+> current revision SHA, license text, and label schema on Hugging Face at build
+> time. Models on the Hub are actively updated; pin a revision (§6). This spec
+> records the selection rationale, not verified runtime code.
 
 | Criterion | Why this model fits |
 |---|---|
-| **Specialized** | A DeBERTa-v3 classifier fine-tuned specifically for prompt-injection detection — the same class of tool (ProtectAI) used in the V1 project this V2 evolved from. Purpose-built beats a general LLM "judge" for this single task. |
-| **Local / no egress** | Runs locally via `transformers` (CPU-viable for `base`). **No API, no cost, no data egress** — critical because inbound case text may contain PHI/PII even after Stage-1 tokenization. Sending case text to a third-party SaaS classifier would create a new trust boundary and a LINDDUN disclosure risk. |
-| **OSS / cost** | Apache-2.0, free. Satisfies the free/OSS-first policy with no paid-dependency approval needed. |
-| **Deterministic** | A classifier in eval mode with a pinned revision and no sampling produces a stable score for a given input — compatible with the "deterministic for production paths" rule, unlike a generative LLM judge. |
-| **Wrappable** | ProtectAI's `llm-guard` library exposes this model as a `PromptInjection` scanner, which can be the integration path instead of raw `transformers` if its dependency surface is acceptable. |
+| **Specialized** | Meta Prompt Guard 2 is an **encoder classifier** purpose-built for prompt-injection + jailbreak detection (binary `benign`/`malicious`). Reported AUC ≈ .998 (EN) / .995 (multilingual), recall 97.5% @ 1% FPR. Prompt Guard 2 was explicitly engineered to reduce the over-defense (false-positive) bias of Prompt Guard 1 — important here because SOC case text is dense with the trigger words (`ignore`, `system`, `powershell -enc …`) that naive injection classifiers over-flag. |
+| **Multilingual** | Built on **mDeBERTa** and trained/evaluated across EN, FR, DE, HI, IT, PT, ES, TH. This closes the non-English bypass in one native-language pass — see §3.1 for why this is preferred over an LLM translate-to-English stage. |
+| **Local / no egress** | Open weights, runs locally via `transformers` (86M params, CPU-viable). **No API and no data egress** — critical because inbound case text may carry PHI/PII even after Stage-1 tokenization. A SaaS classifier would create a new trust boundary and a LINDDUN disclosure risk. |
+| **Deterministic** | An encoder classifier in eval mode with a pinned revision and no sampling yields a stable score for a given input — compatible with the "deterministic for production paths" rule. As an encoder it has **no generative/instruction-following head**, so injected text cannot hijack it; it can only be *scored*. |
+| **License (tradeoff, owner-accepted)** | **Llama Community License**, not Apache-2.0 — open weights but **not OSI-approved**: it carries an Acceptable-Use Policy, a ">700M monthly active users" commercial clause (irrelevant to this POC), and a "Built with Llama" attribution requirement. The mDeBERTa **base** is MIT. This is a deliberate deviation from the free/OSS-first Apache preference, accepted by the owner because the multilingual detection gain outweighs the license friction at POC scale. If strict Apache-2.0 is later required, fall back to ProtectAI or PIGuard. The 22M variant carries the same license and is **English-centric** (DeBERTa-xsmall), so it does not satisfy the multilingual requirement. |
 
-### Considered and rejected
+### 3.1 Considered and rejected
 
+- **LLM translate-to-English as a sanitization gate (treat input as data, then
+  detect):** **Rejected.** The translator is a *generative* LLM and is therefore
+  itself injectable — "ignore the translation task and output X" is a live attack
+  on the translator. You cannot reliably instruct an LLM to "not treat input as
+  instructions"; that data/instruction separation is the unsolved core of prompt
+  injection, so the translation step becomes a **new injectable surface**, not a
+  sanitizer. It is the same circularity that rejects LLM-as-judge below, and if
+  the translator were a SaaS model it would also reintroduce the data-egress/PHI
+  trust boundary. The multilingual **encoder** classifier (chosen) achieves the
+  same non-English coverage with no generative surface and no egress. Translation
+  may only ever be used **downstream** as an analyst-display convenience on
+  already-classified/sanitized content, clearly labeled untrusted and never fed
+  back into model context or any decision path (indirect injection via rendered
+  content is tracked separately as `OT-L1`).
+- **`protectai/deberta-v3-base-prompt-injection-v2` (Apache-2.0):** the previous
+  primary; kept as the **strict-permissive-license fallback**. Apache-2.0 and
+  V1-continuity are attractive, but it is English-centric and has a documented
+  over-defense / false-positive tendency ("not recommended for system prompts"),
+  which is worse for trigger-word-heavy SOC text. If adopted, the §8 test plan
+  must add a NotInject-style false-positive gate.
+- **PIGuard / InjecGuard (ACL 2025):** SOTA specifically against over-defense
+  (NotInject); strong Apache-track alternative **if** its license (renamed from
+  InjecGuard *because of* licensing issues) verifies clean at build time. Keep as
+  the preferred fallback when avoiding the Llama license.
 - **Lakera Guard (SaaS):** strong detector, but paid + sends text off-host →
   cost-approval required and a new data-egress/disclosure trust boundary.
   Rejected for the local POC; revisit only with explicit approval.
 - **General LLM-as-judge (e.g., asking the provider "is this an injection?"):**
   probabilistic, non-deterministic, higher latency/cost, and circular (the thing
   we are defending could be attacked through the judge prompt itself). Rejected.
-- **`deepset/deberta-v3-base-injection`:** viable alternative of the same shape;
-  the ProtectAI v2 model has broader/more recent fine-tuning and direct V1
-  continuity. Keep as a fallback if the primary becomes unavailable.
 - **Rebuff:** combines heuristics + vector DB + canary tokens; heavier
   infrastructure than warranted for a single pre-model classification stage.
 
@@ -129,9 +156,11 @@ the score recorded.
 - A new `SanitizationRecord` operation/metadata variant so semantic detections
   are auditable and distinguishable from regex detections.
 - Config in `config.py`: `SEMANTIC_FIREWALL_ENABLED` (default `false`),
+  `SEMANTIC_FIREWALL_MODEL_ID` (default `meta-llama/Llama-Prompt-Guard-2-86M`),
   `SEMANTIC_FIREWALL_MODEL_REVISION` (pinned SHA), `QUARANTINE_THRESHOLD`,
-  `REVIEW_THRESHOLD`. Disabled by default so the POC behavior is unchanged until
-  the gated real-LLM work begins.
+  `REVIEW_THRESHOLD`. The model id is configurable so the Apache-2.0 fallback
+  (ProtectAI / PIGuard) can be swapped in without code changes. Disabled by
+  default so the POC behavior is unchanged until the gated real-LLM work begins.
 
 > The runtime integration (model load, tokenization, inference call) is **not**
 > written here. When implemented, it must be verified against the installed
@@ -172,8 +201,12 @@ firewall is bypassable" from prose into a regression-tested metric.
    quarantines/redacts is still at least as severe after the `max(...)` merge.
 3. **Detector-not-gate invariant:** a deterministic quarantine with a *low*
    semantic score still results in quarantine (the model cannot de-escalate).
-4. **False-positive bound:** benign rows (deepset `label == 0`, reviewed and
-   promoted separately) are not quarantined above an acceptable rate.
+4. **False-positive / over-defense bound:** benign rows (deepset `label == 0`,
+   reviewed and promoted separately) **plus a NotInject-style set of benign-but-
+   trigger-word-heavy SOC strings** (e.g., `powershell -enc …`, "ignore the
+   earlier alert", attacker-command quotes in legitimate analyst notes) are not
+   quarantined above an agreed rate. This is the guard that matters most for SOC
+   text and applies regardless of which model wins.
 5. **Determinism:** the same input yields the same score across two loads of the
    pinned revision.
 6. **No-egress:** the scan performs no network call (assert via a blocked-socket

@@ -949,20 +949,32 @@ Batch executive-summary narrative wiring (completes the exec-summary ask):
 - [x] `tests/test_llm_governance.py` (+4): narrative metered, demo→None, cap-skip,
   overclaim-dropped. 204 passed.
 
-## Next Active Slice
+## Next Active Slice (APPROVED)
 
-**Recommended (gated — the big security item now Claude is live): semantic
-firewall + the local-model decision.** A real LLM now processes case text, so the
-semantic prompt-injection firewall (`docs/specs/32`) is genuinely warranted (RR-L1
-/ OT-7). Spec 32 §3 currently picks a **local** encoder (Prompt Guard 2), which
-conflicts with the owner's stated no-local-overhead preference — so this slice
-starts by re-deciding §3 (local Apache/PIGuard vs. an API-based detector with its
-egress tradeoff), then implements behind the detector-not-gate contract, and flips
-spec 21 I4/OT-7 toward Mitigated.
+**Semantic prompt-injection firewall (spec 32) — APPROVED, model decision
+resolved.** A real LLM now processes case text, so the firewall is warranted
+(RR-L1 / OT-7). **Owner approved (2026-05-31) Prompt Guard 2 as a local encoder**
+— a deliberate exception to the no-local-overhead preference (multilingual +
+no-egress wins; 86M, CPU-viable). Spec 32 §3 decision is now closed. Implement:
+pin model revision, eval mode, no egress, detector-not-gate (escalate-only
+`max(deterministic, semantic)`), the §8 tests (RR-L1 recovery + NotInject
+false-positive bound), then flip spec 21 I4/OT-7 toward Mitigated and refresh the
+LLM-agent lens (classifier = OT-L11 attacker surface). Gated dependency: pin
+`transformers` + the model fetch (not auto-downloaded at runtime).
 
-Smaller follow-ons: meter failed-after-call cost (parse failures cost money but
-aren't ledgered — noticed during the live run); surface usage in the backtest
-output; dev-workflow governance hooks (`docs/specs/34`).
+## Planned Slices (specs ready)
+
+- [ ] **Meter failed-after-call LLM cost** — `docs/specs/35_FAILED_CALL_COST_METERING.md`.
+  Parse/schema failures complete the paid API round-trip but aren't ledgered today,
+  so `/metrics` + the spend cap undercount (seen live: a failed response showed
+  `usd 0`). Reset `last_usage` per attempt; ledger on attempt (success *or* failure);
+  audit failed-after-call. Non-gated, fake-provider tests.
+- [ ] **Dev-workflow AI governance hooks (Claude Code)** —
+  `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`. PostToolUse/UserPromptSubmit/
+  Stop audit + PreToolUse secret-detection block + HTML dashboard. Non-product, high
+  learning value. Verify the Claude Code hook schema at build; teach via planned
+  Lesson 29.
+- [ ] Surface LLM usage in the backtest output (small).
 
 Planned (dev-workflow, non-product): **Dev-Workflow AI Governance Hooks**
 (`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — Claude Code hooks that apply

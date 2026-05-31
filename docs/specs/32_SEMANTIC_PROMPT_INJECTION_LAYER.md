@@ -66,6 +66,13 @@ recoverable, surfaced to an analyst), never executes an unsafe action.
 
 ### Chosen: `meta-llama/Llama-Prompt-Guard-2-86M` (local, multilingual, Llama Community License)
 
+**Owner approval (2026-05-31):** Prompt Guard 2 as a **local** encoder is approved
+as a deliberate exception to the general "no local-model overhead" preference. The
+multilingual coverage + no-egress security posture (case text never leaves the host
+for injection detection) warrants running this one small (86M, CPU-viable)
+classifier locally. This **resolves the §3 model decision** — the semantic-firewall
+slice may proceed to implementation with Prompt Guard 2.
+
 > Selection updated 2026-05-30 after a model-survey re-review (owner decision).
 > The earlier draft chose `protectai/deberta-v3-base-prompt-injection-v2`
 > (Apache-2.0); it is now the strict-permissive-license **fallback** (below). The

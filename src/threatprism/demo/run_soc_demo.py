@@ -300,9 +300,21 @@ def main() -> int:
         metavar="N",
         help="Also print full triage reports for the first N completed cases.",
     )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Use settings from the environment/.env (e.g. the real Claude provider) "
+        "instead of the in-memory deterministic demo.",
+    )
     args = parser.parse_args()
 
-    settings = _demo_settings()
+    if args.live:
+        from threatprism.config import load_local_dotenv
+
+        load_local_dotenv()
+        settings = Settings.from_env()
+    else:
+        settings = _demo_settings()
     settings.validate_runtime()
     summary = run_soc_demo(settings, sample_report_count=args.show_reports)
 

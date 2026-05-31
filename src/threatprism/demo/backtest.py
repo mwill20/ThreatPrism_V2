@@ -188,13 +188,33 @@ def _render_human(report: BacktestReport) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the Evolution 2 backtest over the curated SOC dataset")
     parser.add_argument("--json", action="store_true", help="Print JSON only.")
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Use settings from the environment/.env (real Claude triage provider) "
+        "instead of the in-memory deterministic demo.",
+    )
     args = parser.parse_args()
 
-    settings = _demo_settings()
+    if args.live:
+        from threatprism.config import load_local_dotenv
+
+        load_local_dotenv()
+        settings = Settings.from_env()
+    else:
+        settings = _demo_settings()
     settings.validate_runtime()
     service = CaseService(settings)
     DemoSeeder(service).seed([CuratedDatasetSource()])
-    report = run_backtest(service, HeuristicDemoAnalyst())
+
+    if args.live:
+        # Independent OpenAI grader (Evolution 2). Falls closed if unconfigured.
+        from threatprism.llm.mock_analyst import build_mock_analyst
+
+        analyst: AnalystGrader = build_mock_analyst(settings)
+    else:
+        analyst = HeuristicDemoAnalyst()
+    report = run_backtest(service, analyst)
 
     if args.json:
         print(report.model_dump_json(indent=2))

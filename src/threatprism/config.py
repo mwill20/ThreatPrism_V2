@@ -9,6 +9,24 @@ from threatprism.auth.production import (
     evaluate_production_identity_readiness,
 )
 
+_DOTENV_LOADED = False
+
+
+def load_local_dotenv() -> None:
+    """Load a local .env once if python-dotenv is available. Never overrides env
+    vars already set in the process. Called only from explicit live entry points
+    (e.g. the demo runners' --live flag), never from `from_env()`, so tests, the
+    validation wrapper, and the app factory never auto-pick-up a local .env."""
+    global _DOTENV_LOADED
+    if _DOTENV_LOADED:
+        return
+    _DOTENV_LOADED = True
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    load_dotenv(override=False)
+
 
 @dataclass(frozen=True)
 class Settings:

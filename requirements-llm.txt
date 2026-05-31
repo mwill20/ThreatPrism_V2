@@ -5,6 +5,7 @@
 #
 #   pip install -r requirements-llm.txt
 #
-# Pin to exact, reviewed versions before production use.
-anthropic>=0.40,<1.0   # ThreatPrism triage brain (Claude). Verify Messages API.
-openai>=1.50,<2.0      # Independent mock-analyst grader (Evolution 2). Verify Chat Completions API.
+# Verified against these versions (2026-05-30): Messages API + Usage(input_tokens/
+# output_tokens) for anthropic; chat.completions + choices[0].message.content for openai.
+anthropic==0.105.2   # ThreatPrism triage brain (Claude)
+openai==1.109.1      # Independent mock-analyst grader (Evolution 2)

@@ -197,10 +197,11 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.live:
+        from dataclasses import replace
         from threatprism.config import load_local_dotenv
 
         load_local_dotenv()
-        settings = Settings.from_env()
+        settings = replace(Settings.from_env(), database_url="sqlite:///:memory:")
     else:
         settings = _demo_settings()
     settings.validate_runtime()

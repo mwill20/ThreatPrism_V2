@@ -25,7 +25,12 @@ from threatprism.llm.failures import (
     failure_from_validation_error,
 )
 from threatprism.llm.mock_analyst import MockAnalyst
-from threatprism.llm.providers import ClaudeTriageProvider, DeterministicDemoProvider, get_provider
+from threatprism.llm.providers import (
+    ClaudeTriageProvider,
+    DeterministicDemoProvider,
+    _extract_json,
+    get_provider,
+)
 from threatprism.llm.runner import build_batch_narrative, safe_generate_report, validate_llm_report
 from support_settings import local_auth_disabled_settings
 
@@ -172,6 +177,14 @@ def test_overclaim_summary_becomes_output_policy_failure() -> None:
 
 
 # --- Claude provider: fails closed when unconfigured (no network) ---------
+
+def test_extract_json_strips_fences_and_prose() -> None:
+    assert _extract_json('```json\n{"a": 1}\n```') == '{"a": 1}'
+    assert _extract_json('Here is the report:\n{"a": 1}\nDone.') == '{"a": 1}'
+    assert _extract_json('{"a": {"b": 2}}') == '{"a": {"b": 2}}'
+    # No JSON object present -> returned as-is so json.loads raises (unparseable).
+    assert _extract_json("no json here") == "no json here"
+
 
 def test_claude_provider_without_key_fails_closed() -> None:
     case = _a_case()

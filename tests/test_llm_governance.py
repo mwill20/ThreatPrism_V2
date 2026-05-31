@@ -15,8 +15,10 @@ from threatprism.llm.governance import (
     build_llm_call_audit,
     enforce_spend_cap,
     metered_generate,
+    metered_narrative,
     would_exceed_budget,
 )
+from threatprism.llm.providers import DeterministicDemoProvider
 from threatprism.cases.schemas import (
     Determination,
     Disposition,
@@ -159,6 +161,53 @@ def test_approved_models_enforced_in_validate_runtime() -> None:
 
 def test_default_model_is_approved() -> None:
     assert "claude-sonnet-4-5" in APPROVED_MODELS
+
+
+# --- metered batch narrative ----------------------------------------------
+
+class _FakeNarrator:
+    provider_name = "fake_narrator"
+
+    def __init__(self, *, text=None, usage=None, exc=None):
+        self._text = text
+        self.last_usage = usage
+        self._exc = exc
+
+    def generate_narrative(self, context):
+        if self._exc:
+            raise self._exc
+        return self._text
+
+
+def test_metered_narrative_returns_text_and_meters_usage() -> None:
+    ledger = SpendLedger()
+    prov = _FakeNarrator(text="High-severity OTRF credential cases lead the batch.",
+                         usage=UsageRecord(model_id="claude-sonnet-4-5", input_tokens=300, output_tokens=120))
+    out = metered_narrative(prov, "ctx", ledger, cost_model=CostModel(3.0, 15.0),
+                            max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(out, str) and "OTRF" in out
+    assert len(ledger.records) == 1 and ledger.records[0].call_kind == "narrative"
+    assert ledger.records[0].estimated_cost_usd > 0
+
+
+def test_metered_narrative_is_none_for_demo_provider() -> None:
+    assert metered_narrative(DeterministicDemoProvider(), "ctx", SpendLedger(),
+                             cost_model=CostModel(), max_total_tokens=1000, max_cost_usd=0.0) is None
+
+
+def test_metered_narrative_skips_when_cap_would_be_exceeded() -> None:
+    prov = _FakeNarrator(text="x", usage=UsageRecord(model_id="m"))
+    out = metered_narrative(prov, "ctx", SpendLedger(), cost_model=CostModel(),
+                            max_total_tokens=1, max_cost_usd=0.0)  # impossibly low token cap
+    assert out is None
+    assert len(SpendLedger().records) == 0
+
+
+def test_metered_narrative_drops_overclaim_via_output_policy() -> None:
+    prov = _FakeNarrator(text="This batch proves HIPAA compliance.", usage=UsageRecord(model_id="m"))
+    out = metered_narrative(prov, "ctx", SpendLedger(), cost_model=CostModel(),
+                            max_total_tokens=10_000, max_cost_usd=100.0)
+    assert out is None  # output policy rejects -> no narrative
 
 
 # --- end-to-end wiring through run_triage ---------------------------------

@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 from threatprism.cases.schemas import AuditEvent, CaseRecord, TriageReport
 from threatprism.llm.batching import estimate_tokens
 from threatprism.llm.failures import TriageFailureReport, budget_exceeded_failure
-from threatprism.llm.runner import safe_generate_report
+from threatprism.llm.runner import build_batch_narrative, safe_generate_report
 
 
 # Code-authoritative allowlist of approved triage model ids (anti-tamper: config
@@ -149,6 +149,48 @@ def build_llm_call_audit(
             "response_sha256": _hash(response),
         },
     )
+
+
+def metered_narrative(
+    provider: object,
+    context: str,
+    ledger: SpendLedger,
+    *,
+    cost_model: CostModel,
+    max_total_tokens: int,
+    max_cost_usd: float,
+    projected_output_tokens: int = 512,
+) -> str | None:
+    """Generate the batch executive-summary narrative through a provider that
+    supports it, metered against the spend ledger. Returns ``None`` for providers
+    without narrative support (the deterministic demo), if the spend cap would be
+    breached, or on a guardrail/provider failure — the narrative is best-effort and
+    must never fail the whole run."""
+    if getattr(provider, "generate_narrative", None) is None:
+        return None
+    projected_input = estimate_tokens(context)
+    if enforce_spend_cap(
+        ledger,
+        projected_tokens=projected_input + projected_output_tokens,
+        projected_cost_usd=cost_model.estimate(projected_input, projected_output_tokens),
+        max_total_tokens=max_total_tokens,
+        max_cost_usd=max_cost_usd,
+    ) is not None:
+        return None  # cap reached — skip the narrative, keep the run going
+
+    result = build_batch_narrative(provider, context)
+    if not isinstance(result, str):
+        return None  # output-policy rejection or provider failure
+    usage = getattr(provider, "last_usage", None)
+    if isinstance(usage, UsageRecord):
+        priced = usage.model_copy(
+            update={
+                "call_kind": "narrative",
+                "estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens),
+            }
+        )
+        ledger.add(priced)
+    return result
 
 
 def _case_text(case: CaseRecord) -> str:

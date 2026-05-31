@@ -30,6 +30,7 @@ from pydantic import BaseModel, Field
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
 from threatprism.demo.seeding import CuratedDatasetSource, DemoSeeder, SeedResult
+from threatprism.llm.governance import metered_narrative
 
 
 # Auditor ordering: most critical first.
@@ -168,6 +169,36 @@ def _build_executive_summary(service: CaseService, family_of: dict[str, str]) ->
     )
 
 
+def _narrative_context(exec_summary: BatchExecutiveSummary) -> str:
+    lines = [f"Batch of {exec_summary.total_cases} triaged cases. by_severity={exec_summary.by_severity}."]
+    for it in exec_summary.items:
+        lines.append(
+            f"#{it.rank} {it.severity}/{it.determination} {it.source_case_id} "
+            f"evidence={','.join(it.evidence_ids) or '-'}"
+        )
+    for note in exec_summary.blocked_notes:
+        lines.append("BLOCKED: " + note)
+    return "\n".join(lines)
+
+
+def _attach_batch_narrative(service: CaseService, settings: Settings, exec_summary: BatchExecutiveSummary) -> None:
+    """Generate the LLM batch narrative (metered) when the provider supports it.
+    No-op for the deterministic demo, so the slot stays empty rather than faked."""
+    if not exec_summary.items:
+        return
+    text = metered_narrative(
+        service.provider,
+        _narrative_context(exec_summary),
+        service._spend_ledger,
+        cost_model=service._cost_model,
+        max_total_tokens=settings.llm_max_total_tokens_per_run,
+        max_cost_usd=settings.llm_max_cost_usd_per_run,
+    )
+    if text:
+        exec_summary.narrative = text
+        exec_summary.narrative_status = "generated"
+
+
 def _collect_sample_reports(service: CaseService, limit: int) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for read_item in service.list_case_read_models().items:
@@ -214,6 +245,11 @@ def run_soc_demo(settings: Settings | None = None, *, sample_report_count: int =
         )
     samples.sort(key=lambda s: s.family)
 
+    exec_summary = _build_executive_summary(service, family_of)
+    _attach_batch_narrative(service, settings, exec_summary)
+    # Re-read usage so the narrative call's tokens/cost are included.
+    llm_usage = service.get_operational_metrics().llm_usage.model_dump()
+
     return SocDemoRunSummary(
         seeded_total=result.seeded_count,
         skipped_total=result.skipped_count,
@@ -237,9 +273,9 @@ def run_soc_demo(settings: Settings | None = None, *, sample_report_count: int =
         },
         manager_review_queue=len(manager_queue.items),
         healthcare_review_queue=len(healthcare_queue.items),
-        llm_usage=metrics.llm_usage.model_dump(),
+        llm_usage=llm_usage,
         samples=samples,
-        executive_summary=_build_executive_summary(service, family_of),
+        executive_summary=exec_summary,
         sample_reports=_collect_sample_reports(service, sample_report_count) if sample_report_count else [],
     )
 

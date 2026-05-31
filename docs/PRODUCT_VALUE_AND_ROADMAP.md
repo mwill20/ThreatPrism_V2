@@ -66,9 +66,10 @@ Two executive-summary surfaces are designed:
 - **Batch:** a `BatchExecutiveSummary` (in `run_soc_demo`) that ranks cases
   **most-critical-first** with per-case **provenance** (`sha256` source hash) and
   **evidence-ID traceability** — the artifact an auditor reviews quickly. Its
-  ranking and provenance are deterministic and usable today; its `narrative`
-  field is the **LLM-generated prose slot**, intentionally empty
-  (`pending_real_llm_provider`) until the real-LLM gate opens. Nothing fake ships.
+  ranking and provenance are deterministic and usable today; its `narrative` is
+  filled (metered + output-policy validated) when a real provider is active
+  (`--live`) and stays empty (`pending_real_llm_provider`) for the deterministic
+  demo. Nothing fake ships.
 
 ### 2.4 See it now
 

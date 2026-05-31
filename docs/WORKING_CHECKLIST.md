@@ -934,20 +934,35 @@ Real-LLM gate OPENED and VERIFIED LIVE + usage/cost surfacing:
   `LLM spend (this run)` line + `llm_usage` block in the run summary. Zero with the
   deterministic provider; real values under `--live`. Tests added (200 passed).
 
+## Completed Slice
+
+Batch executive-summary narrative wiring (completes the exec-summary ask):
+
+- [x] `metered_narrative()` in `llm/governance.py` — spend-cap-gated, output-policy
+  validated (via `build_batch_narrative`), ledgers usage as `call_kind="narrative"`.
+  Best-effort: returns `None` (never fails the run) for providers without
+  `generate_narrative`, on cap breach, or on a policy/provider failure.
+- [x] `run_soc_demo` builds a narrative context from the ranked exec-summary and
+  attaches the narrative; usage re-read so the narrative's tokens/cost count in
+  `llm_usage`. Real prose under `--live`; stays `None` (status `pending_…`) for the
+  deterministic demo — no fake. Per-event ✅ + batch ✅.
+- [x] `tests/test_llm_governance.py` (+4): narrative metered, demo→None, cap-skip,
+  overclaim-dropped. 204 passed.
+
 ## Next Active Slice
 
-**Recommended: wire the batch executive-summary narrative (non-gated to build,
-real under --live).** The per-event `summary` is now real LLM output, but the batch
-`narrative` still shows `[pending_real_llm_provider]` because `run_soc_demo`'s
-exec-summary builder never calls `build_batch_narrative`. Wire it: call the
-provider's `generate_narrative` (metered + output-policy validated via the existing
-`build_batch_narrative` seam) so the auditor batch summary gets real prose under
-`--live`, while staying `None` for the deterministic demo. Completes the
-executive-summary ask (per-event + batch). Downside: only visible under `--live`.
+**Recommended (gated — the big security item now Claude is live): semantic
+firewall + the local-model decision.** A real LLM now processes case text, so the
+semantic prompt-injection firewall (`docs/specs/32`) is genuinely warranted (RR-L1
+/ OT-7). Spec 32 §3 currently picks a **local** encoder (Prompt Guard 2), which
+conflicts with the owner's stated no-local-overhead preference — so this slice
+starts by re-deciding §3 (local Apache/PIGuard vs. an API-based detector with its
+egress tradeoff), then implements behind the detector-not-gate contract, and flips
+spec 21 I4/OT-7 toward Mitigated.
 
-Follow-ons (gated): semantic firewall (spec 32) + the local-model decision; flip
-spec 21 I4/OT-7 to Mitigated; meter failed-after-call cost (parse failures cost
-money but currently aren't ledgered); surface usage in the backtest output.
+Smaller follow-ons: meter failed-after-call cost (parse failures cost money but
+aren't ledgered — noticed during the live run); surface usage in the backtest
+output; dev-workflow governance hooks (`docs/specs/34`).
 
 Planned (dev-workflow, non-product): **Dev-Workflow AI Governance Hooks**
 (`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — Claude Code hooks that apply
@@ -1023,7 +1038,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-200 passed
+204 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

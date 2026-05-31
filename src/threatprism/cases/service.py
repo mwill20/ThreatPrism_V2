@@ -45,8 +45,8 @@ from threatprism.guardrails.tokenization import TokenVault, rehydrate_text, toke
 from threatprism.guardrails.views import RoleViewResult, ViewRole, render_role_view
 from threatprism.ids import new_id
 from threatprism.llm.failures import TriageFailureReport
+from threatprism.llm.governance import CostModel, SpendLedger, metered_generate
 from threatprism.llm.providers import get_provider
-from threatprism.llm.runner import safe_generate_report
 from threatprism.persistence.sqlite import SQLiteRepository
 from threatprism.reports.render import render_report
 from threatprism.soar.generic import normalize_soar_payload
@@ -57,6 +57,11 @@ class CaseService:
         self.settings = settings
         self.repository = SQLiteRepository(settings.database_url)
         self.provider = get_provider(settings.llm_provider, settings)
+        self._spend_ledger = SpendLedger()
+        self._cost_model = CostModel(
+            input_price_per_mtok=settings.llm_input_price_per_mtok,
+            output_price_per_mtok=settings.llm_output_price_per_mtok,
+        )
 
     def create_case(self, payload: dict[str, Any]) -> CaseAcceptedResponse:
         case_create = normalize_soar_payload(payload)
@@ -171,11 +176,23 @@ class CaseService:
             self.repository.save_case(case)
             return
 
-        generation = safe_generate_report(self.provider, tokenized_case, validate_guardrails=False)
+        llm_audit_events: list[AuditEvent] = []
+        generation = metered_generate(
+            self.provider,
+            tokenized_case,
+            self._spend_ledger,
+            cost_model=self._cost_model,
+            max_total_tokens=self.settings.llm_max_total_tokens_per_run,
+            max_cost_usd=self.settings.llm_max_cost_usd_per_run,
+            model_id=self.settings.llm_model_id,
+            model_revision=self.settings.llm_model_revision or None,
+            validate_guardrails=False,
+            audit_events=llm_audit_events,
+        )
         if isinstance(generation, TriageFailureReport):
-            # Real-LLM provider call/parse failure (network, timeout, rate-limit,
-            # auth, malformed/schema-invalid response). Fail closed; the demo
-            # provider never reaches this branch.
+            # Spend-cap breach or real-LLM provider call/parse failure (network,
+            # timeout, rate-limit, auth, malformed/schema-invalid response). Fail
+            # closed; the demo provider never reaches this branch.
             case.status = CaseStatus.needs_analyst_review
             case.triage_status = TriageStatus(generation.terminal_status)
             case.audit_trail.append(
@@ -190,6 +207,8 @@ class CaseService:
             self.repository.save_case(case)
             return
         report = generation
+        for audit_event in llm_audit_events:
+            case.audit_trail.append(audit_event)  # sanitized per-LLM-call audit (real provider only)
         issues = []
         issues.extend(scan_output_policy(report.model_dump(mode="json")))
         issues.extend(validate_report_evidence(report, {item.evidence_id for item in tokenized_case.evidence}))

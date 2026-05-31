@@ -30,18 +30,30 @@ classes to the structured failures in `_classify_anthropic_error`.
 
 ## 2. Configure (env only — never commit keys)
 
+A preconfigured, **gitignored `.env`** is already in the repo root — paste your
+keys into `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` and set per-model prices. Or set
+them in the shell:
+
 ```bash
 export LLM_PROVIDER=anthropic_claude
 export ANTHROPIC_API_KEY=...           # triage brain
-export LLM_MODEL_ID=claude-sonnet-4-5  # pin the model you verified
+export LLM_MODEL_ID=claude-sonnet-4-5  # must be in APPROVED_MODELS
 export OPENAI_API_KEY=...              # mock-analyst (Evolution 2)
-export MOCK_ANALYST_MODEL_ID=gpt-4o-mini
-# Optional tuning: LLM_TEMPERATURE, LLM_CALL_TIMEOUT_SECONDS, LLM_MAX_RETRIES,
-# BATCH_MAX_EVENTS, BATCH_MAX_INPUT_TOKENS, SUMMARY_MAX_CHARS.
+export LLM_INPUT_PRICE_PER_MTOK=...    # your model's price, for cost tracking + cap
+export LLM_OUTPUT_PRICE_PER_MTOK=...
+# A spend cap is REQUIRED: LLM_MAX_COST_USD_PER_RUN or LLM_MAX_TOTAL_TOKENS_PER_RUN > 0.
 ```
 
-`validate_runtime()` fails closed if `LLM_PROVIDER=anthropic_claude` without
-`ANTHROPIC_API_KEY`.
+`validate_runtime()` **fails closed** if the real provider is selected without
+`ANTHROPIC_API_KEY`, with an **unapproved model**, or with **no spend cap**.
+
+## 2a. Governance is already wired (no code needed)
+
+`run_triage` already routes provider calls through `metered_generate`
+(spend-cap check before spending; priced usage recorded on the `SpendLedger`) and
+emits a sanitized `llm_call` audit event (model, token counts, and **hashes** of
+prompt+response — never raw content). So from the first live call you get cost
+tracking, a hard budget cap, per-call audit, and model-allowlist enforcement.
 
 ## 3. Verify on a small batch first
 

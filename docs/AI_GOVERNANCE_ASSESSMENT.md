@@ -62,7 +62,9 @@ they all become *acute exactly when the real LLM turns on*:
 | 6 | Report versioning/diff | Auditability | ❌ (lower priority) |
 
 > Gaps 1–4 implemented and tested (`tests/test_llm_governance.py`, no network).
-> The live provider wires `metered_generate` + `build_llm_call_audit` at the gate.
+> `run_triage` already routes provider calls through `metered_generate` +
+> `build_llm_call_audit` behind the gate flag — metering, spend cap, and per-call
+> audit are active from the first live call. Only keys + SDK verification remain.
 
 **Gaps 1–4 are deterministic, testable without keys, and are precisely the
 controls a paid LLM needs before it is turned on.** Turning on a metered LLM with

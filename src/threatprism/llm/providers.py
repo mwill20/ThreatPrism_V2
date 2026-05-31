@@ -152,11 +152,16 @@ class ClaudeTriageProvider:
         self.timeout_seconds = timeout_seconds
         self.max_output_tokens = max_output_tokens
         self.last_usage: object | None = None  # set per call for the spend ledger
+        self.last_prompt: str = ""              # hashed (never stored raw) in the call audit
+        self.last_response: str = ""
 
     def generate_report(self, case: CaseRecord) -> TriageReport:
         from threatprism.llm.failures import ProviderResponseUnparseable
 
-        raw = self._call(self._build_prompt(case))
+        prompt = self._build_prompt(case)
+        self.last_prompt = prompt
+        raw = self._call(prompt)
+        self.last_response = raw
         try:
             parsed = json.loads(raw)
         except (json.JSONDecodeError, TypeError) as exc:

@@ -159,3 +159,40 @@ def test_approved_models_enforced_in_validate_runtime() -> None:
 
 def test_default_model_is_approved() -> None:
     assert "claude-sonnet-4-5" in APPROVED_MODELS
+
+
+# --- end-to-end wiring through run_triage ---------------------------------
+
+class _FakeMeteredProvider:
+    provider_name = "fake_metered_provider"
+
+    def __init__(self, report, usage):
+        self._report = report
+        self.last_usage = usage
+        self.last_prompt = "RAW_PROMPT_CONTENT_xyz"
+        self.last_response = "RAW_RESPONSE_CONTENT_xyz"
+
+    def generate_report(self, case):
+        return self._report
+
+
+def test_run_triage_meters_and_audits_a_real_like_call() -> None:
+    service = CaseService(local_auth_disabled_settings())
+    accepted = service.create_case(_PAYLOAD)
+    case = service.get_case(accepted.case_id)
+    service.provider = _FakeMeteredProvider(
+        _report(case), UsageRecord(model_id="claude-sonnet-4-5", input_tokens=1000, output_tokens=500)
+    )
+
+    service.run_triage(case.case_id)
+
+    # Spend ledger metered the call.
+    assert service._spend_ledger.total_tokens == 1500
+    # A sanitized llm_call audit event was recorded with hashes, not raw content.
+    updated = service.get_case(case.case_id)
+    llm_audits = [e for e in updated.audit_trail if e.event_type == "llm_call"]
+    assert len(llm_audits) == 1
+    assert "prompt_sha256" in llm_audits[0].metadata
+    assert llm_audits[0].metadata["input_tokens"] == 1000
+    blob = json.dumps([e.model_dump(mode="json") for e in updated.audit_trail])
+    assert "RAW_PROMPT_CONTENT" not in blob and "RAW_RESPONSE_CONTENT" not in blob

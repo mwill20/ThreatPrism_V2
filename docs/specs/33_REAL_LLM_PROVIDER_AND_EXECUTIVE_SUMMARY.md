@@ -1,10 +1,14 @@
 # Spec 33 — Real-LLM Triage Provider, Executive Summaries, Batching & Failure Reporting
 
-Status: **deterministic core implemented; live LLM call gated.** The failure
-taxonomy, deterministic batch planner, untrusted-output validation seam, config,
-fail-closed service integration, and the Claude provider skeleton (lazy import,
-fails closed when unconfigured) are implemented and tested with no network
-(`tests/test_real_llm_provider.py`). The actual paid Claude/OpenAI calls are NOT
+Status: **deterministic core + governance + wiring implemented; live LLM call
+gated.** The failure taxonomy, deterministic batch planner, untrusted-output
+validation seam, governance controls (spend cap, usage/cost accounting, sanitized
+per-call audit, approved-model allowlist — see `docs/AI_GOVERNANCE_ASSESSMENT.md`),
+config, fail-closed service integration, and the Claude provider skeleton (lazy
+import, fails closed when unconfigured) are implemented and tested with no network
+(`tests/test_real_llm_provider.py`, `tests/test_llm_governance.py`). `run_triage`
+routes provider calls through `metered_generate` + `build_llm_call_audit` behind the
+gate flag, so only keys + SDK verification remain. The actual paid Claude/OpenAI calls are NOT
 exercised in the build environment — the owner installs `requirements-llm.txt`,
 sets the keys, verifies the SDK call shapes, and runs live verification. Opening
 this gate is the "real LLM provider integration" precondition that

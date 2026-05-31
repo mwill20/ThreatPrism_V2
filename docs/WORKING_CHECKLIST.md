@@ -908,9 +908,15 @@ eval 15/15, demo safety passed):
   + prompt/response **hashes**, never raw content); `APPROVED_MODELS` allowlist.
 - [x] `config.py` + `validate_runtime()`: pricing + cap settings; real provider
   requires an approved `LLM_MODEL_ID` AND a spend cap > 0. `.env.example` updated.
-- [x] `ClaudeTriageProvider` sets `last_usage` per call (gated; verify SDK attrs).
-- [x] `tests/test_llm_governance.py` (9 tests, no network); `docs/AI_GOVERNANCE_ASSESSMENT.md`
-  gaps 1–4 marked implemented.
+- [x] `ClaudeTriageProvider` sets `last_usage`/`last_prompt`/`last_response` per call
+  (gated; verify SDK attrs).
+- [x] **Wired into `run_triage`**: provider calls now go through `metered_generate`
+  (spend-cap check + priced usage on the instance `SpendLedger`) and emit a
+  sanitized `llm_call` audit event (hashes only). Backward-compatible — the demo
+  provider exposes no usage, so no metering/audit and no behavior change.
+- [x] `tests/test_llm_governance.py` (10 tests, no network, incl. end-to-end
+  run_triage metering+audit); `docs/AI_GOVERNANCE_ASSESSMENT.md` gaps 1–4 implemented.
+- [x] `.env` created (gitignored) preconfigured for the gate — paste keys only.
 
 ## Next Active Slice
 
@@ -918,10 +924,12 @@ eval 15/15, demo safety passed):
 leads the gate — the live LLM will be metered (`SpendLedger`), budget-bounded
 (`enforce_spend_cap` fails closed before overspending), audited per call
 (`build_llm_call_audit`, hashes only), and restricted to an approved model — from
-its first call. Open it per `docs/runbooks/OPEN_REAL_LLM_GATE.md`: install
-`requirements-llm.txt`, set keys + per-model prices + caps, wire `metered_generate`
-+ `build_llm_call_audit` into the live path, verify SDK call/usage attrs, then run
-`run_soc_demo` + `backtest` through real Claude/OpenAI. Also ship the semantic
+its first call. The wiring is **done** (`metered_generate` + `build_llm_call_audit`
+are connected into `run_triage` behind the gate flag) — only keys + verification
+remain: paste keys into `.env`, `pip install -r requirements-llm.txt`, set per-model
+prices/caps, verify the SDK call/usage attrs per
+`docs/runbooks/OPEN_REAL_LLM_GATE.md`, then run `run_soc_demo --show-reports` +
+`backtest` through real Claude/OpenAI. Follow-ons once live: ship the semantic
 firewall (spec 32) and flip spec 21 I4/OT-7 to Mitigated.
 
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
@@ -990,7 +998,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-197 passed
+198 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

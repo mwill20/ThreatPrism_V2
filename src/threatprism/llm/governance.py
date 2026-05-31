@@ -168,9 +168,17 @@ def metered_generate(
     model_id: str | None = None,
     model_revision: str | None = None,
     projected_output_tokens: int = 1024,
+    validate_guardrails: bool = True,
+    audit_events: list[AuditEvent] | None = None,
 ) -> TriageReport | TriageFailureReport:
-    """Spend-cap-gated generation: checks the budget *before* spending, then records
-    usage *after* a successful call (from the provider's optional ``last_usage``)."""
+    """Spend-cap-gated generation: checks the budget *before* spending, records
+    priced usage *after* a successful call (from the provider's optional
+    ``last_usage``), and appends a sanitized per-call audit event when the provider
+    exposes ``last_prompt``/``last_response``.
+
+    ``validate_guardrails=False`` defers the deterministic guardrail validation to
+    the caller (``run_triage`` runs that block), matching ``safe_generate_report``.
+    """
     projected_input = estimate_tokens(_case_text(case))
     projected_cost = cost_model.estimate(projected_input, projected_output_tokens)
     cap_failure = enforce_spend_cap(
@@ -184,7 +192,10 @@ def metered_generate(
     if cap_failure is not None:
         return cap_failure
 
-    result = safe_generate_report(provider, case, model_id=model_id, model_revision=model_revision)
+    result = safe_generate_report(
+        provider, case, model_id=model_id, model_revision=model_revision,
+        validate_guardrails=validate_guardrails,
+    )
     if isinstance(result, TriageReport):
         usage = getattr(provider, "last_usage", None)
         if isinstance(usage, UsageRecord):
@@ -193,4 +204,13 @@ def metered_generate(
                 update={"estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens)}
             )
             ledger.add(priced)
+            if audit_events is not None:
+                audit_events.append(
+                    build_llm_call_audit(
+                        case_id=case.case_id,
+                        usage=priced,
+                        prompt=str(getattr(provider, "last_prompt", "") or ""),
+                        response=str(getattr(provider, "last_response", "") or ""),
+                    )
+                )
     return result

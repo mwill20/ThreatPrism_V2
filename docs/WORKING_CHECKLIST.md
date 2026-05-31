@@ -896,28 +896,33 @@ Evolution 2 backtest harness (deterministic scaffolding) — validated GREEN
 - [x] `tests/test_backtest.py` (5 tests: full agreement, clear-all divergence,
   grading-failure counting, deterministic heuristic divergence, no-leak).
 
+## Completed Slice
+
+Real-LLM governance controls (assessment gaps 1–4) — validated GREEN (197 passed,
+eval 15/15, demo safety passed):
+
+- [x] `src/threatprism/llm/governance.py`: `CostModel` + `SpendLedger` + `UsageRecord`
+  (usage/cost accounting); `enforce_spend_cap()`/`would_exceed_budget()` (fail closed
+  via `budget_exceeded`); `metered_generate()` (pre-call cap check + post-call priced
+  usage recording); `build_llm_call_audit()` (per-call `AuditEvent` with token counts
+  + prompt/response **hashes**, never raw content); `APPROVED_MODELS` allowlist.
+- [x] `config.py` + `validate_runtime()`: pricing + cap settings; real provider
+  requires an approved `LLM_MODEL_ID` AND a spend cap > 0. `.env.example` updated.
+- [x] `ClaudeTriageProvider` sets `last_usage` per call (gated; verify SDK attrs).
+- [x] `tests/test_llm_governance.py` (9 tests, no network); `docs/AI_GOVERNANCE_ASSESSMENT.md`
+  gaps 1–4 marked implemented.
+
 ## Next Active Slice
 
-**Recommended (revised after the AI-governance review,
-`docs/AI_GOVERNANCE_ASSESSMENT.md`): Real-LLM governance controls — deterministic,
-non-gated, and a prerequisite for opening the gate.** Build gaps 1–4 from the
-assessment, all testable with fakes (no keys):
-
-- [ ] `enforce_spend_cap()` — per-run/per-day cost+token ceiling; exhaustion →
-  `budget_exceeded` (already in the failure taxonomy), fail closed. (OWASP LLM10
-  Unbounded Consumption.)
-- [ ] `UsageRecord` per LLM call (input/output tokens, estimated cost) aggregated
-  into `/metrics`. (NIST AI 600-1 MEASURE.)
-- [ ] `LLMCallAudit` — sanitized per-call `AuditEvent` (model id+revision, token
-  counts, prompt+response **hash**, never raw content). (EU AI Act logging.)
-- [ ] `APPROVED_MODELS` in-code allowlist enforced in `validate_runtime()` (same
-  anti-tamper pattern as `DATASET_ALLOWED_LICENSE_REVIEW`). (ISO 42001 governance.)
-
-**Then** open the real-LLM gate (live, owner-run) per
-`docs/runbooks/OPEN_REAL_LLM_GATE.md`, so the live LLM is metered, logged, and
-budget-bounded from its first call. Rationale: turning on a paid LLM with no spend
-cap or cost tracking is the textbook OWASP LLM10 risk — governance should lead the
-gate, not trail it.
+**Recommended (gated — owner-run): open the real-LLM gate (live).** Governance now
+leads the gate — the live LLM will be metered (`SpendLedger`), budget-bounded
+(`enforce_spend_cap` fails closed before overspending), audited per call
+(`build_llm_call_audit`, hashes only), and restricted to an approved model — from
+its first call. Open it per `docs/runbooks/OPEN_REAL_LLM_GATE.md`: install
+`requirements-llm.txt`, set keys + per-model prices + caps, wire `metered_generate`
++ `build_llm_call_audit` into the live path, verify SDK call/usage attrs, then run
+`run_soc_demo` + `backtest` through real Claude/OpenAI. Also ship the semantic
+firewall (spec 32) and flip spec 21 I4/OT-7 to Mitigated.
 
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.
@@ -985,7 +990,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-188 passed
+197 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

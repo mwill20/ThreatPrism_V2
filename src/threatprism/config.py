@@ -30,6 +30,11 @@ class Settings:
     llm_temperature: float = 0.2
     llm_call_timeout_seconds: int = 60
     llm_max_retries: int = 2
+    # Governance: usage/cost accounting + spend caps (gaps 1-2).
+    llm_input_price_per_mtok: float = 0.0
+    llm_output_price_per_mtok: float = 0.0
+    llm_max_cost_usd_per_run: float = 5.0
+    llm_max_total_tokens_per_run: int = 2_000_000
     summary_max_chars: int = 1200
     batch_max_events: int = 50
     batch_max_input_tokens: int = 150_000
@@ -78,6 +83,10 @@ class Settings:
             llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0.2")),
             llm_call_timeout_seconds=_parse_int(os.getenv("LLM_CALL_TIMEOUT_SECONDS"), default=60),
             llm_max_retries=_parse_int(os.getenv("LLM_MAX_RETRIES"), default=2),
+            llm_input_price_per_mtok=float(os.getenv("LLM_INPUT_PRICE_PER_MTOK", "0") or "0"),
+            llm_output_price_per_mtok=float(os.getenv("LLM_OUTPUT_PRICE_PER_MTOK", "0") or "0"),
+            llm_max_cost_usd_per_run=float(os.getenv("LLM_MAX_COST_USD_PER_RUN", "5") or "5"),
+            llm_max_total_tokens_per_run=_parse_int(os.getenv("LLM_MAX_TOTAL_TOKENS_PER_RUN"), default=2_000_000),
             summary_max_chars=_parse_int(os.getenv("SUMMARY_MAX_CHARS"), default=1200),
             batch_max_events=_parse_int(os.getenv("BATCH_MAX_EVENTS"), default=50),
             batch_max_input_tokens=_parse_int(os.getenv("BATCH_MAX_INPUT_TOKENS"), default=150_000),
@@ -168,8 +177,20 @@ class Settings:
             raise ValueError("CASE_POST_RATE_LIMIT_PER_MINUTE must be greater than zero.")
         if self.triage_concurrency_limit <= 0:
             raise ValueError("TRIAGE_CONCURRENCY_LIMIT must be greater than zero.")
-        if self.llm_provider == "anthropic_claude" and not self.anthropic_api_key.strip():
-            raise ValueError("LLM_PROVIDER=anthropic_claude requires ANTHROPIC_API_KEY.")
+        if self.llm_provider == "anthropic_claude":
+            if not self.anthropic_api_key.strip():
+                raise ValueError("LLM_PROVIDER=anthropic_claude requires ANTHROPIC_API_KEY.")
+            from threatprism.llm.governance import APPROVED_MODELS  # lazy: avoid import cycle
+
+            if self.llm_model_id not in APPROVED_MODELS:
+                raise ValueError(
+                    f"LLM_MODEL_ID '{self.llm_model_id}' is not in the approved-model allowlist."
+                )
+            if self.llm_max_cost_usd_per_run <= 0 and self.llm_max_total_tokens_per_run <= 0:
+                raise ValueError(
+                    "A spend cap is required for a real LLM provider: set "
+                    "LLM_MAX_COST_USD_PER_RUN or LLM_MAX_TOTAL_TOKENS_PER_RUN > 0."
+                )
         if self.batch_max_events <= 0 or self.batch_max_input_tokens <= 0:
             raise ValueError("BATCH_MAX_EVENTS and BATCH_MAX_INPUT_TOKENS must be greater than zero.")
 

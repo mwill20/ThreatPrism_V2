@@ -52,14 +52,17 @@ blocking, no tool/file surface, pre-execution validation, secret blocking, HITL)
 The gaps cluster in **Auditability** and the **cost/spend** corner of Safety — and
 they all become *acute exactly when the real LLM turns on*:
 
-| # | Gap | Pillar | Buildable now (deterministic)? |
-|---|-----|--------|-------------------------------|
-| 1 | **Spend cap / cost ceiling** (Unbounded Consumption) | Safety | **Yes** |
-| 2 | **Token usage + cost accounting** (`UsageRecord` → `/metrics`) | Auditability | **Yes** |
-| 3 | **Sanitized per-LLM-call audit** (model+tokens+hash) | Auditability | **Yes** |
-| 4 | **Approved-model allowlist** | Control | **Yes** |
-| 5 | Append-only audit + compliance export + retention (OT-8) | Auditability | Gated (non-demo data) |
-| 6 | Report versioning/diff | Auditability | Yes (lower priority) |
+| # | Gap | Pillar | Status |
+|---|-----|--------|--------|
+| 1 | **Spend cap / cost ceiling** (Unbounded Consumption) | Safety | ✅ `enforce_spend_cap()` / `metered_generate()` in `llm/governance.py`; `validate_runtime` requires a cap for the real provider |
+| 2 | **Token usage + cost accounting** (`UsageRecord`, `SpendLedger`) | Auditability | ✅ `llm/governance.py` (`CostModel`, `SpendLedger`); provider sets `last_usage` |
+| 3 | **Sanitized per-LLM-call audit** (model+tokens+hash) | Auditability | ✅ `build_llm_call_audit()` (hashes prompt+response, never raw) |
+| 4 | **Approved-model allowlist** | Control | ✅ `APPROVED_MODELS` enforced in `validate_runtime()` |
+| 5 | Append-only audit + compliance export + retention (OT-8) | Auditability | ❌ gated (non-demo data) |
+| 6 | Report versioning/diff | Auditability | ❌ (lower priority) |
+
+> Gaps 1–4 implemented and tested (`tests/test_llm_governance.py`, no network).
+> The live provider wires `metered_generate` + `build_llm_call_audit` at the gate.
 
 **Gaps 1–4 are deterministic, testable without keys, and are precisely the
 controls a paid LLM needs before it is turned on.** Turning on a metered LLM with

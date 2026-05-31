@@ -151,6 +151,7 @@ class ClaudeTriageProvider:
         self.temperature = temperature
         self.timeout_seconds = timeout_seconds
         self.max_output_tokens = max_output_tokens
+        self.last_usage: object | None = None  # set per call for the spend ledger
 
     def generate_report(self, case: CaseRecord) -> TriageReport:
         from threatprism.llm.failures import ProviderResponseUnparseable
@@ -199,6 +200,17 @@ class ClaudeTriageProvider:
                 system=system,
                 messages=[{"role": "user", "content": prompt}],
             )
+            # VERIFY usage attribute names against the pinned anthropic version.
+            usage_obj = getattr(response, "usage", None)
+            if usage_obj is not None:
+                from threatprism.llm.governance import UsageRecord
+
+                self.last_usage = UsageRecord(
+                    model_id=self.model_id,
+                    model_revision=self.model_revision,
+                    input_tokens=getattr(usage_obj, "input_tokens", 0),
+                    output_tokens=getattr(usage_obj, "output_tokens", 0),
+                )
             return "".join(
                 getattr(block, "text", "") for block in response.content
                 if getattr(block, "type", "") == "text"

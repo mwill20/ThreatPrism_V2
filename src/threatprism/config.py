@@ -13,10 +13,12 @@ _DOTENV_LOADED = False
 
 
 def load_local_dotenv() -> None:
-    """Load a local .env once if python-dotenv is available. Never overrides env
-    vars already set in the process. Called only from explicit live entry points
-    (e.g. the demo runners' --live flag), never from `from_env()`, so tests, the
-    validation wrapper, and the app factory never auto-pick-up a local .env."""
+    """Load a local .env once if python-dotenv is available, treating .env as
+    **authoritative** (override=True) — so a stray/empty shell variable cannot
+    shadow the configured value on an explicit live run. Called only from explicit
+    live entry points (e.g. the demo runners' --live flag), never from
+    `from_env()`, so tests, the validation wrapper, and the app factory never
+    auto-pick-up a local .env."""
     global _DOTENV_LOADED
     if _DOTENV_LOADED:
         return
@@ -25,7 +27,7 @@ def load_local_dotenv() -> None:
         from dotenv import load_dotenv
     except ImportError:
         return
-    load_dotenv(override=False)
+    load_dotenv(override=True)
 
 
 @dataclass(frozen=True)

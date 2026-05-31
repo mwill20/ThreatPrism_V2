@@ -30,6 +30,34 @@ from threatprism.llm.failures import (
 )
 
 
+def build_batch_narrative(
+    provider: object,
+    context: str,
+    *,
+    max_chars: int = 4000,
+) -> str | TriageFailureReport | None:
+    """Generate the batch executive-summary narrative through a provider that
+    supports it, validating the prose through the output policy before use.
+
+    Returns ``None`` for providers without narrative support (e.g. the
+    deterministic demo) so the narrative slot stays empty — never faked.
+    """
+    generate = getattr(provider, "generate_narrative", None)
+    if generate is None:
+        return None
+    provider_name = getattr(provider, "provider_name", None)
+    try:
+        text = generate(context)
+    except LLMProviderError as exc:
+        return failure_from_exception(exc, provider=provider_name)
+    issues = scan_output_policy({"narrative": text})
+    if issues:
+        return failure_from_guardrail(
+            FailureType.output_policy_rejection, "output_policy", issues, provider=provider_name
+        )
+    return text[:max_chars]
+
+
 def validate_llm_report(
     report: TriageReport,
     case: CaseRecord,

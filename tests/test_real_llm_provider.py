@@ -19,12 +19,14 @@ from threatprism.llm.batching import BatchItem, estimate_tokens, plan_batches
 from threatprism.llm.failures import (
     BatchFailureReport,
     FailureType,
+    ProviderAuthError,
     ProviderTimeout,
     TriageFailureReport,
     failure_from_validation_error,
 )
+from threatprism.llm.mock_analyst import MockAnalyst
 from threatprism.llm.providers import ClaudeTriageProvider, DeterministicDemoProvider, get_provider
-from threatprism.llm.runner import safe_generate_report, validate_llm_report
+from threatprism.llm.runner import build_batch_narrative, safe_generate_report, validate_llm_report
 from support_settings import local_auth_disabled_settings
 
 
@@ -191,3 +193,51 @@ def test_validate_runtime_requires_key_for_real_provider() -> None:
     bad = local_auth_disabled_settings(llm_provider="anthropic_claude", anthropic_api_key="")
     with pytest.raises(ValueError):
         bad.validate_runtime()
+
+
+# --- mock analyst (Evolution 2 grader) ------------------------------------
+
+def test_mock_analyst_is_independent_and_fails_closed() -> None:
+    case = _a_case()
+    analyst = MockAnalyst(api_key="", model_id="gpt-x")
+    # Independence: never the same provider path as the Claude triage brain.
+    assert analyst.provider_name != ClaudeTriageProvider.provider_name
+    with pytest.raises(ProviderAuthError):
+        analyst.evaluate(case, _report(case))
+
+
+# --- batch narrative seam -------------------------------------------------
+
+class _FakeNarrator:
+    provider_name = "fake_narrator"
+
+    def __init__(self, *, text=None, exc=None):
+        self._text = text
+        self._exc = exc
+
+    def generate_narrative(self, context):
+        if self._exc:
+            raise self._exc
+        return self._text
+
+
+def test_batch_narrative_is_none_for_demo_provider() -> None:
+    assert build_batch_narrative(DeterministicDemoProvider(), "ctx") is None
+
+
+def test_batch_narrative_returns_validated_text() -> None:
+    result = build_batch_narrative(_FakeNarrator(text="8 high-severity credential cases lead the batch."), "ctx")
+    assert isinstance(result, str)
+    assert "credential" in result
+
+
+def test_batch_narrative_overclaim_becomes_output_policy_failure() -> None:
+    result = build_batch_narrative(_FakeNarrator(text="This batch proves HIPAA compliance."), "ctx")
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.output_policy_rejection
+
+
+def test_batch_narrative_provider_failure_becomes_failure_report() -> None:
+    result = build_batch_narrative(_FakeNarrator(exc=ProviderTimeout("deadline")), "ctx")
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_timeout

@@ -837,10 +837,17 @@ Spec 33 deterministic core (real-LLM seam, no live calls) — validated GREEN
   failure taxonomy + redaction, the validation seam (happy + each failure path),
   unconfigured-Claude fail-closed, provider routing, runtime guard.
 
-Gated remainder (owner runs with keys): the live Claude/OpenAI calls + prompt
-engineering + the LLM-filled per-event/batch narrative + the OpenAI mock-analyst
-(Evolution 2) + the spec 21/32 threat-model re-open. Verify SDK call shapes against
-the installed pinned versions before live use.
+Follow-up added (still no live calls): `llm/mock_analyst.py` (OpenAI mock-analyst
+seam, independent provider, fails closed) + `build_batch_narrative()` in
+`llm/runner.py` (narrative routed through output policy; `None` for the demo so the
+slot stays empty). Threat-model traceability updated with a "Real-LLM Provider Seam"
+section. Tests: `tests/test_real_llm_provider.py` (19 total).
+
+Gated remainder (owner runs with keys): the live Claude/OpenAI API calls + prompt
+tuning + wiring `build_batch_narrative`/per-event summary into the run output with a
+real provider + the Evolution 2 batch backtest + the spec 21/32 threat-model
+re-open (I4/OT-7 → Mitigated once the semantic firewall ships). Verify SDK call
+shapes against the installed pinned versions before live use.
 
 ## Completed Slice
 
@@ -940,7 +947,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-178 passed
+183 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

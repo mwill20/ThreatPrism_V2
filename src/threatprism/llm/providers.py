@@ -114,6 +114,14 @@ _CLAUDE_SYSTEM_PROMPT = (
     "grounded executive summary. Output must be valid JSON and nothing else."
 )
 
+_BATCH_NARRATIVE_SYSTEM_PROMPT = (
+    "You are writing a SOC batch executive summary for an auditor. Lead with the "
+    "most critical cases. Reference only the cases and severities provided — do not "
+    "invent cases, determinations, or evidence. Do not claim compliance/"
+    "certification and do not claim any real action was taken. Write concise plain "
+    "prose, no JSON."
+)
+
 
 class ClaudeTriageProvider:
     """Real-LLM triage provider backed by Anthropic Claude (spec 33).
@@ -158,11 +166,16 @@ class ClaudeTriageProvider:
         # May raise pydantic ValidationError -> classified as schema_validation_failure upstream.
         return TriageReport.model_validate(parsed)
 
+    def generate_narrative(self, context: str) -> str:
+        """Batch executive-summary prose (spec 33 §2.2). Output is validated by the
+        caller (`build_batch_narrative`) through the output policy before use."""
+        return self._call(context, system=_BATCH_NARRATIVE_SYSTEM_PROMPT)
+
     def _build_prompt(self, case: CaseRecord) -> str:
         # Case is already Stage-1/Stage-2 tokenized + prompt-firewalled before this.
         return json.dumps(case.model_dump(mode="json"), sort_keys=True)
 
-    def _call(self, prompt: str) -> str:
+    def _call(self, prompt: str, *, system: str = _CLAUDE_SYSTEM_PROMPT) -> str:
         from threatprism.llm.failures import ProviderAuthError, ProviderUnreachable
 
         if not self.api_key:
@@ -183,7 +196,7 @@ class ClaudeTriageProvider:
                 model=self.model_id,
                 max_tokens=self.max_output_tokens,
                 temperature=self.temperature,
-                system=_CLAUDE_SYSTEM_PROMPT,
+                system=system,
                 messages=[{"role": "user", "content": prompt}],
             )
             return "".join(

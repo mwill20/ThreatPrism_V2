@@ -129,6 +129,23 @@ anchored in code, not in the manifest the data ships with.
 | Bypassing guardrails via dataset seed path | `CuratedDatasetSource` replays through real `create_case` + `run_triage` (full four-layer pipeline) and reuses the same `.jsonl` path sandbox as the curated path | `CuratedDatasetSource` and `DemoSeeder.seed()` in [demo/seeding.py](../../src/threatprism/demo/seeding.py) | Mitigated | `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py` |
 | T (unreviewed local data implicitly seeded) | `LocalDatasetSource` (gitignored `external_datasets/` replay) is off by default — never the default `--source`, excluded from `--source all`, never in the startup hook, and refused in production | `LocalDatasetSource` in [demo/seeding.py](../../src/threatprism/demo/seeding.py); `_ensure_source_allowed()` in [demo/seed_cli.py](../../src/threatprism/demo/seed_cli.py) | Mitigated | `tests/test_local_dataset_seeding.py` |
 
+### Real-LLM Provider Seam (Spec 33 — deterministic core; live call gated)
+
+These controls govern the gated real-LLM triage path. The deterministic seam is
+implemented and tested with no network; the live Claude/OpenAI calls are gated.
+
+| Threat ID | Mitigation | Code Reference | State | Test File |
+|-----------|------------|----------------|-------|-----------|
+| L3 / L10 (untrusted LLM output) | LLM output (incl. executive summary/narrative) routed through the same deterministic guardrails — output policy, evidence grounding, action safety — before it is trusted; a rejection becomes a structured failure, never a silent pass | `validate_llm_report()` / `safe_generate_report()` / `build_batch_narrative()` in [llm/runner.py](../../src/threatprism/llm/runner.py) | Mitigated (seam) | `tests/test_real_llm_provider.py` |
+| Provider failure not surfaced | Structured `TriageFailureReport` taxonomy (provider unreachable/timeout/rate-limit/auth, response unparseable, pydantic schema failure with field-paths-only redaction, guardrail rejections, budget exceeded); fail-closed terminal status; provider failures recorded as `triage_provider_failure` audit | [llm/failures.py](../../src/threatprism/llm/failures.py); `run_triage()` integration in [cases/service.py](../../src/threatprism/cases/service.py) | Mitigated (seam) | `tests/test_real_llm_provider.py` |
+| OT-L3 (LLM DoS — partial) | Deterministic dual-trigger batch planner (`BATCH_MAX_EVENTS` OR token budget, whichever first); never splits a case; oversized case → `budget_exceeded` (not sent) | `plan_batches()` in [llm/batching.py](../../src/threatprism/llm/batching.py) | Partial — input-side budget; provider-side rate/cost caps still gated | `tests/test_real_llm_provider.py` |
+| Real provider misconfiguration | `LLM_PROVIDER=anthropic_claude` requires `ANTHROPIC_API_KEY` (`validate_runtime()`); unconfigured provider fails closed with a structured error; secrets via env only | `validate_runtime()` in [config.py](../../src/threatprism/config.py); `ClaudeTriageProvider` in [llm/providers.py](../../src/threatprism/llm/providers.py) | Mitigated | `tests/test_real_llm_provider.py` |
+| Circular self-grading (Evolution 2) | Mock analyst is an independent provider (`openai_mock_analyst` ≠ `anthropic_claude`); fails closed when unconfigured | `MockAnalyst` in [llm/mock_analyst.py](../../src/threatprism/llm/mock_analyst.py) | Mitigated (seam) | `tests/test_real_llm_provider.py` |
+
+> Egress boundary (spec 33 §9): case text reaches the third-party API only after
+> Stage-1 tokenization, so the model never receives raw PHI/PII/secrets. Re-confirm
+> this invariant when the live call is enabled.
+
 ### Enrichment Stubs
 
 | Threat ID | Mitigation | Code Reference | State | Test File |
@@ -201,6 +218,7 @@ memory, tools, multi-tenancy, non-demo persistence, or real PHI handling.
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-05-30 | Claude (auto-generated, awaiting human review) | Real-LLM provider seam (spec 33 deterministic core) traceability added | Untrusted-LLM-output validation, structured failure taxonomy, deterministic batch budget (OT-L3 partial), real-provider fail-closed config guard, and mock-analyst independence mapped to `tests/test_real_llm_provider.py`. Live Claude/OpenAI calls remain gated; egress boundary depends on Stage-1 tokenization. The spec 21 I4/OT-7 move to Mitigated still requires the semantic firewall to ship with the live provider. |
 | 2026-05-30 | Claude (auto-generated, awaiting human review) | Third-party dataset onboarding traceability added | OTRF Security-Datasets (MIT lab telemetry) onboarding introduced a supply-chain / data-provenance trust boundary. Added a "Third-Party Dataset Onboarding (Curated Datasets)" section mapping the code-authoritative license allowlist, fail-closed identifier-drop projection, `sha256` provenance, real-intake replay, and off-by-default `LocalDatasetSource` to `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, and `tests/test_local_dataset_seeding.py`. OT-L2 (full training-data curation) remains gated to fine-tuning; the recommended dedicated supply-chain threat ID is now formalized as **OT-L10** (L6.1) in the LLM lens with a "Before Non-Demo Dataset Onboarding" remediation. |
 | 2026-05-30 | Claude (auto-generated, awaiting human review) | Semantic-layer enablement plan reconciled | Added **OT-L10** (dataset corpus supply chain) and **OT-L11** (semantic classifier model-evasion / FP-DoS) to the Open Threats table; updated OT-7 to name the spec 32 control (`Llama-Prompt-Guard-2-86M`). Mirrors the LLM lens L6.1/L1.1 additions and the spec 21 re-opened I4/RR-I4/OT-7 treatment. Owner signatures pending. |
 | 2026-05-26 | Codex | Production token verifier implementation traceability updated | Closed S4 for local no-network verifier scope with fake JWKS tests. Live JWKS fetch and live IdP integration remain gated. |

@@ -898,18 +898,29 @@ Evolution 2 backtest harness (deterministic scaffolding) — validated GREEN
 
 ## Next Active Slice
 
-**Recommended (gated — owner-run): open the real-LLM gate (live).** All the
-deterministic scaffolding is now complete and tested — provider seam, failure
-handling, batching, executive summary, and the Evolution 2 backtest. The logical
-next step is to actually turn it on: `pip install -r requirements-llm.txt`, set
-`ANTHROPIC_API_KEY`/`OPENAI_API_KEY`, verify the SDK call shapes, and run the SOC
-dataset + backtest through real Claude/OpenAI per
-`docs/runbooks/OPEN_REAL_LLM_GATE.md`. This produces real triage narratives and
-real analyst divergence, and triggers the spec 21/32 threat-model state changes.
+**Recommended (revised after the AI-governance review,
+`docs/AI_GOVERNANCE_ASSESSMENT.md`): Real-LLM governance controls — deterministic,
+non-gated, and a prerequisite for opening the gate.** Build gaps 1–4 from the
+assessment, all testable with fakes (no keys):
 
-Non-gated alternative if you'd rather keep building without keys: an Evolution 1
-throughput harness (batched-benign catch-all: false-positive-rate proxy over a
-benign-heavy batch), the same deterministic-scaffolding pattern as Evolution 2.
+- [ ] `enforce_spend_cap()` — per-run/per-day cost+token ceiling; exhaustion →
+  `budget_exceeded` (already in the failure taxonomy), fail closed. (OWASP LLM10
+  Unbounded Consumption.)
+- [ ] `UsageRecord` per LLM call (input/output tokens, estimated cost) aggregated
+  into `/metrics`. (NIST AI 600-1 MEASURE.)
+- [ ] `LLMCallAudit` — sanitized per-call `AuditEvent` (model id+revision, token
+  counts, prompt+response **hash**, never raw content). (EU AI Act logging.)
+- [ ] `APPROVED_MODELS` in-code allowlist enforced in `validate_runtime()` (same
+  anti-tamper pattern as `DATASET_ALLOWED_LICENSE_REVIEW`). (ISO 42001 governance.)
+
+**Then** open the real-LLM gate (live, owner-run) per
+`docs/runbooks/OPEN_REAL_LLM_GATE.md`, so the live LLM is metered, logged, and
+budget-bounded from its first call. Rationale: turning on a paid LLM with no spend
+cap or cost tracking is the textbook OWASP LLM10 risk — governance should lead the
+gate, not trail it.
+
+Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
+versioning/diff) remain gated to non-demo data / lower priority.
 
 **Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
 dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**

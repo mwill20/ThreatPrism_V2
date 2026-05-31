@@ -828,12 +828,18 @@ Batch Executive Summary + `--show-reports` (non-gated parts of the exec-summary 
   traceability present, narrative gated, blocked-case noted, show-reports).
 - [x] Updated runbook and `docs/PRODUCT_VALUE_AND_ROADMAP.md` (§2.3 exec summary).
 
-**Gated next: real-LLM ThreatPrism provider + LLM-filled exec summaries.** Owner
-approved Anthropic Claude for ThreatPrism's brain and a cheaper OpenAI/Gemini model
-as the independent mock-analyst (Evolution 2). Requires a new spec, env-var API
-keys, LLM output routed through the existing deterministic guardrails, token/context
-budget, and the spec 21/32 threat-model re-open. Cannot be exercised from the build
-environment (no keys / no paid calls) — to be implemented for the owner to run.
+**Gated next: real-LLM ThreatPrism provider + LLM-filled exec summaries.** Designed
+in `docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md` (gated, design-only).
+Covers: Claude triage provider + Gemini/OpenAI independent mock-analyst; hybrid
+determinism (nondeterministic prose inside a deterministic validated envelope);
+per-event + batch executive summaries; dual-trigger batching (`BATCH_MAX_EVENTS`=50
+OR token budget, whichever first); a structured `TriageFailureReport` taxonomy
+(provider unreachable/timeout/rate-limit/auth, response unparseable, pydantic schema
+failure, evidence-grounding failure, output-policy/action-safety rejection,
+budget exceeded) with fail-closed behavior; reuse of the existing four guardrail
+layers and auth; env-var secrets; and the spec 21/32 threat-model re-open. Cannot be
+exercised from the build environment (no keys / no paid calls) — implement with
+fake-provider tests; owner runs live verification.
 
 ## Next Active Slice
 

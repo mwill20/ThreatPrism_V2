@@ -10,9 +10,9 @@ defines the contract so implementation is mechanical and auditable.
 
 Owner decisions captured (2026-05-30):
 - **ThreatPrism's brain:** Anthropic Claude (paid; cost acknowledged).
-- **Mock analyst (Evolution 2 grader):** a cheaper, *independent* model — default
-  **Gemini Flash** (or OpenAI). It MUST be a different provider/model path than the
-  triage provider, or the comparison is circular.
+- **Mock analyst (Evolution 2 grader):** **OpenAI** (a cheaper model, e.g.
+  `gpt-4o-mini` or current equivalent). It MUST be a different provider/model path
+  than the Claude triage provider, or the comparison is circular.
 - **Executive summary:** both per-event and batch; batch ranked most-critical-first
   with provenance/traceability for auditors.
 
@@ -180,7 +180,7 @@ The provider does not alter auth. Existing controls apply:
 | `LLM_CALL_TIMEOUT_SECONDS`, `LLM_MAX_RETRIES` | Failure handling |
 | `BATCH_MAX_EVENTS`, `BATCH_MAX_INPUT_TOKENS`, `OUTPUT_TOKEN_RESERVE` | Batching |
 | `SUMMARY_MAX_CHARS` | Per-event summary bound |
-| `MOCK_ANALYST_PROVIDER` (`gemini`/`openai`) + its key (env) | Evolution 2 grader |
+| `MOCK_ANALYST_PROVIDER=openai` + `OPENAI_API_KEY` (env) + `MOCK_ANALYST_MODEL_ID` | Evolution 2 grader (independent from Claude) |
 
 `.env.example` gets placeholders only. `validate_runtime()` keeps real providers
 out of unsafe postures (no real provider while `env` is a test fixture; keys

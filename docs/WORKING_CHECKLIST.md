@@ -918,19 +918,36 @@ eval 15/15, demo safety passed):
   run_triage metering+audit); `docs/AI_GOVERNANCE_ASSESSMENT.md` gaps 1–4 implemented.
 - [x] `.env` created (gitignored) preconfigured for the gate — paste keys only.
 
+## Completed Slice
+
+Real-LLM gate OPENED and VERIFIED LIVE + usage/cost surfacing:
+
+- [x] Real Claude (Sonnet 4.5) gate verified live: `run_soc_demo --live` triaged 32
+  cases with genuine evidence-grounded summaries, ~$0.18 metered, `llm_call` audits
+  recorded, injection case still firewall-blocked. Claude's verdict distribution
+  differs from the stub (its own analysis).
+- [x] Provider fixes that made it work: exact JSON contract in the prompt + valid
+  evidence_ids; `_extract_json` to strip markdown fences; `--live` uses a clean
+  in-memory DB. Committed `109dfc3`.
+- [x] **Usage/cost surfaced** (assessment gap 2 fully closed): `LlmUsageMetrics` on
+  `OperationalMetrics` (`/metrics`) populated from the `SpendLedger`, and an
+  `LLM spend (this run)` line + `llm_usage` block in the run summary. Zero with the
+  deterministic provider; real values under `--live`. Tests added (200 passed).
+
 ## Next Active Slice
 
-**Recommended (gated — owner-run): open the real-LLM gate (live).** Governance now
-leads the gate — the live LLM will be metered (`SpendLedger`), budget-bounded
-(`enforce_spend_cap` fails closed before overspending), audited per call
-(`build_llm_call_audit`, hashes only), and restricted to an approved model — from
-its first call. The wiring is **done** (`metered_generate` + `build_llm_call_audit`
-are connected into `run_triage` behind the gate flag) — only keys + verification
-remain: paste keys into `.env`, `pip install -r requirements-llm.txt`, set per-model
-prices/caps, verify the SDK call/usage attrs per
-`docs/runbooks/OPEN_REAL_LLM_GATE.md`, then run `run_soc_demo --show-reports` +
-`backtest` through real Claude/OpenAI. Follow-ons once live: ship the semantic
-firewall (spec 32) and flip spec 21 I4/OT-7 to Mitigated.
+**Recommended: wire the batch executive-summary narrative (non-gated to build,
+real under --live).** The per-event `summary` is now real LLM output, but the batch
+`narrative` still shows `[pending_real_llm_provider]` because `run_soc_demo`'s
+exec-summary builder never calls `build_batch_narrative`. Wire it: call the
+provider's `generate_narrative` (metered + output-policy validated via the existing
+`build_batch_narrative` seam) so the auditor batch summary gets real prose under
+`--live`, while staying `None` for the deterministic demo. Completes the
+executive-summary ask (per-event + batch). Downside: only visible under `--live`.
+
+Follow-ons (gated): semantic firewall (spec 32) + the local-model decision; flip
+spec 21 I4/OT-7 to Mitigated; meter failed-after-call cost (parse failures cost
+money but currently aren't ledgered); surface usage in the backtest output.
 
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.
@@ -998,7 +1015,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-198 passed
+200 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

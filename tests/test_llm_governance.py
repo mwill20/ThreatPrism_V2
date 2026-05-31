@@ -186,8 +186,12 @@ def test_run_triage_meters_and_audits_a_real_like_call() -> None:
 
     service.run_triage(case.case_id)
 
-    # Spend ledger metered the call.
+    # Spend ledger metered the call, and /metrics surfaces it.
     assert service._spend_ledger.total_tokens == 1500
+    usage = service.get_operational_metrics().llm_usage
+    assert usage.call_count == 1
+    assert usage.total_tokens == 1500
+    assert usage.input_tokens == 1000 and usage.output_tokens == 500
     # A sanitized llm_call audit event was recorded with hashes, not raw content.
     updated = service.get_case(case.case_id)
     llm_audits = [e for e in updated.audit_trail if e.event_type == "llm_call"]

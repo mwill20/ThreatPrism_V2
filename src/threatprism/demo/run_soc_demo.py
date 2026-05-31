@@ -95,6 +95,7 @@ class SocDemoRunSummary(BaseModel):
     guardrails: dict[str, int] = Field(default_factory=dict)
     manager_review_queue: int = 0
     healthcare_review_queue: int = 0
+    llm_usage: dict[str, Any] = Field(default_factory=dict)
     samples: list[SocCaseSample] = Field(default_factory=list)
     executive_summary: BatchExecutiveSummary = Field(default_factory=BatchExecutiveSummary)
     sample_reports: list[dict[str, Any]] = Field(default_factory=list)
@@ -236,6 +237,7 @@ def run_soc_demo(settings: Settings | None = None, *, sample_report_count: int =
         },
         manager_review_queue=len(manager_queue.items),
         healthcare_review_queue=len(healthcare_queue.items),
+        llm_usage=metrics.llm_usage.model_dump(),
         samples=samples,
         executive_summary=_build_executive_summary(service, family_of),
         sample_reports=_collect_sample_reports(service, sample_report_count) if sample_report_count else [],
@@ -264,6 +266,11 @@ def _render_human(summary: SocDemoRunSummary) -> str:
     lines.append(f"Manager-review queue:  {summary.manager_review_queue}    "
                  f"Healthcare-review queue: {summary.healthcare_review_queue}")
     lines.append("  (queues reflect post-sanitization snapshots: already-tokenized PHI does not re-flag - see spec 31 section 7)")
+    u = summary.llm_usage or {}
+    lines.append(f"LLM spend (this run):  calls={u.get('call_count', 0)}  "
+                 f"tokens={u.get('total_tokens', 0)} (in {u.get('input_tokens', 0)} / out {u.get('output_tokens', 0)})  "
+                 f"est_cost=${u.get('estimated_cost_usd', 0)}")
+    lines.append("  (zero with the deterministic provider; real values under --live with the spend cap enforcing)")
     lines.append("")
     es = summary.executive_summary
     lines.append("Executive Summary (batch) - most critical first:")

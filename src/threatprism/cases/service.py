@@ -13,6 +13,7 @@ from threatprism.cases.read_models import (
     DisagreementMetrics,
     GrcMetrics,
     GuardrailMetrics,
+    LlmUsageMetrics,
     MetricsWindow,
     OperationalMetrics,
     ReportDecisionMetrics,
@@ -336,6 +337,14 @@ class CaseService:
             disposition_mismatch_count=sum(item.disposition_mismatch for item in disagreements),
             manager_review_required_count=sum(item.manager_review_required for item in disagreements),
         )
+        ledger = self._spend_ledger
+        llm_usage = LlmUsageMetrics(
+            call_count=len(ledger.records),
+            input_tokens=sum(r.input_tokens for r in ledger.records),
+            output_tokens=sum(r.output_tokens for r in ledger.records),
+            total_tokens=ledger.total_tokens,
+            estimated_cost_usd=ledger.total_cost_usd,
+        )
         return OperationalMetrics(
             window=MetricsWindow(start=start, end=end),
             case_counts=case_counts,
@@ -345,6 +354,7 @@ class CaseService:
             disagreement=disagreement_metrics,
             timing=timing,
             grc=grc,
+            llm_usage=llm_usage,
         )
 
     def list_case_read_models(

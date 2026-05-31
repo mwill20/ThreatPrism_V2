@@ -55,7 +55,7 @@ they all become *acute exactly when the real LLM turns on*:
 | # | Gap | Pillar | Status |
 |---|-----|--------|--------|
 | 1 | **Spend cap / cost ceiling** (Unbounded Consumption) | Safety | ✅ `enforce_spend_cap()` / `metered_generate()` in `llm/governance.py`; `validate_runtime` requires a cap for the real provider |
-| 2 | **Token usage + cost accounting** (`UsageRecord`, `SpendLedger`) | Auditability | ✅ `llm/governance.py` (`CostModel`, `SpendLedger`); provider sets `last_usage` |
+| 2 | **Token usage + cost accounting** (`UsageRecord`, `SpendLedger`) | Auditability | ✅ `llm/governance.py` (`CostModel`, `SpendLedger`); provider sets `last_usage`; **surfaced** to `/metrics` (`OperationalMetrics.llm_usage`) and the run summary |
 | 3 | **Sanitized per-LLM-call audit** (model+tokens+hash) | Auditability | ✅ `build_llm_call_audit()` (hashes prompt+response, never raw) |
 | 4 | **Approved-model allowlist** | Control | ✅ `APPROVED_MODELS` enforced in `validate_runtime()` |
 | 5 | Append-only audit + compliance export + retention (OT-8) | Auditability | ❌ gated (non-demo data) |

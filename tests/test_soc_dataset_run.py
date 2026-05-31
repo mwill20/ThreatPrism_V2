@@ -55,6 +55,14 @@ def test_summary_is_serializable_and_leaks_nothing() -> None:
         assert token not in blob, f"summary leaked raw identifier: {token}"
 
 
+def test_llm_usage_surfaced_and_zero_for_deterministic_provider() -> None:
+    summary = run_soc_demo(local_auth_disabled_settings())
+
+    assert summary.llm_usage["call_count"] == 0
+    assert summary.llm_usage["total_tokens"] == 0
+    assert summary.llm_usage["estimated_cost_usd"] == 0.0
+
+
 def test_executive_summary_ranks_critical_first() -> None:
     es = run_soc_demo(local_auth_disabled_settings()).executive_summary
 

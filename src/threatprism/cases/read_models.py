@@ -64,6 +64,16 @@ class GrcMetrics(BaseModel):
     review_required_count: int = 0
 
 
+class LlmUsageMetrics(BaseModel):
+    """LLM spend for this service process. Zero with the deterministic provider."""
+
+    call_count: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+
 class OperationalMetrics(BaseModel):
     window: MetricsWindow = Field(default_factory=MetricsWindow)
     case_counts: CaseCountMetrics = Field(default_factory=CaseCountMetrics)
@@ -73,6 +83,7 @@ class OperationalMetrics(BaseModel):
     disagreement: DisagreementMetrics = Field(default_factory=DisagreementMetrics)
     timing: TimingMetrics = Field(default_factory=TimingMetrics)
     grc: GrcMetrics = Field(default_factory=GrcMetrics)
+    llm_usage: LlmUsageMetrics = Field(default_factory=LlmUsageMetrics)
 
 
 class TriageReadSummary(BaseModel):

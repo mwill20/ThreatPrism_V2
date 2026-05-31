@@ -814,6 +814,36 @@ it usable"):
 
 ## Completed Slice
 
+Spec 33 deterministic core (real-LLM seam, no live calls) — validated GREEN
+(178 passed, eval 15/15, demo safety passed):
+
+- [x] `src/threatprism/llm/failures.py` — `TriageFailureReport`/`BatchFailureReport`
+  taxonomy + builders (provider unreachable/timeout/rate-limit/auth, response
+  unparseable, pydantic schema failure with field-paths-only redaction, evidence/
+  output-policy/action-safety guardrail rejections, prompt quarantine, budget
+  exceeded); fail-closed terminal status mapping.
+- [x] `src/threatprism/llm/batching.py` — deterministic dual-trigger planner
+  (`BATCH_MAX_EVENTS` OR token budget), never splits a case, oversized → flagged.
+- [x] `src/threatprism/llm/runner.py` — `safe_generate_report` + `validate_llm_report`:
+  untrusted LLM output routed through the existing output-policy/evidence/action
+  guardrails; every failure mode → structured failure report, never raises.
+- [x] `ClaudeTriageProvider` skeleton (lazy `anthropic` import; fails closed with a
+  structured error when unconfigured) + `get_provider("anthropic_claude", settings)`.
+- [x] Backward-compatible `run_triage` integration: provider call/parse failures →
+  `triage_provider_failure` audit + fail-closed status (demo never hits this branch).
+- [x] Config + `validate_runtime` guard (real provider requires `ANTHROPIC_API_KEY`),
+  `.env.example`, and gated `requirements-llm.txt` (anthropic/openai, owner-installed).
+- [x] `tests/test_real_llm_provider.py` (14 tests, no network): batching boundaries,
+  failure taxonomy + redaction, the validation seam (happy + each failure path),
+  unconfigured-Claude fail-closed, provider routing, runtime guard.
+
+Gated remainder (owner runs with keys): the live Claude/OpenAI calls + prompt
+engineering + the LLM-filled per-event/batch narrative + the OpenAI mock-analyst
+(Evolution 2) + the spec 21/32 threat-model re-open. Verify SDK call shapes against
+the installed pinned versions before live use.
+
+## Completed Slice
+
 Batch Executive Summary + `--show-reports` (non-gated parts of the exec-summary ask)
 — validated GREEN (164 passed, eval 15/15, demo safety passed):
 
@@ -910,7 +940,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-164 passed
+178 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

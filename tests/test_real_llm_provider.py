@@ -1,0 +1,193 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from pydantic import ValidationError
+
+from threatprism.cases.schemas import (
+    Determination,
+    Disposition,
+    Finding,
+    Severity,
+    TriageReport,
+)
+from threatprism.cases.service import CaseService
+from threatprism.config import Settings
+from threatprism.llm.batching import BatchItem, estimate_tokens, plan_batches
+from threatprism.llm.failures import (
+    BatchFailureReport,
+    FailureType,
+    ProviderTimeout,
+    TriageFailureReport,
+    failure_from_validation_error,
+)
+from threatprism.llm.providers import ClaudeTriageProvider, DeterministicDemoProvider, get_provider
+from threatprism.llm.runner import safe_generate_report, validate_llm_report
+from support_settings import local_auth_disabled_settings
+
+
+_PAYLOAD = json.loads(Path("examples/soar_payloads/generic_soar_case.json").read_text(encoding="utf-8"))
+
+
+def _a_case():
+    service = CaseService(local_auth_disabled_settings())
+    accepted = service.create_case(_PAYLOAD)
+    return service.get_case(accepted.case_id)
+
+
+def _report(case, *, summary="Reviewed.", evidence_ids=None):
+    valid = [item.evidence_id for item in case.evidence]
+    return TriageReport(
+        case_id=case.case_id,
+        summary=summary,
+        determination=Determination.benign,
+        severity=Severity.low,
+        disposition=Disposition.monitor,
+        confidence=0.5,
+        findings=[Finding(title="t", summary="s", severity=Severity.low, evidence_ids=evidence_ids or valid)],
+    )
+
+
+class _FakeOk:
+    provider_name = "fake_ok"
+
+    def __init__(self, report):
+        self._report = report
+
+    def generate_report(self, case):
+        return self._report
+
+
+class _FakeRaise:
+    provider_name = "fake_raise"
+
+    def __init__(self, exc):
+        self._exc = exc
+
+    def generate_report(self, case):
+        raise self._exc
+
+
+class _FakeSchemaFail:
+    provider_name = "fake_schema"
+
+    def generate_report(self, case):
+        return TriageReport.model_validate({"not": "a report"})  # raises ValidationError
+
+
+# --- batching -------------------------------------------------------------
+
+def test_batches_close_on_event_count() -> None:
+    items = [BatchItem(f"c{i}", 10) for i in range(5)]
+    plan = plan_batches(items, max_events=2, max_input_tokens=10_000)
+    assert [len(b) for b in plan.batches] == [2, 2, 1]
+
+
+def test_batches_close_on_token_budget() -> None:
+    items = [BatchItem(f"c{i}", 40) for i in range(5)]
+    plan = plan_batches(items, max_events=100, max_input_tokens=100)
+    assert [len(b) for b in plan.batches] == [2, 2, 1]
+
+
+def test_oversized_case_is_flagged_not_split() -> None:
+    plan = plan_batches([BatchItem("big", 500), BatchItem("ok", 10)], max_events=10, max_input_tokens=100)
+    assert plan.oversized == ["big"]
+    assert plan.batches == [["ok"]]
+
+
+def test_batch_order_is_preserved_not_resorted() -> None:
+    plan = plan_batches([BatchItem("b", 10), BatchItem("a", 10)], max_events=10, max_input_tokens=10_000)
+    assert plan.batches == [["b", "a"]]
+    assert estimate_tokens("xxxx") >= 1
+
+
+# --- failure reporting ----------------------------------------------------
+
+def test_schema_failure_is_redacted_and_flagged() -> None:
+    try:
+        TriageReport.model_validate({"determination": "not-a-real-value"})
+    except ValidationError as exc:
+        failure = failure_from_validation_error(exc, case_id="c1", provider="anthropic_claude")
+    assert failure.failure_type == FailureType.schema_validation_failure
+    assert failure.pydantic_triggered is True
+    assert failure.terminal_status == "needs_review"
+    # No raw offending input value leaks into the failure record.
+    assert "not-a-real-value" not in failure.model_dump_json()
+
+
+def test_batch_failure_report_aggregates_by_type() -> None:
+    fails = [
+        TriageFailureReport(failure_type=FailureType.provider_timeout, stage="call", what="x", why="y"),
+        TriageFailureReport(failure_type=FailureType.provider_timeout, stage="call", what="x", why="y"),
+        TriageFailureReport(failure_type=FailureType.budget_exceeded, stage="batch", what="x", why="y"),
+    ]
+    report = BatchFailureReport.from_failures(fails, batch_id="b1")
+    assert report.total == 3
+    assert report.by_type == {"budget_exceeded": 1, "provider_timeout": 2}
+
+
+# --- safe_generate_report seam -------------------------------------------
+
+def test_safe_generate_report_happy_path_returns_report() -> None:
+    case = _a_case()
+    result = safe_generate_report(_FakeOk(_report(case)), case)
+    assert isinstance(result, TriageReport)
+
+
+def test_provider_call_failure_becomes_failure_report() -> None:
+    case = _a_case()
+    result = safe_generate_report(_FakeRaise(ProviderTimeout("deadline exceeded")), case)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_timeout
+    assert result.terminal_status == "needs_review"
+
+
+def test_schema_invalid_response_becomes_failure_report() -> None:
+    case = _a_case()
+    result = safe_generate_report(_FakeSchemaFail(), case)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.schema_validation_failure
+    assert result.pydantic_triggered is True
+
+
+def test_unsupported_evidence_becomes_guardrail_failure() -> None:
+    case = _a_case()
+    bad = _report(case, evidence_ids=["ev-does-not-exist"])
+    result = safe_generate_report(_FakeOk(bad), case, validate_guardrails=True)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.evidence_grounding_failure
+    assert result.terminal_status == "blocked_by_guardrail"
+
+
+def test_overclaim_summary_becomes_output_policy_failure() -> None:
+    case = _a_case()
+    overclaim = _report(case, summary="This case is HIPAA compliant and HITRUST certified.")
+    failure = validate_llm_report(overclaim, case, provider="anthropic_claude")
+    assert failure is not None
+    assert failure.failure_type == FailureType.output_policy_rejection
+
+
+# --- Claude provider: fails closed when unconfigured (no network) ---------
+
+def test_claude_provider_without_key_fails_closed() -> None:
+    case = _a_case()
+    provider = ClaudeTriageProvider(api_key="", model_id="claude-x")
+    result = safe_generate_report(provider, case)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_auth_error
+
+
+def test_get_provider_routes_demo_and_requires_settings_for_claude() -> None:
+    assert isinstance(get_provider("deterministic_demo"), DeterministicDemoProvider)
+    with pytest.raises(ValueError):
+        get_provider("anthropic_claude")  # settings required
+    settings = Settings(llm_provider="anthropic_claude", anthropic_api_key="sk-test")
+    assert isinstance(get_provider("anthropic_claude", settings), ClaudeTriageProvider)
+
+
+def test_validate_runtime_requires_key_for_real_provider() -> None:
+    bad = local_auth_disabled_settings(llm_provider="anthropic_claude", anthropic_api_key="")
+    with pytest.raises(ValueError):
+        bad.validate_runtime()

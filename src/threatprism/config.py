@@ -23,6 +23,20 @@ class Settings:
     demo_seed_enabled: bool = False
     llm_provider: str = "deterministic_demo"
     allow_real_actions: bool = False
+    # Real-LLM provider (spec 33) — gated; defaults keep the demo posture.
+    anthropic_api_key: str = ""
+    llm_model_id: str = "claude-sonnet-4-5"
+    llm_model_revision: str = ""
+    llm_temperature: float = 0.2
+    llm_call_timeout_seconds: int = 60
+    llm_max_retries: int = 2
+    summary_max_chars: int = 1200
+    batch_max_events: int = 50
+    batch_max_input_tokens: int = 150_000
+    output_token_reserve: int = 4_096
+    mock_analyst_provider: str = "openai"
+    openai_api_key: str = ""
+    mock_analyst_model_id: str = "gpt-4o-mini"
     max_request_body_bytes: int = 262_144
     case_post_rate_limit_per_minute: int = 60
     triage_concurrency_limit: int = 4
@@ -58,6 +72,19 @@ class Settings:
             demo_seed_enabled=_parse_bool(os.getenv("THREATPRISM_DEMO_SEED"), default=False),
             llm_provider=os.getenv("LLM_PROVIDER", "deterministic_demo"),
             allow_real_actions=_parse_bool(os.getenv("ALLOW_REAL_ACTIONS"), default=False),
+            anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
+            llm_model_id=os.getenv("LLM_MODEL_ID", "claude-sonnet-4-5"),
+            llm_model_revision=os.getenv("LLM_MODEL_REVISION", ""),
+            llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0.2")),
+            llm_call_timeout_seconds=_parse_int(os.getenv("LLM_CALL_TIMEOUT_SECONDS"), default=60),
+            llm_max_retries=_parse_int(os.getenv("LLM_MAX_RETRIES"), default=2),
+            summary_max_chars=_parse_int(os.getenv("SUMMARY_MAX_CHARS"), default=1200),
+            batch_max_events=_parse_int(os.getenv("BATCH_MAX_EVENTS"), default=50),
+            batch_max_input_tokens=_parse_int(os.getenv("BATCH_MAX_INPUT_TOKENS"), default=150_000),
+            output_token_reserve=_parse_int(os.getenv("OUTPUT_TOKEN_RESERVE"), default=4_096),
+            mock_analyst_provider=os.getenv("MOCK_ANALYST_PROVIDER", "openai"),
+            openai_api_key=os.getenv("OPENAI_API_KEY", ""),
+            mock_analyst_model_id=os.getenv("MOCK_ANALYST_MODEL_ID", "gpt-4o-mini"),
             max_request_body_bytes=_parse_int(os.getenv("MAX_REQUEST_BODY_BYTES"), default=262_144),
             case_post_rate_limit_per_minute=_parse_int(
                 os.getenv("CASE_POST_RATE_LIMIT_PER_MINUTE"), default=60
@@ -141,6 +168,10 @@ class Settings:
             raise ValueError("CASE_POST_RATE_LIMIT_PER_MINUTE must be greater than zero.")
         if self.triage_concurrency_limit <= 0:
             raise ValueError("TRIAGE_CONCURRENCY_LIMIT must be greater than zero.")
+        if self.llm_provider == "anthropic_claude" and not self.anthropic_api_key.strip():
+            raise ValueError("LLM_PROVIDER=anthropic_claude requires ANTHROPIC_API_KEY.")
+        if self.batch_max_events <= 0 or self.batch_max_input_tokens <= 0:
+            raise ValueError("BATCH_MAX_EVENTS and BATCH_MAX_INPUT_TOKENS must be greater than zero.")
 
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:

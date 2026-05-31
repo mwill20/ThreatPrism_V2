@@ -1,0 +1,10 @@
+# Gated real-LLM extras (spec 33). NOT part of the core pinned requirements and
+# NOT installed for the demo/CI path. Install only when opening the real-LLM gate
+# (LLM_PROVIDER=anthropic_claude), and VERIFY these versions resolve and the SDK
+# call shapes in src/threatprism/llm/providers.py match before any live use.
+#
+#   pip install -r requirements-llm.txt
+#
+# Pin to exact, reviewed versions before production use.
+anthropic>=0.40,<1.0   # ThreatPrism triage brain (Claude). Verify Messages API.
+openai>=1.50,<2.0      # Independent mock-analyst grader (Evolution 2). Verify Chat Completions API.

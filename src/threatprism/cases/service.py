@@ -44,7 +44,9 @@ from threatprism.guardrails.prompt_firewall import sanitize_text
 from threatprism.guardrails.tokenization import TokenVault, rehydrate_text, tokenize_text
 from threatprism.guardrails.views import RoleViewResult, ViewRole, render_role_view
 from threatprism.ids import new_id
+from threatprism.llm.failures import TriageFailureReport
 from threatprism.llm.providers import get_provider
+from threatprism.llm.runner import safe_generate_report
 from threatprism.persistence.sqlite import SQLiteRepository
 from threatprism.reports.render import render_report
 from threatprism.soar.generic import normalize_soar_payload
@@ -54,7 +56,7 @@ class CaseService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.repository = SQLiteRepository(settings.database_url)
-        self.provider = get_provider(settings.llm_provider)
+        self.provider = get_provider(settings.llm_provider, settings)
 
     def create_case(self, payload: dict[str, Any]) -> CaseAcceptedResponse:
         case_create = normalize_soar_payload(payload)
@@ -169,7 +171,25 @@ class CaseService:
             self.repository.save_case(case)
             return
 
-        report = self.provider.generate_report(tokenized_case)
+        generation = safe_generate_report(self.provider, tokenized_case, validate_guardrails=False)
+        if isinstance(generation, TriageFailureReport):
+            # Real-LLM provider call/parse failure (network, timeout, rate-limit,
+            # auth, malformed/schema-invalid response). Fail closed; the demo
+            # provider never reaches this branch.
+            case.status = CaseStatus.needs_analyst_review
+            case.triage_status = TriageStatus(generation.terminal_status)
+            case.audit_trail.append(
+                AuditEvent(
+                    case_id=case.case_id,
+                    event_type="triage_provider_failure",
+                    summary="Triage provider failed; case fails closed for analyst review.",
+                    metadata=generation.model_dump(mode="json"),
+                )
+            )
+            case.updated_at = utc_now()
+            self.repository.save_case(case)
+            return
+        report = generation
         issues = []
         issues.extend(scan_output_policy(report.model_dump(mode="json")))
         issues.extend(validate_report_evidence(report, {item.evidence_id for item in tokenized_case.evidence}))

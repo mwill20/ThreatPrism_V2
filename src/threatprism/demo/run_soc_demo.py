@@ -22,6 +22,8 @@ Run it:
 from __future__ import annotations
 
 import argparse
+import json
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -30,12 +32,54 @@ from threatprism.config import Settings
 from threatprism.demo.seeding import CuratedDatasetSource, DemoSeeder, SeedResult
 
 
+# Auditor ordering: most critical first.
+_SEVERITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+
+
+def _sev_key(severity: str | None) -> int:
+    return _SEVERITY_RANK.get(severity or "", 99)
+
+
 class SocCaseSample(BaseModel):
     family: str
     source_case_id: str
     severity: str | None
     triage_status: str
     guardrail_blocked: bool
+
+
+class ExecSummaryItem(BaseModel):
+    """One ranked case in the batch executive summary, with provenance/traceability."""
+
+    rank: int
+    severity: str | None = None
+    determination: str | None = None
+    disposition: str | None = None
+    confidence: float | None = None
+    source_case_id: str
+    case_id: str
+    family: str
+    triage_status: str
+    evidence_ids: list[str] = Field(default_factory=list)  # traceability
+    source_payload_hash: str | None = None  # provenance
+
+
+class BatchExecutiveSummary(BaseModel):
+    """Auditor-facing batch summary: most critical first, with provenance/traceability.
+
+    ``narrative`` is the LLM-generated executive prose slot. It is ``None`` here
+    because the inert deterministic provider produces no synthesis — a real
+    (gated) `TriageProvider` fills it. The ranking, severity counts, and per-case
+    provenance below are deterministic and complete on their own, so this object
+    is a usable audit artifact today even with the narrative empty.
+    """
+
+    narrative: str | None = None
+    narrative_status: str = "pending_real_llm_provider"
+    total_cases: int = 0
+    by_severity: dict[str, int] = Field(default_factory=dict)
+    items: list[ExecSummaryItem] = Field(default_factory=list)
+    blocked_notes: list[str] = Field(default_factory=list)
 
 
 class SocDemoRunSummary(BaseModel):
@@ -52,6 +96,8 @@ class SocDemoRunSummary(BaseModel):
     manager_review_queue: int = 0
     healthcare_review_queue: int = 0
     samples: list[SocCaseSample] = Field(default_factory=list)
+    executive_summary: BatchExecutiveSummary = Field(default_factory=BatchExecutiveSummary)
+    sample_reports: list[dict[str, Any]] = Field(default_factory=list)
 
 
 def _demo_settings() -> Settings:
@@ -71,7 +117,69 @@ def _family_by_source_case_id(result: SeedResult) -> dict[str, str]:
     return {outcome.source_case_id: outcome.fixture_id for outcome in result.seeded}
 
 
-def run_soc_demo(settings: Settings | None = None) -> SocDemoRunSummary:
+def _build_executive_summary(service: CaseService, family_of: dict[str, str]) -> BatchExecutiveSummary:
+    items: list[ExecSummaryItem] = []
+    blocked_notes: list[str] = []
+    by_severity: dict[str, int] = {}
+
+    for read_item in service.list_case_read_models().items:
+        family = family_of.get(read_item.source_case_id, "unknown")
+        report = service.get_report(read_item.case_id)
+        if report is None:
+            blocked_notes.append(
+                f"{read_item.source_case_id} ({family}) status={read_item.triage_status.value} "
+                f"- no report; guardrail blocked before triage generation."
+            )
+            continue
+        report_d = report.model_dump(mode="json")
+        case = service.get_case(read_item.case_id)
+        provenance = case.model_dump(mode="json").get("source_payload_hash") if case else None
+        evidence_ids = sorted(
+            {eid for finding in report_d.get("findings", []) for eid in finding.get("evidence_ids", [])}
+        )
+        severity = report_d.get("severity")
+        by_severity[severity] = by_severity.get(severity, 0) + 1
+        items.append(
+            ExecSummaryItem(
+                rank=0,
+                severity=severity,
+                determination=report_d.get("determination"),
+                disposition=report_d.get("disposition"),
+                confidence=report_d.get("confidence"),
+                source_case_id=read_item.source_case_id,
+                case_id=read_item.case_id,
+                family=family,
+                triage_status=read_item.triage_status.value,
+                evidence_ids=evidence_ids,
+                source_payload_hash=provenance,
+            )
+        )
+
+    items.sort(key=lambda it: (_sev_key(it.severity), it.source_case_id))
+    for rank, item in enumerate(items, start=1):
+        item.rank = rank
+
+    return BatchExecutiveSummary(
+        total_cases=len(items),
+        by_severity=dict(sorted(by_severity.items())),
+        items=items,
+        blocked_notes=sorted(blocked_notes),
+    )
+
+
+def _collect_sample_reports(service: CaseService, limit: int) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for read_item in service.list_case_read_models().items:
+        report = service.get_report(read_item.case_id)
+        if report is None:
+            continue
+        out.append({"source_case_id": read_item.source_case_id, "report": report.model_dump(mode="json")})
+        if len(out) >= limit:
+            break
+    return out
+
+
+def run_soc_demo(settings: Settings | None = None, *, sample_report_count: int = 0) -> SocDemoRunSummary:
     settings = settings or _demo_settings()
     service = CaseService(settings)
 
@@ -129,6 +237,8 @@ def run_soc_demo(settings: Settings | None = None) -> SocDemoRunSummary:
         manager_review_queue=len(manager_queue.items),
         healthcare_review_queue=len(healthcare_queue.items),
         samples=samples,
+        executive_summary=_build_executive_summary(service, family_of),
+        sample_reports=_collect_sample_reports(service, sample_report_count) if sample_report_count else [],
     )
 
 
@@ -155,6 +265,21 @@ def _render_human(summary: SocDemoRunSummary) -> str:
                  f"Healthcare-review queue: {summary.healthcare_review_queue}")
     lines.append("  (queues reflect post-sanitization snapshots: already-tokenized PHI does not re-flag - see spec 31 section 7)")
     lines.append("")
+    es = summary.executive_summary
+    lines.append("Executive Summary (batch) - most critical first:")
+    lines.append(f"  narrative: [{es.narrative_status}] (LLM-generated prose is gated on a real provider)")
+    lines.append(f"  by_severity: {es.by_severity}")
+    for it in es.items[:10]:
+        lines.append(
+            f"   #{it.rank:<2} {(it.severity or '-'):<8} {(it.determination or '-'):<10} "
+            f"{it.source_case_id:<34} evidence={','.join(it.evidence_ids) or '-':<28} "
+            f"prov={(it.source_payload_hash or '-')[:18]}"
+        )
+    if len(es.items) > 10:
+        lines.append(f"   ... and {len(es.items) - 10} more (full list in JSON)")
+    for note in es.blocked_notes:
+        lines.append(f"   [blocked] {note}")
+    lines.append("")
     lines.append("Representative case per family:")
     for s in summary.samples:
         lines.append(f"  - {s.family:<26} {s.source_case_id:<34} "
@@ -168,18 +293,32 @@ def _render_human(summary: SocDemoRunSummary) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run ThreatPrism end-to-end against the curated SOC dataset")
     parser.add_argument("--json", action="store_true", help="Print JSON only (no human-readable summary).")
+    parser.add_argument(
+        "--show-reports",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Also print full triage reports for the first N completed cases.",
+    )
     args = parser.parse_args()
 
     settings = _demo_settings()
     settings.validate_runtime()
-    summary = run_soc_demo(settings)
+    summary = run_soc_demo(settings, sample_report_count=args.show_reports)
 
     if args.json:
         print(summary.model_dump_json(indent=2))
-    else:
-        print(_render_human(summary))
+        return 0
+
+    print(_render_human(summary))
+    if args.show_reports:
         print()
-        print(summary.model_dump_json(indent=2))
+        print(f"--- Full triage reports (first {args.show_reports} completed cases) ---")
+        for sr in summary.sample_reports:
+            print(f"\n## {sr['source_case_id']}")
+            print(json.dumps(sr["report"], indent=1))
+    print()
+    print(summary.model_dump_json(indent=2))
     return 0
 
 

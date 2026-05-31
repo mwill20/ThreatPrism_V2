@@ -812,6 +812,29 @@ it usable"):
   Map entries.
 - [x] `Lessons/Lesson28_Running_End_To_End_And_The_Feedback_Loop.md` + index.
 
+## Completed Slice
+
+Batch Executive Summary + `--show-reports` (non-gated parts of the exec-summary ask)
+— validated GREEN (164 passed, eval 15/15, demo safety passed):
+
+- [x] `run_soc_demo` now builds a `BatchExecutiveSummary`: cases ranked
+  most-critical-first with per-case provenance (`sha256` source hash) and
+  evidence-ID traceability; blocked cases surfaced in `blocked_notes`. The
+  `narrative` field is the LLM-generated prose slot, left empty
+  (`pending_real_llm_provider`) — deterministic ranking/provenance ship now, prose
+  is gated. No fake "LLM" output.
+- [x] Added `--show-reports N` to dump full per-case triage reports.
+- [x] Tests in `tests/test_soc_dataset_run.py` (ranking order, provenance +
+  traceability present, narrative gated, blocked-case noted, show-reports).
+- [x] Updated runbook and `docs/PRODUCT_VALUE_AND_ROADMAP.md` (§2.3 exec summary).
+
+**Gated next: real-LLM ThreatPrism provider + LLM-filled exec summaries.** Owner
+approved Anthropic Claude for ThreatPrism's brain and a cheaper OpenAI/Gemini model
+as the independent mock-analyst (Evolution 2). Requires a new spec, env-var API
+keys, LLM output routed through the existing deterministic guardrails, token/context
+budget, and the spec 21/32 threat-model re-open. Cannot be exercised from the build
+environment (no keys / no paid calls) — to be implemented for the owner to run.
+
 ## Next Active Slice
 
 The dataset-onboarding thread, semantic-layer enablement plan, end-to-end SOC
@@ -881,7 +904,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-160 passed
+164 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

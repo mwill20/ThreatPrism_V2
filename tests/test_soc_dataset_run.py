@@ -53,3 +53,41 @@ def test_summary_is_serializable_and_leaks_nothing() -> None:
     json.loads(blob)  # round-trips
     for token in _FORBIDDEN:
         assert token not in blob, f"summary leaked raw identifier: {token}"
+
+
+def test_executive_summary_ranks_critical_first() -> None:
+    es = run_soc_demo(local_auth_disabled_settings()).executive_summary
+
+    severity_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    keys = [severity_rank.get(it.severity or "", 99) for it in es.items]
+    assert keys == sorted(keys), "executive summary is not ordered most-critical-first"
+    assert es.items[0].rank == 1
+    assert es.total_cases == 31  # 31 completed reports (the 1 blocked case has none)
+
+
+def test_executive_summary_carries_provenance_and_traceability() -> None:
+    es = run_soc_demo(local_auth_disabled_settings()).executive_summary
+
+    for item in es.items:
+        assert item.evidence_ids, f"{item.source_case_id} has no evidence traceability"
+        assert item.source_payload_hash, f"{item.source_case_id} has no provenance hash"
+    # The narrative is the gated LLM slot — deterministic run leaves it empty.
+    assert es.narrative is None
+    assert es.narrative_status == "pending_real_llm_provider"
+
+
+def test_executive_summary_notes_the_blocked_case() -> None:
+    es = run_soc_demo(local_auth_disabled_settings()).executive_summary
+
+    # The deepset quarantine row has no report and must be surfaced, not dropped.
+    assert es.blocked_notes
+    assert any("no report" in note for note in es.blocked_notes)
+
+
+def test_show_reports_returns_full_triage_reports() -> None:
+    summary = run_soc_demo(local_auth_disabled_settings(), sample_report_count=2)
+
+    assert len(summary.sample_reports) == 2
+    for sr in summary.sample_reports:
+        assert "report" in sr
+        assert sr["report"]["determination"] in {"benign", "suspicious", "malicious"}

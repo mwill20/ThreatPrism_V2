@@ -33,7 +33,15 @@ python -m threatprism.demo.run_soc_demo
 PYTHONPATH=src python -m threatprism.demo.run_soc_demo
 ```
 
-Add `--json` for machine-readable output only.
+Add `--json` for machine-readable output only, or `--show-reports N` to also dump
+the full triage reports for the first N completed cases (so you can read the
+actual per-case deliverable, not just the aggregate).
+
+The run also prints a **batch executive summary** — cases ranked most-critical-first
+with per-case provenance (`sha256` source hash) and evidence-ID traceability, so an
+auditor can review quickly. Its `narrative` field (LLM-generated executive prose) is
+intentionally empty (`pending_real_llm_provider`) until the real-LLM gate opens — the
+ranking and provenance are deterministic and usable today; only the prose is gated.
 
 ### Expected output
 

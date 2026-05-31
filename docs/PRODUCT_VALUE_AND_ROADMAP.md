@@ -57,10 +57,24 @@ a real action is blocked (`enforce_action_safety()`).
 - **Audit events** — every authorization and guardrail decision is recorded.
 - **The analyst feedback loop** — see §4. This is the tuning backbone.
 
-### 2.3 See it now
+### 2.3 The executive summary (per-event and batch)
+
+Two executive-summary surfaces are designed:
+
+- **Per-event:** the `TriageReport.summary` field. With the deterministic provider
+  it is canned boilerplate; the LLM (gated) fills it with real synthesis.
+- **Batch:** a `BatchExecutiveSummary` (in `run_soc_demo`) that ranks cases
+  **most-critical-first** with per-case **provenance** (`sha256` source hash) and
+  **evidence-ID traceability** — the artifact an auditor reviews quickly. Its
+  ranking and provenance are deterministic and usable today; its `narrative`
+  field is the **LLM-generated prose slot**, intentionally empty
+  (`pending_real_llm_provider`) until the real-LLM gate opens. Nothing fake ships.
+
+### 2.4 See it now
 
 `python -m threatprism.demo.run_soc_demo` runs 32 SOC cases end-to-end and prints
-exactly these outputs in aggregate (see
+these outputs — including the ranked batch executive summary. Add `--show-reports N`
+to read full per-case reports (see
 [runbooks/RUN_AGAINST_SOC_DATASET.md](runbooks/RUN_AGAINST_SOC_DATASET.md)).
 
 ---

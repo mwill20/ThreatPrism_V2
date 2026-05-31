@@ -880,9 +880,19 @@ fake-provider tests; owner runs live verification.
 
 ## Next Active Slice
 
-The dataset-onboarding thread, semantic-layer enablement plan, end-to-end SOC
-dataset run, and product-value/roadmap documentation are complete. Remaining work
-is gated and must be selected explicitly before implementation.
+**Recommended: Evolution 2 backtest harness — deterministic scaffolding (non-gated).**
+Build a provider-agnostic `run_backtest` that, over a batch of cases, runs triage
+(any `TriageProvider`) and the mock-analyst grader, submits feedback through the
+existing `submit_feedback` -> `DisagreementRecord` loop, and emits a structured
+`BacktestReport` (agreement rate; disagreements by determination/severity; the
+cases ThreatPrism called suspicious/malicious where the analyst differed). Built
+and tested now with the deterministic demo + a fake analyst (no keys); the owner
+swaps in real Claude/OpenAI when the gate opens. This is the runnable realization
+of the Evolution 2 tuning loop and the "where they differed" divergence report.
+Downside: exercises only fakes until the gate opens.
+
+The remaining runtime evolutions and live work are gated and must be selected
+explicitly before implementation.
 
 **Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
 dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**

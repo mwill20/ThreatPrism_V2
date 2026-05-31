@@ -206,6 +206,7 @@ docker-compose.yml Local demo backend service
 |---|---|
 | **What the tool produces + roadmap** | [docs/PRODUCT_VALUE_AND_ROADMAP.md](docs/PRODUCT_VALUE_AND_ROADMAP.md) |
 | Run end-to-end on a SOC dataset | [docs/runbooks/RUN_AGAINST_SOC_DATASET.md](docs/runbooks/RUN_AGAINST_SOC_DATASET.md) |
+| Open the real-LLM gate (Claude/OpenAI) | [docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md](docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md), [docs/runbooks/OPEN_REAL_LLM_GATE.md](docs/runbooks/OPEN_REAL_LLM_GATE.md) |
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |
@@ -459,6 +460,28 @@ Re-running is idempotent: fixtures whose `source_case_id` already exists are
 skipped. Curated fixtures are post-sanitization snapshots, so replay does not
 re-trigger prompt-firewall quarantine for already-sanitized fixtures. See
 `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md`.
+
+## Real-LLM Triage (Gated)
+
+By default ThreatPrism uses the inert `DeterministicDemoProvider`. A real-LLM
+provider (Anthropic Claude as the triage brain; OpenAI as an independent
+mock-analyst) is **designed and scaffolded** in
+[`docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md`](docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md).
+The deterministic core is implemented and tested with no network:
+
+- **Untrusted-output validation** — LLM output (including the executive summary)
+  is routed through the existing output-policy, evidence-grounding, and
+  action-safety guardrails before it is trusted.
+- **Structured failure reporting** — provider unreachable/timeout/rate-limit/auth,
+  unparseable response, Pydantic schema failure, guardrail rejection, or budget
+  exceeded each become a `TriageFailureReport` (what/why/which-guardrail/
+  `pydantic_triggered`), and the case fails closed.
+- **Deterministic batching** — `BATCH_MAX_EVENTS` (50) OR a token budget,
+  whichever triggers first; a case is never split.
+
+The live API calls are **gated** — they require your keys and are not exercised in
+CI. To open the gate, follow
+[`docs/runbooks/OPEN_REAL_LLM_GATE.md`](docs/runbooks/OPEN_REAL_LLM_GATE.md).
 
 ## Demo SOAR Intake
 

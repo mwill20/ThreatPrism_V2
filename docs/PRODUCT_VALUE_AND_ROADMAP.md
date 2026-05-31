@@ -180,12 +180,16 @@ semantic-firewall defense), which is why that gate is the next real decision.
 
 ## 6. Honest scope today
 
-- The provider is the inert `DeterministicDemoProvider` (keyword-based). The
+- The active provider is the inert `DeterministicDemoProvider` (keyword-based). The
   pipeline, guardrails, persistence, observability, and feedback loop are real and
   proven end-to-end ([run_soc_demo](../src/threatprism/demo/run_soc_demo.py)); the
   *quality of the verdict* is not, because no real model is wired.
-- Opening the real-LLM gate requires the threat-model re-review already staged in
-  [specs/21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) and the
-  classifier surface modeled as OT-L11.
-- Until then, "pretend the dataset is the SOAR feed" is the correct way to
-  demonstrate every evolution without a live integration.
+- The **real-LLM seam is built and tested** with no network (spec 33 deterministic
+  core): the failure taxonomy, batching, untrusted-output validation, the Claude
+  triage provider + narrative skeleton, and the OpenAI mock-analyst. The **live
+  calls are gated** — open them with [runbooks/OPEN_REAL_LLM_GATE.md](runbooks/OPEN_REAL_LLM_GATE.md).
+- Opening the gate also requires the semantic firewall ([spec 32](specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md))
+  and the threat-model re-review staged in [spec 21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)
+  (classifier surface = OT-L11; provider DoS = OT-L3).
+- Until the gate opens, "pretend the dataset is the SOAR feed" is the correct way
+  to demonstrate every evolution without a live integration.

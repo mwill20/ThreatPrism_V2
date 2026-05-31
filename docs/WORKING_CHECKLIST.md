@@ -878,21 +878,38 @@ layers and auth; env-var secrets; and the spec 21/32 threat-model re-open. Canno
 exercised from the build environment (no keys / no paid calls) — implement with
 fake-provider tests; owner runs live verification.
 
+## Completed Slice
+
+Evolution 2 backtest harness (deterministic scaffolding) — validated GREEN
+(188 passed, eval 15/15, demo safety passed):
+
+- [x] `src/threatprism/demo/backtest.py` — provider-agnostic `run_backtest` grades
+  triaged cases against an `AnalystGrader`, feeds the existing
+  `submit_feedback` -> `DisagreementRecord` loop, and emits a `BacktestReport`
+  (agreement rate; determination/severity mismatches; the
+  `threatprism_flagged_analyst_cleared` set = cases TP called non-benign where the
+  analyst cleared them — the tuning signal). Grading failures counted, not
+  swallowed. `python -m threatprism.demo.backtest`.
+- [x] `HeuristicDemoAnalyst` deterministic stand-in (no keys); demo run grades 31,
+  agreement 0.871, surfaces 4 OTRF divergences. Owner swaps in the OpenAI
+  `MockAnalyst` at the gate.
+- [x] `tests/test_backtest.py` (5 tests: full agreement, clear-all divergence,
+  grading-failure counting, deterministic heuristic divergence, no-leak).
+
 ## Next Active Slice
 
-**Recommended: Evolution 2 backtest harness — deterministic scaffolding (non-gated).**
-Build a provider-agnostic `run_backtest` that, over a batch of cases, runs triage
-(any `TriageProvider`) and the mock-analyst grader, submits feedback through the
-existing `submit_feedback` -> `DisagreementRecord` loop, and emits a structured
-`BacktestReport` (agreement rate; disagreements by determination/severity; the
-cases ThreatPrism called suspicious/malicious where the analyst differed). Built
-and tested now with the deterministic demo + a fake analyst (no keys); the owner
-swaps in real Claude/OpenAI when the gate opens. This is the runnable realization
-of the Evolution 2 tuning loop and the "where they differed" divergence report.
-Downside: exercises only fakes until the gate opens.
+**Recommended (gated — owner-run): open the real-LLM gate (live).** All the
+deterministic scaffolding is now complete and tested — provider seam, failure
+handling, batching, executive summary, and the Evolution 2 backtest. The logical
+next step is to actually turn it on: `pip install -r requirements-llm.txt`, set
+`ANTHROPIC_API_KEY`/`OPENAI_API_KEY`, verify the SDK call shapes, and run the SOC
+dataset + backtest through real Claude/OpenAI per
+`docs/runbooks/OPEN_REAL_LLM_GATE.md`. This produces real triage narratives and
+real analyst divergence, and triggers the spec 21/32 threat-model state changes.
 
-The remaining runtime evolutions and live work are gated and must be selected
-explicitly before implementation.
+Non-gated alternative if you'd rather keep building without keys: an Evolution 1
+throughput harness (batched-benign catch-all: false-positive-rate proxy over a
+benign-heavy batch), the same deterministic-scaffolding pattern as Evolution 2.
 
 **Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
 dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
@@ -957,7 +974,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-183 passed
+188 passed
 eval harness dry-run: 15 passed / 0 failed
 ```
 

@@ -483,6 +483,17 @@ The live API calls are **gated** — they require your keys and are not exercise
 CI. To open the gate, follow
 [`docs/runbooks/OPEN_REAL_LLM_GATE.md`](docs/runbooks/OPEN_REAL_LLM_GATE.md).
 
+The **Evolution 2 backtest** (analyst-vs-ThreatPrism tuning loop) is runnable now
+with a deterministic stand-in analyst — swap in the real OpenAI grader at the gate:
+
+```powershell
+$env:PYTHONPATH='src'
+python -m threatprism.demo.backtest
+```
+
+It reports the determination agreement rate and the cases ThreatPrism flagged
+non-benign where the analyst cleared them (the tuning signal).
+
 ## Demo SOAR Intake
 
 Submit the fake generic SOAR payload:

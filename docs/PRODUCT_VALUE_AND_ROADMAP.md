@@ -150,11 +150,13 @@ analyst worked longer or decided differently. This is the **tuning/feedback loop
 at batch scale**.
 **Reuses today:** the entire feedback loop in §4 (`submit_feedback` →
 `DisagreementRecord` → disagreement metrics).
-**Needs:** a real provider; a mock-analyst harness (second LLM) that emits
-`AnalystFeedbackCreate`; a divergence report aggregating disagreements by
-determination/severity. **Independence rule:** the mock-analyst LLM must be a
-different model/prompt path than the triage provider, or the comparison is
-circular.
+**Status:** the harness is **built and runnable now** —
+`python -m threatprism.demo.backtest` (`src/threatprism/demo/backtest.py`) grades a
+batch with a deterministic stand-in analyst and emits a `BacktestReport` (agreement
+rate; the `threatprism_flagged_analyst_cleared` divergence set). The OpenAI
+`MockAnalyst` (independent of the Claude triage brain) drops in at the gate.
+**Independence rule:** the mock-analyst LLM must be a different model/prompt path
+than the triage provider, or the comparison is circular.
 
 ### Evolution 3 — Single event-driven (live co-pilot, human-in-the-loop)
 

@@ -949,6 +949,14 @@ Follow-ons (gated): semantic firewall (spec 32) + the local-model decision; flip
 spec 21 I4/OT-7 to Mitigated; meter failed-after-call cost (parse failures cost
 money but currently aren't ledgered); surface usage in the backtest output.
 
+Planned (dev-workflow, non-product): **Dev-Workflow AI Governance Hooks**
+(`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — Claude Code hooks that apply
+the Control/Audit/Safety triangle to the *coding assistant*: PostToolUse →
+`audit.jsonl`, UserPromptSubmit → prompt log, Stop → session summary, PreToolUse
+(Edit|Write) → secret-detection block + `blocked.log`, plus a file-based HTML
+dashboard. Reuses ThreatPrism's secret-pattern catalog. Verify the Claude Code hook
+schema at build time. Teach via the planned Lesson 29 (see `Lessons/00_Index.md`).
+
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.
 

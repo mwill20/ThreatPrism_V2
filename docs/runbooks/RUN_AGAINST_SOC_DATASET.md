@@ -76,6 +76,30 @@ Manager-review queue:  0    Healthcare-review queue: 0
 
 ---
 
+## Evolution 1 — Auto-close delta (SOAR catch-all safety net)
+
+Models the headline SOC-migration value: a naive SOAR auto-closes everything the
+*source* didn't mark high/critical; ThreatPrism's triage catches the cases that
+rule would have wrongly closed (the false-negative saves).
+
+```powershell
+$env:PYTHONPATH = "src"
+python -m threatprism.demo.auto_close_delta
+```
+
+```text
+SOAR would auto-close:       31 (100% volume reduction)
+  ...ThreatPrism cleared:    23 (agreement - safe to auto-close)
+  ...ThreatPrism FLAGGED:    8  (the catch - auto-close would have missed these)
+```
+
+The corpus has no high inbound severities, so the naive rule would close all 31;
+ThreatPrism flags 8 (the OTRF telemetry cases). The **catch** is the value: those 8
+are cases a cheap auto-close would have silently closed. The real auto-close rate +
+catch count over a benign-heavy feed are an owner `--live` run (no volume fabricated).
+
+---
+
 ## Option B — Interactive HTTP path (explore the API)
 
 To poke the live endpoints yourself, start the server with the demo seed hook on

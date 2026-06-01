@@ -136,8 +136,15 @@ surface the rare case the catch-all would have auto-closed but ThreatPrism flags
 suspicious. This is throughput + safety-net validation.
 **Reuses today:** batch seeding via `DemoSeeder`, metrics distributions, the
 `run_soc_demo` aggregate summary.
-**Needs:** a real provider; a benign-heavy dataset; an "auto-close vs flagged"
-delta report.
+**Status — built (deterministic core):** `src/threatprism/demo/auto_close_delta.py`
+(`python -m threatprism.demo.auto_close_delta`). A naive SOAR rule auto-closes
+anything the *source* did not mark high/critical (independent of ThreatPrism, so
+the comparison isn't circular); the **catch** = cases that rule would close but
+ThreatPrism flags non-benign. Over the curated corpus with the demo provider: 31
+triaged, all 31 auto-closeable (no high inbound severities), **8 caught** (the OTRF
+telemetry cases triaging to suspicious/high). Tests in `tests/test_auto_close_delta.py`.
+**Still gated (owner runs):** the *real* auto-close rate + catch count over a
+benign-heavy feed under `--live` with a real provider. No volume is fabricated.
 
 ### Evolution 2 — Batch over analyst-handled cases (backtest + tuning)
 

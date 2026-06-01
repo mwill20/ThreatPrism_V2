@@ -1074,9 +1074,14 @@ versioning/diff) remain gated to non-demo data / lower priority.
 **Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
 dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
 
-- [ ] Evolution 1 — Batched benign (SOAR catch-all auto-close): triage the benign
-  volume a SOAR would auto-close; prove agreement at volume + surface the rare
-  flagged case. Needs a real `TriageProvider` + an auto-close-vs-flagged delta report.
+- [x] Evolution 1 — Batched benign (SOAR catch-all auto-close) — **built (deterministic
+  core) 2026-06-01.** `src/threatprism/demo/auto_close_delta.py` + `run_auto_close_delta`:
+  a triage-independent naive SOAR rule (auto-close unless inbound high/critical) vs
+  ThreatPrism's verdict; headline `catches` = cases the rule would close but TP flags.
+  Demo over the curated corpus: 31 triaged, all auto-closeable, **8 caught**.
+  `tests/test_auto_close_delta.py` (5 tests: crafted catch/safe/escalate + corpus
+  invariants + no-leak). Runbook + roadmap §5 updated. Live auto-close rate over a
+  benign feed remains the owner's `--live` run.
 - [ ] Evolution 2 — Batch over analyst-handled cases (backtest + tuning): replay
   cases with analyst ground truth (mock-analyst via a *different, independent* LLM
   emitting `AnalystFeedbackCreate`); aggregate `DisagreementRecord`s where ThreatPrism
@@ -1134,7 +1139,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-245 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
+250 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

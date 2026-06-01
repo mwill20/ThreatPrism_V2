@@ -105,6 +105,12 @@ shell one-liners are not portable). Scripts read the hook JSON from stdin and:
 - `PreToolUse` secret scan: exit/deny to block.
 - others: write their JSONL/markdown and exit 0.
 
+**Operating the hooks** — activation (next Claude Code start), where the gitignored
+logs live, how to disable (`"disableAllHooks": true` or delete the file), how to
+build the dashboard (`python tools/hooks/gen_dashboard.py`), and the `jq` review
+queries are documented in the runbook:
+[`docs/runbooks/DEV_WORKFLOW_HOOKS.md`](../runbooks/DEV_WORKFLOW_HOOKS.md).
+
 ---
 
 ## 6. Test plan

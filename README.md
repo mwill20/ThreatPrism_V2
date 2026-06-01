@@ -208,7 +208,7 @@ docker-compose.yml Local demo backend service
 | Run end-to-end on a SOC dataset | [docs/runbooks/RUN_AGAINST_SOC_DATASET.md](docs/runbooks/RUN_AGAINST_SOC_DATASET.md) |
 | Open the real-LLM gate (Claude/OpenAI) | [docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md](docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md), [docs/runbooks/OPEN_REAL_LLM_GATE.md](docs/runbooks/OPEN_REAL_LLM_GATE.md) |
 | AI governance posture (Control/Audit/Safety) | [docs/AI_GOVERNANCE_ASSESSMENT.md](docs/AI_GOVERNANCE_ASSESSMENT.md) |
-| Dev-workflow AI governance hooks (planned) | [docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md](docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md) |
+| Dev-workflow AI governance hooks (audit + secret-block + dashboard) | [docs/runbooks/DEV_WORKFLOW_HOOKS.md](docs/runbooks/DEV_WORKFLOW_HOOKS.md) (operate/disable/dashboard), [docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md](docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md) (design) |
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Usage examples | [docs/USAGE.md](docs/USAGE.md) |
 | Architecture and data flow | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/ARCHITECTURAL_NORTH_STAR.md](docs/ARCHITECTURAL_NORTH_STAR.md) |

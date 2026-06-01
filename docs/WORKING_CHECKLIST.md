@@ -1086,9 +1086,18 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
   cases with analyst ground truth (mock-analyst via a *different, independent* LLM
   emitting `AnalystFeedbackCreate`); aggregate `DisagreementRecord`s where ThreatPrism
   said suspicious/malicious vs the analyst. Reuses the existing feedback loop at scale.
-- [ ] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
+- [~] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
   pulls the triage report, works it human-in-the-loop, submits feedback; same tuning
-  loop as Evolution 2 at live cadence. Needs assignment/ownership + dashboard feedback UI.
+  loop as Evolution 2 at live cadence.
+  - [x] **Sub-slice 1 — case ownership/assignment (backend), built 2026-06-01.**
+    `assigned_to`/`assigned_at` on `CaseRecord`; `POST /cases/{id}/assign` (self-assign,
+    roles `analyst`/`engineer`/`admin` only) + `POST /cases/{id}/release` (current owner
+    or admin only); `_authorized_principal` authn+role-allowlist helper with a deny audit;
+    `assign_case`/`release_case` in the service with ownership enforcement; an audit event
+    per decision. `tests/test_case_assignment.py` (10 tests: API authz, ownership rules,
+    service unit). 260 passed.
+  - [ ] Sub-slice 2 — dashboard feedback UI wired to the existing feedback endpoint.
+  - [ ] Owner-run — live cadence with a real provider.
 
 Other gated work:
 
@@ -1139,7 +1148,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-250 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+260 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

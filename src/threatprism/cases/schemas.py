@@ -309,6 +309,19 @@ class CaseRecord(CaseCreate):
     sanitization_records: list[SanitizationRecord] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+    # Case ownership (Evolution 3 sub-slice 1). Orthogonal to the triage status
+    # machine: who owns the case for human-in-the-loop work. Optional + defaulted
+    # so existing stored blobs deserialize unchanged.
+    assigned_to: str | None = None
+    assigned_at: datetime | None = None
+
+
+class CaseAssignmentResponse(BaseModel):
+    case_id: str
+    assigned_to: str | None = None
+    assigned_at: datetime | None = None
+    status: CaseStatus
+    updated_at: datetime
 
 
 class CaseSummary(BaseModel):

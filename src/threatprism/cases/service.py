@@ -27,6 +27,7 @@ from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
     AuditEvent,
     CaseAcceptedResponse,
+    CaseAssignmentResponse,
     CaseRecord,
     CaseStatus,
     CaseSummary,
@@ -503,6 +504,74 @@ class CaseService:
         case.audit_trail.append(audit_event)
         case.updated_at = utc_now()
         self.repository.save_case(case)
+
+    def assign_case(
+        self, case_id: str, *, actor_identity: str, actor_role: str
+    ) -> CaseAssignmentResponse:
+        """Self-assign a case to the authenticated caller (Evolution 3). The caller's
+        role is authorized at the API boundary; this records ownership + an audit
+        event. The assignee is always the caller — no assigning others in this slice."""
+        case = self.repository.get_case(case_id)
+        if case is None:
+            raise KeyError(case_id)
+        identity = (actor_identity or "").strip()
+        if not identity:
+            raise ValueError("An authenticated identity is required to assign a case.")
+        case.assigned_to = identity
+        case.assigned_at = utc_now()
+        case.updated_at = case.assigned_at
+        case.audit_trail.append(
+            AuditEvent(
+                case_id=case_id,
+                event_type="case_assigned",
+                actor=identity,
+                summary=f"Case self-assigned by {identity}.",
+                metadata={"assignee": identity, "actor_role": actor_role, "decision": "assign"},
+            )
+        )
+        self.repository.save_case(case)
+        return CaseAssignmentResponse(
+            case_id=case_id,
+            assigned_to=case.assigned_to,
+            assigned_at=case.assigned_at,
+            status=case.status,
+            updated_at=case.updated_at,
+        )
+
+    def release_case(
+        self, case_id: str, *, actor_identity: str, actor_role: str
+    ) -> CaseAssignmentResponse:
+        """Release ownership. Only the current owner or an admin may release — a
+        caller cannot release a case owned by someone else."""
+        case = self.repository.get_case(case_id)
+        if case is None:
+            raise KeyError(case_id)
+        identity = (actor_identity or "").strip()
+        if case.assigned_to and case.assigned_to != identity and actor_role != "admin":
+            raise PermissionError(
+                f"{identity} cannot release a case owned by another analyst."
+            )
+        previous = case.assigned_to
+        case.assigned_to = None
+        case.assigned_at = None
+        case.updated_at = utc_now()
+        case.audit_trail.append(
+            AuditEvent(
+                case_id=case_id,
+                event_type="case_released",
+                actor=identity,
+                summary=f"Case released by {identity}.",
+                metadata={"previous_assignee": previous, "actor_role": actor_role, "decision": "release"},
+            )
+        )
+        self.repository.save_case(case)
+        return CaseAssignmentResponse(
+            case_id=case_id,
+            assigned_to=case.assigned_to,
+            assigned_at=case.assigned_at,
+            status=case.status,
+            updated_at=case.updated_at,
+        )
 
     def submit_feedback(self, case_id: str, feedback_create: AnalystFeedbackCreate) -> FeedbackResponse:
         case = self.repository.get_case(case_id)

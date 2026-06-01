@@ -12,12 +12,14 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from threatprism import __version__
-from threatprism.auth.demo import AuthorizationError, authorize_role_view
+from threatprism.auth.demo import AuthorizationError, DemoPrincipal, authorize_role_view
 from threatprism.auth.production import PRODUCTION_IDENTITY_AUTH_MODE
 from threatprism.cases.read_models import CaseReadModelEnvelope, OperationalMetrics, ReviewQueueEnvelope
 from threatprism.cases.schemas import (
     AnalystFeedbackCreate,
+    AuditEvent,
     CaseAcceptedResponse,
+    CaseAssignmentResponse,
     CaseSummary,
     CaseStatus,
     Determination,
@@ -510,6 +512,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="Case not found") from exc
 
+    @app.post(
+        "/cases/{case_id}/assign",
+        response_model=CaseAssignmentResponse,
+        responses=CASE_ERROR_RESPONSES,
+    )
+    def assign_case(case_id: str, request: Request) -> CaseAssignmentResponse:
+        principal = _authorized_principal(request, case_id, "assign_case", _ASSIGNABLE_ROLES)
+        try:
+            return _service(request).assign_case(
+                case_id, actor_identity=principal.identity, actor_role=principal.role
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="Case not found") from exc
+
+    @app.post(
+        "/cases/{case_id}/release",
+        response_model=CaseAssignmentResponse,
+        responses=CASE_ERROR_RESPONSES,
+    )
+    def release_case(case_id: str, request: Request) -> CaseAssignmentResponse:
+        principal = _authorized_principal(request, case_id, "release_case", _ASSIGNABLE_ROLES)
+        try:
+            return _service(request).release_case(
+                case_id, actor_identity=principal.identity, actor_role=principal.role
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="Case not found") from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
     return app
 
 
@@ -582,6 +614,58 @@ def _authorized_global_view_role(
     except AuthorizationError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
     return result.view_role
+
+
+# Roles permitted to own/work a case (Evolution 3). Non-working roles (manager_grc,
+# legal_privacy, audit_debug, ai) cannot self-assign.
+_ASSIGNABLE_ROLES = frozenset({"analyst", "engineer", "admin"})
+
+
+def _authorized_principal(
+    request: Request,
+    case_id: str,
+    endpoint: str,
+    allowed_roles: frozenset[str],
+) -> DemoPrincipal:
+    """Authenticate the caller for a mutating case action and enforce a role
+    allowlist. Records the auth audit (allow) and a deny audit on role refusal —
+    every authorization decision is audited on the case."""
+    service = _service(request)
+    settings: Settings = request.app.state.settings
+    try:
+        result = authorize_role_view(
+            settings=settings,
+            headers=request.headers,
+            method=request.method,
+            path=request.url.path,
+            query_keys=list(request.query_params.keys()),
+            requested_role=None,
+            case_id=case_id,
+            endpoint=endpoint,
+        )
+    except AuthorizationError as exc:
+        if exc.audit_event is not None:
+            service.record_audit_event(case_id, exc.audit_event)
+        raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
+
+    if result.audit_event is not None:
+        service.record_audit_event(case_id, result.audit_event)
+    if result.principal.role not in allowed_roles:
+        service.record_audit_event(
+            case_id,
+            AuditEvent(
+                case_id=case_id,
+                event_type="authorization_denied",
+                actor=result.principal.identity,
+                summary=f"Role '{result.principal.role}' is not authorized for {endpoint}.",
+                metadata={"endpoint": endpoint, "effective_role": result.principal.role, "decision": "deny"},
+            ),
+        )
+        raise HTTPException(
+            status_code=403,
+            detail=f"Role '{result.principal.role}' is not authorized to {endpoint.replace('_', ' ')}.",
+        )
+    return result.principal
 
 
 def _authorized_csi_context(

@@ -73,6 +73,13 @@ class Settings:
     semantic_firewall_model_revision: str = ""
     semantic_firewall_quarantine_threshold: float = 0.9
     semantic_firewall_review_threshold: float = 0.5
+    # High-band action when the classifier scores >= quarantine_threshold:
+    #   "quarantine" (default) -> block triage (max injection defense)
+    #   "review"               -> non-blocking manager-review flag (avoids the
+    #                             measured ~25% FP-DoS tax on trigger-word SOC text)
+    # The deterministic regex quarantine still blocks regardless (detector-not-gate
+    # is preserved either way). See spec 32 §9.1.
+    semantic_firewall_high_band_action: str = "quarantine"
     max_request_body_bytes: int = 262_144
     case_post_rate_limit_per_minute: int = 60
     triage_concurrency_limit: int = 4
@@ -143,6 +150,9 @@ class Settings:
             ),
             semantic_firewall_review_threshold=float(
                 os.getenv("SEMANTIC_FIREWALL_REVIEW_THRESHOLD", "0.5") or "0.5"
+            ),
+            semantic_firewall_high_band_action=os.getenv(
+                "SEMANTIC_FIREWALL_HIGH_BAND_ACTION", "quarantine"
             ),
             max_request_body_bytes=_parse_int(os.getenv("MAX_REQUEST_BODY_BYTES"), default=262_144),
             case_post_rate_limit_per_minute=_parse_int(
@@ -258,6 +268,10 @@ class Settings:
                     "Semantic firewall thresholds must satisfy "
                     "0 < SEMANTIC_FIREWALL_REVIEW_THRESHOLD <= "
                     "SEMANTIC_FIREWALL_QUARANTINE_THRESHOLD <= 1."
+                )
+            if self.semantic_firewall_high_band_action not in {"quarantine", "review"}:
+                raise ValueError(
+                    "SEMANTIC_FIREWALL_HIGH_BAND_ACTION must be 'quarantine' or 'review'."
                 )
 
 

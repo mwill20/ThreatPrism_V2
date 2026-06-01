@@ -331,11 +331,19 @@ them. Options:
   review in between. The measured FPs score 0.99+ (same as true injections), so
   threshold tuning alone cannot separate them — C is not viable for PG2 here.
 
-**Recommendation: decide per deployment, default to A for the demo** (injection
-defense over availability while volume is low and every case is reviewed anyway),
-and revisit toward **B** before any high-volume / auto-close path where a 25% FP
-block becomes an operational cost. This is an owner decision; it is recorded here
-rather than silently chosen. Tracked against **OT-L11**.
+**Resolved (2026-05-31) as a config knob, not a hardcoded choice.**
+`SEMANTIC_FIREWALL_HIGH_BAND_ACTION` (`config.py`, validated in `validate_runtime`)
+selects **A** `quarantine` (default — block, max injection defense) or **B**
+`review` (non-blocking manager-review flag — avoids the 25% FP block tax). Option
+**C** (higher threshold) is not viable: the measured FPs score 0.99+, the same as
+true injections, so no threshold separates them. The wiring is in
+`_apply_semantic_firewall()` (`cases/service.py`): in `review` mode a high-band
+score emits a `semantic_firewall_review_flag` audit (`band="quarantine",
+blocked=false`) instead of a quarantine record — and **the deterministic regex
+quarantine still blocks regardless**, so detector-not-gate holds in both modes
+(`tests/test_semantic_prompt_firewall.py::test_review_mode_still_blocks_deterministic_quarantine`).
+Default stays **A** for the demo; flip to **B** before any high-volume/auto-close
+path. Tracked against **OT-L11**.
 
 ## 10. Out of scope
 

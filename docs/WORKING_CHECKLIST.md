@@ -999,9 +999,12 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
 - [x] Documented in spec 32 §8.4, added §9.1 (block-vs-review owner decision),
   and corrected the now-stale "no over-defense" claims in the LLM-agent lens +
   mitigations-traceability (OT-L11).
-- [ ] **Owner decision pending (spec 32 §9.1):** keep the semantic high band as
-  blocking **quarantine** (default A, max injection defense) or demote to
-  non-blocking **review** before any high-volume/auto-close path (B).
+- [x] **Resolved (spec 32 §9.1) as a config knob** — `SEMANTIC_FIREWALL_HIGH_BAND_ACTION`
+  (`quarantine` default | `review`). High-band score blocks or flags per config;
+  the deterministic regex quarantine still blocks in both modes (detector-not-gate
+  preserved). 4 tests added (demote-doesn't-block, review-mode-still-blocks-regex,
+  validate rejects/accepts). Default stays `quarantine` for the demo; flip to
+  `review` before any high-volume/auto-close path. Validated GREEN: 233 passed.
 
 ## Planned Slices (specs ready)
 
@@ -1117,7 +1120,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-229 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
+233 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

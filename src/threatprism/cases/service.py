@@ -70,6 +70,10 @@ class CaseService:
         # Semantic prompt-injection backstop (spec 32). None when disabled, which
         # keeps the pipeline byte-for-byte unchanged.
         self._semantic_firewall = build_semantic_firewall(settings)
+        # Whether a high semantic score blocks (quarantine) or only flags (review).
+        # Default "quarantine"; the deterministic regex quarantine blocks either
+        # way (detector-not-gate preserved). See spec 32 §9.1.
+        self._semantic_high_band_action = settings.semantic_firewall_high_band_action
 
     def create_case(self, payload: dict[str, Any]) -> CaseAcceptedResponse:
         case_create = normalize_soar_payload(payload)
@@ -625,7 +629,13 @@ class CaseService:
         if self._semantic_firewall is None:
             return
         decision = self._semantic_firewall.classify(text)
-        if decision.action == SemanticAction.quarantine:
+        if decision.action == SemanticAction.pass_:
+            return
+        # A high-band (quarantine) score blocks only when configured to; otherwise
+        # — and for the review band — it becomes a non-blocking review flag. The
+        # deterministic regex quarantine still blocks regardless (§9.1).
+        high_band = decision.action == SemanticAction.quarantine
+        if high_band and self._semantic_high_band_action == "quarantine":
             records.append(
                 SanitizationRecord(
                     case_id=case_id,
@@ -635,31 +645,38 @@ class CaseService:
                     rehydration_allowed=False,
                     metadata={
                         "detector": "semantic",
+                        "band": "quarantine",
                         "score": round(decision.score, 6),
                         "model_id": decision.model_id,
                         "model_revision": decision.model_revision,
                     },
                 )
             )
-        elif decision.action == SemanticAction.review:
-            semantic_events.append(
-                AuditEvent(
-                    case_id=case_id,
-                    event_type="semantic_firewall_review_flag",
-                    summary=(
-                        "Semantic firewall flagged a field for manager review "
-                        "(below the quarantine threshold)."
-                    ),
-                    metadata={
-                        "detector": "semantic",
-                        "field_path": field_path,
-                        "evidence_id": evidence_id,
-                        "score": round(decision.score, 6),
-                        "model_id": decision.model_id,
-                        "model_revision": decision.model_revision,
-                    },
-                )
+            return
+        summary = (
+            "Semantic firewall flagged a field for manager review "
+            "(high-band score demoted to review by configuration)."
+            if high_band
+            else "Semantic firewall flagged a field for manager review "
+            "(below the quarantine threshold)."
+        )
+        semantic_events.append(
+            AuditEvent(
+                case_id=case_id,
+                event_type="semantic_firewall_review_flag",
+                summary=summary,
+                metadata={
+                    "detector": "semantic",
+                    "band": "quarantine" if high_band else "review",
+                    "blocked": False,
+                    "field_path": field_path,
+                    "evidence_id": evidence_id,
+                    "score": round(decision.score, 6),
+                    "model_id": decision.model_id,
+                    "model_revision": decision.model_revision,
+                },
             )
+        )
 
     def _rehydrate_report(self, report: TriageReport, vault: TokenVault) -> TriageReport:
         payload = report.model_dump(mode="json")

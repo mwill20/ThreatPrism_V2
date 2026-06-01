@@ -206,6 +206,11 @@ numbers with a debugging post-mortem** instead of a fabricated success.
 
 - The 2 unrecovered generic-instruction rows + novel paraphrase keep **RR-L1**
   partially open (measured-narrowed, not closed).
-- Recommended follow-up: a broader **NotInject-style false-positive battery** on
-  representative SOC text to bound the over-defense (FP-DoS, OT-L11) rate at
-  scale. Spot checks show none (benign telemetry → 0.0004), but it's unquantified.
+- The **NotInject false-positive battery** is now built and measured:
+  **3/12 (25%)** benign trigger-word SOC strings quarantine ("disregard the
+  previous", "override the rule", quoted attacks). The firewall has a real
+  over-defense cost — contained by detector-not-gate (a false quarantine is a
+  recoverable analyst-review, not an unsafe action), but material enough that
+  spec 32 §9.1 records an open owner decision: keep the semantic high band as
+  blocking **quarantine** or demote it to non-blocking **review** before any
+  high-volume/auto-close path.

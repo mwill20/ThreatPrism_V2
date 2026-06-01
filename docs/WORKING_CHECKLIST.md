@@ -983,7 +983,25 @@ validated GREEN (216 passed, eval 15/15, demo safety passed):
   the pinned revision. Fixed a live-test field bug (scored evidence `summary`
   boilerplate, not the `excerpt` attack text) that initially masked the result as
   0/6 — caught via a known-injection control. RR-L1 is now **measured-narrowed**.
-  Remaining recommendation: a broader NotInject over-defense battery at scale.
+
+## Completed Slice
+
+**Semantic firewall NotInject false-positive battery (spec 32 §8.4 / OT-L11)** —
+validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
+
+- [x] Added `BENIGN_SOC_CORPUS` (12 fake benign-but-trigger-word SOC strings) +
+  a deterministic threshold test and an opt-in live regression guard
+  (`test_live_prompt_guard_false_positive_bound`).
+- [x] **Measured live (cached Prompt Guard 2, free local run): 3/12 (25%) benign
+  SOC strings quarantine, 1/12 review.** PG2 over-defends on "disregard the
+  previous"/"override the rule"/quoted-attack phrasing. Honest finding — not a
+  clean pass. Live test asserts `≤3/12` as a regression guard.
+- [x] Documented in spec 32 §8.4, added §9.1 (block-vs-review owner decision),
+  and corrected the now-stale "no over-defense" claims in the LLM-agent lens +
+  mitigations-traceability (OT-L11).
+- [ ] **Owner decision pending (spec 32 §9.1):** keep the semantic high band as
+  blocking **quarantine** (default A, max injection defense) or demote to
+  non-blocking **review** before any high-volume/auto-close path (B).
 
 ## Planned Slices (specs ready)
 
@@ -1099,7 +1117,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-228 passed (1 skipped: opt-in live Prompt Guard 2 test)
+229 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

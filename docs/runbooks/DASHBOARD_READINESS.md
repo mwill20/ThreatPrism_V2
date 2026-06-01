@@ -25,6 +25,16 @@ $env:ALLOW_REAL_ACTIONS='false'
 python -m uvicorn threatprism.api.app:create_app --factory --reload
 ```
 
+> **Analyst co-pilot (Evolution 3):** on the **Analyst** or **Engineer** persona the
+> case-detail panel shows an "Analyst co-pilot" card — **Assign to me** / **Release**
+> and a **feedback form** — plus a **"My cases only"** toggle. Controls are hidden for
+> non-assignable personas (manager/legal/audit), which the API would also deny.
+>
+> **Use a file-backed DB (the default above), not `DATABASE_URL=sqlite:///:memory:`.**
+> The dashboard fires several parallel detail requests per case; `:memory:` shares one
+> SQLite connection across threads and returns intermittent 500s (see the hardening
+> backlog in `docs/WORKING_CHECKLIST.md`). File-backed mode is unaffected.
+
 ## Fake Credential Map
 
 | Persona | Demo Key |

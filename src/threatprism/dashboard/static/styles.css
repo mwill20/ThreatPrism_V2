@@ -430,3 +430,52 @@ select {
     display: grid;
   }
 }
+
+/* Evolution 3 — analyst co-pilot (assign/release + feedback) */
+.filters .toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-card.copilot {
+  border-color: var(--teal);
+}
+
+.ownership-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feedback-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.feedback-form .field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.feedback-form input {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}

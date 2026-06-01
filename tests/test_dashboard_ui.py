@@ -143,3 +143,35 @@ def test_dashboard_static_content_has_responsive_operational_layout() -> None:
     assert "@media (max-width: 1180px)" in styles
     assert "@media (max-width: 760px)" in styles
     assert "grid-template-columns" in styles
+
+
+def test_dashboard_copilot_controls_present_and_assignable_gated() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+
+    # "My cases" toggle in the shell.
+    assert "my-cases-toggle" in html
+
+    # Evolution 3 routes wired into the dashboard.
+    for route in (
+        "/queues/my-cases",
+        "/cases/{case_id}/assign",
+        "/cases/{case_id}/release",
+        "/cases/{case_id}/analyst-feedback",
+    ):
+        assert route in script
+
+    # Co-pilot panel + CSP-safe delegated actions (no inline handlers).
+    assert "renderCopilot" in script
+    assert "runCaseAction" in script
+    for action in ('data-action="assign"', 'data-action="release"', 'data-action="submit-feedback"'):
+        assert action in script
+    assert "onclick" not in html and "onclick" not in script  # CSP: no inline handlers
+
+    # Controls are gated to assignable personas (analyst/engineer) only.
+    assert "ASSIGNABLE_PERSONAS" in script
+    assert "isAssignable" in script
+
+    # Feedback form fields exist.
+    for field in ("fb-determination", "fb-severity", "fb-disposition", "fb-confidence"):
+        assert field in script

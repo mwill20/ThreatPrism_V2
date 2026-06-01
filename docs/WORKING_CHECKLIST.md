@@ -1013,7 +1013,17 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
   battery. Also added **Lesson 31** (Real-LLM Governance: caps/metering/dual-provider
   accounting) closing the lesson gap for specs 33/35/36.
 
-## Security Hardening Backlog
+## Security / Reliability Hardening Backlog
+
+- [ ] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests.** Found
+  during the Evolution 3 sub-slice 2 browser verification: the dashboard fires ~6
+  parallel detail fetches per case, and `:memory:` mode shares one connection across
+  FastAPI's threadpool → intermittent 500 on `GET /cases/{id}`. **Not a co-pilot bug
+  and not security** — a persistence-layer reliability issue. File-backed mode
+  (`sqlite:///./data/...`) creates a connection per op and is unaffected. **Workaround
+  (documented):** run the dashboard demo with a file DB, not `:memory:`. **Fix (future):**
+  `check_same_thread=False` + a connection lock, or a connection-per-op for `:memory:`
+  too, in `src/threatprism/persistence/sqlite.py`. Pre-existing; surfaced now.
 
 - [x] **`POST /cases/{case_id}/analyst-feedback` role authorization — FIXED
   2026-06-01.** The endpoint now routes through
@@ -1120,7 +1130,18 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     caller's** owned cases (keyed on identity, not a query param — a caller can only
     list their own queue; role-view masking applies). +4 tests (isolation, manager
     denied 403, unauth 401, read-model filter). 264 passed. Makes ownership actionable.
-  - [ ] Sub-slice 2 — dashboard feedback UI wired to the existing feedback endpoint.
+  - [x] **Sub-slice 2 — dashboard co-pilot UI (2026-06-01).** Wired the live loop into
+    the local dashboard (`dashboard/static/`): an "Analyst co-pilot" panel in the case
+    detail with **Assign to me** / **Release** buttons and a **feedback form**
+    (determination/severity/disposition/confidence/notes), plus a **"My cases only"**
+    toggle that calls `GET /queues/my-cases`. CSP-safe (external JS, delegated
+    `addEventListener` on `data-action`, no inline handlers; `style-src 'self'`). The
+    persona's demo key IS the authenticated identity, so controls are gated to
+    assignable personas (analyst/engineer) and the API authorizes per persona.
+    **Browser-verified** end-to-end with Playwright: assign → "Assigned to local_demo",
+    my-cases filter → owned case only, submit feedback → status
+    `analyst_feedback_submitted`; only console noise is a favicon 404. +1 static test in
+    `tests/test_dashboard_ui.py`. 266 passed.
   - [ ] Owner-run — live cadence with a real provider.
 
 Other gated work:
@@ -1172,7 +1193,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-265 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+266 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

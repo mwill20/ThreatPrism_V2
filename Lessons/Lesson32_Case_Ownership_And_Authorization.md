@@ -85,6 +85,27 @@ could be attributed to the wrong analyst.
 
 ---
 
+## 2.7 🖥️ Wiring it into a CSP-hardened UI (and why you must run it)
+
+The dashboard co-pilot (assign/release + feedback form + "my cases" toggle) runs
+under a strict CSP: `script-src 'self'` (no inline handlers), `style-src 'self'`
+(no inline styles), `form-action 'none'` (no native form submit). So every control
+is an external-JS `addEventListener` on a `data-action` attribute, and submits go
+through `fetch`, not a `<form>`. The persona's demo key *is* the authenticated
+identity, so the same per-persona authorization from §2 applies for free — the UI
+just hides the controls for non-assignable personas.
+
+**Static tests can't prove a UI works.** The dashboard tests assert the HTML/JS
+contain the right strings — but a JS syntax error or a runtime bug passes those and
+still breaks the page. Browser verification (Playwright) caught a real one: with an
+in-memory SQLite DB, the dashboard's ~6 parallel detail fetches hit one shared
+connection across threads → **500**. A `node --check` syntax pass + a real
+click-through (assign → "Assigned to local_demo", submit → status changes) is what
+actually validates a frontend slice. The concurrency 500 was pre-existing (file-
+backed DB is unaffected) — logged to the hardening backlog, not silently ignored.
+
+---
+
 ## 3. 🧾 Every decision is audited — allow *and* deny
 
 `_authorized_principal()` records an `AuditEvent` on the case for the authenticated

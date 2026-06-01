@@ -54,12 +54,22 @@ const PERSONA_TAB_IDS = {
 
 const REQUEST_TIMEOUT_MS = 8000;
 
+// Personas that authenticate as a case-working role (their demo key maps to
+// analyst/engineer) — only these see the assign/release/feedback controls. Other
+// personas would be denied (403) by the API anyway.
+const ASSIGNABLE_PERSONAS = new Set(["analyst", "engineer"]);
+const isAssignable = () => ASSIGNABLE_PERSONAS.has(state.persona);
+
 const API_ROUTES = {
   health: "/health",
   metrics: "/metrics",
   cases: "/cases/read-model",
+  myCases: "/queues/my-cases",
   managerQueue: "/queues/manager-review",
   healthcareQueue: "/queues/healthcare-review",
+  assign: "/cases/{case_id}/assign",
+  release: "/cases/{case_id}/release",
+  feedback: "/cases/{case_id}/analyst-feedback",
   caseDetail: "/cases/{case_id}",
   evidence: "/cases/{case_id}/evidence",
   timeline: "/cases/{case_id}/timeline",
@@ -159,6 +169,8 @@ const state = {
   healthcareQueue: [],
   csi: null,
   selectedCaseId: null,
+  myCasesOnly: false,
+  actionError: null,
   detail: null,
   evidence: null,
   timeline: null,
@@ -256,10 +268,13 @@ async function refreshDashboard() {
   state.loading = true;
   renderLoading();
   try {
+    const casesRequest = state.myCasesOnly && isAssignable()
+      ? apiGet(API_ROUTES.myCases, { limit: 25 })
+      : apiGet(API_ROUTES.cases, caseFilters());
     const [health, metrics, cases, managerQueue, healthcareQueue, csi] = await Promise.all([
       dashboardFetch(API_ROUTES.health, { auth: false }),
       apiGet(API_ROUTES.metrics),
-      apiGet(API_ROUTES.cases, caseFilters()),
+      casesRequest,
       apiGet(API_ROUTES.managerQueue, { limit: 25 }),
       apiGet(API_ROUTES.healthcareQueue, { limit: 25 }),
       apiGet(API_ROUTES.csiObjects, {
@@ -367,6 +382,7 @@ function renderRoleControls() {
   $("main").setAttribute("aria-labelledby", PERSONA_TAB_IDS[state.persona]);
   $("queue-title").textContent = profile().queueTitle;
   $("active-persona").textContent = profile().label;
+  $("my-cases-label").hidden = !isAssignable();
 }
 
 function renderHealth() {
@@ -455,7 +471,74 @@ function renderDetail() {
         <div class="kv"><span>Confidence</span><strong>${formatConfidence(report.confidence)}</strong></div>
       </div>
     </article>
+    ${renderCopilot()}
     ${renderPersonaDetail()}
+  `;
+}
+
+function renderCopilot() {
+  // The live co-pilot loop (Evolution 3): self-assign -> review -> submit feedback
+  // -> release. Only for assignable personas; their demo key IS the authenticated
+  // identity, so the API authorizes/attributes correctly per persona.
+  if (!isAssignable() || !state.detail) {
+    return "";
+  }
+  const assignedTo = state.detail.assigned_to;
+  const ownership = assignedTo
+    ? `Assigned to <strong>${escapeHtml(assignedTo)}</strong>`
+    : `<span class="muted">Unassigned</span>`;
+  const error = state.actionError
+    ? `<p class="empty error">${escapeHtml(state.actionError)}</p>`
+    : "";
+  return `
+    <article class="detail-card copilot">
+      <h3>Analyst co-pilot</h3>
+      <div class="ownership-row">
+        <span>${ownership}</span>
+        <div class="button-row">
+          <button class="command secondary" type="button" data-action="assign">Assign to me</button>
+          <button class="command secondary" type="button" data-action="release">Release</button>
+        </div>
+      </div>
+      <div class="feedback-form">
+        <div class="field-grid">
+          <label>Determination
+            <select id="fb-determination">
+              <option value="benign">benign</option>
+              <option value="suspicious">suspicious</option>
+              <option value="malicious">malicious</option>
+              <option value="critical">critical</option>
+            </select>
+          </label>
+          <label>Severity
+            <select id="fb-severity">
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+              <option value="critical">critical</option>
+            </select>
+          </label>
+          <label>Disposition
+            <select id="fb-disposition">
+              <option value="monitor">monitor</option>
+              <option value="close">close</option>
+              <option value="escalate">escalate</option>
+              <option value="needs_more_info">needs_more_info</option>
+            </select>
+          </label>
+          <label>Confidence
+            <input type="number" id="fb-confidence" min="0" max="1" step="0.05" value="0.7" />
+          </label>
+        </div>
+        <label>Notes
+          <input type="text" id="fb-notes" placeholder="Optional analyst note (no secrets/PHI)" />
+        </label>
+        <div class="button-row">
+          <button class="command" type="button" data-action="submit-feedback">Submit feedback</button>
+        </div>
+      </div>
+      ${error}
+    </article>
   `;
 }
 
@@ -588,13 +671,52 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
+  const actionButton = event.target.closest("[data-action]");
+  if (actionButton) {
+    await runCaseAction(actionButton.dataset.action);
+    return;
+  }
+
   const caseButton = event.target.closest(".case-card");
   if (caseButton) {
     state.selectedCaseId = caseButton.dataset.caseId;
+    state.actionError = null;
     await refreshDetail();
     render();
   }
 });
+
+async function runCaseAction(action) {
+  const caseId = state.selectedCaseId;
+  if (!caseId) {
+    return;
+  }
+  state.actionError = null;
+  try {
+    if (action === "assign") {
+      await dashboardFetch(API_ROUTES.assign.replace("{case_id}", caseId), { method: "POST" });
+    } else if (action === "release") {
+      await dashboardFetch(API_ROUTES.release.replace("{case_id}", caseId), { method: "POST" });
+    } else if (action === "submit-feedback") {
+      const confidence = Math.min(1, Math.max(0, Number($("fb-confidence").value) || 0.7));
+      const body = {
+        analyst_id: profile().role,  // server overrides with the authenticated identity
+        analyst_determination: $("fb-determination").value,
+        analyst_severity: $("fb-severity").value,
+        analyst_final_disposition: $("fb-disposition").value,
+        analyst_confidence: confidence,
+        analyst_notes: $("fb-notes").value || null,
+      };
+      await dashboardFetch(API_ROUTES.feedback.replace("{case_id}", caseId), { method: "POST", body });
+    } else {
+      return;
+    }
+    await refreshDashboard();  // re-fetch list + detail, then render
+  } catch (error) {
+    state.actionError = error.message;
+    render();
+  }
+}
 
 document.addEventListener("keydown", async (event) => {
   const roleButton = event.target.closest(".role-button");
@@ -634,5 +756,10 @@ $("refresh").addEventListener("click", refreshDashboard);
 $("seed-case").addEventListener("click", seedCase);
 $("status-filter").addEventListener("change", refreshDashboard);
 $("severity-filter").addEventListener("change", refreshDashboard);
+$("my-cases-toggle").addEventListener("change", (event) => {
+  state.myCasesOnly = event.target.checked;
+  state.selectedCaseId = null;
+  refreshDashboard();
+});
 
 refreshDashboard();

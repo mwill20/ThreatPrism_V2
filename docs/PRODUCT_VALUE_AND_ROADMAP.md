@@ -181,8 +181,10 @@ the detail routes, role views), and the feedback loop in §4.
 event per decision. `GET /queues/my-cases` lists the authenticated caller's owned
 cases (keyed on identity, so a caller only ever sees their own queue), and
 `/cases/read-model` gained an `assigned_to` filter — making ownership *actionable*.
-`tests/test_case_assignment.py`. **Remaining:** the dashboard feedback UI
-(sub-slice 2) and the live cadence with a real provider (owner-run).
+`tests/test_case_assignment.py`. **Sub-slice 2 built (dashboard co-pilot UI):** an
+"Analyst co-pilot" panel in the local dashboard with Assign/Release + a feedback form
+and a "My cases only" toggle (`dashboard/static/`, CSP-safe, browser-verified
+end-to-end). **Remaining:** the live cadence with a real provider (owner-run).
 
 ### The common thread
 

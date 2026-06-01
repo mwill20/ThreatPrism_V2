@@ -46,9 +46,20 @@ class MockAnalyst:
         self.model_id = model_id
         self.analyst_id = analyst_id
         self.temperature = temperature
+        self.last_usage: object | None = None  # set per call for the spend ledger
+        self.last_prompt: str = ""              # hashed (never raw) in the call audit
+        self.last_response: str = ""
 
     def evaluate(self, case: CaseRecord, report: TriageReport) -> AnalystFeedbackCreate:
-        raw = self._call(self._build_prompt(case, report))
+        # Reset per attempt so a stale record is never re-ledgered and a pre-call
+        # failure leaves last_usage None -> nothing billed (spec 35 contract).
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+        prompt = self._build_prompt(case, report)
+        self.last_prompt = prompt
+        raw = self._call(prompt)
+        self.last_response = raw
         try:
             parsed = json.loads(raw)
         except (json.JSONDecodeError, TypeError) as exc:
@@ -89,6 +100,18 @@ class MockAnalyst:
                     {"role": "user", "content": prompt},
                 ],
             )
+            # VERIFY usage attribute names against the pinned openai version
+            # (Chat Completions: usage.prompt_tokens / usage.completion_tokens).
+            usage_obj = getattr(response, "usage", None)
+            if usage_obj is not None:
+                from threatprism.llm.governance import UsageRecord
+
+                self.last_usage = UsageRecord(
+                    model_id=self.model_id,
+                    call_kind="analyst",
+                    input_tokens=getattr(usage_obj, "prompt_tokens", 0),
+                    output_tokens=getattr(usage_obj, "completion_tokens", 0),
+                )
             return response.choices[0].message.content or ""
         except Exception as exc:  # noqa: BLE001 - re-classified to a structured failure
             from threatprism.llm.providers import _classify_anthropic_error

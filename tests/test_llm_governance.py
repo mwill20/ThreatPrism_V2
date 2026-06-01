@@ -14,12 +14,14 @@ from threatprism.llm.governance import (
     UsageRecord,
     build_llm_call_audit,
     enforce_spend_cap,
+    metered_evaluate,
     metered_generate,
     metered_narrative,
     would_exceed_budget,
 )
 from threatprism.llm.providers import DeterministicDemoProvider
 from threatprism.cases.schemas import (
+    AnalystFeedbackCreate,
     Determination,
     Disposition,
     Finding,
@@ -425,3 +427,113 @@ def test_run_triage_surfaces_failed_call_in_metrics_and_audit() -> None:
     llm_audits = [e for e in updated.audit_trail if e.event_type == "llm_call"]
     assert len(llm_audits) == 1
     assert llm_audits[0].metadata["failure_type"] == "provider_response_unparseable"
+
+
+# --- spec 36: governed independent-analyst spend (metered_evaluate) ---------
+
+def _feedback(determination=Determination.benign, severity=Severity.low):
+    return AnalystFeedbackCreate(
+        analyst_id="x", analyst_determination=determination, analyst_severity=severity,
+        analyst_confidence=0.5, analyst_final_disposition=Disposition.monitor,
+    )
+
+
+class _MeteredAnalyst:
+    provider_name = "fake_analyst"
+    model_id = "gpt-4o-mini"
+
+    def __init__(self, feedback, usage):
+        self._feedback = feedback
+        self._usage = usage
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+        self.called = False
+
+    def evaluate(self, case, report):
+        self.called = True
+        self.last_usage = None  # reset per attempt
+        self.last_prompt = "ANALYST_PROMPT"
+        self.last_response = "ANALYST_RESPONSE"
+        self.last_usage = self._usage  # API responded
+        return self._feedback
+
+
+def test_metered_evaluate_meters_analyst_usage_and_audits() -> None:
+    case = _a_case()
+    report = _report(case)
+    usage = UsageRecord(model_id="gpt-4o-mini", call_kind="analyst", input_tokens=400, output_tokens=80)
+    analyst = _MeteredAnalyst(_feedback(), usage)
+    ledger = SpendLedger()
+    audits: list = []
+    result = metered_evaluate(analyst, case, report, ledger, cost_model=CostModel(0.15, 0.60),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0, audit_events=audits)
+    assert isinstance(result, AnalystFeedbackCreate)
+    assert len(ledger.records) == 1 and ledger.records[0].call_kind == "analyst"
+    assert ledger.records[0].estimated_cost_usd == 0.000108  # 400*0.15/1e6 + 80*0.60/1e6
+    assert len(audits) == 1 and "prompt_sha256" in audits[0].metadata
+    assert "ANALYST_PROMPT" not in json.dumps(audits[0].model_dump(mode="json"))
+
+
+def test_metered_evaluate_pre_call_failure_is_not_metered() -> None:
+    case = _a_case()
+    report = _report(case)
+
+    class _Raise:
+        provider_name = "raise_analyst"
+        model_id = "gpt-4o-mini"
+        last_usage = None
+
+        def evaluate(self, case, report):
+            self.last_usage = None
+            from threatprism.llm.failures import ProviderUnreachable
+            raise ProviderUnreachable("analyst down")
+
+    ledger = SpendLedger()
+    result = metered_evaluate(_Raise(), case, report, ledger, cost_model=CostModel(0.15, 0.60),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_unreachable
+    assert len(ledger.records) == 0
+
+
+def test_metered_evaluate_failed_after_call_is_metered() -> None:
+    case = _a_case()
+    report = _report(case)
+    usage = UsageRecord(model_id="gpt-4o-mini", call_kind="analyst", input_tokens=300, output_tokens=50)
+
+    class _FailAfter:
+        provider_name = "fail_after_analyst"
+        model_id = "gpt-4o-mini"
+
+        def __init__(self, usage):
+            self._usage = usage
+            self.last_usage = None
+            self.last_prompt = ""
+            self.last_response = ""
+
+        def evaluate(self, case, report):
+            self.last_usage = None
+            self.last_usage = self._usage  # responded
+            from threatprism.llm.failures import ProviderResponseUnparseable
+            raise ProviderResponseUnparseable("not json")
+
+    ledger = SpendLedger()
+    result = metered_evaluate(_FailAfter(usage), case, report, ledger, cost_model=CostModel(0.15, 0.60),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_response_unparseable
+    assert len(ledger.records) == 1 and ledger.records[0].failure_type == "provider_response_unparseable"
+
+
+def test_metered_evaluate_blocks_on_cap_without_calling_analyst() -> None:
+    case = _a_case()
+    report = _report(case)
+    analyst = _MeteredAnalyst(_feedback(), UsageRecord(model_id="gpt-4o-mini"))
+    ledger = SpendLedger()
+    result = metered_evaluate(analyst, case, report, ledger, cost_model=CostModel(),
+                              max_total_tokens=1, max_cost_usd=0.0)  # impossibly low token cap
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.budget_exceeded
+    assert analyst.called is False
+    assert len(ledger.records) == 0

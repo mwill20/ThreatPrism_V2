@@ -62,6 +62,10 @@ class Settings:
     mock_analyst_provider: str = "openai"
     openai_api_key: str = ""
     mock_analyst_model_id: str = "gpt-4o-mini"
+    # Independent-analyst pricing (a different model from the triage brain, so it
+    # needs its own price). gpt-4o-mini standard: $0.15 / $0.60 per 1M tokens.
+    mock_analyst_input_price_per_mtok: float = 0.0
+    mock_analyst_output_price_per_mtok: float = 0.0
     # Semantic prompt-injection firewall (spec 32) — gated; default off keeps the
     # demo/CI pipeline byte-for-byte unchanged. Detector, never a gate.
     semantic_firewall_enabled: bool = False
@@ -121,6 +125,12 @@ class Settings:
             mock_analyst_provider=os.getenv("MOCK_ANALYST_PROVIDER", "openai"),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             mock_analyst_model_id=os.getenv("MOCK_ANALYST_MODEL_ID", "gpt-4o-mini"),
+            mock_analyst_input_price_per_mtok=float(
+                os.getenv("MOCK_ANALYST_INPUT_PRICE_PER_MTOK", "0") or "0"
+            ),
+            mock_analyst_output_price_per_mtok=float(
+                os.getenv("MOCK_ANALYST_OUTPUT_PRICE_PER_MTOK", "0") or "0"
+            ),
             semantic_firewall_enabled=_parse_bool(
                 os.getenv("SEMANTIC_FIREWALL_ENABLED"), default=False
             ),

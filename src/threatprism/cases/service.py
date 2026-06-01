@@ -352,15 +352,7 @@ class CaseService:
             disposition_mismatch_count=sum(item.disposition_mismatch for item in disagreements),
             manager_review_required_count=sum(item.manager_review_required for item in disagreements),
         )
-        ledger = self._spend_ledger
-        llm_usage = LlmUsageMetrics(
-            call_count=len(ledger.records),
-            failed_call_count=sum(1 for r in ledger.records if r.failure_type is not None),
-            input_tokens=sum(r.input_tokens for r in ledger.records),
-            output_tokens=sum(r.output_tokens for r in ledger.records),
-            total_tokens=ledger.total_tokens,
-            estimated_cost_usd=ledger.total_cost_usd,
-        )
+        llm_usage = LlmUsageMetrics.from_ledger(self._spend_ledger)
         return OperationalMetrics(
             window=MetricsWindow(start=start, end=end),
             case_counts=case_counts,

@@ -31,10 +31,12 @@ from threatprism.cases.schemas import (
     Severity,
     TriageReport,
 )
+from threatprism.cases.read_models import LlmUsageMetrics
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
 from threatprism.demo.seeding import CuratedDatasetSource, DemoSeeder
-from threatprism.llm.failures import LLMProviderError
+from threatprism.llm.failures import TriageFailureReport
+from threatprism.llm.governance import CostModel, SpendLedger, metered_evaluate
 
 
 class AnalystGrader(Protocol):
@@ -65,12 +67,27 @@ class BacktestReport(BaseModel):
     by_threatprism_determination: dict[str, int] = Field(default_factory=dict)
     threatprism_flagged_analyst_cleared: list[BacktestCaseResult] = Field(default_factory=list)
     results: list[BacktestCaseResult] = Field(default_factory=list)
+    triage_llm_usage: dict = Field(default_factory=dict)    # ThreatPrism (Claude) spend
+    analyst_llm_usage: dict = Field(default_factory=dict)    # independent analyst (OpenAI) spend
 
 
-def run_backtest(service: CaseService, analyst: AnalystGrader) -> BacktestReport:
+def run_backtest(
+    service: CaseService,
+    analyst: AnalystGrader,
+    *,
+    cost_model: CostModel | None = None,
+    max_total_tokens: int = 0,
+    max_cost_usd: float = 0.0,
+) -> BacktestReport:
+    """Grade triaged cases against the independent analyst, governing the analyst's
+    spend with its own ledger + cost model + cap (Evolution 2). The demo heuristic
+    analyst exposes no ``last_usage``, so its analyst spend is zero and the caps are
+    inert — behavior is unchanged without a real grader."""
     results: list[BacktestCaseResult] = []
     grading_failures = 0
     by_det: dict[str, int] = {}
+    analyst_ledger = SpendLedger()
+    analyst_cost_model = cost_model or CostModel()
 
     for item in service.list_case_read_models().items:
         report = service.get_report(item.case_id)
@@ -79,11 +96,16 @@ def run_backtest(service: CaseService, analyst: AnalystGrader) -> BacktestReport
         case = service.get_case(item.case_id)
         if case is None:
             continue
-        try:
-            feedback = analyst.evaluate(case, report)
-        except LLMProviderError:
-            grading_failures += 1
+        outcome = metered_evaluate(
+            analyst, case, report, analyst_ledger,
+            cost_model=analyst_cost_model,
+            max_total_tokens=max_total_tokens,
+            max_cost_usd=max_cost_usd,
+        )
+        if isinstance(outcome, TriageFailureReport):
+            grading_failures += 1  # provider/parse/schema failure OR spend cap — fail closed
             continue
+        feedback = outcome
 
         response = service.submit_feedback(item.case_id, feedback)
         disagreement = response.disagreement
@@ -116,6 +138,8 @@ def run_backtest(service: CaseService, analyst: AnalystGrader) -> BacktestReport
         by_threatprism_determination=dict(sorted(by_det.items())),
         threatprism_flagged_analyst_cleared=flagged_cleared,
         results=results,
+        triage_llm_usage=service.get_operational_metrics().llm_usage.model_dump(),
+        analyst_llm_usage=LlmUsageMetrics.from_ledger(analyst_ledger).model_dump(),
     )
 
 
@@ -180,6 +204,19 @@ def _render_human(report: BacktestReport) -> str:
     if not report.threatprism_flagged_analyst_cleared:
         lines.append("  (none)")
     lines.append("")
+
+    def _spend(label: str, u: dict) -> str:
+        return (
+            f"  {label:<22} calls={u.get('call_count', 0)} "
+            f"(failed={u.get('failed_call_count', 0)})  tokens={u.get('total_tokens', 0)}  "
+            f"usd={u.get('estimated_cost_usd', 0.0)}"
+        )
+
+    lines.append("LLM spend (this run):")
+    lines.append(_spend("ThreatPrism (triage)", report.triage_llm_usage))
+    lines.append(_spend("Analyst (independent)", report.analyst_llm_usage))
+    lines.append("  (zero with the deterministic demo; real values under --live with caps enforcing)")
+    lines.append("")
     lines.append("Note: the demo analyst is a deterministic stand-in. Real divergence requires the")
     lines.append("OpenAI mock-analyst at the gate (docs/runbooks/OPEN_REAL_LLM_GATE.md).")
     return "\n".join(lines)
@@ -213,9 +250,19 @@ def main() -> int:
         from threatprism.llm.mock_analyst import build_mock_analyst
 
         analyst: AnalystGrader = build_mock_analyst(settings)
+        analyst_cost_model = CostModel(
+            input_price_per_mtok=settings.mock_analyst_input_price_per_mtok,
+            output_price_per_mtok=settings.mock_analyst_output_price_per_mtok,
+        )
+        report = run_backtest(
+            service, analyst,
+            cost_model=analyst_cost_model,
+            max_total_tokens=settings.llm_max_total_tokens_per_run,
+            max_cost_usd=settings.llm_max_cost_usd_per_run,
+        )
     else:
         analyst = HeuristicDemoAnalyst()
-    report = run_backtest(service, analyst)
+        report = run_backtest(service, analyst)
 
     if args.json:
         print(report.model_dump_json(indent=2))

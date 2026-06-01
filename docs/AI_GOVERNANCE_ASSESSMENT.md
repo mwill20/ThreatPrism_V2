@@ -54,7 +54,7 @@ they all become *acute exactly when the real LLM turns on*:
 
 | # | Gap | Pillar | Status |
 |---|-----|--------|--------|
-| 1 | **Spend cap / cost ceiling** (Unbounded Consumption) | Safety | ✅ `enforce_spend_cap()` / `metered_generate()` in `llm/governance.py`; `validate_runtime` requires a cap for the real provider |
+| 1 | **Spend cap / cost ceiling** (Unbounded Consumption) | Safety | ✅ `enforce_spend_cap()` / `metered_generate()` in `llm/governance.py`; `validate_runtime` requires a cap for the real provider. **Spec 36:** the independent Evolution-2 analyst (OpenAI) is governed by `metered_evaluate()` — its own cost model + ledger + cap + audit, so the *second* LLM is metered too |
 | 2 | **Token usage + cost accounting** (`UsageRecord`, `SpendLedger`) | Auditability | ✅ `llm/governance.py` (`CostModel`, `SpendLedger`); provider sets `last_usage`; **surfaced** to `/metrics` (`OperationalMetrics.llm_usage`) and the run summary. **Spec 35:** usage is now ledgered on *attempt* — a call that completes the API round-trip then fails downstream (parse/schema/policy) is metered + audited (`UsageRecord.failure_type`, `llm_usage.failed_call_count`), closing the undercount where a failed response showed `usd 0` |
 | 3 | **Sanitized per-LLM-call audit** (model+tokens+hash) | Auditability | ✅ `build_llm_call_audit()` (hashes prompt+response, never raw) |
 | 4 | **Approved-model allowlist** | Control | ✅ `APPROVED_MODELS` enforced in `validate_runtime()` |

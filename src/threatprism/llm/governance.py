@@ -18,11 +18,17 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
-from threatprism.cases.schemas import AuditEvent, CaseRecord, TriageReport
+from threatprism.cases.schemas import AnalystFeedbackCreate, AuditEvent, CaseRecord, TriageReport
 from threatprism.llm.batching import estimate_tokens
-from threatprism.llm.failures import TriageFailureReport, budget_exceeded_failure
+from threatprism.llm.failures import (
+    LLMProviderError,
+    TriageFailureReport,
+    budget_exceeded_failure,
+    failure_from_exception,
+    failure_from_validation_error,
+)
 from threatprism.llm.runner import build_batch_narrative, safe_generate_report
 
 
@@ -276,6 +282,75 @@ def metered_generate(
                     usage=priced,
                     prompt=str(getattr(provider, "last_prompt", "") or ""),
                     response=str(getattr(provider, "last_response", "") or ""),
+                )
+            )
+    return result
+
+
+def metered_evaluate(
+    analyst: object,
+    case: CaseRecord,
+    report: TriageReport,
+    ledger: SpendLedger,
+    *,
+    cost_model: CostModel,
+    max_total_tokens: int,
+    max_cost_usd: float,
+    projected_output_tokens: int = 256,
+    audit_events: list[AuditEvent] | None = None,
+) -> AnalystFeedbackCreate | TriageFailureReport:
+    """Spend-cap-gated, metered, audited independent-analyst evaluation (Evolution 2).
+
+    The analyst analogue of ``metered_generate``: checks the budget before the
+    call, runs the grader, and ledgers the *attempted* spend (success OR a
+    downstream parse/schema failure) from the analyst's ``last_usage`` — using the
+    analyst's own ``CostModel`` (a different model from the triage brain). Every
+    failure mode becomes a structured ``TriageFailureReport`` so the backtest fails
+    closed for that case rather than fabricating an analyst verdict.
+    """
+    provider_name = getattr(analyst, "provider_name", None)
+    projected_input = estimate_tokens(_case_text(case) + " " + report.summary)
+    cap_failure = enforce_spend_cap(
+        ledger,
+        projected_tokens=projected_input + projected_output_tokens,
+        projected_cost_usd=cost_model.estimate(projected_input, projected_output_tokens),
+        max_total_tokens=max_total_tokens,
+        max_cost_usd=max_cost_usd,
+        case_id=case.case_id,
+    )
+    if cap_failure is not None:
+        return cap_failure
+
+    meta = {
+        "case_id": case.case_id,
+        "provider": provider_name,
+        "model_id": getattr(analyst, "model_id", None),
+    }
+    try:
+        result: AnalystFeedbackCreate | TriageFailureReport = analyst.evaluate(case, report)  # type: ignore[attr-defined]
+    except LLMProviderError as exc:
+        result = failure_from_exception(exc, **meta)
+    except ValidationError as exc:
+        result = failure_from_validation_error(exc, **meta)
+
+    usage = getattr(analyst, "last_usage", None)
+    if isinstance(usage, UsageRecord):
+        failure_type = result.failure_type.value if isinstance(result, TriageFailureReport) else None
+        priced = usage.model_copy(
+            update={
+                "call_kind": "analyst",
+                "estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens),
+                "failure_type": failure_type,
+            }
+        )
+        ledger.add(priced)
+        if audit_events is not None:
+            audit_events.append(
+                build_llm_call_audit(
+                    case_id=case.case_id,
+                    usage=priced,
+                    prompt=str(getattr(analyst, "last_prompt", "") or ""),
+                    response=str(getattr(analyst, "last_response", "") or ""),
                 )
             )
     return result

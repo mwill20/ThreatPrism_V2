@@ -1001,7 +1001,29 @@ validated GREEN (216 passed, eval 15/15, demo safety passed):
   Stop audit + PreToolUse secret-detection block + HTML dashboard. Non-product, high
   learning value. Verify the Claude Code hook schema at build; teach via planned
   Lesson 29.
-- [ ] Surface LLM usage in the backtest output (small).
+- [x] Surface LLM usage in the backtest output — **done** as part of spec 36 below
+  (both `triage_llm_usage` and `analyst_llm_usage` in `BacktestReport` + render).
+
+## Completed Slice
+
+**Govern + surface the independent analyst's spend (Evolution 2, spec 36)** —
+validated GREEN (228 passed, eval 15/15, demo safety passed):
+
+- [x] `MockAnalyst` captures usage per call (reset+set, spec-35 contract; OpenAI
+  `prompt_tokens`/`completion_tokens`).
+- [x] `metered_evaluate()` in `llm/governance.py` — the analyst analogue of
+  `metered_generate`: spend-cap-gated, ledger-on-attempt (success OR downstream
+  failure), sanitized `llm_call` audit, fail-closed `TriageFailureReport` for every
+  failure mode. Uses the analyst's own `CostModel` (different model from triage).
+- [x] `run_backtest` routes grading through `metered_evaluate` with its own ledger +
+  cap; `BacktestReport` surfaces `triage_llm_usage` + `analyst_llm_usage`; the human
+  render prints an LLM-spend section for both sides. Cap breach / provider failure →
+  grading failure (fail closed).
+- [x] gpt-4o-mini pricing in `config.py` + `.env*`; `LlmUsageMetrics.from_ledger()`
+  reused by `/metrics` and the backtest. 6 fake-provider tests added.
+- [x] **Gated (owner runs):** the live two-model backtest
+  `python -m threatprism.demo.backtest --live` (paid both sides). Verify the `openai`
+  usage attribute names against the pinned SDK before trusting the analyst cost.
 
 Planned (dev-workflow, non-product): **Dev-Workflow AI Governance Hooks**
 (`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — Claude Code hooks that apply
@@ -1077,7 +1099,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-222 passed (1 skipped: opt-in live Prompt Guard 2 test)
+228 passed (1 skipped: opt-in live Prompt Guard 2 test)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

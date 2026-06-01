@@ -105,3 +105,46 @@ def test_report_is_serializable_and_leaks_nothing() -> None:
     assert isinstance(report, BacktestReport)
     for token in _FORBIDDEN:
         assert token not in blob
+
+
+# --- spec 36: governed analyst spend surfaced in the backtest --------------
+
+class _MeteredAgreeAnalyst:
+    provider_name = "metered_agree"
+    model_id = "gpt-4o-mini"
+
+    def __init__(self):
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+
+    def evaluate(self, case, report):
+        from threatprism.llm.governance import UsageRecord
+        self.last_usage = None
+        self.last_prompt = "P"
+        self.last_response = "R"
+        self.last_usage = UsageRecord(model_id="gpt-4o-mini", call_kind="analyst",
+                                      input_tokens=100, output_tokens=20)
+        return AnalystFeedbackCreate(
+            analyst_id="a", analyst_determination=report.determination,
+            analyst_severity=report.severity, analyst_confidence=0.6,
+            analyst_final_disposition=report.disposition,
+        )
+
+
+def test_backtest_surfaces_governed_analyst_spend() -> None:
+    from threatprism.llm.governance import CostModel
+    report = run_backtest(_seeded_service(), _MeteredAgreeAnalyst(),
+                          cost_model=CostModel(0.15, 0.60), max_total_tokens=10_000_000, max_cost_usd=100.0)
+    # One metered analyst call per graded case.
+    assert report.analyst_llm_usage["call_count"] == 31
+    assert report.analyst_llm_usage["total_tokens"] == 31 * 120
+    assert report.analyst_llm_usage["estimated_cost_usd"] > 0
+    # The triage side is the deterministic demo here → zero triage spend.
+    assert report.triage_llm_usage["call_count"] == 0
+
+
+def test_heuristic_analyst_has_zero_analyst_spend() -> None:
+    report = run_backtest(_seeded_service(), HeuristicDemoAnalyst())
+    assert report.analyst_llm_usage["call_count"] == 0
+    assert report.analyst_llm_usage["estimated_cost_usd"] == 0.0

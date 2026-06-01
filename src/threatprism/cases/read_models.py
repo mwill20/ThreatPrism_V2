@@ -74,6 +74,19 @@ class LlmUsageMetrics(BaseModel):
     total_tokens: int = 0
     estimated_cost_usd: float = 0.0
 
+    @classmethod
+    def from_ledger(cls, ledger: object) -> "LlmUsageMetrics":
+        """Aggregate a SpendLedger (duck-typed) into surfaced usage metrics."""
+        records = ledger.records
+        return cls(
+            call_count=len(records),
+            failed_call_count=sum(1 for r in records if r.failure_type is not None),
+            input_tokens=sum(r.input_tokens for r in records),
+            output_tokens=sum(r.output_tokens for r in records),
+            total_tokens=ledger.total_tokens,
+            estimated_cost_usd=ledger.total_cost_usd,
+        )
+
 
 class OperationalMetrics(BaseModel):
     window: MetricsWindow = Field(default_factory=MetricsWindow)

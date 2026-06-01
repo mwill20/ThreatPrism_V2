@@ -1,6 +1,15 @@
 # Spec 34 — Dev-Workflow AI Governance Hooks (Claude Code)
 
-Status: **design-only.** Not implemented. This is *dev-workflow tooling*, not
+Status: **implemented** (2026-06-01). Hook schema verified at build against the
+official docs (`code.claude.com/docs/en/hooks`): events `PreToolUse`/`PostToolUse`/
+`UserPromptSubmit`/`Stop`, stdin fields, and the `permissionDecision: deny` block
+mechanism. Scripts under `tools/hooks/`, wired in `.claude/settings.json`, tested
+in `tests/test_dev_workflow_hooks.py` (12 tests, incl. the §6 mutation check).
+Validated GREEN: 245 passed. One verified correction to the design: the `Stop`
+payload carries `assistant_message` (not a prompt), so the session summary is built
+by aggregating the JSONL trail, not from the Stop payload.
+
+This is *dev-workflow tooling*, not
 ThreatPrism runtime/product code — it governs the AI coding assistant (Claude
 Code) working on this repo, applying the same Control / Auditability / Safety
 triangle ThreatPrism enforces on its own triage LLM (see

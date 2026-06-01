@@ -14,3 +14,4 @@ external_datasets/**
 fixtures/generated/**
 !fixtures/generated/.gitkeep
 downloaded_datasets/**
+.claude/audit/

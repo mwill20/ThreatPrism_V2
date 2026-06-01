@@ -52,6 +52,13 @@ SECRET_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("OpenAI-style live key", re.compile(r"\bsk-(?!test|fake|demo|example)[0-9A-Za-z_-]{20,}\b", re.IGNORECASE)),
 )
 
+# Files that legitimately contain secret-SHAPED (fake) fixtures because their job
+# is to TEST the secret detectors. Narrow, documented allowlist — never add
+# product/runtime code here. (Spec 34 dev-workflow secret-block hook tests.)
+SECRET_SCAN_ALLOWLIST = {
+    "tests/test_dev_workflow_hooks.py",
+}
+
 EVAL_ARTIFACT_FORBIDDEN_STRINGS = {
     "PAT-44321",
     "jane.patient@example.invalid",
@@ -366,6 +373,8 @@ def _check_secret_patterns(root: Path, files: list[Path]) -> list[SafetyFinding]
     for relative_path in files:
         if _should_skip(relative_path):
             continue
+        if relative_path.as_posix() in SECRET_SCAN_ALLOWLIST:
+            continue  # security-test fixtures: fake secret-shaped strings by design
         path = root / relative_path
         if not path.is_file():
             continue

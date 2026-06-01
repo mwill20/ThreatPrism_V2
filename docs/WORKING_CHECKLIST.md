@@ -1017,10 +1017,17 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
   `/metrics` gains `llm_usage.failed_call_count`. Pre-call failures (unreachable/
   timeout/auth/budget) leave `last_usage` None → nothing ledgered. 6 fake-provider
   tests in `tests/test_llm_governance.py`.
-- [ ] **Dev-workflow AI governance hooks (Claude Code)** —
-  `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`. PostToolUse/UserPromptSubmit/
-  Stop audit + PreToolUse secret-detection block + HTML dashboard. Non-product, high
-  learning value. Verify the Claude Code hook schema at build; teach via planned
+- [x] **Dev-workflow AI governance hooks (Claude Code)** —
+  `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md` — **implemented 2026-06-01**
+  (245 passed). Hook schema verified against the official docs. `tools/hooks/`:
+  PostToolUse audit (`audit_post_tool.py`), UserPromptSubmit log (`audit_prompt.py`),
+  Stop session summary (`session_summary.py`), PreToolUse secret-detection block
+  (`secret_block.py`, `permissionDecision: deny`), and a dependency-free HTML
+  dashboard generator (`gen_dashboard.py`). Wired in `.claude/settings.json`;
+  `.claude/audit/` gitignored. Records are redacted (hashes + sizes, never raw
+  content/secrets). `tests/test_dev_workflow_hooks.py` (12 tests incl. the §6
+  mutation check — proven non-vacuous by breaking the AWS pattern). Demo-safety
+  scanner given a narrow allowlist for the security-test fixtures. Taught in
   Lesson 29.
 - [x] Surface LLM usage in the backtest output — **done** as part of spec 36 below
   (both `triage_llm_usage` and `analyst_llm_usage` in `BacktestReport` + render).
@@ -1120,7 +1127,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-233 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
+245 passed (2 skipped: opt-in live Prompt Guard 2 recall + false-positive tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

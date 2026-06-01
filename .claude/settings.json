@@ -1,0 +1,35 @@
+{
+  "$comment": "Dev-workflow AI governance hooks (spec 34). Governs the Claude Code assistant working on this repo: redacted audit trail, secret-write block, and a session summary. Scripts resolve their own paths via __file__, so output is cwd-independent; the command paths assume hooks run with the project root as cwd (Claude Code default) and python on PATH. Logs land in gitignored .claude/audit/. Disable with \"disableAllHooks\": true or by removing this file. Review tools/hooks/*.py before trusting (hooks run local commands).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "python tools/hooks/secret_block.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "python tools/hooks/audit_post_tool.py" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python tools/hooks/audit_prompt.py" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python tools/hooks/session_summary.py" }
+        ]
+      }
+    ]
+  }
+}

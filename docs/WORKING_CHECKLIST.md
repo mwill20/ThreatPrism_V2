@@ -1074,13 +1074,17 @@ validated GREEN (228 passed, eval 15/15, demo safety passed):
   `python -m threatprism.demo.backtest --live` (paid both sides). Verify the `openai`
   usage attribute names against the pinned SDK before trusting the analyst cost.
 
-Planned (dev-workflow, non-product): **Dev-Workflow AI Governance Hooks**
-(`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — Claude Code hooks that apply
-the Control/Audit/Safety triangle to the *coding assistant*: PostToolUse →
-`audit.jsonl`, UserPromptSubmit → prompt log, Stop → session summary, PreToolUse
-(Edit|Write) → secret-detection block + `blocked.log`, plus a file-based HTML
-dashboard. Reuses ThreatPrism's secret-pattern catalog. Verify the Claude Code hook
-schema at build time. Teach via the planned Lesson 29 (see `Lessons/00_Index.md`).
+**IMPLEMENTED (dev-workflow, non-product): Dev-Workflow AI Governance Hooks**
+(`docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`) — done 2026-06-01 (commit
+`5c4971c`). Claude Code hooks applying the Control/Audit/Safety triangle to the
+*coding assistant*: PostToolUse → `audit.jsonl`, UserPromptSubmit → prompt log,
+Stop → session summary, PreToolUse (Edit|Write) → secret-detection block +
+`blocked.log`, plus a file-based HTML dashboard (`tools/hooks/`, wired in
+`.claude/settings.json`, gitignored `.claude/audit/`). Hook schema verified against
+the live docs at build. Taught in **Lesson 29**; operated via
+`docs/runbooks/DEV_WORKFLOW_HOOKS.md`. The shared secret-pattern catalog (one source
+feeding the hook + the product detectors) remains a small follow-up DRY refactor
+(spec 34 §3 note) — the hook currently keeps its own standalone catalog.
 
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.

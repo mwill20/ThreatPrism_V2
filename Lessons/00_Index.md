@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `260 passed` (1 skipped: opt-in live Prompt Guard 2 test).
+- The current validated baseline is `266 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -87,6 +87,7 @@ Fake SOAR payload
 | ✅ | [Lesson 30](Lesson30_Semantic_Prompt_Injection_Firewall.md) | Semantic Prompt-Injection Firewall (Detector, Not Gate) | `src/threatprism/guardrails/semantic_firewall.py`, `src/threatprism/cases/service.py`, `src/threatprism/config.py`, `tests/test_semantic_prompt_firewall.py`, `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` |
 | ✅ | [Lesson 31](Lesson31_Real_LLM_Governance.md) | Real-LLM Governance: Spend Caps, Metering & Dual-Provider Accounting | `src/threatprism/llm/governance.py`, `src/threatprism/llm/providers.py`, `src/threatprism/llm/mock_analyst.py`, `src/threatprism/cases/read_models.py`, `tests/test_llm_governance.py`, `docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md`, `docs/specs/35_FAILED_CALL_COST_METERING.md`, `docs/specs/36_GOVERNED_BACKTEST_ANALYST_SPEND.md` |
 | ✅ | [Lesson 32](Lesson32_Case_Ownership_And_Authorization.md) | Case Ownership & Authorization (Authn vs Authz vs Object-Level) | `src/threatprism/cases/service.py` (`assign_case`/`release_case`), `src/threatprism/api/app.py` (`_authorized_principal`, assign/release routes), `src/threatprism/cases/schemas.py`, `tests/test_case_assignment.py` |
+| ✅ | [Lesson 33](Lesson33_Operating_The_Dashboard.md) | Operating the Dashboard (Analyst Co-Pilot Walkthrough) — how-to | `src/threatprism/dashboard/static/*`, `docs/runbooks/DASHBOARD_READINESS.md` |
 | ✅ | [Lesson 29](Lesson29_Dev_Workflow_AI_Governance_Hooks.md) | Dev-Workflow AI Governance Hooks (Claude Code) | `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`, `.claude/settings.json`, `tools/hooks/*`, `tests/test_dev_workflow_hooks.py` |
 
 ## File Coverage Map
@@ -130,7 +131,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\run_soc_demo.py` -> Lesson 28
 - `C:\Projects\ThreatPrismV2\tests\test_soc_dataset_run.py` -> Lesson 28
 - `C:\Projects\ThreatPrismV2\docs\PRODUCT_VALUE_AND_ROADMAP.md` -> Lesson 28
-- `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20 and 21
+- `C:\Projects\ThreatPrismV2\src\threatprism\dashboard\static\*` -> Lessons 20, 21, and 33
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\auto_close_delta.py` -> Lesson 28
 - `C:\Projects\ThreatPrismV2\tools\check_demo_safety.py` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\tools\validate-threatprism.ps1` -> Lesson 12
 - `C:\Projects\ThreatPrismV2\.github\workflows\safe-validation.yml` -> Lesson 12
@@ -235,7 +237,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-260 passed
+266 passed
 ```
 
 ## What To Study Next

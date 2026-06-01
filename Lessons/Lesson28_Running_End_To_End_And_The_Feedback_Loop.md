@@ -315,6 +315,24 @@ documented in [`docs/PRODUCT_VALUE_AND_ROADMAP.md`](../docs/PRODUCT_VALUE_AND_RO
 All three are gated on opening the real-LLM gate; until then a curated SOC dataset
 stands in for the SOAR feed.
 
+### 🔁 Sibling proving grounds (same pipeline, different question)
+
+`run_soc_demo` answers "does it work end to end?" Two siblings reuse the same real
+intake + triage path to answer the *product* questions, runnable today on the demo
+provider (`--live` for a real provider is owner-run):
+
+- **Evolution 1 — auto-close delta** (`python -m threatprism.demo.auto_close_delta`):
+  a naive SOAR rule auto-closes anything the *source* didn't mark high/critical
+  (independent of ThreatPrism, so the comparison isn't circular); the **catch** =
+  cases that rule would close but ThreatPrism flags non-benign — the false negatives
+  a cheap auto-close would have buried. On the curated corpus: 31 triaged, all
+  auto-closeable, **8 caught**. See `src/threatprism/demo/auto_close_delta.py` and the
+  "Evolution 1" section of `docs/runbooks/RUN_AGAINST_SOC_DATASET.md`. The number that
+  matters isn't the auto-close rate — it's the catch count.
+- **Evolution 2 — backtest** (`python -m threatprism.demo.backtest`): grades triaged
+  cases against an independent analyst and surfaces where they diverged (the tuning
+  signal). Governed spend on both LLMs (Lesson 31).
+
 **Modification challenge:** Add a `disposition` distribution to `SocDemoRunSummary`
 (it already pulls `report_decisions`), update the human render, and extend
 `tests/test_soc_dataset_run.py` to assert it. ~20 minutes, and you'll have traced

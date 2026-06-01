@@ -37,7 +37,7 @@ transparency for high-risk systems.
 
 | Item | ThreatPrism today | Status | Gap → standards-based fix |
 |---|---|---|---|
-| Pre-execution validation hooks | Four-layer guardrail pipeline: prompt firewall (pre-model) + output policy / evidence / action safety (post-model, pre-persist). LLM output is untrusted and validated (`validate_llm_report`) | ✅ | Add the semantic firewall (spec 32) once the LLM acts on text |
+| Pre-execution validation hooks | Four-layer guardrail pipeline: prompt firewall (pre-model) + output policy / evidence / action safety (post-model, pre-persist). LLM output is untrusted and validated (`validate_llm_report`). Semantic prompt-injection firewall (spec 32, Prompt Guard 2) now implemented + wired as a detector-not-gate, **default-off** — enable with the live model under the real-LLM gate | ✅ | Run the §8 live-model recovery + over-defense tests before enabling (`THREATPRISM_RUN_LIVE_PROMPT_GUARD=1`) |
 | Secret detection and blocking | Healthcare safeguard tokenizes secrets (API keys/passwords, never rehydrated); output policy blocks `sk-` shapes; sanitizers redact credentials | ✅ | None |
 | Scope enforcement (no mass edits) | No edit surface; `BATCH_MAX_EVENTS`/token budget, request body cap, in-process rate limit, triage concurrency cap | ✅ | None |
 | Budget limits and spend caps | **Input** token budget for batching (`BATCH_MAX_INPUT_TOKENS`); **no spend/cost cap** | ❌ | **Deterministic spend cap.** Fix: `enforce_spend_cap()` — a per-run / per-day cost+token ceiling that fails closed (`budget_exceeded` already in the taxonomy) before any further call (OWASP **LLM10 Unbounded Consumption**; NIST MANAGE) |

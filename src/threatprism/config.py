@@ -62,6 +62,13 @@ class Settings:
     mock_analyst_provider: str = "openai"
     openai_api_key: str = ""
     mock_analyst_model_id: str = "gpt-4o-mini"
+    # Semantic prompt-injection firewall (spec 32) — gated; default off keeps the
+    # demo/CI pipeline byte-for-byte unchanged. Detector, never a gate.
+    semantic_firewall_enabled: bool = False
+    semantic_firewall_model_id: str = "meta-llama/Llama-Prompt-Guard-2-86M"
+    semantic_firewall_model_revision: str = ""
+    semantic_firewall_quarantine_threshold: float = 0.9
+    semantic_firewall_review_threshold: float = 0.5
     max_request_body_bytes: int = 262_144
     case_post_rate_limit_per_minute: int = 60
     triage_concurrency_limit: int = 4
@@ -114,6 +121,19 @@ class Settings:
             mock_analyst_provider=os.getenv("MOCK_ANALYST_PROVIDER", "openai"),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             mock_analyst_model_id=os.getenv("MOCK_ANALYST_MODEL_ID", "gpt-4o-mini"),
+            semantic_firewall_enabled=_parse_bool(
+                os.getenv("SEMANTIC_FIREWALL_ENABLED"), default=False
+            ),
+            semantic_firewall_model_id=os.getenv(
+                "SEMANTIC_FIREWALL_MODEL_ID", "meta-llama/Llama-Prompt-Guard-2-86M"
+            ),
+            semantic_firewall_model_revision=os.getenv("SEMANTIC_FIREWALL_MODEL_REVISION", ""),
+            semantic_firewall_quarantine_threshold=float(
+                os.getenv("SEMANTIC_FIREWALL_QUARANTINE_THRESHOLD", "0.9") or "0.9"
+            ),
+            semantic_firewall_review_threshold=float(
+                os.getenv("SEMANTIC_FIREWALL_REVIEW_THRESHOLD", "0.5") or "0.5"
+            ),
             max_request_body_bytes=_parse_int(os.getenv("MAX_REQUEST_BODY_BYTES"), default=262_144),
             case_post_rate_limit_per_minute=_parse_int(
                 os.getenv("CASE_POST_RATE_LIMIT_PER_MINUTE"), default=60
@@ -213,6 +233,22 @@ class Settings:
                 )
         if self.batch_max_events <= 0 or self.batch_max_input_tokens <= 0:
             raise ValueError("BATCH_MAX_EVENTS and BATCH_MAX_INPUT_TOKENS must be greater than zero.")
+        if self.semantic_firewall_enabled:
+            # Supply-chain determinism (spec 32 §6): a moving tag is not allowed —
+            # the model must be pinned by revision so the score is reproducible.
+            if not self.semantic_firewall_model_revision.strip():
+                raise ValueError(
+                    "SEMANTIC_FIREWALL_MODEL_REVISION (pinned SHA) is required when "
+                    "SEMANTIC_FIREWALL_ENABLED=true."
+                )
+            review = self.semantic_firewall_review_threshold
+            quarantine = self.semantic_firewall_quarantine_threshold
+            if not (0.0 < review <= quarantine <= 1.0):
+                raise ValueError(
+                    "Semantic firewall thresholds must satisfy "
+                    "0 < SEMANTIC_FIREWALL_REVIEW_THRESHOLD <= "
+                    "SEMANTIC_FIREWALL_QUARANTINE_THRESHOLD <= 1."
+                )
 
 
 def _parse_bool(value: str | None, default: bool = False) -> bool:

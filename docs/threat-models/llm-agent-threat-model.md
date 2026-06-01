@@ -104,13 +104,13 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 
 **Severity.** Current: Low (demo provider doesn't follow instructions). Post real-LLM: **High**.
 
-**Residual risk (RR-L1).** Pattern-based detection remains bypassable by paraphrase, encoding, language switching, or multi-turn manipulation. Detected quarantine patterns now halt service-layer triage before provider execution; RR-L1 is limited to undetected semantic bypass. The planned remediation is the semantic classifier in [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) (`meta-llama/Llama-Prompt-Guard-2-86M`), gated on real-LLM rollout — which itself introduces the new attacker surface modeled in L1.1.
+**Residual risk (RR-L1).** Pattern-based detection remains bypassable by paraphrase, encoding, language switching, or multi-turn manipulation. Detected quarantine patterns now halt service-layer triage before provider execution. The remediation — the semantic classifier in [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) (`meta-llama/Llama-Prompt-Guard-2-86M`) — is **implemented, wired (default-off), and now measured live (2026-05-31): 4/6 deepset RR-L1 rows recovered** at quarantine threshold 0.9 (the 4 explicit instruction-override injections score 0.95–0.9996; the 2 generic-instruction rows score ~0.005 and are treated as benign). So RR-L1 is **measured-narrowed**: explicit override injection is now caught, while paraphrased non-override content and the two benign-ish generic rows remain residual. The classifier introduces the new attacker surface modeled in L1.1.
 
 ---
 
-### L1.1 — Semantic Prompt-Injection Classifier (Planned, Gated) — Model Evasion & False-Positive DoS
+### L1.1 — Semantic Prompt-Injection Classifier (Implemented, Default-Off) — Model Evasion & False-Positive DoS
 
-**Status.** Design-only, gated on real-LLM rollout. See [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md). The chosen detector is `meta-llama/Llama-Prompt-Guard-2-86M` — a local encoder classifier, no egress.
+**Status.** Implemented, wired, and **live-verified (2026-05-31, 4/6 RR-L1 recovery)**; disabled by default — enable only under the real-LLM gate. See [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md). The detector is `meta-llama/Llama-Prompt-Guard-2-86M` (pinned rev `a8ded8e6`) — a local encoder classifier, no egress, loaded `local_files_only` (no runtime auto-download). Code: `guardrails/semantic_firewall.py`, wired at `_apply_semantic_firewall()` in `cases/service.py`; tests in `tests/test_semantic_prompt_firewall.py`.
 
 **New attacker surface introduced by the control.** Adding an ML classifier to the intake path creates its own adversary surface (MITRE ATLAS model-evasion tactics):
 - **Evasion (AML.T0015 craft-adversarial-data / model evasion):** adversarial paraphrase or obfuscation crafted to score *below* the quarantine threshold — the classifier is a detector, not a guarantee, so RR-L1 is narrowed but not fully closed.
@@ -118,9 +118,9 @@ ATLAS tactics applied to ThreatPrism's current and planned LLM surface.
 
 **Containment (per spec 32 §2).** The classifier is a **detector, not a gate**: its probabilistic score feeds a deterministic threshold, it may only ever *escalate* (`max(deterministic, semantic)`), never de-escalate, and the existing deterministic guardrails remain authoritative. Quarantine-on-high-score is the fail-safe direction (a false positive blocks a legitimate case — annoying, recoverable — never executes an unsafe action). The false-positive rate is bounded by the NotInject-style SOC trigger-word test (spec 32 §8 item 4). As an encoder, the model has no generative/instruction-following head, so the classifier itself cannot be prompt-injected — only evaded or over-triggered.
 
-**How to address.** Pin the model revision by SHA, load in eval mode (deterministic), assert no network egress, and ship the §8 evasion-recovery + false-positive-bound tests before enabling. Re-open the I4/RR-I4/OT-7 treatment in [spec 21](../specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) when the layer lands.
+**How to address.** Done in code: revision pinned by SHA (a moving tag is rejected by `validate_runtime()`), eval mode, `local_files_only` (no egress), escalate-only merge. Live verification run 2026-05-31: §8.1 evasion-recovery passes (4/6 RR-L1 at threshold 0.9); the quarantine/review records carry `model_id`/`model_revision` for audit. Still recommended before production reliance: a broader NotInject-style false-positive battery on representative SOC text (the spot checks show no over-defense — benign telemetry scores ~0.0004 — but a wider set would bound the FP-DoS risk quantitatively).
 
-**Severity.** N/A today (not built). Post real-LLM: **Medium** (evasion keeps RR-L1 partially open; FP-DoS is a bounded availability risk). Tracked as OT-L11.
+**Severity.** Built, default-off, live-verified at 4/6 RR-L1 recovery. Post real-LLM: **Medium** (the 2 unrecovered generic-instruction rows + any novel evasion keep RR-L1 partially open; FP-DoS is a bounded availability risk, unquantified at scale). Tracked as OT-L11.
 
 ---
 

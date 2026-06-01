@@ -42,6 +42,10 @@ from threatprism.guardrails.evidence import validate_report_evidence
 from threatprism.guardrails.healthcare import safeguard_value
 from threatprism.guardrails.policy import enforce_action_safety, scan_output_policy
 from threatprism.guardrails.prompt_firewall import sanitize_text
+from threatprism.guardrails.semantic_firewall import (
+    SemanticAction,
+    build_semantic_firewall,
+)
 from threatprism.guardrails.tokenization import TokenVault, rehydrate_text, tokenize_text
 from threatprism.guardrails.views import RoleViewResult, ViewRole, render_role_view
 from threatprism.ids import new_id
@@ -63,6 +67,9 @@ class CaseService:
             input_price_per_mtok=settings.llm_input_price_per_mtok,
             output_price_per_mtok=settings.llm_output_price_per_mtok,
         )
+        # Semantic prompt-injection backstop (spec 32). None when disabled, which
+        # keeps the pipeline byte-for-byte unchanged.
+        self._semantic_firewall = build_semantic_firewall(settings)
 
     def create_case(self, payload: dict[str, Any]) -> CaseAcceptedResponse:
         case_create = normalize_soar_payload(payload)
@@ -150,8 +157,11 @@ class CaseService:
         case.updated_at = utc_now()
         self.repository.save_case(case)
 
-        tokenized_case, records, vault = self._prepare_case_for_model(case)
+        tokenized_case, records, vault, semantic_events = self._prepare_case_for_model(case)
         case.sanitization_records.extend(records)
+        # Non-blocking semantic review-band flags are persisted before the
+        # quarantine check so they survive even on a blocked case.
+        case.audit_trail.extend(semantic_events)
         quarantine_records = [record for record in records if record.operation == "quarantine"]
         if quarantine_records:
             case.status = CaseStatus.needs_analyst_review
@@ -523,25 +533,28 @@ class CaseService:
             disagreement=disagreement,
         )
 
-    def _prepare_case_for_model(self, case: CaseRecord) -> tuple[CaseRecord, list[SanitizationRecord], TokenVault]:
+    def _prepare_case_for_model(
+        self, case: CaseRecord
+    ) -> tuple[CaseRecord, list[SanitizationRecord], TokenVault, list[AuditEvent]]:
         tokenized = deepcopy(case)
         vault = TokenVault(case_id=case.case_id)
         records: list[SanitizationRecord] = []
+        semantic_events: list[AuditEvent] = []
 
         tokenized.title, records = self._sanitize_and_tokenize_text(
-            tokenized.title, vault, "title", None, records
+            tokenized.title, vault, "title", None, records, semantic_events
         )
         tokenized.description, records = self._sanitize_and_tokenize_text(
-            tokenized.description, vault, "description", None, records
+            tokenized.description, vault, "description", None, records, semantic_events
         )
         for idx, event in enumerate(tokenized.events):
             event.description, records = self._sanitize_and_tokenize_text(
-                event.description, vault, f"events[{idx}].description", None, records
+                event.description, vault, f"events[{idx}].description", None, records, semantic_events
             )
             for key, value in list(event.normalized.items()):
                 if isinstance(value, str):
                     event.normalized[key], records = self._sanitize_and_tokenize_text(
-                        value, vault, f"events[{idx}].normalized.{key}", None, records
+                        value, vault, f"events[{idx}].normalized.{key}", None, records, semantic_events
                     )
         for idx, evidence in enumerate(tokenized.evidence):
             evidence.summary, records = self._sanitize_and_tokenize_text(
@@ -550,6 +563,7 @@ class CaseService:
                 f"evidence[{idx}].summary",
                 evidence.evidence_id,
                 records,
+                semantic_events,
             )
             if evidence.excerpt:
                 evidence.excerpt, records = self._sanitize_and_tokenize_text(
@@ -558,17 +572,18 @@ class CaseService:
                     f"evidence[{idx}].excerpt",
                     evidence.evidence_id,
                     records,
+                    semantic_events,
                 )
         for idx, entity in enumerate(tokenized.entities):
             entity.value, records = self._sanitize_and_tokenize_text(
-                entity.value, vault, f"entities[{idx}].value", None, records
+                entity.value, vault, f"entities[{idx}].value", None, records, semantic_events
             )
         for idx, ioc in enumerate(tokenized.iocs):
             ioc.value, records = self._sanitize_and_tokenize_text(
-                ioc.value, vault, f"iocs[{idx}].value", None, records
+                ioc.value, vault, f"iocs[{idx}].value", None, records, semantic_events
             )
         records.extend(vault.records)
-        return tokenized, records, vault
+        return tokenized, records, vault, semantic_events
 
     def _sanitize_and_tokenize_text(
         self,
@@ -577,6 +592,7 @@ class CaseService:
         field_path: str,
         evidence_id: str | None,
         records: list[SanitizationRecord],
+        semantic_events: list[AuditEvent],
     ) -> tuple[str, list[SanitizationRecord]]:
         sanitized, flags, quarantined = sanitize_text(text)
         if flags:
@@ -590,7 +606,62 @@ class CaseService:
                     metadata={"flags": flags},
                 )
             )
+        # Semantic backstop (spec 32): scores the ORIGINAL text (pre-redaction) so
+        # the injection signal the regex layer missed is still visible. Only ever
+        # escalates — a quarantine band appends a quarantine record (reusing the
+        # existing block path); a review band appends a non-blocking audit event.
+        self._apply_semantic_firewall(
+            text, vault.case_id, field_path, evidence_id, records, semantic_events
+        )
         return tokenize_text(sanitized, vault, field_path, evidence_id), records
+
+    def _apply_semantic_firewall(
+        self,
+        text: str,
+        case_id: str | None,
+        field_path: str,
+        evidence_id: str | None,
+        records: list[SanitizationRecord],
+        semantic_events: list[AuditEvent],
+    ) -> None:
+        if self._semantic_firewall is None:
+            return
+        decision = self._semantic_firewall.classify(text)
+        if decision.action == SemanticAction.quarantine:
+            records.append(
+                SanitizationRecord(
+                    case_id=case_id,
+                    evidence_id=evidence_id,
+                    operation="quarantine",
+                    field_path=field_path,
+                    rehydration_allowed=False,
+                    metadata={
+                        "detector": "semantic",
+                        "score": round(decision.score, 6),
+                        "model_id": decision.model_id,
+                        "model_revision": decision.model_revision,
+                    },
+                )
+            )
+        elif decision.action == SemanticAction.review:
+            semantic_events.append(
+                AuditEvent(
+                    case_id=case_id,
+                    event_type="semantic_firewall_review_flag",
+                    summary=(
+                        "Semantic firewall flagged a field for manager review "
+                        "(below the quarantine threshold)."
+                    ),
+                    metadata={
+                        "detector": "semantic",
+                        "field_path": field_path,
+                        "evidence_id": evidence_id,
+                        "score": round(decision.score, 6),
+                        "model_id": decision.model_id,
+                        "model_revision": decision.model_revision,
+                    },
+                )
+            )
 
     def _rehydrate_report(self, report: TriageReport, vault: TokenVault) -> TriageReport:
         payload = report.model_dump(mode="json")

@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `156 passed`.
+- The current validated baseline is `216 passed` (1 skipped: opt-in live Prompt Guard 2 test).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -84,6 +84,7 @@ Fake SOAR payload
 | yes | [Lesson 26](Lesson26_Dataset_Backed_Demo_Seeder.md) | Dataset-Backed Demo Seeder | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tests/test_demo_seeding.py`, `docs/specs/31_DATASET_BACKED_DEMO_SEEDER.md` |
 | ✅ | [Lesson 27](Lesson27_Dataset_Onboarding_And_Fixture_Sources.md) | Dataset Onboarding And Fixture Source Contracts | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tools/fixture_factory/adapters/{synthea,deepset,otrf}_adapter.py`, `fixtures/curated_datasets/*`, `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, `tests/test_local_dataset_seeding.py` |
 | ✅ | [Lesson 28](Lesson28_Running_End_To_End_And_The_Feedback_Loop.md) | Running End-to-End And The Analyst Feedback Loop | `src/threatprism/demo/run_soc_demo.py`, `tests/test_soc_dataset_run.py`, `docs/PRODUCT_VALUE_AND_ROADMAP.md`, `docs/runbooks/RUN_AGAINST_SOC_DATASET.md` |
+| ✅ | [Lesson 30](Lesson30_Semantic_Prompt_Injection_Firewall.md) | Semantic Prompt-Injection Firewall (Detector, Not Gate) | `src/threatprism/guardrails/semantic_firewall.py`, `src/threatprism/cases/service.py`, `src/threatprism/config.py`, `tests/test_semantic_prompt_firewall.py`, `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` |
 | 📝 planned | Lesson 29 (TODO) | Dev-Workflow AI Governance Hooks (Claude Code) | `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`, `.claude/settings.json`, `tools/hooks/*` — **NOTE:** write after Spec 34 is implemented. Teach the Control/Audit/Safety triangle at the dev-workflow layer: PostToolUse/UserPromptSubmit/Stop audit hooks, the PreToolUse secret-detection block, the file-based HTML dashboard, and the "break a requirement → do tests catch it?" mutation check. Mirror it against ThreatPrism's own `llm_call` audit + secret tokenization so the reader sees the same triangle at both layers. |
 
 ## File Coverage Map
@@ -100,7 +101,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\service.py` -> Lesson 02
 - `C:\Projects\ThreatPrismV2\src\threatprism\cases\read_models.py` -> Lesson 10
 - `C:\Projects\ThreatPrismV2\src\threatprism\soar\generic.py` -> Lesson 03
-- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\prompt_firewall.py` -> Lesson 04
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\prompt_firewall.py` -> Lessons 04 and 30
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\semantic_firewall.py` -> Lesson 30
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\tokenization.py` -> Lesson 04
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\policy.py` -> Lesson 04
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\evidence.py` -> Lesson 04
@@ -196,6 +198,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_curated_dataset_seeding.py` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\tests\test_otrf_telemetry_corpus.py` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\tests\test_local_dataset_seeding.py` -> Lesson 27
+- `C:\Projects\ThreatPrismV2\tests\test_semantic_prompt_firewall.py` -> Lesson 30
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08
@@ -224,7 +227,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-156 passed
+216 passed
 ```
 
 ## What To Study Next

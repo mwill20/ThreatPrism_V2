@@ -9,3 +9,15 @@
 # output_tokens) for anthropic; chat.completions + choices[0].message.content for openai.
 anthropic==0.105.2   # ThreatPrism triage brain (Claude)
 openai==1.109.1      # Independent mock-analyst grader (Evolution 2)
+
+# Semantic prompt-injection firewall (spec 32) — local Prompt Guard 2 encoder.
+# Gated and default-off; install only when SEMANTIC_FIREWALL_ENABLED=true.
+# The model weights are NOT a pip dependency: meta-llama/Llama-Prompt-Guard-2-86M
+# is gated on Hugging Face (Llama Community License). Accept the license, then
+# fetch a PINNED revision locally as a build/deploy step (no runtime
+# auto-download), e.g.:
+#   huggingface-cli download meta-llama/Llama-Prompt-Guard-2-86M --revision <SHA>
+# Verify the label schema (config.id2label) and inference call shape against the
+# installed transformers version before any live use (spec 32 §3, §5).
+transformers==4.57.6  # encoder classifier runtime
+torch==2.11.0         # transformers backend (CPU build is sufficient; 86M params)

@@ -332,8 +332,11 @@ host, SID, account, and domain are dropped by a fail-closed field allowlist, not
 just tokenized). The deepset set deliberately retains attacker-controlled
 injection text un-redacted so the runtime prompt firewall is exercised on replay;
 its bucket mix (1 quarantine, 5 redact, 6 unrecognized) gives RR-L1 a measured
-baseline for the planned semantic layer
-(`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`). See `docs/DATASET.md` and
+baseline for the semantic layer
+(`docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md`), now **implemented and wired
+as a default-off detector-not-gate** (local Prompt Guard 2 encoder; enable only
+under the real-LLM gate, see `src/threatprism/guardrails/semantic_firewall.py`).
+See `docs/DATASET.md` and
 `Lessons/Lesson27_Dataset_Onboarding_And_Fixture_Sources.md`.
 
 Run only the demo scenario and API contract checks:

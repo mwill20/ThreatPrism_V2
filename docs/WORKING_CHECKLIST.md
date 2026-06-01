@@ -949,18 +949,41 @@ Batch executive-summary narrative wiring (completes the exec-summary ask):
 - [x] `tests/test_llm_governance.py` (+4): narrative metered, demo→None, cap-skip,
   overclaim-dropped. 204 passed.
 
-## Next Active Slice (APPROVED)
+## Completed Slice
 
-**Semantic prompt-injection firewall (spec 32) — APPROVED, model decision
-resolved.** A real LLM now processes case text, so the firewall is warranted
-(RR-L1 / OT-7). **Owner approved (2026-05-31) Prompt Guard 2 as a local encoder**
-— a deliberate exception to the no-local-overhead preference (multilingual +
-no-egress wins; 86M, CPU-viable). Spec 32 §3 decision is now closed. Implement:
-pin model revision, eval mode, no egress, detector-not-gate (escalate-only
-`max(deterministic, semantic)`), the §8 tests (RR-L1 recovery + NotInject
-false-positive bound), then flip spec 21 I4/OT-7 toward Mitigated and refresh the
-LLM-agent lens (classifier = OT-L11 attacker surface). Gated dependency: pin
-`transformers` + the model fetch (not auto-downloaded at runtime).
+**Semantic prompt-injection firewall (spec 32) — implemented (default-off)** —
+validated GREEN (216 passed, eval 15/15, demo safety passed):
+
+- [x] `src/threatprism/guardrails/semantic_firewall.py`: `SemanticScorer`
+  Protocol, pure `decide_action` band policy, `SemanticFirewall.classify`, lazy
+  local `PromptGuardScorer` (eval mode, `local_files_only`, no egress), and
+  `build_semantic_firewall(settings, scorer=None)` → `None` when disabled.
+- [x] Wired in `_apply_semantic_firewall()` (`cases/service.py`) **after** the
+  regex firewall and **before** the provider. Detector-not-gate by construction:
+  it only *appends* records, so it can never de-escalate a deterministic
+  quarantine. Quarantine band → `operation="quarantine"` record (reuses the
+  existing `run_triage` block); review band → non-blocking
+  `semantic_firewall_review_flag` audit event. Scores the ORIGINAL text.
+- [x] Config (`config.py`): `SEMANTIC_FIREWALL_ENABLED` (default off), model
+  id/revision, thresholds; `validate_runtime()` requires a pinned revision and
+  `0 < review ≤ quarantine ≤ 1` when enabled. `.env.example` +
+  `requirements-llm.txt` (pinned `transformers`/`torch` + gated model-fetch note).
+- [x] `tests/test_semantic_prompt_firewall.py` (12 fake-scorer tests, no
+  download): threshold bands, RR-L1 recovery wiring, no-regression, detector-not-
+  gate, false-positive threshold bound, review-band flag, determinism, no-egress,
+  disabled-by-default byte-identical.
+- [x] Threat-model flip: spec 21 I4/RR-I4/OT-7 → "Mitigation implemented
+  (default-off), live-verified 4/6"; LLM-agent lens L1.1/OT-L11 + RR-L1 +
+  mitigations-traceability + AI_GOVERNANCE_ASSESSMENT updated.
+- [x] **Live-verified 2026-05-31** against gated Prompt Guard 2 (rev `a8ded8e6`,
+  downloaded to local cache, `local_files_only` runtime): the §8.1 live test
+  recovers **4/6 deepset RR-L1 rows** at threshold 0.9 (explicit instruction-
+  override injections score 0.95–0.9996; 2 generic-instruction rows ~0.005 stay
+  residual; benign SOC telemetry 0.0004 — no over-defense). `.env` enabled with
+  the pinned revision. Fixed a live-test field bug (scored evidence `summary`
+  boilerplate, not the `excerpt` attack text) that initially masked the result as
+  0/6 — caught via a known-injection control. RR-L1 is now **measured-narrowed**.
+  Remaining recommendation: a broader NotInject over-defense battery at scale.
 
 ## Planned Slices (specs ready)
 
@@ -1050,7 +1073,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-204 passed
+216 passed (1 skipped: opt-in live Prompt Guard 2 test)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

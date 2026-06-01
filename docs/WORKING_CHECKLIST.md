@@ -1013,6 +1013,22 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
   battery. Also added **Lesson 31** (Real-LLM Governance: caps/metering/dual-provider
   accounting) closing the lesson gap for specs 33/35/36.
 
+## Security Hardening Backlog
+
+- [ ] **`POST /cases/{case_id}/analyst-feedback` skips role authorization.** Noted
+  during Evolution 3 sub-slice 1 (case ownership). The endpoint
+  (`submit_feedback` in `src/threatprism/api/app.py`) calls
+  `service.submit_feedback()` directly — it does **not** authenticate the caller or
+  enforce a role allowlist, unlike the new `/assign` and `/release` endpoints
+  (`_authorized_principal`). Any caller can submit feedback for any case, and the
+  feedback is attributed to a self-reported `analyst_id` in the body rather than an
+  authenticated identity. **Fix:** route it through `_authorized_principal(...,
+  {analyst, engineer, admin})` (mutating action → authenticate + role-allowlist +
+  audit), and prefer the authenticated identity over the body's `analyst_id` for
+  attribution. Was out of scope for the ownership slice; track as API authz
+  hardening. Mirror the assign/release pattern + add an authz test like
+  `tests/test_case_assignment.py`.
+
 ## Planned Slices (specs ready)
 
 - [x] **Meter failed-after-call LLM cost** — `docs/specs/35_FAILED_CALL_COST_METERING.md`
@@ -1096,6 +1112,12 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     `assign_case`/`release_case` in the service with ownership enforcement; an audit event
     per decision. `tests/test_case_assignment.py` (10 tests: API authz, ownership rules,
     service unit). 260 passed.
+  - [x] **"My queue" assignment filter (2026-06-01).** `assigned_to` on
+    `CaseReadModelItem` + an `assigned_to` filter on `list_case_read_models` /
+    `GET /cases/read-model`; `GET /queues/my-cases` lists the **authenticated
+    caller's** owned cases (keyed on identity, not a query param — a caller can only
+    list their own queue; role-view masking applies). +4 tests (isolation, manager
+    denied 403, unauth 401, read-model filter). 264 passed. Makes ownership actionable.
   - [ ] Sub-slice 2 — dashboard feedback UI wired to the existing feedback endpoint.
   - [ ] Owner-run — live cadence with a real provider.
 
@@ -1148,7 +1170,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-260 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+264 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

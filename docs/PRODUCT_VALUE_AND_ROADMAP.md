@@ -175,11 +175,14 @@ feedback.
 as Evolution 2** running continuously on live decisions.
 **Reuses today:** the per-case API (`POST /cases`, `GET /cases/{id}/triage-report`,
 the detail routes, role views), and the feedback loop in §4.
-**Status — sub-slice 1 built (case ownership):** `POST /cases/{id}/assign`
+**Status — sub-slice 1 built (case ownership + my queue):** `POST /cases/{id}/assign`
 (self-assign; roles `analyst`/`engineer`/`admin` only) and `POST /cases/{id}/release`
 (owner-or-admin only), with `assigned_to`/`assigned_at` on the case and an audit
-event per decision. `tests/test_case_assignment.py`. **Remaining:** the dashboard
-feedback UI (sub-slice 2) and the live cadence with a real provider (owner-run).
+event per decision. `GET /queues/my-cases` lists the authenticated caller's owned
+cases (keyed on identity, so a caller only ever sees their own queue), and
+`/cases/read-model` gained an `assigned_to` filter — making ownership *actionable*.
+`tests/test_case_assignment.py`. **Remaining:** the dashboard feedback UI
+(sub-slice 2) and the live cadence with a real provider (owner-run).
 
 ### The common thread
 

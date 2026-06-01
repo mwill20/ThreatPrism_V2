@@ -152,6 +152,9 @@ Operational endpoints:
 - `GET /cases/read-model` — filterable case list with triage summaries, supports all filter combinations
 - `GET /queues/manager-review` — cases requiring manager review (disagreements, false negatives, missed escalations)
 - `GET /queues/healthcare-review` — cases flagged by healthcare safeguards
+- `GET /queues/my-cases` — cases owned by the **authenticated caller** (keyed on identity, not a query param; roles `analyst`/`engineer`/`admin`)
+
+The `/cases/read-model` filter set includes `assigned_to` (and `CaseReadModelItem` carries `assigned_to`).
 
 ### Auth modes
 

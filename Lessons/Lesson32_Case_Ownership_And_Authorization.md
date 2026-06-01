@@ -43,6 +43,24 @@ because it is a *business rule about the object*, not a property of the endpoint
 
 ---
 
+## 2.5 🪪 The "my queue" endpoint — key on identity, not a parameter (IDOR prevention)
+
+`GET /queues/my-cases` lists the cases the caller owns. The critical detail: it
+filters on `principal.identity` from the **authenticated** session, **not** a
+`?user=` query parameter. If it took the owner as a parameter
+(`/queues/my-cases?owner=demo_analyst`), any analyst could enumerate a colleague's
+queue by changing the value — a classic **IDOR** (Insecure Direct Object Reference).
+Deriving the filter from the authenticated identity makes "see only your own" a
+property of the design, not a check you can forget.
+
+The same `assigned_to` filter is exposed on the general `/cases/read-model` for
+managers/admins who legitimately need to query *across* owners — that's a different
+authorization context (a global view role), so it's fine there. The distinction:
+**"my" queue is identity-derived; the admin filter is a parameter** because the
+admin's authorization already covers all cases.
+
+---
+
 ## 3. 🧾 Every decision is audited — allow *and* deny
 
 `_authorized_principal()` records an `AuditEvent` on the case for the authenticated

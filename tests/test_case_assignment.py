@@ -133,3 +133,47 @@ def test_service_assign_unknown_case_raises_keyerror() -> None:
     service, _ = _service_case()
     with pytest.raises(KeyError):
         service.assign_case("nope", actor_identity="analyst_1", actor_role="analyst")
+
+
+# --- "my queue" assignment filter -------------------------------------------
+
+def _create_case_id(client: TestClient, scid: str) -> str:
+    payload = {**_PAYLOAD, "source_case_id": scid}
+    return client.post("/cases", json=payload, headers=ADMIN).json()["case_id"]
+
+
+def test_my_cases_lists_only_callers_owned_cases() -> None:
+    client = _client()
+    c_analyst = _create_case_id(client, "SOAR-MQ-A")
+    c_engineer = _create_case_id(client, "SOAR-MQ-E")
+    c_unassigned = _create_case_id(client, "SOAR-MQ-U")
+    client.post(f"/cases/{c_analyst}/assign", headers=ANALYST)
+    client.post(f"/cases/{c_engineer}/assign", headers=ENGINEER)
+
+    body = client.get("/queues/my-cases", headers=ANALYST).json()
+    assert body["queue"] == "my-cases"
+    ids = {it["case_id"] for it in body["items"]}
+    assert c_analyst in ids
+    assert c_engineer not in ids and c_unassigned not in ids  # isolation
+    item = next(it for it in body["items"] if it["case_id"] == c_analyst)
+    assert item["assigned_to"] == "demo_analyst"
+
+
+def test_my_cases_manager_is_denied() -> None:
+    client = _client()
+    assert client.get("/queues/my-cases", headers=MANAGER).status_code == 403
+
+
+def test_my_cases_unauthenticated_is_denied() -> None:
+    client = _client()
+    assert client.get("/queues/my-cases").status_code == 401
+
+
+def test_read_model_assigned_to_filter() -> None:
+    client = _client()
+    c1 = _create_case_id(client, "SOAR-RM-1")
+    _create_case_id(client, "SOAR-RM-2")  # unassigned
+    client.post(f"/cases/{c1}/assign", headers=ANALYST)
+    body = client.get("/cases/read-model?assigned_to=demo_analyst", headers=ADMIN).json()
+    ids = {it["case_id"] for it in body["items"]}
+    assert ids == {c1}

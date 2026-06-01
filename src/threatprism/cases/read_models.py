@@ -119,6 +119,7 @@ class CaseReadModelItem(BaseModel):
     healthcare_review_required: bool = False
     guardrail_blocked: bool = False
     authorization_denied: bool = False
+    assigned_to: str | None = None
     created_at: datetime
     updated_at: datetime
 

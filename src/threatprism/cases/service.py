@@ -382,6 +382,7 @@ class CaseService:
         healthcare_review_required: bool | None = None,
         guardrail_blocked: bool | None = None,
         authorization_denied: bool | None = None,
+        assigned_to: str | None = None,
         created_after: datetime | None = None,
         created_before: datetime | None = None,
         limit: int = 50,
@@ -407,6 +408,7 @@ class CaseService:
             "healthcare_review_required": healthcare_review_required,
             "guardrail_blocked": guardrail_blocked,
             "authorization_denied": authorization_denied,
+            "assigned_to": assigned_to,
             "created_after": created_after.isoformat() if created_after else None,
             "created_before": created_before.isoformat() if created_before else None,
             "limit": limit,
@@ -424,6 +426,7 @@ class CaseService:
             and _matches_bool(item.healthcare_review_required, healthcare_review_required)
             and _matches_bool(item.guardrail_blocked, guardrail_blocked)
             and _matches_bool(item.authorization_denied, authorization_denied)
+            and _matches_filter(item.assigned_to, assigned_to)
         ]
         envelope = CaseReadModelEnvelope(
             items=filtered[: max(0, limit)],
@@ -869,6 +872,7 @@ class CaseService:
             ),
             guardrail_blocked=self._case_guardrail_blocked(case),
             authorization_denied=self._case_authorization_denied(case),
+            assigned_to=case.assigned_to,
             created_at=case.created_at,
             updated_at=case.updated_at,
         )

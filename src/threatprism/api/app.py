@@ -12,7 +12,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from threatprism import __version__
-from threatprism.auth.demo import AuthorizationError, DemoPrincipal, authorize_role_view
+from threatprism.auth.demo import (
+    VIEW_ROLES,
+    AuthorizationError,
+    DemoPrincipal,
+    authorize_role_view,
+)
 from threatprism.auth.production import PRODUCTION_IDENTITY_AUTH_MODE
 from threatprism.cases.read_models import CaseReadModelEnvelope, OperationalMetrics, ReviewQueueEnvelope
 from threatprism.cases.schemas import (
@@ -327,6 +332,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         healthcare_review_required: bool | None = None,
         guardrail_blocked: bool | None = None,
         authorization_denied: bool | None = None,
+        assigned_to: str | None = None,
         created_after: datetime | None = None,
         created_before: datetime | None = None,
         limit: int = 50,
@@ -344,6 +350,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             healthcare_review_required=healthcare_review_required,
             guardrail_blocked=guardrail_blocked,
             authorization_denied=authorization_denied,
+            assigned_to=assigned_to,
             created_after=created_after,
             created_before=created_before,
             limit=limit,
@@ -384,6 +391,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             role=view_role,
         )
         return ReviewQueueEnvelope(queue="manager-review", **envelope.model_dump())
+
+    @app.get("/queues/my-cases", response_model=ReviewQueueEnvelope, responses=AUTH_ERROR_RESPONSES)
+    def get_my_cases(
+        request: Request,
+        limit: int = 50,
+        cursor: str | None = None,
+    ) -> ReviewQueueEnvelope:
+        # The caller's own owned cases, keyed on the AUTHENTICATED identity (not a
+        # query param), so a caller can only ever list their own queue. Role-view
+        # masking applies at the caller's role.
+        principal = _authorized_principal(request, None, "get_my_cases", _ASSIGNABLE_ROLES)
+        view_role = principal.role if principal.role in VIEW_ROLES else None
+        envelope = _service(request).list_case_read_models(
+            assigned_to=principal.identity,
+            limit=limit,
+            cursor=cursor,
+            role=view_role,
+        )
+        return ReviewQueueEnvelope(queue="my-cases", **envelope.model_dump())
 
     @app.get("/queues/healthcare-review", response_model=ReviewQueueEnvelope, responses=AUTH_ERROR_RESPONSES)
     def get_healthcare_review_queue(

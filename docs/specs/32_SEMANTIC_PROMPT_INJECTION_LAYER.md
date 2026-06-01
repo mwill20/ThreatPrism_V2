@@ -345,6 +345,14 @@ quarantine still blocks regardless**, so detector-not-gate holds in both modes
 Default stays **A** for the demo; flip to **B** before any high-volume/auto-close
 path. Tracked against **OT-L11**.
 
+**Validated end-to-end live (2026-06-01).**
+`test_live_review_mode_demotes_injection_to_nonblocking_flag` runs the real cached
+Prompt Guard 2 through the full `create_case` + `run_triage` pipeline and confirms,
+on a real RR-L1 deepset row PG2 flags: quarantine mode **blocks** it; review mode
+**does not block** but records a `semantic_firewall_review_flag` (`band="quarantine"`);
+and a deterministic regex injection **still blocks in review mode** — detector-not-
+gate holds in both modes on real data, not just the fake-scorer unit tests.
+
 ## 10. Out of scope
 
 - Indirect/second-order prompt injection from retrieved content (RAG) — separate

@@ -85,6 +85,7 @@ Fake SOAR payload
 | ✅ | [Lesson 27](Lesson27_Dataset_Onboarding_And_Fixture_Sources.md) | Dataset Onboarding And Fixture Source Contracts | `src/threatprism/demo/seeding.py`, `src/threatprism/demo/seed_cli.py`, `tools/fixture_factory/adapters/{synthea,deepset,otrf}_adapter.py`, `fixtures/curated_datasets/*`, `tests/test_curated_dataset_seeding.py`, `tests/test_otrf_telemetry_corpus.py`, `tests/test_local_dataset_seeding.py` |
 | ✅ | [Lesson 28](Lesson28_Running_End_To_End_And_The_Feedback_Loop.md) | Running End-to-End And The Analyst Feedback Loop | `src/threatprism/demo/run_soc_demo.py`, `tests/test_soc_dataset_run.py`, `docs/PRODUCT_VALUE_AND_ROADMAP.md`, `docs/runbooks/RUN_AGAINST_SOC_DATASET.md` |
 | ✅ | [Lesson 30](Lesson30_Semantic_Prompt_Injection_Firewall.md) | Semantic Prompt-Injection Firewall (Detector, Not Gate) | `src/threatprism/guardrails/semantic_firewall.py`, `src/threatprism/cases/service.py`, `src/threatprism/config.py`, `tests/test_semantic_prompt_firewall.py`, `docs/specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md` |
+| ✅ | [Lesson 31](Lesson31_Real_LLM_Governance.md) | Real-LLM Governance: Spend Caps, Metering & Dual-Provider Accounting | `src/threatprism/llm/governance.py`, `src/threatprism/llm/providers.py`, `src/threatprism/llm/mock_analyst.py`, `src/threatprism/cases/read_models.py`, `tests/test_llm_governance.py`, `docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md`, `docs/specs/35_FAILED_CALL_COST_METERING.md`, `docs/specs/36_GOVERNED_BACKTEST_ANALYST_SPEND.md` |
 | ✅ | [Lesson 29](Lesson29_Dev_Workflow_AI_Governance_Hooks.md) | Dev-Workflow AI Governance Hooks (Claude Code) | `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`, `.claude/settings.json`, `tools/hooks/*`, `tests/test_dev_workflow_hooks.py` |
 
 ## File Coverage Map
@@ -201,6 +202,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_semantic_prompt_firewall.py` -> Lesson 30
 - `C:\Projects\ThreatPrismV2\tools\hooks\*.py` -> Lesson 29
 - `C:\Projects\ThreatPrismV2\tests\test_dev_workflow_hooks.py` -> Lesson 29
+- `C:\Projects\ThreatPrismV2\src\threatprism\llm\governance.py` -> Lesson 31
+- `C:\Projects\ThreatPrismV2\src\threatprism\llm\mock_analyst.py` -> Lesson 31
+- `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08

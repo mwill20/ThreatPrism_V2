@@ -1005,6 +1005,13 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
   preserved). 4 tests added (demote-doesn't-block, review-mode-still-blocks-regex,
   validate rejects/accepts). Default stays `quarantine` for the demo; flip to
   `review` before any high-volume/auto-close path. Validated GREEN: 233 passed.
+- [x] **Validated end-to-end live (2026-06-01)** against the cached Prompt Guard 2:
+  `test_live_review_mode_demotes_injection_to_nonblocking_flag` proves a real RR-L1
+  injection is blocked in quarantine mode, demoted to a non-blocking review flag in
+  review mode, and a deterministic regex injection still blocks in review mode
+  (detector-not-gate holds on real data). Closes the loop on specs 32 §9.1 + the FP
+  battery. Also added **Lesson 31** (Real-LLM Governance: caps/metering/dual-provider
+  accounting) closing the lesson gap for specs 33/35/36.
 
 ## Planned Slices (specs ready)
 

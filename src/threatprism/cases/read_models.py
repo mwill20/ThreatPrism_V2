@@ -68,6 +68,7 @@ class LlmUsageMetrics(BaseModel):
     """LLM spend for this service process. Zero with the deterministic provider."""
 
     call_count: int = 0
+    failed_call_count: int = 0  # calls that reached the API then failed downstream (still billed)
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0

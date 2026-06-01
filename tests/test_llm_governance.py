@@ -249,3 +249,179 @@ def test_run_triage_meters_and_audits_a_real_like_call() -> None:
     assert llm_audits[0].metadata["input_tokens"] == 1000
     blob = json.dumps([e.model_dump(mode="json") for e in updated.audit_trail])
     assert "RAW_PROMPT_CONTENT" not in blob and "RAW_RESPONSE_CONTENT" not in blob
+
+
+# --- spec 35: meter failed-after-call cost ---------------------------------
+
+class _FailAfterCall:
+    """Models the real provider's contract: resets last_usage per attempt, sets it
+    only after a (simulated) API response, then fails downstream."""
+
+    provider_name = "fail_after_call"
+
+    def __init__(self, usage, mode: str):
+        self._usage = usage
+        self._mode = mode  # "unparseable" | "schema"
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+
+    def generate_report(self, case):
+        self.last_usage = None  # reset per attempt
+        self.last_prompt = "PROMPT"
+        self.last_response = "RESPONSE"
+        self.last_usage = self._usage  # API responded — tokens spent
+        if self._mode == "unparseable":
+            from threatprism.llm.failures import ProviderResponseUnparseable
+            raise ProviderResponseUnparseable("model response was not valid JSON")
+        TriageReport.model_validate({})  # raises ValidationError -> schema failure
+
+
+def test_failed_after_call_unparseable_is_metered_and_audited() -> None:
+    case = _a_case()
+    usage = UsageRecord(model_id="claude-sonnet-4-5", input_tokens=800, output_tokens=200)
+    provider = _FailAfterCall(usage, "unparseable")
+    ledger = SpendLedger()
+    audits: list = []
+    result = metered_generate(provider, case, ledger, cost_model=CostModel(3.0, 15.0),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0, audit_events=audits)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_response_unparseable
+    # The spent tokens are now ledgered (previously dropped -> undercount).
+    assert len(ledger.records) == 1
+    assert ledger.records[0].failure_type == "provider_response_unparseable"
+    assert ledger.records[0].estimated_cost_usd == 0.0054  # 800/1e6*3 + 200/1e6*15
+    # A sanitized llm_call audit fired for the failed-after-call, hashes not raw.
+    assert len(audits) == 1
+    assert audits[0].metadata["failure_type"] == "provider_response_unparseable"
+    assert "prompt_sha256" in audits[0].metadata
+    assert "PROMPT" not in json.dumps(audits[0].model_dump(mode="json"))
+
+
+def test_failed_after_call_schema_is_metered() -> None:
+    case = _a_case()
+    usage = UsageRecord(model_id="claude-sonnet-4-5", input_tokens=500, output_tokens=100)
+    ledger = SpendLedger()
+    result = metered_generate(_FailAfterCall(usage, "schema"), case, ledger,
+                              cost_model=CostModel(3.0, 15.0),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.schema_validation_failure
+    assert len(ledger.records) == 1
+    assert ledger.records[0].failure_type == "schema_validation_failure"
+
+
+class _PreCallFail:
+    """Resets last_usage and fails before any API response (no tokens spent)."""
+
+    provider_name = "pre_call_fail"
+
+    def __init__(self):
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+
+    def generate_report(self, case):
+        self.last_usage = None  # reset; no response arrives
+        from threatprism.llm.failures import ProviderUnreachable
+        raise ProviderUnreachable("network down")
+
+
+def test_pre_call_failure_is_not_metered() -> None:
+    case = _a_case()
+    ledger = SpendLedger()
+    result = metered_generate(_PreCallFail(), case, ledger, cost_model=CostModel(3.0, 15.0),
+                              max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(result, TriageFailureReport)
+    assert result.failure_type == FailureType.provider_unreachable
+    assert len(ledger.records) == 0  # no round-trip -> nothing billed
+
+
+class _SucceedThenPreCallFail:
+    """First attempt responds + succeeds (usage set); second attempt fails pre-call
+    after resetting. Proves the reset prevents re-ledgering the stale record."""
+
+    provider_name = "succeed_then_fail"
+
+    def __init__(self, report, usage):
+        self._report = report
+        self._usage = usage
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+        self.attempts = 0
+
+    def generate_report(self, case):
+        self.attempts += 1
+        self.last_usage = None  # reset per attempt
+        if self.attempts == 1:
+            self.last_usage = self._usage  # responded
+            return self._report
+        from threatprism.llm.failures import ProviderAuthError
+        raise ProviderAuthError("key rotated mid-run")  # pre-call, no usage
+
+
+def test_last_usage_reset_prevents_double_count() -> None:
+    case = _a_case()
+    usage = UsageRecord(model_id="claude-sonnet-4-5", input_tokens=100, output_tokens=50)
+    provider = _SucceedThenPreCallFail(_report(case), usage)
+    ledger = SpendLedger()
+    cm = CostModel(3.0, 15.0)
+    r1 = metered_generate(provider, case, ledger, cost_model=cm, max_total_tokens=10_000_000, max_cost_usd=100.0)
+    r2 = metered_generate(provider, case, ledger, cost_model=cm, max_total_tokens=10_000_000, max_cost_usd=100.0)
+    assert isinstance(r1, TriageReport)
+    assert isinstance(r2, TriageFailureReport) and r2.failure_type == FailureType.provider_auth_error
+    # Only the successful attempt is billed; attempt 2 did not re-ledger stale usage.
+    assert len(ledger.records) == 1
+
+
+def test_metered_narrative_meters_failed_after_call() -> None:
+    # Output policy rejects the prose, but the call already cost tokens.
+    prov = _FakeNarrator(text="This batch proves HIPAA compliance.",
+                         usage=UsageRecord(model_id="m", input_tokens=200, output_tokens=80))
+    ledger = SpendLedger()
+    out = metered_narrative(prov, "ctx", ledger, cost_model=CostModel(3.0, 15.0),
+                            max_total_tokens=10_000, max_cost_usd=100.0)
+    assert out is None  # policy rejected
+    assert len(ledger.records) == 1  # but the spend was metered
+    assert ledger.records[0].failure_type == "output_policy_rejection"
+    assert ledger.records[0].call_kind == "narrative"
+
+
+class _RunTriageFailAfterCall:
+    provider_name = "fail_after_call_e2e"
+
+    def __init__(self, usage):
+        self._usage = usage
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+
+    def generate_report(self, case):
+        self.last_usage = None
+        self.last_prompt = "p"
+        self.last_response = "r"
+        self.last_usage = self._usage
+        from threatprism.llm.failures import ProviderResponseUnparseable
+        raise ProviderResponseUnparseable("bad json")
+
+
+def test_run_triage_surfaces_failed_call_in_metrics_and_audit() -> None:
+    service = CaseService(local_auth_disabled_settings())
+    accepted = service.create_case(_PAYLOAD)
+    case = service.get_case(accepted.case_id)
+    service.provider = _RunTriageFailAfterCall(
+        UsageRecord(model_id="claude-sonnet-4-5", input_tokens=900, output_tokens=300)
+    )
+
+    service.run_triage(case.case_id)
+
+    usage = service.get_operational_metrics().llm_usage
+    assert usage.call_count == 1
+    assert usage.failed_call_count == 1
+    assert usage.total_tokens == 1200
+    # The sanitized llm_call audit landed on the case despite the failure.
+    updated = service.get_case(case.case_id)
+    llm_audits = [e for e in updated.audit_trail if e.event_type == "llm_call"]
+    assert len(llm_audits) == 1
+    assert llm_audits[0].metadata["failure_type"] == "provider_response_unparseable"

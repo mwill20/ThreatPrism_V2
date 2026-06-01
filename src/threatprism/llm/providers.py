@@ -165,9 +165,15 @@ class ClaudeTriageProvider:
     def generate_report(self, case: CaseRecord) -> TriageReport:
         from threatprism.llm.failures import ProviderResponseUnparseable
 
+        # Reset per attempt so a stale record from a prior call is never
+        # re-ledgered, and a pre-call failure (auth/unreachable) leaves last_usage
+        # None → metered_generate ledgers nothing (spec 35).
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
         prompt = self._build_prompt(case)
         self.last_prompt = prompt
-        raw = self._call(prompt)
+        raw = self._call(prompt)  # sets last_usage after a real API response
         self.last_response = raw
         try:
             parsed = json.loads(_extract_json(raw))
@@ -182,7 +188,12 @@ class ClaudeTriageProvider:
     def generate_narrative(self, context: str) -> str:
         """Batch executive-summary prose (spec 33 §2.2). Output is validated by the
         caller (`build_batch_narrative`) through the output policy before use."""
-        return self._call(context, system=_BATCH_NARRATIVE_SYSTEM_PROMPT)
+        self.last_usage = None  # reset per attempt (spec 35)
+        self.last_prompt = context
+        self.last_response = ""
+        raw = self._call(context, system=_BATCH_NARRATIVE_SYSTEM_PROMPT)
+        self.last_response = raw
+        return raw
 
     def _build_prompt(self, case: CaseRecord) -> str:
         # Case is already Stage-1/Stage-2 tokenized + prompt-firewalled before this.

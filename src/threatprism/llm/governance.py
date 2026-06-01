@@ -44,6 +44,10 @@ class UsageRecord(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     estimated_cost_usd: float = 0.0
+    # Set when the call completed the API round-trip but failed downstream
+    # (parse/schema/guardrail). None for a successful call. The tokens were still
+    # spent, so the record is ledgered either way (spec 35).
+    failure_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -133,21 +137,31 @@ def build_llm_call_audit(
     prompt: str,
     response: str,
 ) -> AuditEvent:
-    """Sanitized per-call audit. Records counts + content HASHES, never raw text."""
+    """Sanitized per-call audit. Records counts + content HASHES, never raw text.
+
+    For a failed-after-call (usage carries a ``failure_type``) the event still
+    fires so the spent cost is attributable, with the failure type in metadata."""
+    metadata: dict[str, object] = {
+        "model_id": usage.model_id,
+        "model_revision": usage.model_revision,
+        "call_kind": usage.call_kind,
+        "input_tokens": usage.input_tokens,
+        "output_tokens": usage.output_tokens,
+        "estimated_cost_usd": usage.estimated_cost_usd,
+        "prompt_sha256": _hash(prompt),
+        "response_sha256": _hash(response),
+    }
+    if usage.failure_type is not None:
+        metadata["failure_type"] = usage.failure_type
     return AuditEvent(
         case_id=case_id,
         event_type="llm_call",
-        summary="LLM call recorded (model, token usage, and content hashes).",
-        metadata={
-            "model_id": usage.model_id,
-            "model_revision": usage.model_revision,
-            "call_kind": usage.call_kind,
-            "input_tokens": usage.input_tokens,
-            "output_tokens": usage.output_tokens,
-            "estimated_cost_usd": usage.estimated_cost_usd,
-            "prompt_sha256": _hash(prompt),
-            "response_sha256": _hash(response),
-        },
+        summary=(
+            "LLM call recorded (model, token usage, and content hashes)."
+            if usage.failure_type is None
+            else f"LLM call recorded but failed after the API round-trip ({usage.failure_type})."
+        ),
+        metadata=metadata,
     )
 
 
@@ -179,18 +193,20 @@ def metered_narrative(
         return None  # cap reached — skip the narrative, keep the run going
 
     result = build_batch_narrative(provider, context)
-    if not isinstance(result, str):
-        return None  # output-policy rejection or provider failure
+    # Meter the spend whenever the call reached the API, even if the output policy
+    # later rejected the prose (a failed-after-call still cost tokens — spec 35).
     usage = getattr(provider, "last_usage", None)
     if isinstance(usage, UsageRecord):
+        failure_type = result.failure_type.value if isinstance(result, TriageFailureReport) else None
         priced = usage.model_copy(
             update={
                 "call_kind": "narrative",
                 "estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens),
+                "failure_type": failure_type,
             }
         )
         ledger.add(priced)
-    return result
+    return result if isinstance(result, str) else None
 
 
 def _case_text(case: CaseRecord) -> str:
@@ -238,21 +254,28 @@ def metered_generate(
         provider, case, model_id=model_id, model_revision=model_revision,
         validate_guardrails=validate_guardrails,
     )
-    if isinstance(result, TriageReport):
-        usage = getattr(provider, "last_usage", None)
-        if isinstance(usage, UsageRecord):
-            # Price the actual reported tokens, not the projection.
-            priced = usage.model_copy(
-                update={"estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens)}
-            )
-            ledger.add(priced)
-            if audit_events is not None:
-                audit_events.append(
-                    build_llm_call_audit(
-                        case_id=case.case_id,
-                        usage=priced,
-                        prompt=str(getattr(provider, "last_prompt", "") or ""),
-                        response=str(getattr(provider, "last_response", "") or ""),
-                    )
+    # Ledger usage whenever the call actually reached the API — success OR a
+    # downstream failure (parse/schema/guardrail). The provider resets
+    # ``last_usage`` per attempt and sets it only after a real response, so a
+    # non-None record here means tokens were spent (spec 35). Pre-call failures
+    # (unreachable/timeout/auth/budget) leave it None → nothing ledgered.
+    usage = getattr(provider, "last_usage", None)
+    if isinstance(usage, UsageRecord):
+        failure_type = result.failure_type.value if isinstance(result, TriageFailureReport) else None
+        priced = usage.model_copy(
+            update={
+                "estimated_cost_usd": cost_model.estimate(usage.input_tokens, usage.output_tokens),
+                "failure_type": failure_type,
+            }
+        )
+        ledger.add(priced)
+        if audit_events is not None:
+            audit_events.append(
+                build_llm_call_audit(
+                    case_id=case.case_id,
+                    usage=priced,
+                    prompt=str(getattr(provider, "last_prompt", "") or ""),
+                    response=str(getattr(provider, "last_response", "") or ""),
                 )
+            )
     return result

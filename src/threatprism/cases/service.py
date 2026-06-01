@@ -206,6 +206,11 @@ class CaseService:
             # closed; the demo provider never reaches this branch.
             case.status = CaseStatus.needs_analyst_review
             case.triage_status = TriageStatus(generation.terminal_status)
+            # A failed-after-call (parse/schema) still completed the paid round-trip;
+            # persist its sanitized llm_call audit so the spend is attributable
+            # (spec 35). Pre-call failures produce no such event.
+            for audit_event in llm_audit_events:
+                case.audit_trail.append(audit_event)
             case.audit_trail.append(
                 AuditEvent(
                     case_id=case.case_id,
@@ -350,6 +355,7 @@ class CaseService:
         ledger = self._spend_ledger
         llm_usage = LlmUsageMetrics(
             call_count=len(ledger.records),
+            failed_call_count=sum(1 for r in ledger.records if r.failure_type is not None),
             input_tokens=sum(r.input_tokens for r in ledger.records),
             output_tokens=sum(r.output_tokens for r in ledger.records),
             total_tokens=ledger.total_tokens,

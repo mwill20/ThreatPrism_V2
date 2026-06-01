@@ -1,6 +1,12 @@
 # Spec 35 — Meter Failed-After-Call LLM Cost
 
-Status: **design-only.** Focused correctness fix surfaced during the live run.
+Status: **implemented** (2026-05-31). Focused correctness fix surfaced during the
+live run. Code: `llm/governance.py` (`metered_generate`, `metered_narrative`,
+`UsageRecord.failure_type`, `build_llm_call_audit`), `llm/providers.py` (per-attempt
+reset of `last_usage`/`last_prompt`/`last_response`), `cases/service.py` (persist the
+`llm_call` audit on the failure branch; `failed_call_count` in `/metrics`),
+`cases/read_models.py` (`LlmUsageMetrics.failed_call_count`). Tests:
+`tests/test_llm_governance.py` (6 added, no network). Validated GREEN: 222 passed.
 
 ## 1. Problem
 

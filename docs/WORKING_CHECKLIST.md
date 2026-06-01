@@ -987,11 +987,15 @@ validated GREEN (216 passed, eval 15/15, demo safety passed):
 
 ## Planned Slices (specs ready)
 
-- [ ] **Meter failed-after-call LLM cost** — `docs/specs/35_FAILED_CALL_COST_METERING.md`.
-  Parse/schema failures complete the paid API round-trip but aren't ledgered today,
-  so `/metrics` + the spend cap undercount (seen live: a failed response showed
-  `usd 0`). Reset `last_usage` per attempt; ledger on attempt (success *or* failure);
-  audit failed-after-call. Non-gated, fake-provider tests.
+- [x] **Meter failed-after-call LLM cost** — `docs/specs/35_FAILED_CALL_COST_METERING.md`
+  — **implemented 2026-05-31** (validated GREEN, 222 passed). Provider resets
+  `last_usage`/`last_prompt`/`last_response` per attempt and sets usage only after a
+  real API response; `metered_generate`/`metered_narrative` ledger on *attempt*
+  (success OR downstream parse/schema/policy failure) and tag `UsageRecord.failure_type`;
+  `run_triage` persists the sanitized `llm_call` audit on the failure branch too;
+  `/metrics` gains `llm_usage.failed_call_count`. Pre-call failures (unreachable/
+  timeout/auth/budget) leave `last_usage` None → nothing ledgered. 6 fake-provider
+  tests in `tests/test_llm_governance.py`.
 - [ ] **Dev-workflow AI governance hooks (Claude Code)** —
   `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`. PostToolUse/UserPromptSubmit/
   Stop audit + PreToolUse secret-detection block + HTML dashboard. Non-product, high
@@ -1073,7 +1077,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-216 passed (1 skipped: opt-in live Prompt Guard 2 test)
+222 passed (1 skipped: opt-in live Prompt Guard 2 test)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

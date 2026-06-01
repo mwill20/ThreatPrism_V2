@@ -136,7 +136,7 @@ Core case lifecycle:
 - `GET /cases` — list case summaries
 - `GET /cases/{case_id}` — full case record
 - `GET /cases/{case_id}/triage-report` — triage report (or pending status)
-- `POST /cases/{case_id}/analyst-feedback` — submit analyst feedback, compute disagreement metrics
+- `POST /cases/{case_id}/analyst-feedback` — submit analyst feedback (roles `analyst`/`engineer`/`admin`; attribution is server-set from the authenticated identity), compute disagreement metrics
 - `POST /cases/{case_id}/assign` — self-assign case ownership (roles `analyst`/`engineer`/`admin` only; audited)
 - `POST /cases/{case_id}/release` — release ownership (current owner or admin only; audited)
 

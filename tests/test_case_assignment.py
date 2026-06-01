@@ -177,3 +177,34 @@ def test_read_model_assigned_to_filter() -> None:
     body = client.get("/cases/read-model?assigned_to=demo_analyst", headers=ADMIN).json()
     ids = {it["case_id"] for it in body["items"]}
     assert ids == {c1}
+
+
+# --- analyst-feedback authorization + server-authoritative attribution -------
+
+_FEEDBACK = {
+    "analyst_id": "SPOOFED_OTHER",
+    "analyst_determination": "benign",
+    "analyst_severity": "low",
+    "analyst_confidence": 0.5,
+    "analyst_final_disposition": "monitor",
+}
+
+
+def test_feedback_requires_auth_and_attributes_to_authenticated_identity() -> None:
+    app = create_app(demo_key_settings())
+    client = TestClient(app)
+    case_id = client.post(
+        "/cases", json={**_PAYLOAD, "source_case_id": "SOAR-FB-1"}, headers=ADMIN
+    ).json()["case_id"]
+    url = f"/cases/{case_id}/analyst-feedback"
+
+    # A non-working role (manager_grc) cannot submit feedback.
+    assert client.post(url, json=_FEEDBACK, headers=MANAGER).status_code == 403
+    # Unauthenticated is denied.
+    assert client.post(url, json=_FEEDBACK).status_code == 401
+
+    # Analyst may submit; the spoofed body analyst_id is overridden with the
+    # AUTHENTICATED identity (can't file feedback in another analyst's name).
+    assert client.post(url, json=_FEEDBACK, headers=ANALYST).status_code == 200
+    stored = app.state.case_service.get_case(case_id).analyst_feedback[-1]
+    assert stored.analyst_id == "demo_analyst"  # not "SPOOFED_OTHER"

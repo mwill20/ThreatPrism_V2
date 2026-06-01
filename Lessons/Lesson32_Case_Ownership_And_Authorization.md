@@ -61,6 +61,30 @@ admin's authorization already covers all cases.
 
 ---
 
+## 2.6 ✍️ Server-authoritative attribution (don't trust the body)
+
+`POST /analyst-feedback` originally took the submitter as `analyst_id` **in the
+request body** and skipped authorization entirely — so anyone could file feedback,
+in anyone's name. The fix brought it to the same bar as assign/release
+(`_authorized_principal`), and made attribution **server-authoritative**: the body's
+`analyst_id` is *overridden* with the authenticated identity. A client can send
+`analyst_id: "someone_else"` and the system records it as the real caller.
+
+The principle: **never trust the client for identity or attribution.** The body can
+carry what the action *is* (the determination, severity); *who did it* comes from
+the authenticated session, not a field the client controls. This closes a
+spoofing/repudiation gap — without it, the audit trail and disagreement metrics
+could be attributed to the wrong analyst.
+
+> Finding-in-practice: bringing this one endpoint to the authz bar surfaced a demo
+> scenario that had a *manager* filing analyst feedback — which the new rule
+> correctly forbids. The scenario was fixed so the *analyst* files it (and it then
+> surfaces in the manager's review queue). A real authz change should *break* the
+> things that were quietly wrong; if nothing breaks, the rule probably isn't doing
+> anything.
+
+---
+
 ## 3. 🧾 Every decision is audited — allow *and* deny
 
 `_authorized_principal()` records an `AuditEvent` on the case for the authenticated

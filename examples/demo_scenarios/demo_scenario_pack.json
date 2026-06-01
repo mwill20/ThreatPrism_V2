@@ -200,9 +200,10 @@
           "step_id": "submit_feedback",
           "method": "POST",
           "path": "/cases/{case_id}/analyst-feedback",
-          "purpose": "Create disagreement metrics for manager review.",
+          "purpose": "An analyst files feedback (a manager_grc caller cannot) to create disagreement metrics that surface in the manager review queue.",
           "expected_status": 200,
           "body": "feedback",
+          "auth": "demo-analyst-key",
           "expected_json_paths": ["disagreement.manager_review_required"]
         },
         {

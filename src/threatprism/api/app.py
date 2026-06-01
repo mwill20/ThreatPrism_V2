@@ -526,15 +526,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post(
         "/cases/{case_id}/analyst-feedback",
         response_model=FeedbackResponse,
-        responses={404: {"description": "Case not found"}},
+        responses=CASE_ERROR_RESPONSES,
     )
     def submit_feedback(
         case_id: str,
         feedback: AnalystFeedbackCreate,
         request: Request,
     ) -> FeedbackResponse:
+        # Mutating action -> authenticate + role-allowlist + audit (matches
+        # assign/release). Attribution is server-authoritative: the body's
+        # self-reported analyst_id is overridden with the AUTHENTICATED identity, so
+        # feedback cannot be filed in another analyst's name.
+        principal = _authorized_principal(request, case_id, "submit_feedback", _ASSIGNABLE_ROLES)
+        attributed = feedback.model_copy(update={"analyst_id": principal.identity})
         try:
-            return _service(request).submit_feedback(case_id, feedback)
+            return _service(request).submit_feedback(case_id, attributed)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="Case not found") from exc
 

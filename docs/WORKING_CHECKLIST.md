@@ -1015,19 +1015,17 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
 
 ## Security Hardening Backlog
 
-- [ ] **`POST /cases/{case_id}/analyst-feedback` skips role authorization.** Noted
-  during Evolution 3 sub-slice 1 (case ownership). The endpoint
-  (`submit_feedback` in `src/threatprism/api/app.py`) calls
-  `service.submit_feedback()` directly — it does **not** authenticate the caller or
-  enforce a role allowlist, unlike the new `/assign` and `/release` endpoints
-  (`_authorized_principal`). Any caller can submit feedback for any case, and the
-  feedback is attributed to a self-reported `analyst_id` in the body rather than an
-  authenticated identity. **Fix:** route it through `_authorized_principal(...,
-  {analyst, engineer, admin})` (mutating action → authenticate + role-allowlist +
-  audit), and prefer the authenticated identity over the body's `analyst_id` for
-  attribution. Was out of scope for the ownership slice; track as API authz
-  hardening. Mirror the assign/release pattern + add an authz test like
-  `tests/test_case_assignment.py`.
+- [x] **`POST /cases/{case_id}/analyst-feedback` role authorization — FIXED
+  2026-06-01.** The endpoint now routes through
+  `_authorized_principal(..., {analyst, engineer, admin})` (authenticate +
+  role-allowlist + audit, matching assign/release), and **attribution is
+  server-authoritative**: the body's self-reported `analyst_id` is overridden with
+  the authenticated identity, so feedback cannot be filed in another analyst's name.
+  `manager_grc`/`legal_privacy`/`audit_debug` get 403; unauthenticated gets 401.
+  Test: `test_feedback_requires_auth_and_attributes_to_authenticated_identity` in
+  `tests/test_case_assignment.py`. Surfaced + fixed a demo scenario that had a
+  `manager_grc` caller filing feedback (`demo_scenario_pack.json` — the analyst now
+  files it). 265 passed. Every mutating case endpoint is now at the same authz bar.
 
 ## Planned Slices (specs ready)
 
@@ -1170,7 +1168,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-264 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+265 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

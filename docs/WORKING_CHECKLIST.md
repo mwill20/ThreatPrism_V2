@@ -1198,9 +1198,12 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-266 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+267 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
+
+Baseline moved `266 -> 267` on 2026-06-01 with the in-memory SQLite concurrency
+fix (`tests/test_persistence_concurrency.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

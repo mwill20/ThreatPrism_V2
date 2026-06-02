@@ -4,6 +4,12 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Fixed an in-memory SQLite concurrency bug: the shared `:memory:` connection
+  returned HTTP 500 under FastAPI threadpool concurrency (the dashboard's
+  parallel per-case detail fetches). Added a `threading.Lock` and a
+  `_transaction()` context manager serializing access to the shared connection;
+  file-backed mode keeps connection-per-op. Added a barrier-synchronized
+  concurrency regression test and Lesson 34. Baseline `266 -> 267 passed`.
 - Added Production Token Verifier Design v0.1 with the future `external_oidc`
   verifier contract, claim-to-role mapping rules, JWKS/cache boundaries,
   fail-closed semantics, sanitized audit requirements, no-network validation

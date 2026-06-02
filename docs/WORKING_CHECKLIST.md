@@ -1214,6 +1214,14 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     `docs/LIVE_BACKTEST_FINDINGS.md`. **Next lever: harder/human-labeled cases or a
     richer-confidence prompt** (the engineered-ambiguity set + coarse buckets still
     under-exercise divergence).
+  - [x] **Hardened the analyst enum contract 2026-06-02 (non-paid).** Root-caused the
+    2/8 blind-mode `schema_validation_failure`s: `_ANALYST_SYSTEM_PROMPT` named
+    `analyst_final_disposition` without its allowed values, so a blind analyst (no
+    report template) free-styled an out-of-enum disposition. Now derives all three
+    required enum vocabularies (determination/severity/disposition) from the schema
+    enums via `_vocab()` so the prompt can't drift, + "use exactly one of the listed
+    values". TDD: `test_analyst_prompt_enumerates_all_required_enum_vocabularies`
+    (283 -> 284). **Pending paid confirmation:** a blind re-run showing 8/8 graded.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1297,7 +1305,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-283 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+284 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1314,7 +1322,9 @@ spec 37 Q4), then `280 -> 281` with blind-analyst mode
 (`test_blind_analyst_withholds_report_reducing_egress`), then `281 -> 282` with
 confidence-delta capture (`test_confidence_deltas_are_captured`), then `282 -> 283`
 with the blind-analyst report-leak fix
-(`test_blind_analyst_does_not_leak_report_via_case_triage_report`).
+(`test_blind_analyst_does_not_leak_report_via_case_triage_report`), then `283 -> 284`
+with the analyst enum-contract hardening
+(`test_analyst_prompt_enumerates_all_required_enum_vocabularies`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

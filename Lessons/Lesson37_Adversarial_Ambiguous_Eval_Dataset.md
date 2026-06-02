@@ -181,6 +181,21 @@ test it against a realistically-triaged case, not a hand-built stub whose
 `triage_report` happens to be empty. The eval revealed a flaw in the eval; then a
 *deeper* flaw in the fix to that flaw. Rigor is iterative.
 
+**The schema-failure follow-up: the report was also a hidden *schema crutch*.** Why
+did blind mode lose 2 of 8 gradings to `schema_validation_failure` when anchored lost
+none? Same root cause as the leak, one layer down. `AnalystFeedbackCreate` requires
+`analyst_final_disposition` to be a `Disposition` enum (`close|monitor|escalate|
+needs_more_info`), but the analyst system prompt named the field *without listing its
+allowed values*. Anchored mode got away with it because the report it was shown
+contained a valid disposition — an accidental few-shot example. Blind, with no report,
+the model free-styled a disposition that failed validation (fail-closed, so it was
+counted, never fabricated). The fix derives every required enum's vocabulary straight
+from the schema enums into the prompt (`_vocab()`), so the prompt can't drift from
+`AnalystFeedbackCreate` and a blind analyst is told the exact closed vocabulary the
+report used to leak. Lesson: **when you remove an information channel, audit what
+*else* was silently riding on it** — here the report was carrying both the verdict
+(anchoring) and the schema's allowed values (a structure crutch).
+
 **Confidence-delta capture (the instrument that exposed the leak).** `BacktestReport`
 records each `confidence_delta = |analyst_confidence − triage_confidence|` and a
 summary (mean/max/count over 0.2). Two models can land in the same determination

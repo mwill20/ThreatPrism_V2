@@ -4,6 +4,19 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Hardened the analyst prompt's enum contract** (`mock_analyst.py`) to fix the 2/8
+  blind-mode `schema_validation_failure`s from the corrected A/B. The system prompt
+  named `analyst_final_disposition` but never stated its allowed values; a blind
+  analyst (no report to copy valid values from) free-styled an out-of-enum
+  disposition that failed `AnalystFeedbackCreate`. Anchored runs masked it because
+  the report supplied valid enum values as an implicit example. The closed
+  vocabularies for all three required enum fields (determination/severity/
+  disposition) are now derived from the schema enums (`_vocab()`), so the prompt
+  can't drift from `AnalystFeedbackCreate`, plus an explicit "use exactly one of the
+  listed values" instruction. TDD regression:
+  `test_analyst_prompt_enumerates_all_required_enum_vocabularies`. Baseline
+  `283 -> 284 passed`. Decisive confirmation (8/8 graded blind) is a paid blind
+  re-run — pending owner go-ahead.
 - **Fixed: blind analyst was not blind** (`mock_analyst.py`). `_build_prompt`
   stripped only the top-level `threatprism_report` key, but a triaged `CaseRecord`
   carries the verdict on `case.triage_report`, so the report (determination/severity/

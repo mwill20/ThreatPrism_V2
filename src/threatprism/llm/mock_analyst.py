@@ -19,7 +19,14 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from threatprism.cases.schemas import AnalystFeedbackCreate, CaseRecord, TriageReport
+from threatprism.cases.schemas import (
+    AnalystFeedbackCreate,
+    CaseRecord,
+    Determination,
+    Disposition,
+    Severity,
+    TriageReport,
+)
 from threatprism.llm.failures import (
     ProviderAuthError,
     ProviderResponseUnparseable,
@@ -27,15 +34,24 @@ from threatprism.llm.failures import (
 )
 
 
+def _vocab(enum_cls: type) -> str:
+    return "|".join(member.value for member in enum_cls)
+
+
 # Phrased to be valid in BOTH modes (blind = case only; anchored = case + report),
 # so the only experimental variable between runs is the report's presence — not the
-# instructions.
+# instructions. The closed vocabularies are derived from the schema enums so the
+# prompt can never drift out of sync with AnalystFeedbackCreate. A blind analyst has
+# no report to copy valid enum values from, so EVERY required enum field must state
+# its allowed values inline — otherwise the model free-styles an out-of-enum value
+# (notably analyst_final_disposition) and grading fails schema validation.
 _ANALYST_SYSTEM_PROMPT = (
     "You are an experienced SOC analyst independently triaging a case. Judge the "
     "case on its own merits. Return ONLY a JSON object with keys: analyst_id, "
-    "analyst_determination (benign|suspicious|malicious|critical), analyst_severity "
-    "(low|medium|high|critical), analyst_confidence (0..1), analyst_final_disposition, "
-    "analyst_notes. Do not claim compliance or that any real action was taken."
+    f"analyst_determination ({_vocab(Determination)}), analyst_severity "
+    f"({_vocab(Severity)}), analyst_confidence (0..1), analyst_final_disposition "
+    f"({_vocab(Disposition)}), analyst_notes. Use EXACTLY one of the listed values "
+    "for each enum field. Do not claim compliance or that any real action was taken."
 )
 
 

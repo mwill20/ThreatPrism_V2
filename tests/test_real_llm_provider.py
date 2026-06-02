@@ -219,6 +219,23 @@ def test_mock_analyst_is_independent_and_fails_closed() -> None:
         analyst.evaluate(case, _report(case))
 
 
+def test_analyst_prompt_enumerates_all_required_enum_vocabularies() -> None:
+    # A blind analyst has no ThreatPrism report to copy valid enum values from, so the
+    # system prompt must itself state the closed vocabulary for EVERY required enum
+    # field. Otherwise the model free-styles an out-of-enum value (notably
+    # analyst_final_disposition) and grading fails schema validation -- exactly the
+    # 2/8 blind-mode failures from the 2026-06-02 corrected A/B. Anchored runs masked
+    # this because the report supplied valid enum values as an implicit example.
+    from threatprism.llm.mock_analyst import _ANALYST_SYSTEM_PROMPT
+
+    for value in (d.value for d in Determination):
+        assert value in _ANALYST_SYSTEM_PROMPT, f"determination '{value}' missing from analyst prompt"
+    for value in (s.value for s in Severity):
+        assert value in _ANALYST_SYSTEM_PROMPT, f"severity '{value}' missing from analyst prompt"
+    for value in (d.value for d in Disposition):
+        assert value in _ANALYST_SYSTEM_PROMPT, f"disposition '{value}' missing from analyst prompt"
+
+
 # --- batch narrative seam -------------------------------------------------
 
 class _FakeNarrator:

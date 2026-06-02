@@ -78,7 +78,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known validation baseline:
 
 ```text
-283 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+284 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

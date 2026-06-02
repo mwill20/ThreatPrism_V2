@@ -46,6 +46,9 @@ class AnalystGrader(Protocol):
         ...
 
 
+_CONFIDENCE_GAP_THRESHOLD = 0.2  # |analyst - triage| at/above this = a notable confidence gap
+
+
 class BacktestCaseResult(BaseModel):
     source_case_id: str
     case_id: str
@@ -56,6 +59,9 @@ class BacktestCaseResult(BaseModel):
     determination_mismatch: bool
     severity_mismatch: bool
     threatprism_flagged_analyst_cleared: bool
+    threatprism_confidence: float = 0.0
+    analyst_confidence: float = 0.0
+    confidence_delta: float = 0.0  # abs(threatprism_confidence - analyst_confidence)
 
 
 class BacktestReport(BaseModel):
@@ -67,6 +73,9 @@ class BacktestReport(BaseModel):
     # ambiguity_axis -> {graded, determination_mismatches} (spec 37 Q4): which kinds
     # of ambiguity drive divergence. Empty for cases with no ambiguity_axis metadata.
     agreement_by_axis: dict[str, dict[str, int]] = Field(default_factory=dict)
+    # Soft-disagreement signal the 4-bucket determination hides: how far the analyst's
+    # confidence sits from ThreatPrism's, even when the determination matches.
+    confidence_delta_summary: dict[str, float] = Field(default_factory=dict)
     agreement_rate: float = 1.0  # 1 - determination_mismatch / graded
     determination_mismatches: int = 0
     severity_mismatches: int = 0
@@ -145,12 +154,22 @@ def run_backtest(
                 determination_mismatch=disagreement.determination_mismatch,
                 severity_mismatch=disagreement.severity_mismatch,
                 threatprism_flagged_analyst_cleared=(tp_det != "benign" and an_det == "benign"),
+                threatprism_confidence=report.confidence,
+                analyst_confidence=feedback.analyst_confidence,
+                confidence_delta=round(abs(report.confidence - feedback.analyst_confidence), 3),
             )
         )
 
     graded = len(results)
     det_mismatches = sum(r.determination_mismatch for r in results)
     flagged_cleared = [r for r in results if r.threatprism_flagged_analyst_cleared]
+    deltas = [r.confidence_delta for r in results]
+    confidence_delta_summary = {
+        "mean_abs_delta": round(sum(deltas) / len(deltas), 3) if deltas else 0.0,
+        "max_abs_delta": round(max(deltas), 3) if deltas else 0.0,
+        # cases where confidence diverges notably even if the determination agrees
+        "count_over_threshold": float(sum(1 for d in deltas if d >= _CONFIDENCE_GAP_THRESHOLD)),
+    }
     return BacktestReport(
         graded_total=graded,
         grading_failures=grading_failures,
@@ -158,6 +177,7 @@ def run_backtest(
         no_report_total=no_report_total,
         no_report_reasons=dict(sorted(no_report_reasons.items())),
         agreement_by_axis=dict(sorted(axis_tally.items())),
+        confidence_delta_summary=confidence_delta_summary,
         agreement_rate=round(1 - det_mismatches / graded, 3) if graded else 1.0,
         determination_mismatches=det_mismatches,
         severity_mismatches=sum(r.severity_mismatch for r in results),

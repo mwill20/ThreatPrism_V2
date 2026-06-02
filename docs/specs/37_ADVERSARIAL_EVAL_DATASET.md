@@ -30,6 +30,15 @@ reasoning-ambiguity at the determination bucket; the next lever is **signal
 granularity** (capture confidence deltas) rather than anchoring or more cases. See
 `docs/LIVE_BACKTEST_FINDINGS.md`.
 
+**Confidence-delta capture (built 2026-06-02):** `BacktestCaseResult` now carries
+`threatprism_confidence`/`analyst_confidence`/`confidence_delta`, and
+`BacktestReport.confidence_delta_summary` reports `mean_abs_delta`/`max_abs_delta`/
+`count_over_threshold` (≥0.2). This surfaces the soft disagreement the 4-bucket
+determination hides. Deterministically the demo analyst's fixed 0.6 confidence gives
+a flat 0.22 delta — the capture is proven, but the *interesting per-case spread*
+requires a live run (where analyst confidence varies). Test:
+`test_confidence_deltas_are_captured`.
+
 ## 1. Problem
 
 The first live Evolution 2 backtest (real Claude triage vs. independent real OpenAI

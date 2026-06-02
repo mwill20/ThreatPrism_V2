@@ -161,6 +161,16 @@ bucket. The clean A/B paid off by *eliminating* a hypothesis: the next lever is
 **signal granularity** (confidence deltas), not anchoring. An experiment that returns
 "no effect" is still a result — it redirects the search.
 
+**Following the redirect: confidence-delta capture.** `BacktestReport` now records
+each `confidence_delta = |analyst_confidence − triage_confidence|` and a summary
+(mean/max/count over 0.2). Two models can land in the same determination bucket while
+being *very* differently confident — that gap is the soft-disagreement signal the
+coarse bucket throws away. (Deterministically the demo analyst's fixed 0.6 confidence
+gives a flat 0.22, proving the capture; the real per-case spread needs a live run.)
+The arc of this lesson is the method itself: **measure → find no signal where you
+looked → instrument the next-most-likely place.** Each step was cheap and each
+narrowed the question.
+
 > Career framing: "My adversarial set hit 100% agreement live. Instead of declaring
 > success, I asked *why* — and realized the 'independent' analyst was being shown the
 > verdict it was grading. That's residual circularity even with a different model. The

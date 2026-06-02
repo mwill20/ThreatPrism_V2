@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `281 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
+- The current validated baseline is `282 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -248,7 +248,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-281 passed
+282 passed
 ```
 
 ## What To Study Next

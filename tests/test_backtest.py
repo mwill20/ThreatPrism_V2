@@ -167,6 +167,17 @@ def test_backtest_over_seed_limited_service_grades_at_most_limit() -> None:
     assert report.graded_total <= 3
 
 
+def test_confidence_deltas_are_captured() -> None:
+    # Blind A/B ruled out anchoring; determination buckets are too coarse to show
+    # disagreement. Confidence deltas surface the soft divergence the buckets hide.
+    report = run_backtest(_seeded_service(), HeuristicDemoAnalyst())
+    summary = report.confidence_delta_summary
+    assert {"mean_abs_delta", "max_abs_delta", "count_over_threshold"} <= set(summary)
+    assert summary["max_abs_delta"] > 0.0  # heuristic analyst (0.6) differs from triage confidence
+    assert report.results
+    assert all(r.confidence_delta >= 0.0 for r in report.results)
+
+
 def test_no_report_cases_are_counted_with_reason() -> None:
     # The curated corpus includes a case that produces no gradeable report (blocked).
     # The backtest must surface WHY (the 27-vs-31 gap from the live run), not silently

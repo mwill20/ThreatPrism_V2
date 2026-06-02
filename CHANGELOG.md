@@ -4,6 +4,13 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added confidence-delta capture to the backtest:
+  `BacktestCaseResult.{threatprism_confidence,analyst_confidence,confidence_delta}` +
+  `BacktestReport.confidence_delta_summary` (mean/max/count ≥0.2). Surfaces the soft
+  disagreement the 4-bucket determination hides — the lever the blind A/B promoted.
+  Deterministic demo gives a flat 0.22 (fixed analyst confidence); the real per-case
+  spread needs a live run. Test: `test_confidence_deltas_are_captured`. Baseline
+  `281 -> 282 passed`.
 - Ran the blind-vs-anchored live comparison (~$0.05): blind (case-only) and anchored
   analyst both returned **1.0 agreement**, identical — **anchoring ruled out.** The
   100% on engineered-ambiguous cases is real convergence, not circularity; the cause

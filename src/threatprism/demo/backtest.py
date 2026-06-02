@@ -62,6 +62,8 @@ class BacktestReport(BaseModel):
     graded_total: int = 0
     grading_failures: int = 0
     grading_failure_types: dict[str, int] = Field(default_factory=dict)  # failure_type -> count
+    no_report_total: int = 0  # cases with no gradeable report (blocked/failed/not-yet-run)
+    no_report_reasons: dict[str, int] = Field(default_factory=dict)  # triage_status -> count
     agreement_rate: float = 1.0  # 1 - determination_mismatch / graded
     determination_mismatches: int = 0
     severity_mismatches: int = 0
@@ -87,6 +89,8 @@ def run_backtest(
     results: list[BacktestCaseResult] = []
     grading_failures = 0
     grading_failure_types: dict[str, int] = {}
+    no_report_total = 0
+    no_report_reasons: dict[str, int] = {}
     by_det: dict[str, int] = {}
     analyst_ledger = SpendLedger()
     analyst_cost_model = cost_model or CostModel()
@@ -94,7 +98,12 @@ def run_backtest(
     for item in service.list_case_read_models().items:
         report = service.get_report(item.case_id)
         if report is None:
-            continue  # blocked / no report — nothing to grade
+            # No gradeable report. Record WHY (the case's triage_status) instead of
+            # silently skipping — this is the 27-vs-31 gap from the live run.
+            no_report_total += 1
+            reason = item.triage_status.value if hasattr(item.triage_status, "value") else str(item.triage_status)
+            no_report_reasons[reason] = no_report_reasons.get(reason, 0) + 1
+            continue
         case = service.get_case(item.case_id)
         if case is None:
             continue
@@ -137,6 +146,8 @@ def run_backtest(
         graded_total=graded,
         grading_failures=grading_failures,
         grading_failure_types=dict(sorted(grading_failure_types.items())),
+        no_report_total=no_report_total,
+        no_report_reasons=dict(sorted(no_report_reasons.items())),
         agreement_rate=round(1 - det_mismatches / graded, 3) if graded else 1.0,
         determination_mismatches=det_mismatches,
         severity_mismatches=sum(r.severity_mismatch for r in results),

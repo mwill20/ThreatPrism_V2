@@ -75,10 +75,12 @@ more cases yielded **no report** under the real pipeline. The most likely cause 
 the guardrail pipeline (prompt firewall / quarantine / evidence validation) firing
 on real-Claude output where the deterministic demo provider's canned output passed
 — i.e., **the guardrails doing their job on a real model**. But this run did not
-capture the per-case reason (`run_backtest` does `if report is None: continue`).
-**Follow-up (cheap, non-paid):** count + categorize no-report cases (blocked vs.
-failed) in `run_backtest`, then a single persisted-DB re-run would confirm. Until
-then this is an observation, not a conclusion.
+capture the per-case reason. **Follow-up done 2026-06-02 (non-paid):** `run_backtest` now
+records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so the
+27-vs-31 gap is no longer silent — the next live (or deterministic) run reports
+whether the missing cases were `blocked_by_guardrail`, `failed`, etc. Regression:
+`test_no_report_cases_are_counted_with_reason`. A confirming live re-run remains an
+optional owner-run; the categorization itself is now structural.
 
 **Pre-flight items cleared:** both providers' usage-attribute names read correctly
 (token/cost accounting populated); model revision pinned; curated synthetic data

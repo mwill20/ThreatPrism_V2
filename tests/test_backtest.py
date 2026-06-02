@@ -167,6 +167,16 @@ def test_backtest_over_seed_limited_service_grades_at_most_limit() -> None:
     assert report.graded_total <= 3
 
 
+def test_no_report_cases_are_counted_with_reason() -> None:
+    # The curated corpus includes a case that produces no gradeable report (blocked).
+    # The backtest must surface WHY (the 27-vs-31 gap from the live run), not silently
+    # skip it. Reason = the case's triage_status.
+    report = run_backtest(_seeded_service(), HeuristicDemoAnalyst())
+    assert report.no_report_total >= 1
+    assert sum(report.no_report_reasons.values()) == report.no_report_total
+    assert report.no_report_reasons  # categorized by triage_status, not silent
+
+
 def test_grading_failure_types_are_recorded_not_silent() -> None:
     # Found live 2026-06-01: failures were counted but their category was discarded,
     # so the report couldn't say WHY gradings failed. Now each failure_type is kept.

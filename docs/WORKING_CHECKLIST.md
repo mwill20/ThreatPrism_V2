@@ -1176,8 +1176,10 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     ambiguous/adversarial synthetic cases. **Planned in
     `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md`** (ambiguity taxonomy, curated
     manifest onboarding, divergence-capable acceptance test).
-  - [ ] (b) 27 vs 31 graded — add no-report-reason (blocked vs failed) counting to
-    `run_backtest` (cheap, non-paid). **← next slice in progress.**
+  - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
+    records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
+    the gap is categorized (blocked vs failed) instead of silently skipped.
+    Regression: `test_no_report_cases_are_counted_with_reason`.
 - [~] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
   pulls the triage report, works it human-in-the-loop, submits feedback; same tuning
   loop as Evolution 2 at live cadence.
@@ -1257,7 +1259,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-275 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+276 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1266,7 +1268,8 @@ fix (`tests/test_persistence_concurrency.py`), then `267 -> 271` with the shared
 secret-pattern catalog refactor (`tests/test_secret_catalog.py`), then `271 -> 272`
 with the real-LLM analyst data-egress guard (`tests/test_analyst_egress.py`), then
 `272 -> 275` with the cost-minimal `--limit` smoke support + grading-failure
-diagnosability (`tests/test_backtest.py`).
+diagnosability (`tests/test_backtest.py`), then `275 -> 276` with no-report-reason
+counting (`test_no_report_cases_are_counted_with_reason`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

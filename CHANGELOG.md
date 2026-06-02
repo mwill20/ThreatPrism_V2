@@ -12,7 +12,11 @@ All notable repository-level changes should be recorded here.
   gained `grading_failure_types` so failures are no longer silent. Added a
   `--limit`/seed-`limit` flag for cost-minimal smoke runs. Findings + honest
   caveats (corpus too clear-cut to exercise disagreement detection; 27-vs-31 graded
-  gap) in `docs/LIVE_BACKTEST_FINDINGS.md`. Baseline `272 -> 275 passed`.
+  gap) in `docs/LIVE_BACKTEST_FINDINGS.md`. Followed up by adding
+  `no_report_total`/`no_report_reasons` (keyed on `triage_status`) so the graded-gap
+  is categorized (blocked vs failed) instead of silently skipped, and planned the
+  adversarial/ambiguous eval dataset (`docs/specs/37_ADVERSARIAL_EVAL_DATASET.md`)
+  to actually exercise disagreement detection. Baseline `272 -> 276 passed`.
 - Opened the real-LLM gates (owner-authorized 2026-06-01): live Anthropic triage,
   OpenAI independent analyst, and the local Prompt Guard 2 semantic firewall. Spec
   21 threat-treatment register updated — re-opened L1/RR-L1, L5/OT-L3, L7/OT-L7

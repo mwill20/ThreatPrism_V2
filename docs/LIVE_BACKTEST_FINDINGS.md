@@ -3,7 +3,61 @@
 Real-LLM two-model backtest: ThreatPrism (Claude) triage vs. an independent
 OpenAI analyst, over the curated synthetic SOC dataset. No real-world data.
 
+## CORRECTION — blind mode was not blind; anchoring is NOT ruled out — 2026-06-02 (post-fix A/B)
+
+> **This supersedes the "Blind-vs-anchored" section below.** That comparison used a
+> blind path that still leaked ThreatPrism's report to the analyst, so its
+> "identical → anchoring ruled out" conclusion is invalid. Kept below for the record.
+
+**The bug.** `MockAnalyst._build_prompt` stripped only the top-level
+`threatprism_report` key in blind mode — but a triaged `CaseRecord` persists the
+verdict on `case.triage_report` (set by `run_triage`), and the prompt serializes the
+whole case. So ThreatPrism's determination/severity/**confidence**/findings reached
+the analyst in *both* modes. The "blind" run was a second anchored run. Fixed in
+`mock_analyst.py` (`case.model_dump(exclude={"triage_report"})`); regression test
+`test_blind_analyst_does_not_leak_report_via_case_triage_report`. Found by *this*
+paid run: confidence_delta was 0.0 on all 8 cases even "blind," with the analyst
+tracking ThreatPrism's run-to-run confidence wobble — impossible for a real blind
+grader.
+
+**The corrected A/B (real Claude triage + real OpenAI analyst, adversarial set, ~$0.10):**
+
+| Analyst mode (post-fix) | Agreement | Det mismatch | Sev mismatch | Confidence delta | Graded |
+|-------------------------|-----------|--------------|--------------|------------------|--------|
+| Anchored (sees report)  | 1.0       | 0            | 0            | flat **0.0**     | 8/8    |
+| **True blind (case only)** | **0.833** | **1** (adv-0004) | 2        | varies, mean **0.042**, max 0.05 | 6/8 (2 schema fails) |
+
+**Decisive result: blind ≠ anchored. Anchoring was the dominant cause of the prior
+100%, not genuine convergence.**
+
+1. **The disagreement path fires on real models once the leak is closed.**
+   `adv-ambiguous-0004`: ThreatPrism `benign/low` vs. blind analyst `suspicious/medium`
+   — a genuine determination mismatch → `DisagreementRecord` → manager-review queue.
+   This is the signal the arc was hunting; anchoring had been masking it.
+2. **Anchored exactly parrots the report's confidence** (delta 0.0 on every case:
+   0.85/0.75/0.65 reproduced verbatim). Blind produces the analyst's *own* confidence,
+   so deltas go non-zero.
+
+**Honest caveats (do not over-read this):**
+- **The confidence signal is weak.** The blind analyst sits near a constant ~0.70;
+  the 0.05 deltas come mostly from *ThreatPrism's* side varying (0.65/0.75) against
+  that near-constant, not from a rich analyst spread.
+- **2 schema-validation failures in blind mode** (6/8 graded). Without the report to
+  mimic, gpt-4o-mini's structured output was less reliable — itself a finding, and it
+  shrinks an already-small N (the one determination mismatch is out of 6 graded).
+- **N is small (6–8) and exploratory.** Directional, not statistically strong.
+
+**Methodological lesson.** The prior unit test gave false assurance because its
+fixture had no `triage_report` set — the one field carrying the leak. A "blind" claim
+is a *data-flow* claim and must be tested against a realistically-triaged case, not a
+hand-built stub. (Same failure class as smoke-run #1's JSON-mode bug: the harness
+looked like it tested independence while a hidden channel leaked the answer.)
+
 ## Blind-vs-anchored live comparison — 2026-06-02 (`--blind-analyst`)
+
+> **SUPERSEDED — see the CORRECTION section above.** The blind path used here leaked
+> the report via `case.triage_report`, so the "identical → anchoring ruled out"
+> conclusion does not hold. Retained verbatim as the historical record.
 
 Re-ran the adversarial set with the analyst **blind** (case only, ThreatPrism's
 report withheld) to test the anchoring hypothesis. ~$0.05.

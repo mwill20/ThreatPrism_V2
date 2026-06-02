@@ -152,24 +152,45 @@ divergence; if it stays at 100%, the cases really are easy for reasoning models.
 Bonus: withholding the verdict also *reduces* what egresses to the third-party
 provider — a privacy win that falls out of better methodology.
 
-**The A/B result (2026-06-02): blind = anchored = 1.0, identical** (same
-2-benign/6-suspicious split). Anchoring was *ruled out* — the independent model
-reaches the same verdicts grading the case alone. Double finding: the analyst
-genuinely isn't echoing the report (real independence), and the cause is the cases —
-engineered rule-ambiguity is not reasoning-ambiguity at the coarse determination
-bucket. The clean A/B paid off by *eliminating* a hypothesis: the next lever is
-**signal granularity** (confidence deltas), not anchoring. An experiment that returns
-"no effect" is still a result — it redirects the search.
+**The A/B result — first pass, then a correction.** The first run returned **blind =
+anchored = 1.0, identical**, and I wrote "anchoring ruled out." That was *wrong*, and
+the way it was wrong is the real lesson. The "blind" mode stripped only the top-level
+`threatprism_report` key from the prompt — but a triaged `CaseRecord` carries the
+verdict on `case.triage_report`, and the prompt serialized the whole case. **The
+report leaked into the "blind" prompt anyway**, so the "blind" run was just a second
+anchored run. Of course it was identical.
 
-**Following the redirect: confidence-delta capture.** `BacktestReport` now records
-each `confidence_delta = |analyst_confidence − triage_confidence|` and a summary
-(mean/max/count over 0.2). Two models can land in the same determination bucket while
-being *very* differently confident — that gap is the soft-disagreement signal the
-coarse bucket throws away. (Deterministically the demo analyst's fixed 0.6 confidence
-gives a flat 0.22, proving the capture; the real per-case spread needs a live run.)
-The arc of this lesson is the method itself: **measure → find no signal where you
-looked → instrument the next-most-likely place.** Each step was cheap and each
-narrowed the question.
+The tell that caught it: even "blind," the analyst's confidence matched ThreatPrism's
+to two decimals on every case, and tracked ThreatPrism's run-to-run wobble — which a
+genuinely blind grader cannot do. After fixing `_build_prompt` to exclude
+`triage_report` (regression test
+`test_blind_analyst_does_not_leak_report_via_case_triage_report`), the corrected A/B:
+
+| Analyst mode (post-fix) | Agreement | Det mismatch | Confidence delta |
+|-------------------------|-----------|--------------|------------------|
+| Anchored                | 1.0       | 0            | flat 0.0 (parrots the report) |
+| **True blind**          | **0.833** | **1** (adv-0004) | varies, mean 0.042 |
+
+**Blind ≠ anchored. Anchoring was the dominant cause of the 100%, not convergence.**
+Once the leak closed, the disagreement pipeline fired on real models: `adv-0004`
+split `benign` (ThreatPrism) vs `suspicious` (blind analyst) → a real
+`DisagreementRecord`. *Caveats kept honest:* the confidence signal is weak (the blind
+analyst sits near a constant 0.70), blind mode hit 2 schema-validation failures (6/8
+graded), and N is small. The meta-lesson: **a "blind" claim is a data-flow claim** —
+test it against a realistically-triaged case, not a hand-built stub whose
+`triage_report` happens to be empty. The eval revealed a flaw in the eval; then a
+*deeper* flaw in the fix to that flaw. Rigor is iterative.
+
+**Confidence-delta capture (the instrument that exposed the leak).** `BacktestReport`
+records each `confidence_delta = |analyst_confidence − triage_confidence|` and a
+summary (mean/max/count over 0.2). Two models can land in the same determination
+bucket while being *very* differently confident — that gap is the soft-disagreement
+signal the coarse bucket throws away. This metric is what *caught* the blind-mode bug:
+an exact-0.0 delta on every "blind" case was too clean to be real, and pulling that
+thread found the leak. Post-fix, the blind deltas go non-zero (though weak — the blind
+analyst is near-constant ~0.70). The arc of this lesson is the method itself:
+**measure → distrust a too-clean result → find the hidden channel → re-measure.** Each
+step was cheap (cents) and each narrowed — or corrected — the question.
 
 > Career framing: "My adversarial set hit 100% agreement live. Instead of declaring
 > success, I asked *why* — and realized the 'independent' analyst was being shown the

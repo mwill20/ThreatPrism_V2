@@ -1189,17 +1189,31 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     anchoring and egresses less. System prompt generalized so blind vs anchored
     differ only by the report. Test: `test_blind_analyst_withholds_report_reducing_egress`.
   - [x] **Blind-vs-anchored live comparison done 2026-06-02 (~$0.05):** blind and
-    anchored both **1.0 agreement** (identical) — **anchoring ruled out.** The 100%
-    is real convergence, not circularity. Conclusion: engineered rule-ambiguity is
-    not reasoning-ambiguity at the determination bucket. **Next lever: signal
-    granularity** — capture `analyst_confidence` vs report `confidence` deltas
-    (hypothesis #2, promoted), ahead of authoring harder cases.
+    anchored both **1.0 agreement** (identical) — *originally read as* **anchoring
+    ruled out.** **⚠️ SUPERSEDED 2026-06-02 — this was invalid (see the bug fix
+    below): the "blind" path leaked the report via `case.triage_report`, so it was a
+    second anchored run. Anchoring is NOT ruled out.**
   - [x] **Confidence-delta capture built 2026-06-02 (non-paid):**
     `BacktestCaseResult.{threatprism_confidence,analyst_confidence,confidence_delta}`
     + `BacktestReport.confidence_delta_summary` (mean/max/count≥0.2). Surfaces soft
     disagreement the determination bucket hides. Deterministic demo gives a flat 0.22
     (fixed analyst confidence); real per-case spread needs a live run. Test:
-    `test_confidence_deltas_are_captured`. **Next:** a live run to see the real spread.
+    `test_confidence_deltas_are_captured`. This metric is what *caught* the blind bug
+    (too-clean 0.0 deltas).
+  - [x] **Fixed: blind analyst was not blind + corrected A/B done 2026-06-02 (~$0.10
+    paid + bugfix).** `_build_prompt` stripped only the top-level `threatprism_report`
+    key, but a triaged `CaseRecord` carries the verdict on `case.triage_report` → the
+    report leaked into the "blind" prompt. Fixed to exclude `triage_report`; regression
+    `test_blind_analyst_does_not_leak_report_via_case_triage_report` (282 -> 283).
+    **Corrected live A/B (adversarial):** anchored 1.0 / flat 0.0 delta; **true blind
+    0.833, 1 determination mismatch (adv-0004), 2 severity mismatches, confidence mean
+    0.042.** Blind ≠ anchored → anchoring was the dominant cause of the prior 100%, and
+    the disagreement pipeline fires on real models once the leak closes. Caveats:
+    weak confidence signal (blind analyst ~constant 0.70), 2 schema-validation failures
+    in blind mode (6/8 graded), small N. Commit `478f325`. Full analysis:
+    `docs/LIVE_BACKTEST_FINDINGS.md`. **Next lever: harder/human-labeled cases or a
+    richer-confidence prompt** (the engineered-ambiguity set + coarse buckets still
+    under-exercise divergence).
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1283,7 +1297,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-282 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+283 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1298,7 +1312,9 @@ the adversarial/ambiguous eval dataset (spec 37, `tests/test_adversarial_dataset
 then `279 -> 280` with the per-axis agreement breakdown (`agreement_by_axis`,
 spec 37 Q4), then `280 -> 281` with blind-analyst mode
 (`test_blind_analyst_withholds_report_reducing_egress`), then `281 -> 282` with
-confidence-delta capture (`test_confidence_deltas_are_captured`).
+confidence-delta capture (`test_confidence_deltas_are_captured`), then `282 -> 283`
+with the blind-analyst report-leak fix
+(`test_blind_analyst_does_not_leak_report_via_case_triage_report`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

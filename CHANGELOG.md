@@ -4,6 +4,24 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Fixed: blind analyst was not blind** (`mock_analyst.py`). `_build_prompt`
+  stripped only the top-level `threatprism_report` key, but a triaged `CaseRecord`
+  carries the verdict on `case.triage_report`, so the report (determination/severity/
+  confidence/findings) reached the analyst in both modes — the "blind" run was a
+  second anchored run. Now excludes `triage_report` from the case payload, making the
+  report's presence the only blind-vs-anchored variable. Found by a paid live run
+  (confidence_delta flat 0.0 even "blind"). TDD regression:
+  `test_blind_analyst_does_not_leak_report_via_case_triage_report`. Baseline
+  `282 -> 283 passed`.
+- **CORRECTION — anchoring is NOT ruled out.** Re-ran the corrected A/B (~$0.10, real
+  Claude triage + real OpenAI analyst, adversarial set): anchored = 1.0 agreement /
+  flat 0.0 confidence delta; **true blind = 0.833 agreement, 1 determination mismatch
+  (adv-0004), 2 severity mismatches, confidence deltas mean 0.042**. Blind ≠ anchored
+  → anchoring was the dominant cause of the prior 100%, and the disagreement pipeline
+  fires on real models once the leak is closed. Caveats: weak confidence signal
+  (blind analyst ~constant 0.70), 2 schema-validation failures in blind mode (6/8
+  graded), small N. This supersedes the "anchoring ruled out" entry below. See
+  `docs/LIVE_BACKTEST_FINDINGS.md`.
 - Added confidence-delta capture to the backtest:
   `BacktestCaseResult.{threatprism_confidence,analyst_confidence,confidence_delta}` +
   `BacktestReport.confidence_delta_summary` (mean/max/count ≥0.2). Surfaces the soft
@@ -17,6 +35,9 @@ All notable repository-level changes should be recorded here.
   is that rule-ambiguity isn't reasoning-ambiguity at the determination bucket. Next
   lever promoted to signal granularity (capture confidence deltas) over harder cases.
   Docs only. See `docs/LIVE_BACKTEST_FINDINGS.md`.
+  **[SUPERSEDED 2026-06-02 — the blind path leaked the report via `case.triage_report`,
+  so this comparison was not actually blind; anchoring is NOT ruled out. See the
+  CORRECTION entry at the top of Unreleased.]**
 - Added blind-analyst mode (`MockAnalyst(blind=True)` / `backtest --blind-analyst`):
   grades the case ONLY, withholding ThreatPrism's report from the analyst prompt —
   the fix for the anchoring/residual-circularity finding from the live adversarial

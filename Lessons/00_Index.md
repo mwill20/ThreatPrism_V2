@@ -89,6 +89,7 @@ Fake SOAR payload
 | ✅ | [Lesson 32](Lesson32_Case_Ownership_And_Authorization.md) | Case Ownership & Authorization (Authn vs Authz vs Object-Level) | `src/threatprism/cases/service.py` (`assign_case`/`release_case`), `src/threatprism/api/app.py` (`_authorized_principal`, assign/release routes), `src/threatprism/cases/schemas.py`, `tests/test_case_assignment.py` |
 | ✅ | [Lesson 33](Lesson33_Operating_The_Dashboard.md) | Operating the Dashboard (Analyst Co-Pilot Walkthrough) — how-to | `src/threatprism/dashboard/static/*`, `docs/runbooks/DASHBOARD_READINESS.md` |
 | ✅ | [Lesson 29](Lesson29_Dev_Workflow_AI_Governance_Hooks.md) | Dev-Workflow AI Governance Hooks (Claude Code) | `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`, `.claude/settings.json`, `tools/hooks/*`, `tests/test_dev_workflow_hooks.py` |
+| ✅ | [Lesson 34](Lesson34_In_Memory_SQLite_Concurrency.md) | In-Memory SQLite Concurrency 500 (Shared State Needs a Lock) | `src/threatprism/persistence/sqlite.py`, `tests/test_persistence_concurrency.py` |
 
 ## File Coverage Map
 
@@ -117,7 +118,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\grc\mapping.py` -> Lesson 06
 - `C:\Projects\ThreatPrismV2\src\threatprism\enrichment\stubs.py` -> Lesson 06
 - `C:\Projects\ThreatPrismV2\src\threatprism\reports\render.py` -> Lesson 06
-- `C:\Projects\ThreatPrismV2\src\threatprism\persistence\sqlite.py` -> Lesson 07
+- `C:\Projects\ThreatPrismV2\src\threatprism\persistence\sqlite.py` -> Lessons 07 and 34
 - `C:\Projects\ThreatPrismV2\src\threatprism\config.py` -> Lesson 07
 - `C:\Projects\ThreatPrismV2\src\threatprism\ids.py` -> Lesson 07
 - `C:\Projects\ThreatPrismV2\src\threatprism\evals\schemas.py` -> Lesson 11
@@ -209,6 +210,7 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\mock_analyst.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
+- `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34
 - `C:\Projects\ThreatPrismV2\tests\evals\*.jsonl` -> Lesson 11
 - `C:\Projects\ThreatPrismV2\tests\test_soar_adapters.py` -> Lessons 03 and 08
 - `C:\Projects\ThreatPrismV2\tests\test_guardrails.py` -> Lessons 04 and 08

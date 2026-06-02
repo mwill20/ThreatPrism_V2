@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import sqlite3
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from threatprism.cases.schemas import (
@@ -26,6 +29,10 @@ class SQLiteRepository:
     def __init__(self, database_url: str) -> None:
         self.db_path = sqlite_path_from_url(database_url)
         self._memory_conn: sqlite3.Connection | None = None
+        # Serializes access to the shared in-memory connection. FastAPI runs
+        # sync route handlers in a threadpool, so concurrent requests would
+        # otherwise race the single :memory: connection's cursor/transaction.
+        self._lock = threading.Lock()
         if self.db_path == ":memory:":
             self._memory_conn = sqlite3.connect(":memory:", check_same_thread=False)
             self._memory_conn.execute("PRAGMA foreign_keys = ON")
@@ -34,7 +41,7 @@ class SQLiteRepository:
         self.initialize()
 
     def initialize(self) -> None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             conn.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS cases (
@@ -71,7 +78,7 @@ class SQLiteRepository:
             )
 
     def save_case(self, case: CaseRecord) -> None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO cases
@@ -91,19 +98,19 @@ class SQLiteRepository:
             )
 
     def get_case(self, case_id: str) -> CaseRecord | None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             row = conn.execute("SELECT payload_json FROM cases WHERE case_id = ?", (case_id,)).fetchone()
         if row is None:
             return None
         return CaseRecord.model_validate_json(row[0])
 
     def list_cases(self) -> list[CaseRecord]:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             rows = conn.execute("SELECT payload_json FROM cases ORDER BY created_at DESC").fetchall()
         return [CaseRecord.model_validate_json(row[0]) for row in rows]
 
     def save_report(self, report: TriageReport) -> None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO triage_reports
@@ -119,7 +126,7 @@ class SQLiteRepository:
             )
 
     def get_report(self, case_id: str) -> TriageReport | None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             row = conn.execute(
                 "SELECT payload_json FROM triage_reports WHERE case_id = ? ORDER BY generated_at DESC LIMIT 1",
                 (case_id,),
@@ -129,7 +136,7 @@ class SQLiteRepository:
         return TriageReport.model_validate_json(row[0])
 
     def save_feedback(self, feedback: AnalystFeedback, disagreement: DisagreementRecord) -> None:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO analyst_feedback
@@ -157,14 +164,14 @@ class SQLiteRepository:
             )
 
     def list_feedback(self) -> list[AnalystFeedback]:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             rows = conn.execute(
                 "SELECT payload_json FROM analyst_feedback ORDER BY created_at DESC"
             ).fetchall()
         return [AnalystFeedback.model_validate_json(row[0]) for row in rows]
 
     def list_disagreements(self) -> list[DisagreementRecord]:
-        with self._connect() as conn:
+        with self._transaction() as conn:
             rows = conn.execute("SELECT payload_json FROM disagreement_records").fetchall()
         return [DisagreementRecord.model_validate_json(row[0]) for row in rows]
 
@@ -178,9 +185,20 @@ class SQLiteRepository:
         self.save_case(case)
         return case
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _transaction(self) -> Iterator[sqlite3.Connection]:
         if self._memory_conn is not None:
-            return self._memory_conn
+            # One shared connection: hold the lock for the whole transaction
+            # (BEGIN -> execute -> COMMIT) so threads cannot interleave on it.
+            with self._lock, self._memory_conn as conn:
+                yield conn
+            return
+        # File-backed mode: a fresh connection per operation. SQLite handles
+        # cross-connection file locking, so no process-level lock is needed.
         conn = sqlite3.connect(self.db_path)
         conn.execute("PRAGMA foreign_keys = ON")
-        return conn
+        try:
+            with conn:
+                yield conn
+        finally:
+            conn.close()

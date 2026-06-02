@@ -1015,15 +1015,20 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
 
 ## Security / Reliability Hardening Backlog
 
-- [ ] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests.** Found
-  during the Evolution 3 sub-slice 2 browser verification: the dashboard fires ~6
-  parallel detail fetches per case, and `:memory:` mode shares one connection across
-  FastAPI's threadpool → intermittent 500 on `GET /cases/{id}`. **Not a co-pilot bug
-  and not security** — a persistence-layer reliability issue. File-backed mode
-  (`sqlite:///./data/...`) creates a connection per op and is unaffected. **Workaround
-  (documented):** run the dashboard demo with a file DB, not `:memory:`. **Fix (future):**
-  `check_same_thread=False` + a connection lock, or a connection-per-op for `:memory:`
-  too, in `src/threatprism/persistence/sqlite.py`. Pre-existing; surfaced now.
+- [x] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests — FIXED
+  2026-06-01.** Found during the Evolution 3 sub-slice 2 browser verification: the
+  dashboard fires ~6 parallel detail fetches per case, and `:memory:` mode shares one
+  connection across FastAPI's threadpool → intermittent 500 on `GET /cases/{id}`. **Not a
+  co-pilot bug and not security** — a persistence-layer reliability issue. **Fix:** added a
+  `threading.Lock` in `src/threatprism/persistence/sqlite.py` and routed all DB access
+  through a `_transaction()` context manager that holds the lock for the full
+  BEGIN→execute→COMMIT span on the shared `:memory:` connection. File-backed mode keeps its
+  connection-per-op path (SQLite handles cross-connection file locking), so `:memory:`
+  state-sharing for the test suite is preserved — connection-per-op for `:memory:` was
+  rejected because each `:memory:` connection is a separate empty DB. Regression test:
+  `tests/test_persistence_concurrency.py` (8 threads × 50 iterations of concurrent reads;
+  reproduced the original `InterfaceError('bad parameter or other API misuse')` pre-fix).
+  Validation: 267 passed / 3 skipped, eval 15/15, demo safety passed.
 
 - [x] **`POST /cases/{case_id}/analyst-feedback` role authorization — FIXED
   2026-06-01.** The endpoint now routes through

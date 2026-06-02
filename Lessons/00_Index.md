@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `267 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
+- The current validated baseline is `271 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -90,6 +90,7 @@ Fake SOAR payload
 | ✅ | [Lesson 33](Lesson33_Operating_The_Dashboard.md) | Operating the Dashboard (Analyst Co-Pilot Walkthrough) — how-to | `src/threatprism/dashboard/static/*`, `docs/runbooks/DASHBOARD_READINESS.md` |
 | ✅ | [Lesson 29](Lesson29_Dev_Workflow_AI_Governance_Hooks.md) | Dev-Workflow AI Governance Hooks (Claude Code) | `docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md`, `.claude/settings.json`, `tools/hooks/*`, `tests/test_dev_workflow_hooks.py` |
 | ✅ | [Lesson 34](Lesson34_In_Memory_SQLite_Concurrency.md) | In-Memory SQLite Concurrency 500 (Shared State Needs a Lock) | `src/threatprism/persistence/sqlite.py`, `tests/test_persistence_concurrency.py` |
+| ✅ | [Lesson 35](Lesson35_Shared_Secret_Pattern_Catalog.md) | One Secret-Pattern Catalog, Many Consumers (DRY Without Coupling) | `src/threatprism/guardrails/secret_catalog.py`, `guardrails/{healthcare,tokenization,policy}.py`, `tools/hooks/_common.py`, `tests/test_secret_catalog.py` |
 
 ## File Coverage Map
 
@@ -107,11 +108,12 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\soar\generic.py` -> Lesson 03
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\prompt_firewall.py` -> Lessons 04 and 30
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\semantic_firewall.py` -> Lesson 30
-- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\tokenization.py` -> Lesson 04
-- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\policy.py` -> Lesson 04
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\tokenization.py` -> Lessons 04 and 35
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\policy.py` -> Lessons 04 and 35
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\secret_catalog.py` -> Lesson 35
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\evidence.py` -> Lesson 04
 - `C:\Projects\ThreatPrismV2\src\threatprism\actions\safety.py` -> Lesson 04
-- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\healthcare.py` -> Lesson 05
+- `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\healthcare.py` -> Lessons 05 and 35
 - `C:\Projects\ThreatPrismV2\src\threatprism\guardrails\views.py` -> Lesson 05
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\providers.py` -> Lesson 06
 - `C:\Projects\ThreatPrismV2\src\threatprism\mitre\mapping.py` -> Lesson 06
@@ -204,8 +206,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_otrf_telemetry_corpus.py` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\tests\test_local_dataset_seeding.py` -> Lesson 27
 - `C:\Projects\ThreatPrismV2\tests\test_semantic_prompt_firewall.py` -> Lesson 30
-- `C:\Projects\ThreatPrismV2\tools\hooks\*.py` -> Lesson 29
+- `C:\Projects\ThreatPrismV2\tools\hooks\*.py` -> Lessons 29 and 35
 - `C:\Projects\ThreatPrismV2\tests\test_dev_workflow_hooks.py` -> Lesson 29
+- `C:\Projects\ThreatPrismV2\tests\test_secret_catalog.py` -> Lesson 35
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\mock_analyst.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
@@ -239,7 +242,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-267 passed
+271 passed
 ```
 
 ## What To Study Next

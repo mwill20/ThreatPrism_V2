@@ -7,7 +7,7 @@ PROHIBITED_PATTERN_FIXTURES = {
     r"\b(I|we)\b.*\b(disabled|isolated|blocked|deleted|revoked|remediated)\b": "We disabled the account.",
     r"\b(real action executed|containment completed|remediation completed)\b": "Containment completed successfully.",
     r"\b(confirmed|certain|guaranteed) that\b": "Confirmed that this is malicious.",
-    r"\bsk-[A-Za-z0-9_-]{12,}\b": "The key was sk-testsecretvalue12345.",
+    r"\b(?:sk-[A-Za-z0-9_-]{12,}|xox[baprs]-[A-Za-z0-9-]{12,}|AIza[0-9A-Za-z_-]{12,})\b": "The key was sk-testsecretvalue12345.",
     r"\bHIPAA[- ]?(?:compliant|compliance|certified|certification)\b": "This case is HIPAA compliant.",
     r"\bHITRUST[- ]?(?:compliant|compliance|certified|certification)\b": "This is HITRUST certified.",
     r"\b(?:control(?: is)? satisfied|satisfies (?:a )?control|case satisfies.*control)\b": "The control is satisfied.",

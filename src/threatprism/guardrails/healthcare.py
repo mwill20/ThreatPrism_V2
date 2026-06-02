@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from threatprism.cases.schemas import SanitizationRecord
+from threatprism.guardrails.secret_catalog import pattern_for
 
 
 SensitiveClass = Literal["potential_phi", "potential_pii", "secret"]
@@ -104,19 +105,12 @@ class HealthcareScanResult:
     summary: dict[str, Any]
 
 
+# Detector regexes come from the shared catalog (spec 34 §3); the detector NAMES
+# (`api_key`, `password`) are kept because they label the emitted Stage-1 tokens
+# (e.g. `[SECRET:API_KEY:secret_0001]`) and `_confidence_for`.
 SECRET_RULES = [
-    SensitiveRule(
-        "secret",
-        "api_key",
-        re.compile(r"\b(?:sk-[A-Za-z0-9_-]{12,}|xox[baprs]-[A-Za-z0-9-]{12,}|AIza[0-9A-Za-z_-]{12,})\b"),
-        0.98,
-    ),
-    SensitiveRule(
-        "secret",
-        "password",
-        re.compile(r"(?i)\b(?:password|passwd|pwd)\s*[:=]\s*[^\s,;]{6,}"),
-        0.95,
-    ),
+    SensitiveRule("secret", "api_key", pattern_for("provider_token_prefix"), 0.98),
+    SensitiveRule("secret", "password", pattern_for("password_in_config"), 0.95),
 ]
 
 PHI_RULES = [

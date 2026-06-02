@@ -6,10 +6,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from threatprism.cases.schemas import SanitizationRecord
+from threatprism.guardrails.secret_catalog import pattern_for
 
 
 TOKEN_PATTERNS = [
-    ("secret_like", re.compile(r"\b(?:sk-[A-Za-z0-9_-]{12,}|xox[baprs]-[A-Za-z0-9-]{12,}|AIza[0-9A-Za-z_-]{12,})\b")),
+    ("secret_like", pattern_for("provider_token_prefix")),
     ("url", re.compile(r"https?://[^\s\"'<>]+", re.I)),
     ("email", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
     ("ip", re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")),

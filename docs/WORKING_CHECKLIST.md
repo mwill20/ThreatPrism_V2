@@ -1098,8 +1098,17 @@ Stop → session summary, PreToolUse (Edit|Write) → secret-detection block +
 `.claude/settings.json`, gitignored `.claude/audit/`). Hook schema verified against
 the live docs at build. Taught in **Lesson 29**; operated via
 `docs/runbooks/DEV_WORKFLOW_HOOKS.md`. The shared secret-pattern catalog (one source
-feeding the hook + the product detectors) remains a small follow-up DRY refactor
-(spec 34 §3 note) — the hook currently keeps its own standalone catalog.
+feeding the hook + the product detectors) is **done 2026-06-01**: every
+secret-shaped regex now lives once in `src/threatprism/guardrails/secret_catalog.py`.
+`guardrails/healthcare.py` (`SECRET_RULES`), `guardrails/tokenization.py`
+(`secret_like`), and `guardrails/policy.py` reference it by name; the standalone
+hook (`tools/hooks/_common.py`) loads it by file path (no `threatprism` import,
+fail-open if absent). Product runtime keeps its narrow inbound subset; the hook
+uses the full set (two threat models, one catalog). Regression:
+`tests/test_secret_catalog.py` (the dev-hook and product catalogs must stay
+identical). Healthcare/tokenization regexes unchanged byte-for-byte; policy +
+hook broadened in the safe direction only. `docs/runbooks/PATTERN_REFRESH.md`
+updated to make the catalog the single edit point.
 
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.
@@ -1198,12 +1207,13 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-267 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+271 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
 Baseline moved `266 -> 267` on 2026-06-01 with the in-memory SQLite concurrency
-fix (`tests/test_persistence_concurrency.py`).
+fix (`tests/test_persistence_concurrency.py`), then `267 -> 271` with the shared
+secret-pattern catalog refactor (`tests/test_secret_catalog.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

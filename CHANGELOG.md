@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Unified secret-pattern detection into a single shared catalog
+  (`src/threatprism/guardrails/secret_catalog.py`, spec 34 §3). The product
+  detectors (`healthcare.py` `SECRET_RULES`, `tokenization.py` `secret_like`,
+  `policy.py`) and the standalone dev-workflow hook (`tools/hooks/_common.py`,
+  loaded by file path) now derive every secret-shaped regex from one source, so
+  product and dev-workflow secret detection stay in sync under one quarterly
+  refresh. Healthcare/tokenization detection is byte-for-byte unchanged; policy
+  and the hook broadened only in the safe direction. Added
+  `tests/test_secret_catalog.py` and Lesson 35. Baseline `267 -> 271 passed`.
 - Fixed an in-memory SQLite concurrency bug: the shared `:memory:` connection
   returned HTTP 500 under FastAPI threadpool concurrency (the dashboard's
   parallel per-case detail fetches). Added a `threading.Lock` and a

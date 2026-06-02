@@ -71,11 +71,13 @@ On match: deny the tool call with a clear reason, and append a record to
 `blocked.log` (timestamp, file path, matched **pattern name only** — never the
 matched secret value).
 
-**Reuse opportunity:** these patterns overlap ThreatPrism's own
-`guardrails/healthcare.py` secret detectors and `guardrails/policy.py` `sk-` rule —
-the hook can share the same pattern catalog so product and dev-workflow secret
-detection stay in sync (and a single quarterly refresh — `PATTERN_REFRESH.md` —
-covers both).
+**Reuse opportunity — IMPLEMENTED 2026-06-01:** these patterns overlap ThreatPrism's
+own `guardrails/healthcare.py` secret detectors and `guardrails/policy.py` `sk-`
+rule. Every secret-shaped regex now lives once in
+`src/threatprism/guardrails/secret_catalog.py`; the product detectors reference it
+by name and the hook loads it by file path (staying standalone). Product and
+dev-workflow secret detection stay in sync under one quarterly refresh
+(`PATTERN_REFRESH.md`), enforced by `tests/test_secret_catalog.py`.
 
 ### `.env` handling (deliberate)
 A `Write` of a `.env` containing secret-shaped content is **blocked** — the

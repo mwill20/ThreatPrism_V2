@@ -21,7 +21,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -97,39 +96,42 @@ def iter_strings(value: object):
 
 
 # --- Secret-detection catalog (spec 34 §3) ---------------------------------
-# Mirrors ThreatPrism's product secret detectors (guardrails/healthcare.py +
-# guardrails/policy.py `sk-` rule). Kept standalone here so the hook has no import
-# dependency; a future refactor could share a single catalog (PATTERN_REFRESH.md
-# covers both). Pattern NAMES are logged on a block — never the matched value.
-SECRET_PATTERNS: list[tuple[str, re.Pattern]] = [
-    ("private_key_block", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
-    ("aws_access_key_id", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
-    ("github_token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b")),
-    ("stripe_secret_key", re.compile(r"\b(?:sk|rk)_live_[A-Za-z0-9]{16,}\b")),
-    ("anthropic_openai_key", re.compile(r"\bsk-(?:ant|proj)-[A-Za-z0-9_-]{20,}")),
-    ("generic_sk_key", re.compile(r"\bsk-[A-Za-z0-9]{32,}\b")),
-    ("db_connection_string", re.compile(
-        r"(?i)\b(?:postgres|postgresql|mysql|mongodb)(?:\+\w+)?://[^\s:@/]+:[^\s:@/]+@\S+")),
-    ("password_assignment", re.compile(r"(?i)\bpassword\s*[:=]\s*['\"]?\S{6,}")),
-    ("api_key_assignment", re.compile(
-        r"(?i)\b(?:api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)\s*[:=]\s*['\"]?[A-Za-z0-9_\-]{20,}")),
-]
+# Single source of truth shared with the product runtime detectors
+# (guardrails/secret_catalog.py). Loaded by FILE PATH, not `import threatprism`,
+# so the hook stays standalone — it runs as a plain script whether or not the
+# package is installed. On any load failure the hook falls back to no patterns and
+# fails open (the documented hook philosophy): a broken catalog must never wedge
+# the workflow. Pattern NAMES are logged on a block — never the matched value.
+def _load_secret_catalog():
+    import importlib.util
+
+    path = REPO_ROOT / "src" / "threatprism" / "guardrails" / "secret_catalog.py"
+    spec = importlib.util.spec_from_file_location("_tp_secret_catalog", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+try:
+    _SECRET_CATALOG = _load_secret_catalog()
+    SECRET_PATTERNS = _SECRET_CATALOG.SECRET_PATTERNS
+except Exception:  # pragma: no cover - fail open if the catalog cannot be loaded
+    _SECRET_CATALOG = None
+    SECRET_PATTERNS = []
 
 
 def scan_secrets(text: str) -> list[str]:
     """Return the sorted unique names of secret patterns that match `text`."""
-    if not text:
+    if not text or _SECRET_CATALOG is None:
         return []
-    return sorted({name for name, pattern in SECRET_PATTERNS if pattern.search(text)})
+    return _SECRET_CATALOG.scan(text)
 
 
 def redact_secrets(text: str, max_len: int = 160) -> str:
     """Mask any secret-shaped spans, then truncate — for safe previews."""
-    masked = text
-    for _name, pattern in SECRET_PATTERNS:
-        masked = pattern.sub("[REDACTED_SECRET]", masked)
-    masked = masked.replace("\n", " ")
-    return masked[:max_len]
+    if _SECRET_CATALOG is None:
+        return text.replace("\n", " ")[:max_len]
+    return _SECRET_CATALOG.redact(text, max_len)
 
 
 def input_summary(tool_input: object) -> dict:

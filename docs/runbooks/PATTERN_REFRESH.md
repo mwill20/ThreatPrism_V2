@@ -8,11 +8,19 @@ reviewable without turning the POC into an unbounded classifier project.
 
 Review these pattern surfaces together:
 
-- `PROHIBITED_PATTERNS` in `src/threatprism/guardrails/policy.py`.
-- `SECRET_RULES`, `PHI_RULES`, `CONTEXT_IDENTIFIER_RULES`, and `PII_RULES` in
+- **Secret patterns: `src/threatprism/guardrails/secret_catalog.py` is the single
+  source of truth (spec 34 §3).** Every secret-shaped regex is defined there once.
+  `guardrails/healthcare.py` (`SECRET_RULES`), `guardrails/tokenization.py`
+  (`secret_like`), `guardrails/policy.py`, and the standalone dev-workflow hook
+  (`tools/hooks/_common.py`) all reference it — edit secret patterns **here only**,
+  never in a consumer.
+- `PROHIBITED_PATTERNS` (non-secret overclaim/clinical rules) in
+  `src/threatprism/guardrails/policy.py`.
+- `PHI_RULES`, `CONTEXT_IDENTIFIER_RULES`, and `PII_RULES` in
   `src/threatprism/guardrails/healthcare.py`.
-- Regression fixture catalogs in `tests/test_overclaim_regression.py` and
-  `tests/test_phi_detector_coverage.py`.
+- Regression fixture catalogs in `tests/test_overclaim_regression.py`,
+  `tests/test_phi_detector_coverage.py`, and `tests/test_secret_catalog.py`
+  (the latter asserts the product and dev-hook secret catalogs stay identical).
 
 ## Quarterly Review Steps
 

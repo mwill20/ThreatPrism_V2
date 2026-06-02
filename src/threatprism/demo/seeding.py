@@ -22,6 +22,7 @@ from threatprism.cases.service import CaseService
 
 
 CURATED_RELATIVE_ROOT = "fixtures/curated"
+ADVERSARIAL_RELATIVE_ROOT = "fixtures/curated_adversarial"
 DATASET_RELATIVE_ROOT = "fixtures/curated_datasets"
 LOCAL_DATASET_RELATIVE_ROOT = "external_datasets"
 DATASET_MANIFEST_VERSION = "curated-datasets/0.1"
@@ -182,6 +183,22 @@ class CuratedFixtureSource:
                 )
             )
         return seeds
+
+
+class AdversarialCuratedSource(CuratedFixtureSource):
+    """Hand-authored, fully synthetic triage-AMBIGUOUS SOC cases (spec 37).
+
+    Same review/path-safety/manifest contract as the curated source, but rooted at
+    ``fixtures/curated_adversarial/`` so it does not disturb the default curated set.
+    These cases are engineered to produce reasonable disagreement, exercising the
+    backtest's `DisagreementRecord` → manager-review path.
+    """
+
+    name = "adversarial"
+
+    def __init__(self, *, repo_root: Path | None = None) -> None:
+        self._repo_root = (repo_root or _default_repo_root()).resolve()
+        self._curated_root = (self._repo_root / ADVERSARIAL_RELATIVE_ROOT).resolve()
 
 
 def _is_within(path: Path, root: Path) -> bool:

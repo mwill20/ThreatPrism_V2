@@ -1172,10 +1172,13 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
   (real Claude triage + real OpenAI analyst): 27 graded, **100% agreement** (0
   determination/severity mismatches), $0.171. Findings + analysis:
   `docs/LIVE_BACKTEST_FINDINGS.md`. Two follow-ups surfaced:
-  - [ ] (a) the corpus is too clear-cut to exercise disagreement detection — need
-    ambiguous/adversarial synthetic cases. **Planned in
-    `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md`** (ambiguity taxonomy, curated
-    manifest onboarding, divergence-capable acceptance test).
+  - [x] (a) the corpus is too clear-cut to exercise disagreement detection —
+    **done 2026-06-02 (spec 37 implemented).** 8 hand-authored synthetic ambiguous
+    cases in `fixtures/curated_adversarial/` + `AdversarialCuratedSource` +
+    `backtest --dataset adversarial`. Deterministic baseline: **agreement 0.5**
+    (4/8 mismatches) vs 1.0 on the curated set — divergence-capable. Tests:
+    `tests/test_adversarial_dataset.py`. Optional next: a live
+    `--live --dataset adversarial` run (paid, owner-run) for real-model disagreement.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1259,7 +1262,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-276 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+279 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1269,7 +1272,8 @@ secret-pattern catalog refactor (`tests/test_secret_catalog.py`), then `271 -> 2
 with the real-LLM analyst data-egress guard (`tests/test_analyst_egress.py`), then
 `272 -> 275` with the cost-minimal `--limit` smoke support + grading-failure
 diagnosability (`tests/test_backtest.py`), then `275 -> 276` with no-report-reason
-counting (`test_no_report_cases_are_counted_with_reason`).
+counting (`test_no_report_cases_are_counted_with_reason`), then `276 -> 279` with
+the adversarial/ambiguous eval dataset (spec 37, `tests/test_adversarial_dataset.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

@@ -3,7 +3,7 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `276 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
+- The current validated baseline is `279 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -92,6 +92,7 @@ Fake SOAR payload
 | ✅ | [Lesson 34](Lesson34_In_Memory_SQLite_Concurrency.md) | In-Memory SQLite Concurrency 500 (Shared State Needs a Lock) | `src/threatprism/persistence/sqlite.py`, `tests/test_persistence_concurrency.py` |
 | ✅ | [Lesson 35](Lesson35_Shared_Secret_Pattern_Catalog.md) | One Secret-Pattern Catalog, Many Consumers (DRY Without Coupling) | `src/threatprism/guardrails/secret_catalog.py`, `guardrails/{healthcare,tokenization,policy}.py`, `tools/hooks/_common.py`, `tests/test_secret_catalog.py` |
 | ✅ | [Lesson 36](Lesson36_Live_Two_Model_Backtest.md) | The Live Two-Model Backtest (Reading "100% Agreement" Honestly) | `src/threatprism/demo/backtest.py`, `src/threatprism/llm/mock_analyst.py`, `src/threatprism/demo/seeding.py`, `tests/test_backtest.py`, `docs/LIVE_BACKTEST_FINDINGS.md` |
+| ✅ | [Lesson 37](Lesson37_Adversarial_Ambiguous_Eval_Dataset.md) | Designing an Adversarial Dataset (An Eval Must Be Able to Fail) | `fixtures/curated_adversarial/*`, `src/threatprism/demo/seeding.py` (`AdversarialCuratedSource`), `src/threatprism/demo/backtest.py` (`--dataset`), `tests/test_adversarial_dataset.py`, `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md` |
 
 ## File Coverage Map
 
@@ -214,6 +215,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\mock_analyst.py` -> Lessons 31 and 36
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\backtest.py` -> Lesson 36
 - `C:\Projects\ThreatPrismV2\tests\test_backtest.py` -> Lesson 36
+- `C:\Projects\ThreatPrismV2\fixtures\curated_adversarial\*` -> Lesson 37
+- `C:\Projects\ThreatPrismV2\tests\test_adversarial_dataset.py` -> Lesson 37
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
 - `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34
@@ -245,7 +248,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp
 Expected output:
 
 ```text
-276 passed
+279 passed
 ```
 
 ## What To Study Next

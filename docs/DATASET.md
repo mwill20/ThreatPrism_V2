@@ -15,6 +15,7 @@ and demo flows use fake data only.
 | `fixtures/generated/` | No generated data | Ignored output directory for deterministic sanitized fixtures. |
 | `fixtures/curated/` | Yes | Tiny tracked synthetic fixtures promoted through manifest review. |
 | `fixtures/curated_datasets/` | Yes | Tracked derivatives of reviewed third-party datasets (Synthea + deepset, Apache-2.0 synthetic; OTRF, MIT lab telemetry), gated by an in-code license allowlist. |
+| `fixtures/curated_adversarial/` | Yes | Hand-authored, fully synthetic *triage-ambiguous* SOC cases (spec 37) engineered to exercise disagreement detection in the Evolution 2 backtest. No third-party license; same manifest review gate as `fixtures/curated/`. |
 
 ## Source Registry Rules
 

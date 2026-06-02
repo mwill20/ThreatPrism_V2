@@ -226,6 +226,7 @@ docker-compose.yml Local demo backend service
 | Future enhancement options | [docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md) |
 | Evaluation evidence | [docs/EVALUATION.md](docs/EVALUATION.md), [docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md](docs/EVALUATION_HARNESS_AND_REGRESSION_DEFENSE_LABS.md) |
 | Dataset and fixture policy | [docs/DATASET.md](docs/DATASET.md), [docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md](docs/DATA_STRATEGY_AND_FIXTURE_FACTORY.md), [docs/CURATED_GENERATED_FIXTURE_PROMOTION.md](docs/CURATED_GENERATED_FIXTURE_PROMOTION.md) |
+| Adversarial/ambiguous eval dataset (exercise disagreement detection) | [docs/specs/37_ADVERSARIAL_EVAL_DATASET.md](docs/specs/37_ADVERSARIAL_EVAL_DATASET.md), [fixtures/curated_adversarial/README.md](fixtures/curated_adversarial/README.md) |
 | Model/provider behavior | [docs/MODEL_CARD.md](docs/MODEL_CARD.md) |
 | Deployment boundary | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Monitoring and maintenance | [docs/MONITORING.md](docs/MONITORING.md) |
@@ -289,7 +290,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-276 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+279 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -593,7 +594,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-276 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+279 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

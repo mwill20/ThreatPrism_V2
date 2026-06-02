@@ -69,6 +69,13 @@ testing; the *real* analyst agreed fully. **To stress-test disagreement detectio
 (DisagreementRecord → manager-review queue), the next dataset needs ambiguous /
 adversarial cases**, not more clear ones.
 
+**Follow-up done 2026-06-02 (spec 37):** built `fixtures/curated_adversarial/` (8
+synthetic triage-ambiguous cases) + `backtest --dataset adversarial`. Deterministic
+baseline over the set is **agreement 0.5** (4/8 mismatches) vs. 1.0 on the curated
+set — the disagreement path is now exercised. A confirming **live**
+`--live --dataset adversarial` run (paid, owner-run) is the optional next step to
+see whether two *real* models also diverge on engineered ambiguity.
+
 **2. 27 graded vs. 31 on the deterministic baseline.** The deterministic backtest
 grades 31 (32 seeded, 1 blocked). Live, only 27 produced a gradeable report — ~4
 more cases yielded **no report** under the real pipeline. The most likely cause is

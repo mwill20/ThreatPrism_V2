@@ -1,0 +1,39 @@
+{
+  "manifest_version": "curated-adversarial/0.1",
+  "purpose": "Hand-authored, fully synthetic triage-AMBIGUOUS SOC cases (spec 37) used to exercise disagreement detection in the Evolution 2 backtest. Each case is engineered so independent triage can reasonably land on different determinations/severities/dispositions. Adversarial = triage-ambiguous content, NOT adversarial input to the guardrails.",
+  "generated_fixture_auto_scan": false,
+  "promotion_policy": {
+    "raw_external_datasets_committed": false,
+    "auto_downloads_allowed": false,
+    "live_provider_output_allowed": false,
+    "real_data_allowed": false,
+    "standard_validation_auto_scans_generated_folder": false
+  },
+  "fixtures": [
+    {
+      "fixture_id": "adversarial_ambiguous_0001",
+      "path": "fixtures/curated_adversarial/adversarial_ambiguous_0001.jsonl",
+      "source_family": "manual_fake_adversarial",
+      "source_sample_status": "handwritten_fake_source_shape",
+      "license_review_status": "not_third_party_local_fake",
+      "safety_review_status": "approved_demo_safe",
+      "content_review_status": "approved_for_tests",
+      "reviewed_by": "Claude (owner-authorized)",
+      "reviewed_at": "2026-06-02",
+      "raw_source_committed": false,
+      "auto_downloaded": false,
+      "ambiguity_axes": [
+        "dual_use_behavior",
+        "conflicting_evidence",
+        "severity_edge",
+        "disposition_edge",
+        "benign_mimicking_malicious"
+      ],
+      "allowed_uses": [
+        "fixture_factory_regression",
+        "api_schema_validation",
+        "demo_review"
+      ]
+    }
+  ]
+}

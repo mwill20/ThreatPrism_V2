@@ -1,7 +1,15 @@
 # Spec 37 — Adversarial / Ambiguous SOC Eval Dataset (Exercise Disagreement Detection)
 
-Status: **proposed** (not implemented). Planned 2026-06-02 as the follow-up to the
-first live two-model backtest ([docs/LIVE_BACKTEST_FINDINGS.md](../LIVE_BACKTEST_FINDINGS.md)).
+Status: **implemented** (2026-06-02). Follow-up to the first live two-model backtest
+([docs/LIVE_BACKTEST_FINDINGS.md](../LIVE_BACKTEST_FINDINGS.md)).
+
+**Implementation result.** 8 hand-authored synthetic ambiguous cases live in
+`fixtures/curated_adversarial/` (dedicated dir + manifest review gate);
+`AdversarialCuratedSource` + `backtest --dataset adversarial` run the backtest over
+them. Deterministic baseline over the set: **agreement 0.5** (4/8 determination
+mismatches, 4 flagged-then-cleared) — vs. 1.0 on the curated set, confirming the set
+is divergence-capable. Tests: `tests/test_adversarial_dataset.py`. A confirming
+live `--live --dataset adversarial` run is an optional owner-run.
 
 ## 1. Problem
 
@@ -62,11 +70,12 @@ its metadata (documentation, not a label the grader sees).
 
 ### 4.1 Fixtures
 - Hand-authored synthetic cases (8–12 to start), one per axis with 1–2 variants.
-- Authored into the **hand-authored curated contract** (`fixtures/curated/`), not the
-  third-party-dataset-derivative contract (`fixtures/curated_datasets/`), because these
-  are our own synthetic cases with no third-party license.
-- Onboarded through the existing **manifest review gate** (`fixtures/curated/manifest.json`)
-  — explicit review before any fixture is tracked, same as today's curated set.
+- Authored into a **dedicated dir** `fixtures/curated_adversarial/` (the option-A
+  realization, decided at implementation) with its own `manifest.json`, so the
+  default curated set and its consumers are undisturbed. Same hand-authored,
+  synthetic, no-third-party-license contract as `fixtures/curated/`.
+- Onboarded through the same **manifest review gate** fields (safety/content review,
+  no raw source, no downloads) — explicit review before any fixture is tracked.
 - All values fake; `tools/check_demo_safety.py` must pass.
 
 ### 4.2 Running the backtest over the set

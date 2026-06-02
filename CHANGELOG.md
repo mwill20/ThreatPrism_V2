@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Implemented the adversarial/ambiguous eval dataset (spec 37): 8 hand-authored,
+  fully synthetic *triage-ambiguous* SOC cases in `fixtures/curated_adversarial/`
+  (dual-use / conflicting-evidence / severity-edge / disposition-edge /
+  benign-mimicking axes), an `AdversarialCuratedSource`, and a
+  `backtest --dataset adversarial` flag. Engineered to exercise disagreement
+  detection that a clear-cut corpus cannot: deterministic baseline is **agreement
+  0.5** (4/8 mismatches, 4 flagged-then-cleared) vs. 1.0 on the curated set.
+  Synthetic only (RFC 5737 IPs, `.test` domains), manifest review gate, demo-safety
+  clean. Tests: `tests/test_adversarial_dataset.py`. Baseline `276 -> 279 passed`.
 - Ran the first live two-model backtest (real Claude triage + independent OpenAI
   analyst) over the curated synthetic SOC corpus: 27 graded, 0 failures, 100%
   determination/severity agreement, ~$0.17. A cents-scale smoke run first caught a

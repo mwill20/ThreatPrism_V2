@@ -34,7 +34,7 @@ from threatprism.cases.schemas import (
 from threatprism.cases.read_models import LlmUsageMetrics
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
-from threatprism.demo.seeding import CuratedDatasetSource, DemoSeeder
+from threatprism.demo.seeding import AdversarialCuratedSource, CuratedDatasetSource, DemoSeeder
 from threatprism.llm.failures import TriageFailureReport
 from threatprism.llm.governance import CostModel, SpendLedger, metered_evaluate
 
@@ -253,6 +253,13 @@ def main() -> int:
         default=None,
         help="Cap the number of cases seeded/triaged/graded (cost-minimal smoke run).",
     )
+    parser.add_argument(
+        "--dataset",
+        choices=["curated", "adversarial"],
+        default="curated",
+        help="Which fixture set to backtest: 'curated' (default) or 'adversarial' "
+        "(triage-ambiguous cases that exercise disagreement detection, spec 37).",
+    )
     args = parser.parse_args()
 
     if args.live:
@@ -265,7 +272,8 @@ def main() -> int:
         settings = _demo_settings()
     settings.validate_runtime()
     service = CaseService(settings)
-    DemoSeeder(service).seed([CuratedDatasetSource()], limit=args.limit)
+    source = AdversarialCuratedSource() if args.dataset == "adversarial" else CuratedDatasetSource()
+    DemoSeeder(service).seed([source], limit=args.limit)
 
     if args.live:
         # Independent OpenAI grader (Evolution 2). Falls closed if unconfigured.

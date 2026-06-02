@@ -48,7 +48,7 @@ checks eval artifacts for forbidden raw values.
 Expected current result:
 
 ```text
-282 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+283 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -63,7 +63,7 @@ python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_ops_ci
 Expected current result:
 
 ```text
-282 passed (3 skipped)
+283 passed (3 skipped)
 ```
 
 If a reused temp directory is locked on Windows, use a new ignored

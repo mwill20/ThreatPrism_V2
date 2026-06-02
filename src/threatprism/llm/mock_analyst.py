@@ -78,7 +78,12 @@ class MockAnalyst:
         return AnalystFeedbackCreate.model_validate(parsed)
 
     def _build_prompt(self, case: CaseRecord, report: TriageReport) -> str:
-        payload: dict[str, Any] = {"case": case.model_dump(mode="json")}
+        # A triaged CaseRecord persists the verdict on `case.triage_report`
+        # (set by run_triage). Exclude it so the ONLY variable between blind and
+        # anchored is the explicit `threatprism_report` key below -- otherwise the
+        # report leaks into the "blind" prompt via the case and anchoring is not
+        # actually removed.
+        payload: dict[str, Any] = {"case": case.model_dump(mode="json", exclude={"triage_report"})}
         if not self.blind:
             payload["threatprism_report"] = report.model_dump(mode="json")
         return json.dumps(payload, sort_keys=True)

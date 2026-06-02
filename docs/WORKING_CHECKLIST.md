@@ -1047,6 +1047,13 @@ smoke run costs cents before committing to the full corpus. Tests in
 `tests/test_backtest.py`. Live run command: `PYTHONPATH=src python -m
 threatprism.demo.backtest --live --limit N --json` (loads `.env`).
 
+**Smoke run #1 (2026-06-01) caught a real bug for ~$0.01:** OpenAI analyst grading
+failed for every case (missing JSON mode → unparseable response). Fixed
+(`response_format=json_object`) + added `grading_failure_types` so failures are no
+longer silent. SDK usage-attribute pre-flight cleared (token/cost accounting works
+on both providers). Full findings: `docs/LIVE_BACKTEST_FINDINGS.md`. Re-run pending
+owner go-ahead.
+
 ## Security / Reliability Hardening Backlog
 
 - [x] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests — FIXED

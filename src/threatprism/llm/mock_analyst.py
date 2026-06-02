@@ -95,6 +95,12 @@ class MockAnalyst:
             response = client.chat.completions.create(
                 model=self.model_id,
                 temperature=self.temperature,
+                # JSON mode: guarantees a parseable JSON object back (the system
+                # prompt already mandates "ONLY a JSON object"). Without this,
+                # gpt-4o-mini returns markdown-fenced/prose-wrapped JSON and
+                # json.loads() fails -> every grading is a response_unparseable
+                # failure (found live 2026-06-01).
+                response_format={"type": "json_object"},
                 messages=[
                     {"role": "system", "content": _ANALYST_SYSTEM_PROMPT},
                     {"role": "user", "content": prompt},

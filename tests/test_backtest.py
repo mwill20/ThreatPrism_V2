@@ -165,3 +165,12 @@ def test_backtest_over_seed_limited_service_grades_at_most_limit() -> None:
     DemoSeeder(service).seed([CuratedDatasetSource()], limit=3)
     report = run_backtest(service, HeuristicDemoAnalyst())
     assert report.graded_total <= 3
+
+
+def test_grading_failure_types_are_recorded_not_silent() -> None:
+    # Found live 2026-06-01: failures were counted but their category was discarded,
+    # so the report couldn't say WHY gradings failed. Now each failure_type is kept.
+    report = run_backtest(_seeded_service(), _RaiseAnalyst())
+    assert report.grading_failures == 31
+    assert sum(report.grading_failure_types.values()) == 31
+    assert report.grading_failure_types  # category recorded, not silent

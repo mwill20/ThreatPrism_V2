@@ -61,6 +61,7 @@ class BacktestCaseResult(BaseModel):
 class BacktestReport(BaseModel):
     graded_total: int = 0
     grading_failures: int = 0
+    grading_failure_types: dict[str, int] = Field(default_factory=dict)  # failure_type -> count
     agreement_rate: float = 1.0  # 1 - determination_mismatch / graded
     determination_mismatches: int = 0
     severity_mismatches: int = 0
@@ -85,6 +86,7 @@ def run_backtest(
     inert — behavior is unchanged without a real grader."""
     results: list[BacktestCaseResult] = []
     grading_failures = 0
+    grading_failure_types: dict[str, int] = {}
     by_det: dict[str, int] = {}
     analyst_ledger = SpendLedger()
     analyst_cost_model = cost_model or CostModel()
@@ -104,6 +106,8 @@ def run_backtest(
         )
         if isinstance(outcome, TriageFailureReport):
             grading_failures += 1  # provider/parse/schema failure OR spend cap — fail closed
+            ftype = outcome.failure_type.value if hasattr(outcome.failure_type, "value") else str(outcome.failure_type)
+            grading_failure_types[ftype] = grading_failure_types.get(ftype, 0) + 1
             continue
         feedback = outcome
 
@@ -132,6 +136,7 @@ def run_backtest(
     return BacktestReport(
         graded_total=graded,
         grading_failures=grading_failures,
+        grading_failure_types=dict(sorted(grading_failure_types.items())),
         agreement_rate=round(1 - det_mismatches / graded, 3) if graded else 1.0,
         determination_mismatches=det_mismatches,
         severity_mismatches=sum(r.severity_mismatch for r in results),

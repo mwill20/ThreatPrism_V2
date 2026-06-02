@@ -21,8 +21,9 @@ does not.
 Run the backtest over this set:
 
 ```bash
-PYTHONPATH=src python -m threatprism.demo.backtest --dataset adversarial --json          # deterministic
-PYTHONPATH=src python -m threatprism.demo.backtest --live --dataset adversarial --json   # gated, paid
+PYTHONPATH=src python -m threatprism.demo.backtest --dataset adversarial --json                    # deterministic
+PYTHONPATH=src python -m threatprism.demo.backtest --live --dataset adversarial --json             # gated, paid (anchored analyst)
+PYTHONPATH=src python -m threatprism.demo.backtest --live --dataset adversarial --blind-analyst --json  # blind analyst (case only, no report)
 ```
 
 See `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md`.

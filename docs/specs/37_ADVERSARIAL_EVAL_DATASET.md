@@ -16,6 +16,13 @@ hypothesis: the analyst is shown ThreatPrism's report (anchoring / residual
 circularity); a **blind, case-only analyst** is the recommended follow-up. See
 `docs/LIVE_BACKTEST_FINDINGS.md`.
 
+**Blind-analyst mode (built 2026-06-02):** `MockAnalyst(blind=True)` /
+`backtest --blind-analyst` withholds the ThreatPrism report from the analyst prompt
+(case only) — a true independent second opinion that also egresses less. The system
+prompt was generalized so blind vs. anchored differ *only* by the report's presence.
+Deterministic test: `test_blind_analyst_withholds_report_reducing_egress`. The
+blind-vs-anchored *live* comparison is the next paid owner-run.
+
 ## 1. Problem
 
 The first live Evolution 2 backtest (real Claude triage vs. independent real OpenAI

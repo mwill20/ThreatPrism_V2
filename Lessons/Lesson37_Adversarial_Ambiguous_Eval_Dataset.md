@@ -143,6 +143,15 @@ the pipeline *can* detect disagreement, a live 100% is interpretable — it poin
 the methodology (anchoring), not at "the feature is broken." An eval you can reason
 about tells you where to look next.
 
+**The fix: blind-analyst mode.** `MockAnalyst(blind=True)` / `backtest
+--blind-analyst` withholds the ThreatPrism report from the analyst prompt — it
+grades the *case only*. The system prompt was generalized so blind and anchored
+differ by exactly one variable: the report's presence. That makes the next live run
+a clean A/B — if blind agreement drops below anchored, anchoring was masking real
+divergence; if it stays at 100%, the cases really are easy for reasoning models.
+Bonus: withholding the verdict also *reduces* what egresses to the third-party
+provider — a privacy win that falls out of better methodology.
+
 > Career framing: "My adversarial set hit 100% agreement live. Instead of declaring
 > success, I asked *why* — and realized the 'independent' analyst was being shown the
 > verdict it was grading. That's residual circularity even with a different model. The

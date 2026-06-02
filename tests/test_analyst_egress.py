@@ -57,3 +57,23 @@ def test_analyst_prompt_carries_tokens_not_raw_phi_or_secrets() -> None:
     # The redacted token form is what egresses instead.
     assert "[POTENTIAL_PHI:" in prompt
     assert "[SECRET:" in prompt
+
+
+def test_blind_analyst_withholds_report_reducing_egress() -> None:
+    # Spec 37 follow-up: a blind analyst grades the CASE only (no ThreatPrism report),
+    # for a true independent second opinion -- which also egresses less to the provider.
+    case = CaseRecord(source_case_id="blind-1", title="Encoded PowerShell", description="encoded powershell on host-A")
+    report = TriageReport(
+        case_id=case.case_id,
+        summary="s",
+        determination=Determination.suspicious,
+        severity=Severity.high,
+        disposition=Disposition.escalate,
+        confidence=0.7,
+    )
+    anchored = MockAnalyst(api_key="x", model_id="gpt-4o-mini", blind=False)._build_prompt(case, report)
+    blind = MockAnalyst(api_key="x", model_id="gpt-4o-mini", blind=True)._build_prompt(case, report)
+
+    assert "threatprism_report" in anchored
+    assert "threatprism_report" not in blind  # the verdict is withheld (no anchoring)
+    assert "case" in blind and case.title in blind  # the case itself is still graded

@@ -17,6 +17,7 @@ batch backtests fail closed rather than silently fabricating an analyst verdict.
 from __future__ import annotations
 
 import json
+from typing import Any
 
 from threatprism.cases.schemas import AnalystFeedbackCreate, CaseRecord, TriageReport
 from threatprism.llm.failures import (
@@ -26,13 +27,15 @@ from threatprism.llm.failures import (
 )
 
 
+# Phrased to be valid in BOTH modes (blind = case only; anchored = case + report),
+# so the only experimental variable between runs is the report's presence — not the
+# instructions.
 _ANALYST_SYSTEM_PROMPT = (
-    "You are an experienced SOC analyst independently triaging a case. You are NOT "
-    "the tool that produced the attached report — judge the case on its own merits. "
-    "Return ONLY a JSON object with keys: analyst_id, analyst_determination "
-    "(benign|suspicious|malicious|critical), analyst_severity (low|medium|high|"
-    "critical), analyst_confidence (0..1), analyst_final_disposition, analyst_notes. "
-    "Do not claim compliance or that any real action was taken."
+    "You are an experienced SOC analyst independently triaging a case. Judge the "
+    "case on its own merits. Return ONLY a JSON object with keys: analyst_id, "
+    "analyst_determination (benign|suspicious|malicious|critical), analyst_severity "
+    "(low|medium|high|critical), analyst_confidence (0..1), analyst_final_disposition, "
+    "analyst_notes. Do not claim compliance or that any real action was taken."
 )
 
 
@@ -41,11 +44,15 @@ class MockAnalyst:
 
     provider_name = "openai_mock_analyst"
 
-    def __init__(self, *, api_key: str, model_id: str, analyst_id: str = "mock_analyst_openai", temperature: float = 0.2) -> None:
+    def __init__(self, *, api_key: str, model_id: str, analyst_id: str = "mock_analyst_openai", temperature: float = 0.2, blind: bool = False) -> None:
         self.api_key = api_key
         self.model_id = model_id
         self.analyst_id = analyst_id
         self.temperature = temperature
+        # Blind = grade the case ONLY (ThreatPrism's report withheld) for a true
+        # independent second opinion. Anchored (False) = case + report, which risks
+        # the analyst agreeing because it was shown the verdict (spec 37 finding).
+        self.blind = blind
         self.last_usage: object | None = None  # set per call for the spend ledger
         self.last_prompt: str = ""              # hashed (never raw) in the call audit
         self.last_response: str = ""
@@ -71,13 +78,10 @@ class MockAnalyst:
         return AnalystFeedbackCreate.model_validate(parsed)
 
     def _build_prompt(self, case: CaseRecord, report: TriageReport) -> str:
-        return json.dumps(
-            {
-                "case": case.model_dump(mode="json"),
-                "threatprism_report": report.model_dump(mode="json"),
-            },
-            sort_keys=True,
-        )
+        payload: dict[str, Any] = {"case": case.model_dump(mode="json")}
+        if not self.blind:
+            payload["threatprism_report"] = report.model_dump(mode="json")
+        return json.dumps(payload, sort_keys=True)
 
     def _call(self, prompt: str) -> str:
         if not self.api_key:
@@ -130,4 +134,5 @@ def build_mock_analyst(settings: object) -> MockAnalyst:
     return MockAnalyst(
         api_key=getattr(settings, "openai_api_key", ""),
         model_id=getattr(settings, "mock_analyst_model_id", "gpt-4o-mini"),
+        blind=bool(getattr(settings, "mock_analyst_blind", False)),
     )

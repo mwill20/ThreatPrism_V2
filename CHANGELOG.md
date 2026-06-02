@@ -4,6 +4,14 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Added blind-analyst mode (`MockAnalyst(blind=True)` / `backtest --blind-analyst`):
+  grades the case ONLY, withholding ThreatPrism's report from the analyst prompt —
+  the fix for the anchoring/residual-circularity finding from the live adversarial
+  run, and a true independent second opinion that also egresses less to the
+  provider. The analyst system prompt was generalized so blind vs. anchored differ
+  only by the report's presence. Test:
+  `test_blind_analyst_withholds_report_reducing_egress`. The blind-vs-anchored live
+  comparison is the next paid owner-run. Baseline `280 -> 281 passed`.
 - Ran the adversarial set live (~$0.05): real Claude triage + real OpenAI analyst
   **agreed 100%** on all 8 engineered-ambiguous cases / all 5 axes, despite the
   deterministic pair splitting 0.5. Finding: engineered rule-ambiguity does not

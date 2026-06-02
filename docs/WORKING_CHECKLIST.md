@@ -1184,6 +1184,11 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     reasoning models. Top hypothesis — the analyst is shown ThreatPrism's report
     (anchoring/residual circularity); a **blind (case-only) analyst** is the next
     slice. Full analysis: `docs/LIVE_BACKTEST_FINDINGS.md`.
+  - [x] **Blind-analyst mode built 2026-06-02 (non-paid):** `MockAnalyst(blind=True)`
+    / `backtest --blind-analyst` grades the case only (report withheld) — removes
+    anchoring and egresses less. System prompt generalized so blind vs anchored
+    differ only by the report. Test: `test_blind_analyst_withholds_report_reducing_egress`.
+    **Next:** the paid blind-vs-anchored live comparison on the adversarial set.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1267,7 +1272,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-280 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+281 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1280,7 +1285,8 @@ diagnosability (`tests/test_backtest.py`), then `275 -> 276` with no-report-reas
 counting (`test_no_report_cases_are_counted_with_reason`), then `276 -> 279` with
 the adversarial/ambiguous eval dataset (spec 37, `tests/test_adversarial_dataset.py`),
 then `279 -> 280` with the per-axis agreement breakdown (`agreement_by_axis`,
-spec 37 Q4).
+spec 37 Q4), then `280 -> 281` with blind-analyst mode
+(`test_blind_analyst_withholds_report_reducing_egress`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

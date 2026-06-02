@@ -270,6 +270,12 @@ def main() -> int:
         help="Which fixture set to backtest: 'curated' (default) or 'adversarial' "
         "(triage-ambiguous cases that exercise disagreement detection, spec 37).",
     )
+    parser.add_argument(
+        "--blind-analyst",
+        action="store_true",
+        help="Grade the case ONLY (withhold ThreatPrism's report from the analyst) "
+        "for a true independent second opinion, removing anchoring (spec 37 finding).",
+    )
     args = parser.parse_args()
 
     if args.live:
@@ -290,6 +296,8 @@ def main() -> int:
         from threatprism.llm.mock_analyst import build_mock_analyst
 
         analyst: AnalystGrader = build_mock_analyst(settings)
+        if args.blind_analyst:
+            analyst.blind = True  # case-only grading (no ThreatPrism report)
         analyst_cost_model = CostModel(
             input_price_per_mtok=settings.mock_analyst_input_price_per_mtok,
             output_price_per_mtok=settings.mock_analyst_output_price_per_mtok,

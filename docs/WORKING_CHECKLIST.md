@@ -1041,6 +1041,12 @@ Gate Opening"):
   (OT-L8), production multi-tenancy (OT-L9), fine-tuning (L4), non-demo data, real
   PHI.
 
+**Cost-minimal smoke support (build 2026-06-01):** `DemoSeeder.seed(..., limit=N)`
++ `backtest --limit N` cap the number of cases seeded/triaged/graded, so a live
+smoke run costs cents before committing to the full corpus. Tests in
+`tests/test_backtest.py`. Live run command: `PYTHONPATH=src python -m
+threatprism.demo.backtest --live --limit N --json` (loads `.env`).
+
 ## Security / Reliability Hardening Backlog
 
 - [x] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests — FIXED

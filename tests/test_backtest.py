@@ -148,3 +148,20 @@ def test_heuristic_analyst_has_zero_analyst_spend() -> None:
     report = run_backtest(_seeded_service(), HeuristicDemoAnalyst())
     assert report.analyst_llm_usage["call_count"] == 0
     assert report.analyst_llm_usage["estimated_cost_usd"] == 0.0
+
+
+# --- cost-minimal smoke runs: seed limit (--limit) -------------------------
+
+def test_seed_limit_caps_seeded_and_triaged_cases() -> None:
+    service = CaseService(local_auth_disabled_settings())
+    result = DemoSeeder(service).seed([CuratedDatasetSource()], limit=2)
+    # Triage runs per seeded case, so capping the seed caps the (paid) triage calls.
+    assert len(result.seeded) == 2
+    assert len(service.list_cases()) == 2
+
+
+def test_backtest_over_seed_limited_service_grades_at_most_limit() -> None:
+    service = CaseService(local_auth_disabled_settings())
+    DemoSeeder(service).seed([CuratedDatasetSource()], limit=3)
+    report = run_backtest(service, HeuristicDemoAnalyst())
+    assert report.graded_total <= 3

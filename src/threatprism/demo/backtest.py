@@ -231,6 +231,12 @@ def main() -> int:
         help="Use settings from the environment/.env (real Claude triage provider) "
         "instead of the in-memory deterministic demo.",
     )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Cap the number of cases seeded/triaged/graded (cost-minimal smoke run).",
+    )
     args = parser.parse_args()
 
     if args.live:
@@ -243,7 +249,7 @@ def main() -> int:
         settings = _demo_settings()
     settings.validate_runtime()
     service = CaseService(settings)
-    DemoSeeder(service).seed([CuratedDatasetSource()])
+    DemoSeeder(service).seed([CuratedDatasetSource()], limit=args.limit)
 
     if args.live:
         # Independent OpenAI grader (Evolution 2). Falls closed if unconfigured.

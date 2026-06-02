@@ -316,11 +316,19 @@ class DemoSeeder:
         *,
         skip_existing: bool = True,
         run_triage: bool = True,
+        limit: int | None = None,
     ) -> SeedResult:
+        """Replay fixtures through real intake + triage. ``limit`` caps the number
+        of NEW cases seeded — and therefore the number of (paid, in live mode)
+        triage calls — enabling a cost-minimal smoke run."""
+        if limit is not None and limit <= 0:
+            raise ValueError("seed limit must be greater than zero.")
         existing = {summary.source_case_id for summary in self._service.list_cases()}
         result = SeedResult()
         for source in sources:
             for seed_case in source.list_demo_fixtures():
+                if limit is not None and len(result.seeded) >= limit:
+                    return result
                 if skip_existing and seed_case.source_case_id in existing:
                     result.skipped.append(
                         SeedOutcome(

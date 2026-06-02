@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Operator verify / inspect / export for the integrity logs (export half of OT-8).**
+  `python -m threatprism.persistence.verify_logs` runs the hash-chain `verify()` on every
+  configured log (failure log + audit trail), summarizes record counts by category
+  (`failure_type` / `event_type`), and `--export PATH` writes a redaction-safe integrity
+  report (status + counts, no raw content). Exits non-zero if any configured, existing
+  log fails its chain check, so it can gate CI. Proven on real data: it verified 4
+  `provider_response_unparseable` records captured during this session's live runs. TDD:
+  `tests/test_verify_logs.py` (valid chain + summary, tamper detection, absent-log,
+  export, all-valid aggregation). Baseline `294 -> 299 passed`.
 - **Tamper-evident mirror of the case audit trail (closes OT-1 / rest of OT-8).** The
   case `audit_trail` lived only in a rewritable SQLite blob; every persisted
   `AuditEvent` (authz allow/deny, guardrail blocks, rehydration, role-view access) is

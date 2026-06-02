@@ -61,6 +61,23 @@ Expected current result: see [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASEL
 If a reused temp directory is locked on Windows, use a new ignored
 `--basetemp` directory.
 
+## Verify The Tamper-Evident Integrity Logs
+
+The failure log and the (opt-in) audit-trail mirror are append-only hash chains.
+Verify their integrity, inspect record counts, or export an integrity report:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m threatprism.persistence.verify_logs                 # human summary; exit 1 if tampered
+python -m threatprism.persistence.verify_logs --json          # machine-readable
+python -m threatprism.persistence.verify_logs --export .\data\audit\integrity_report.json
+```
+
+Exit code is non-zero if any configured, existing log fails its hash-chain check, so
+this is safe to use as a CI/integrity gate. Absent logs are treated as trivially valid.
+The audit-trail mirror is enabled by setting `AUDIT_LOG_PATH` (see `.env.example`).
+
 ## Run Demo Scenario And Contract Checks
 
 Use this focused check when changing routes, response models, demo payloads, or

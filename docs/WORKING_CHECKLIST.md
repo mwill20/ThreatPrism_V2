@@ -1254,6 +1254,13 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     (gitignored, empty by default → test posture unchanged). TDD:
     `tests/test_audit_log_integrity.py` (verifiable chain, dedup-across-saves,
     disabled-by-default). 291 -> 294.
+  - [x] **Operator verify/inspect/export CLI 2026-06-02 (non-paid) — export half of
+    OT-8.** `python -m threatprism.persistence.verify_logs` runs `verify()` on every
+    configured integrity log, summarizes counts by category, and `--export PATH` writes
+    a redaction-safe integrity report; exits non-zero on any chain failure (CI-gateable).
+    Proven on real data (verified 4 `provider_response_unparseable` records from this
+    session's live runs). TDD: `tests/test_verify_logs.py`. 294 -> 299. Documented in
+    `RUNBOOK.md`.
   - [ ] **DEFERRED (next/later if recommended) — harder / human-labeled adversarial
     cases to push divergence past 1/8.** The engineered rule-ambiguity set + coarse
     4-bucket determinations still under-exercise divergence (true-blind agreement
@@ -1366,7 +1373,8 @@ with the analyst enum-contract hardening
 with the tamper-evident failure log + sanitized offending-value capture
 (`tests/test_failure_log.py`, `test_failure_from_validation_error_*`,
 `test_backtest_records_failures_in_tamper_evident_log`), then `291 -> 294`
-with the tamper-evident audit-trail mirror (`tests/test_audit_log_integrity.py`).
+with the tamper-evident audit-trail mirror (`tests/test_audit_log_integrity.py`), then
+`294 -> 299` with the verify/inspect/export CLI (`tests/test_verify_logs.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

@@ -6,8 +6,10 @@
 > `failure_from_validation_error`), `src/threatprism/cases/service.py` (`run_triage`),
 > `src/threatprism/persistence/sqlite.py` (`save_case` audit mirror),
 > `src/threatprism/demo/backtest.py` (`run_backtest`),
+> `src/threatprism/persistence/verify_logs.py` (operator verify/inspect/export CLI),
 > `tests/test_failure_log.py`, `tests/test_audit_log_integrity.py`,
-> `tests/test_real_llm_provider.py`, `tests/test_backtest.py`. Baseline: see
+> `tests/test_verify_logs.py`, `tests/test_real_llm_provider.py`,
+> `tests/test_backtest.py`. Baseline: see
 > [../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ## 1. 🎯 The gap this closes
@@ -124,6 +126,17 @@ Two design choices worth keeping:
 The trade-off mirrors a database normalization decision: completeness at the persistence
 boundary (one site, dedup) vs. correctness at creation (many sites, no dedup). Here
 "can't miss an event" won.
+
+## 7b. 🔎 An immutable log nobody can verify is half-built
+
+The chain is worthless operationally without a way to *run* `verify()`. The
+verify/inspect/export CLI (`python -m threatprism.persistence.verify_logs`) checks every
+configured log, summarizes counts by category, and `--export`s a redaction-safe
+integrity report, returning a non-zero exit code on any tamper — so it can gate CI. It
+earned its keep on first run: it verified **4 real `provider_response_unparseable`
+records** the failure log had captured during live runs this session. Lesson: ship the
+*operator affordance* alongside the mechanism — detection you can't invoke is latent, not
+real.
 
 ## 8. 🎤 Interview talk track
 

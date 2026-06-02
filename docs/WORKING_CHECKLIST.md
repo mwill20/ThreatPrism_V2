@@ -1171,10 +1171,13 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
   said suspicious/malicious vs the analyst. **Live two-model run done 2026-06-01**
   (real Claude triage + real OpenAI analyst): 27 graded, **100% agreement** (0
   determination/severity mismatches), $0.171. Findings + analysis:
-  `docs/LIVE_BACKTEST_FINDINGS.md`. Two follow-ups surfaced: (a) the corpus is too
-  clear-cut to exercise disagreement detection — need ambiguous/adversarial cases;
-  (b) 27 vs 31 graded — add no-report-reason (blocked vs failed) counting to
-  `run_backtest` (cheap, non-paid).
+  `docs/LIVE_BACKTEST_FINDINGS.md`. Two follow-ups surfaced:
+  - [ ] (a) the corpus is too clear-cut to exercise disagreement detection — need
+    ambiguous/adversarial synthetic cases. **Planned in
+    `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md`** (ambiguity taxonomy, curated
+    manifest onboarding, divergence-capable acceptance test).
+  - [ ] (b) 27 vs 31 graded — add no-report-reason (blocked vs failed) counting to
+    `run_backtest` (cheap, non-paid). **← next slice in progress.**
 - [~] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
   pulls the triage report, works it human-in-the-loop, submits feedback; same tuning
   loop as Evolution 2 at live cadence.

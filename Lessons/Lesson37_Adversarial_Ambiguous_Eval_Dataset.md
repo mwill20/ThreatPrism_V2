@@ -152,6 +152,15 @@ divergence; if it stays at 100%, the cases really are easy for reasoning models.
 Bonus: withholding the verdict also *reduces* what egresses to the third-party
 provider — a privacy win that falls out of better methodology.
 
+**The A/B result (2026-06-02): blind = anchored = 1.0, identical** (same
+2-benign/6-suspicious split). Anchoring was *ruled out* — the independent model
+reaches the same verdicts grading the case alone. Double finding: the analyst
+genuinely isn't echoing the report (real independence), and the cause is the cases —
+engineered rule-ambiguity is not reasoning-ambiguity at the coarse determination
+bucket. The clean A/B paid off by *eliminating* a hypothesis: the next lever is
+**signal granularity** (confidence deltas), not anchoring. An experiment that returns
+"no effect" is still a result — it redirects the search.
+
 > Career framing: "My adversarial set hit 100% agreement live. Instead of declaring
 > success, I asked *why* — and realized the 'independent' analyst was being shown the
 > verdict it was grading. That's residual circularity even with a different model. The

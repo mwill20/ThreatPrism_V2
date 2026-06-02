@@ -1188,7 +1188,12 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     / `backtest --blind-analyst` grades the case only (report withheld) — removes
     anchoring and egresses less. System prompt generalized so blind vs anchored
     differ only by the report. Test: `test_blind_analyst_withholds_report_reducing_egress`.
-    **Next:** the paid blind-vs-anchored live comparison on the adversarial set.
+  - [x] **Blind-vs-anchored live comparison done 2026-06-02 (~$0.05):** blind and
+    anchored both **1.0 agreement** (identical) — **anchoring ruled out.** The 100%
+    is real convergence, not circularity. Conclusion: engineered rule-ambiguity is
+    not reasoning-ambiguity at the determination bucket. **Next lever: signal
+    granularity** — capture `analyst_confidence` vs report `confidence` deltas
+    (hypothesis #2, promoted), ahead of authoring harder cases.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.

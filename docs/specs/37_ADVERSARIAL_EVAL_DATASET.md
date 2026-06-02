@@ -20,8 +20,15 @@ circularity); a **blind, case-only analyst** is the recommended follow-up. See
 `backtest --blind-analyst` withholds the ThreatPrism report from the analyst prompt
 (case only) — a true independent second opinion that also egresses less. The system
 prompt was generalized so blind vs. anchored differ *only* by the report's presence.
-Deterministic test: `test_blind_analyst_withholds_report_reducing_egress`. The
-blind-vs-anchored *live* comparison is the next paid owner-run.
+Deterministic test: `test_blind_analyst_withholds_report_reducing_egress`.
+
+**Blind-vs-anchored live comparison (2026-06-02):** blind and anchored both returned
+**1.0 agreement** (identical, same 2-benign/6-suspicious split) — **anchoring ruled
+out.** The analyst reaches the same verdicts grading the case alone, so the 100% is
+real convergence, not circularity. Conclusion: engineered rule-ambiguity is not
+reasoning-ambiguity at the determination bucket; the next lever is **signal
+granularity** (capture confidence deltas) rather than anchoring or more cases. See
+`docs/LIVE_BACKTEST_FINDINGS.md`.
 
 ## 1. Problem
 

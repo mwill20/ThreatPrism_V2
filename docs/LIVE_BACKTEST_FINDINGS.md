@@ -3,6 +3,33 @@
 Real-LLM two-model backtest: ThreatPrism (Claude) triage vs. an independent
 OpenAI analyst, over the curated synthetic SOC dataset. No real-world data.
 
+## Blind-vs-anchored live comparison — 2026-06-02 (`--blind-analyst`)
+
+Re-ran the adversarial set with the analyst **blind** (case only, ThreatPrism's
+report withheld) to test the anchoring hypothesis. ~$0.05.
+
+| Analyst mode | Agreement | Det mismatches | Sev mismatches | By determination |
+|--------------|-----------|----------------|----------------|------------------|
+| Anchored (sees report) | 1.0 | 0 | 0 | benign 2, suspicious 6 |
+| **Blind (case only)** | **1.0** | **0** | **0** | benign 2, suspicious 6 |
+
+**Decisive result: identical. Anchoring is ruled out.** Removing the report changed
+nothing — the independent model reached the *same* verdicts grading the case alone,
+including the same 2-benign / 6-suspicious split. Two takeaways:
+
+1. **The analyst was not just echoing the report** — a genuine independence win. The
+   100% is real convergence, not circularity.
+2. **The remaining cause is the cases themselves** (hypothesis #3): engineered
+   *rule*-ambiguity is not *reasoning*-ambiguity at the determination/severity bucket
+   level. Two competent models independently resolve these the same way.
+
+**So the next lever is signal granularity, not anchoring (hypothesis #2 promoted).**
+A 4-bucket determination is coarse; real divergence likely lives in **confidence**
+or rationale. Capturing `analyst_confidence` vs report `confidence` deltas would
+surface soft disagreement the buckets hide — and is now the priority follow-up,
+ahead of authoring harder cases (a blind A/B already told us the cases aren't the
+only issue).
+
 ## Live adversarial run — 2026-06-02 (`--live --dataset adversarial`)
 
 Ran the 8 engineered-ambiguous cases (spec 37) through real Claude triage + real

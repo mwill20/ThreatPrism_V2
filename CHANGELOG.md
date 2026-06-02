@@ -4,6 +4,12 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Ran the blind-vs-anchored live comparison (~$0.05): blind (case-only) and anchored
+  analyst both returned **1.0 agreement**, identical — **anchoring ruled out.** The
+  100% on engineered-ambiguous cases is real convergence, not circularity; the cause
+  is that rule-ambiguity isn't reasoning-ambiguity at the determination bucket. Next
+  lever promoted to signal granularity (capture confidence deltas) over harder cases.
+  Docs only. See `docs/LIVE_BACKTEST_FINDINGS.md`.
 - Added blind-analyst mode (`MockAnalyst(blind=True)` / `backtest --blind-analyst`):
   grades the case ONLY, withholding ThreatPrism's report from the analyst prompt —
   the fix for the anchoring/residual-circularity finding from the live adversarial

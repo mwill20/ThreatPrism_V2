@@ -121,6 +121,34 @@ crack that lets real data in.
 
 ---
 
+## 5.5 🔬 The live result — when the eval taught us about the eval
+
+Running the set live (real Claude triage vs. real OpenAI analyst) produced a
+genuinely instructive surprise: **100% agreement** on all 8 cases / all 5 axes —
+even though the deterministic pair split 0.5 on the same cases. Two takeaways:
+
+- **Engineered rule-ambiguity ≠ reasoning-model ambiguity.** Cases built to split a
+  keyword engine don't split two competent reasoning models — they resolve the same
+  "dual-use" or "conflicting-evidence" tension the same way. Coarse 4-bucket
+  determinations make convergence even likelier.
+- **The eval revealed a flaw in the eval.** The most likely cause isn't "the cases
+  are easy" — it's that the analyst is shown **ThreatPrism's report** alongside the
+  case. The independence rule guarantees a *different model*, but a model shown the
+  verdict it's meant to independently check is **anchored**. A true blind second
+  opinion grades the *case only*. So the next slice isn't more cases — it's
+  *removing the anchor*.
+
+This is the lesson's whole thesis paying off: because the deterministic floor proved
+the pipeline *can* detect disagreement, a live 100% is interpretable — it points at
+the methodology (anchoring), not at "the feature is broken." An eval you can reason
+about tells you where to look next.
+
+> Career framing: "My adversarial set hit 100% agreement live. Instead of declaring
+> success, I asked *why* — and realized the 'independent' analyst was being shown the
+> verdict it was grading. That's residual circularity even with a different model. The
+> fix is a blind analyst, and I only knew to look there because the deterministic
+> baseline had already proven the pipeline could detect disagreement."
+
 ## 6. 🎤 Interview talk track
 
 > "Our first live backtest hit 100% agreement, which I reported as a plumbing

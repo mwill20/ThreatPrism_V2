@@ -4,6 +4,12 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Ran the adversarial set live (~$0.05): real Claude triage + real OpenAI analyst
+  **agreed 100%** on all 8 engineered-ambiguous cases / all 5 axes, despite the
+  deterministic pair splitting 0.5. Finding: engineered rule-ambiguity does not
+  split reasoning models, and the analyst is shown ThreatPrism's report (anchoring /
+  residual circularity) — a blind case-only analyst is the recommended follow-up.
+  Analysis in `docs/LIVE_BACKTEST_FINDINGS.md`; no code change (docs only).
 - Implemented the adversarial/ambiguous eval dataset (spec 37): 8 hand-authored,
   fully synthetic *triage-ambiguous* SOC cases in `fixtures/curated_adversarial/`
   (dual-use / conflicting-evidence / severity-edge / disposition-edge /

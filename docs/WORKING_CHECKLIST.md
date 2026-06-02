@@ -1177,8 +1177,13 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     cases in `fixtures/curated_adversarial/` + `AdversarialCuratedSource` +
     `backtest --dataset adversarial`. Deterministic baseline: **agreement 0.5**
     (4/8 mismatches) vs 1.0 on the curated set — divergence-capable. Tests:
-    `tests/test_adversarial_dataset.py`. Optional next: a live
-    `--live --dataset adversarial` run (paid, owner-run) for real-model disagreement.
+    `tests/test_adversarial_dataset.py`.
+  - [x] **Live adversarial run done 2026-06-02 (~$0.05):** real Claude + OpenAI
+    **agreed 100%** on all 8 cases / all 5 axes, despite the deterministic pair
+    splitting 0.5. Key finding: engineered rule-ambiguity does not split two
+    reasoning models. Top hypothesis — the analyst is shown ThreatPrism's report
+    (anchoring/residual circularity); a **blind (case-only) analyst** is the next
+    slice. Full analysis: `docs/LIVE_BACKTEST_FINDINGS.md`.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.

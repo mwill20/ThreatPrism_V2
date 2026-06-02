@@ -8,8 +8,13 @@ Status: **implemented** (2026-06-02). Follow-up to the first live two-model back
 `AdversarialCuratedSource` + `backtest --dataset adversarial` run the backtest over
 them. Deterministic baseline over the set: **agreement 0.5** (4/8 determination
 mismatches, 4 flagged-then-cleared) — vs. 1.0 on the curated set, confirming the set
-is divergence-capable. Tests: `tests/test_adversarial_dataset.py`. A confirming
-live `--live --dataset adversarial` run is an optional owner-run.
+is divergence-capable. Tests: `tests/test_adversarial_dataset.py`.
+
+**Live run (2026-06-02, ~$0.05):** the two *real* models **agreed 100%** on all 8
+cases / all 5 axes — engineered rule-ambiguity did not split reasoning models. Top
+hypothesis: the analyst is shown ThreatPrism's report (anchoring / residual
+circularity); a **blind, case-only analyst** is the recommended follow-up. See
+`docs/LIVE_BACKTEST_FINDINGS.md`.
 
 ## 1. Problem
 

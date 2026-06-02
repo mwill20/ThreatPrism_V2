@@ -3,6 +3,48 @@
 Real-LLM two-model backtest: ThreatPrism (Claude) triage vs. an independent
 OpenAI analyst, over the curated synthetic SOC dataset. No real-world data.
 
+## Live adversarial run — 2026-06-02 (`--live --dataset adversarial`)
+
+Ran the 8 engineered-ambiguous cases (spec 37) through real Claude triage + real
+OpenAI analyst. ~$0.05 (triage $0.0454 + analyst $0.0039).
+
+| Metric | Value |
+|--------|-------|
+| Graded | 8 (0 failures, 0 no-report) |
+| **Agreement rate** | **1.0 (100%)** — 0 determination mismatches, 0 severity mismatches |
+| ThreatPrism determinations | 2 benign, 6 suspicious (the demo provider had marked all 8 non-benign — the real model is more nuanced) |
+| Flagged-then-cleared | 0 |
+| Per-axis mismatches | dual_use 0/2, conflicting_evidence 0/2, severity_edge 0/2, disposition_edge 0/1, benign_mimicking 0/1 — **every axis converged** |
+
+### Analysis — the important (counterintuitive) finding
+
+The **deterministic** pair split 0.5 on these exact cases (by construction). The two
+**real reasoning models converged completely** — on every axis. The headline:
+**engineered ambiguity that splits a rule engine does not split two reasoning
+models.** Determination/severity buckets are coarse, and two competent models tend
+to resolve "dual-use" or "conflicting-evidence" tension the same way (e.g., both
+treat encoded PowerShell from a service account as *suspicious, pending review*).
+
+Three hypotheses for the 100%, in priority order:
+
+1. **Analyst anchoring / residual circularity (most likely + most actionable).**
+   `MockAnalyst._build_prompt` sends the analyst **both the case AND ThreatPrism's
+   report**. Even though it's a *different model* (which is what the independence
+   rule guarantees), being shown the verdict primes agreement. A truly blind second
+   opinion would grade the **case only**. This is the next slice.
+2. **Coarse signal.** Determination is a 4-bucket enum; genuine disagreement may live
+   in *confidence* or *rationale*, which the backtest doesn't compare. Capturing
+   `analyst_confidence` vs report `confidence` deltas would surface soft divergence.
+3. **Cases easy for reasoning models / too few (8).** Possible, but (1) should be
+   ruled out first — anchoring would mask real divergence regardless of case quality.
+
+### What this does NOT mean
+
+It does **not** mean the disagreement pipeline is broken (the deterministic tests
+prove it fires) or that ThreatPrism is "accurate" (agreement ≠ ground truth). It
+means our independence test is weaker than it looks while the analyst can see the
+verdict it's supposed to independently check.
+
 ## Smoke run #1 — 2026-06-01 (`--live --limit 2`)
 
 **Purpose:** verify the live Anthropic/OpenAI SDK plumbing before the full corpus.

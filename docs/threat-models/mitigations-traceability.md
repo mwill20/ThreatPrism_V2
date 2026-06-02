@@ -143,13 +143,16 @@ implemented and tested with no network; the live Claude/OpenAI calls are gated.
 | OT-L3 (LLM DoS — partial) | Deterministic dual-trigger batch planner (`BATCH_MAX_EVENTS` OR token budget, whichever first); never splits a case; oversized case → `budget_exceeded` (not sent) | `plan_batches()` in [llm/batching.py](../../src/threatprism/llm/batching.py) | Partial — input-side budget; provider-side rate/cost caps still gated | `tests/test_real_llm_provider.py` |
 | Real provider misconfiguration | `LLM_PROVIDER=anthropic_claude` requires `ANTHROPIC_API_KEY` (`validate_runtime()`); unconfigured provider fails closed with a structured error; secrets via env only | `validate_runtime()` in [config.py](../../src/threatprism/config.py); `ClaudeTriageProvider` in [llm/providers.py](../../src/threatprism/llm/providers.py) | Mitigated | `tests/test_real_llm_provider.py` |
 | Circular self-grading (Evolution 2) | Mock analyst is an independent provider (`openai_mock_analyst` ≠ `anthropic_claude`); fails closed when unconfigured | `MockAnalyst` in [llm/mock_analyst.py](../../src/threatprism/llm/mock_analyst.py) | Mitigated (seam) | `tests/test_real_llm_provider.py` |
+| OT-L10 (analyst data egress to OpenAI) | The analyst grades the **stored, Stage-1-tokenized** case (`run_backtest` → `service.get_case()`); raw PHI/PII/secrets are replaced before egress and never rehydrated | `_build_prompt()` in [llm/mock_analyst.py](../../src/threatprism/llm/mock_analyst.py); `run_backtest()` in [demo/backtest.py](../../src/threatprism/demo/backtest.py) | **Mitigated + tested** (gate opened 2026-06-01) | `tests/test_analyst_egress.py` |
 | OT-L3 (Unbounded Consumption / spend) | Pre-call spend cap (cost + token ceiling) fails closed before overspending; `validate_runtime` requires a cap for the real provider; per-call usage/cost accounting | `enforce_spend_cap()` / `metered_generate()` / `SpendLedger` in [llm/governance.py](../../src/threatprism/llm/governance.py); `validate_runtime()` in [config.py](../../src/threatprism/config.py) | Mitigated (seam) | `tests/test_llm_governance.py` |
 | Prompt/response audit (no raw leak) | Per-call `AuditEvent` records model id+revision, token counts, and `sha256` hashes of prompt+response — never raw content | `build_llm_call_audit()` in [llm/governance.py](../../src/threatprism/llm/governance.py) | Mitigated (seam) | `tests/test_llm_governance.py` |
 | Model selection governance | In-code `APPROVED_MODELS` allowlist enforced at startup (config cannot select an unapproved model) | `APPROVED_MODELS` in [llm/governance.py](../../src/threatprism/llm/governance.py); `validate_runtime()` | Mitigated | `tests/test_llm_governance.py` |
 
 > Egress boundary (spec 33 §9): case text reaches the third-party API only after
-> Stage-1 tokenization, so the model never receives raw PHI/PII/secrets. Re-confirm
-> this invariant when the live call is enabled.
+> Stage-1 tokenization, so the model never receives raw PHI/PII/secrets. As of the
+> 2026-06-01 gate opening this invariant is **guarded by a test**
+> (`tests/test_analyst_egress.py`, OT-L10) for the analyst path; the triage path is
+> covered by I1 (Stage-1 runs before `_prepare_case_for_model()`).
 
 ### Enrichment Stubs
 

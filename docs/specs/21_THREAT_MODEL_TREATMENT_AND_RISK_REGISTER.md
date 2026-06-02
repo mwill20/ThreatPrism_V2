@@ -113,13 +113,13 @@ Treatment decisions for every open threat (OT-X) and residual risk (RR-X) in the
 
 | ID | Threat (short) | Proposed Treatment | Slice | Owner | Notes |
 |----|----------------|---------------------|-------|-------|-------|
-| L1 / RR-L1 / OT-L5 | Quarantine flag did not abort service-layer triage | **Mitigated** (OT-L5 closed); **Gated Mitigation** remains for semantic RR-L1 | Slice G (implemented) | Codex | `run_triage()` now blocks on `operation="quarantine"` before provider execution and records `triage_blocked_by_prompt_firewall`; semantic prompt-injection bypass remains RR-L1 until real LLM work |
+| L1 / RR-L1 / OT-L5 | Quarantine flag did not abort service-layer triage | **Mitigated** (OT-L5 closed); RR-L1 **further mitigated** 2026-06-01 | Slice G + Real-LLM Gate Opening | Codex; Project owner, 2026-06-01 | `run_triage()` blocks on `operation="quarantine"` before provider execution (`triage_blocked_by_prompt_firewall`). The semantic prompt-injection firewall (spec 32, local Prompt Guard 2) is now active as a **detector** with review/quarantine bands; the deterministic firewall + Slice G enforcement remain the hard gate (detector-not-gate, Lesson 30). **Residual:** novel semantic bypass that neither layer detects — accepted with owner sign-off below |
 | L2 / OT-L1 | No indirect prompt injection defenses (RAG) | **Gated Mitigation**; read-only CSI/RGOI foundation implemented | Gated (live RAG) | Project owner (POC), 2026-05-24 | CSI/RGOI v0.1 adds read-only retrieval governance, tenant namespace filtering, retrieved-object sanitization, evidence-ID binding, trust scoring, and quarantine exclusion for fake in-memory cognition. Live RAG, external corpora, and production retrieval remain gated per [LLM threat model "Before RAG"](../threat-models/llm-agent-threat-model.md#before-rag--retrieval). |
 | L3 | Insecure output handling | **Mitigated** (current) | n/a | n/a | Already implemented via three-layer validation. No further treatment required |
 | L4 / OT-L2 | Training data poisoning | **Avoid** (current) → **Gated Mitigation** (if fine-tuning added) | Gated (fine-tuning) | Project owner (POC), 2026-05-24 | Current avoid is "no fine-tuning pipeline exists." If that changes, treat per LLM threat model "Before Memory / Write-Back" preconditions |
-| L5 / OT-L3 | LLM DoS (cost, context, recursion) | **Gated Mitigation** | Gated (real LLM) | Project owner (POC), 2026-05-24 | Token budget per request + context size cap + provider-level rate limiting |
+| L5 / OT-L3 | LLM DoS (cost, context, recursion) | **Mitigated** (gate opened 2026-06-01) | Real-LLM Gate Opening | Project owner, 2026-06-01 | Per-run spend cap `llm_max_cost_usd_per_run` (default $5) enforced by `metered_generate`/`metered_evaluate` (fail-closed on breach), per-call usage metering (specs 35/36), HTTP body cap bounds input size (Slice B), triage concurrency cap. **Residual:** no separate per-request *token* budget beyond the cost cap; recursion N/A (no agent loop). See Gate-Opening section |
 | L6 / RR-L2 / OT-L6 | `requirements.txt` uses `>=` not `==`; no dep scan | **Mitigated** | Slice E | Project owner (POC), 2026-05-24 | Direct dependencies exact-pinned; transitive lock file and advisory `pip-audit` hook added |
-| L7 / RR-L3 / OT-L7 | Output regex catches only known credential shapes | **Gated Mitigation** | Gated (real LLM) | Project owner (POC), 2026-05-24 | Broader data-regurgitation detection (entity extraction on output) is only useful with a real provider |
+| L7 / RR-L3 / OT-L7 | Output regex catches only known credential shapes | **Partially Mitigated** (gate opened 2026-06-01) | Real-LLM Gate Opening | Project owner, 2026-06-01 | Output-policy scan now sources the shared secret catalog (`secret_catalog.py`, spec 34 §3) — broadened from `sk-` only to the full provider-token set. **Residual:** entity-extraction / data-regurgitation detection on output is still future work. Accepted as residual with owner sign-off below |
 | L8 / OT-L4 | No tool/plugin design | **Avoid** (current) → **Gated Mitigation** (if tools added) | Gated (function-calling) | Project owner (POC), 2026-05-24 | Per LLM threat model "Before Tool / Plugin / Function-Calling" preconditions: allowlist + parameter validation + human approval + audit per call |
 | L9 | Excessive agency | **Mitigated** (current) | n/a | n/a | Already implemented via `ALLOW_REAL_ACTIONS=false` + `enforce_action_safety()`. No further treatment required |
 | L10 | Overreliance | **Mitigated** (current) | n/a | n/a | Already implemented via three-layer deterministic validation + `analyst_review_required=True`. No further treatment required |
@@ -473,10 +473,61 @@ This spec does not:
 - Resolve threats by re-classifying severity. A threat does not become Low because the fix is hard.
 - Make external compliance, legal, HIPAA, HITRUST, or enterprise production-readiness decisions. The recorded owner pass is a POC governance decision only.
 
+---
+
+## Real-LLM, Analyst & Local-Model Gate Opening (2026-06-01)
+
+The project owner authorized opening the previously-gated real-LLM preconditions.
+Three external/model trust boundaries are now **active** (no longer demo-only):
+
+1. **Anthropic Claude** — real triage brain (`ClaudeTriageProvider`,
+   `llm/providers.py`, `LLM_PROVIDER=anthropic_claude`).
+2. **OpenAI** — independent baseline analyst for backtests (`MockAnalyst`,
+   `llm/mock_analyst.py`).
+3. **Local Prompt Guard 2** — semantic prompt-injection firewall
+   (`guardrails/semantic_firewall.py`, `SEMANTIC_FIREWALL_ENABLED=true`).
+
+Opening the gate **re-opened** the gated rows L1/RR-L1, L5/OT-L3, and L7/OT-L7
+(updated in the tables above). It does **not** open: tool/function-calling (L8),
+memory write-back (OT-L8), production multi-tenancy (OT-L9), fine-tuning (L4),
+non-demo data, or real PHI — those remain **Avoid/Gated**.
+
+### New trust-boundary threats and treatments
+
+| ID | Threat | Treatment | Mitigation (code + test) | Owner |
+|----|--------|-----------|--------------------------|-------|
+| OT-L10 | **Data egress to OpenAI (analyst).** Case + report sent to a third party could leak raw PHI/PII/secrets. | **Mitigated** | The analyst grades the **stored, Stage-1-tokenized** case (`run_backtest` → `service.get_case()`, `demo/backtest.py:96`); Stage-1 tokens (`[POTENTIAL_PHI:...]`, `[SECRET:...]`) are never rehydrated. Guarded by `tests/test_analyst_egress.py`. Spend-capped + metered + fail-closed (specs 35/36). | Project owner, 2026-06-01 |
+| OT-L11a | **Data egress to Anthropic (triage).** Raw sensitive data could reach the triage provider. | **Mitigated** (covered by I1) | Stage-1 tokenization runs before `_prepare_case_for_model()`; the provider never sees raw PHI/PII/secrets. Now applies to a *live* provider. | Project owner, 2026-06-01 |
+| OT-L11b | **Local model supply chain.** A tampered/poisoned Prompt Guard 2 weight set could mis-score injection. | **Mitigated for current scope** | Model is **revision-pinnable** (`SEMANTIC_FIREWALL_MODEL_REVISION`); loaded locally (no per-request network). Owner must pin a verified revision before production. | `TODO: owner sign-off on pinned revision` |
+| OT-L11c | **Probabilistic firewall trusted as a gate.** A semantic detector could be evaded or could over-block. | **Mitigated by design** | Detector-not-gate (Lesson 30): the deterministic prompt firewall + Slice G quarantine enforcement remain the hard gate; the semantic layer only adds review/quarantine *bands*. Fails toward the deterministic layers. | Project owner, 2026-06-01 |
+
+### Residual risks accepted (owner sign-off)
+
+- **RR-L1 (novel semantic prompt-injection bypass):** a payload neither the
+  deterministic firewall nor Prompt Guard 2 detects could still reach the live
+  triage model. Downstream output policy + evidence validation + action safety
+  remain. Accepted for POC live-eval scope. `Accepted by: <owner>, 2026-06-01`.
+- **L7 residual (no output entity-extraction):** the output scan catches known
+  credential *shapes* (shared catalog) but not arbitrary data regurgitation.
+  Accepted for POC scope. `Accepted by: <owner>, 2026-06-01`.
+- **Live spend:** real paid calls on both Anthropic and OpenAI. Bounded by
+  `llm_max_cost_usd_per_run` (default $5, fail-closed). Owner confirmed cost
+  policy is in place. `Accepted by: <owner>, 2026-06-01`.
+
+### Pre-flight before any paid run (owner)
+
+- Verify `anthropic` and `openai` SDK **usage-attribute names** against the pinned
+  versions (cost accounting depends on them) — flagged in `providers.py` /
+  `mock_analyst.py` VERIFY comments.
+- Run against the **curated/synthetic SOC dataset only** — never real workplace
+  data (AGENTS.md hard rule).
+- Confirm `SEMANTIC_FIREWALL_MODEL_REVISION` is pinned to a verified revision.
+
 ## Review Log
 
 | Date | Reviewer | Verdict | Notes |
 |------|----------|---------|-------|
+| 2026-06-01 | Claude (owner-authorized) | Real-LLM gate opened | Owner authorized live Anthropic triage, OpenAI analyst, and local Prompt Guard 2. Re-opened L1/RR-L1, L5/OT-L3, L7/OT-L7 with current-mitigation evidence; added new-boundary threats OT-L10 (analyst egress, guarded by `tests/test_analyst_egress.py`), OT-L11a/b/c. Recorded residual-risk acceptances with owner-signature placeholders and a pre-flight checklist. Tools/function-calling, memory write-back, multi-tenancy, fine-tuning, non-demo data, and real PHI remain Avoid/Gated. |
 | 2026-05-26 | Codex | Production token verifier implementation landed | Added local fake-JWKS `external_oidc` verifier, verified claim-to-role mapping, role-view policy integration, no-network tests, and sanitized audit coverage. Live JWKS fetch and live IdP integration remain gated. |
 | 2026-05-26 | Codex | Production token verifier design documented | Added the `external_oidc` verifier contract, S4/OT-9 treatment row, no-network validation requirement, and future test expectations. Superseded by the local implementation row above for fake-JWKS runtime scope. |
 | 2026-05-26 | Codex | Production identity readiness implemented | Added static `external_oidc` readiness config checks, unknown auth-mode rejection, incomplete-verifier rejection, and fail-closed protected-route behavior when verification is disabled. |

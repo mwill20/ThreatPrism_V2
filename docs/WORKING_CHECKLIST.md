@@ -1013,6 +1013,34 @@ validated GREEN (229 passed, 2 skipped, eval 15/15, demo safety passed):
   battery. Also added **Lesson 31** (Real-LLM Governance: caps/metering/dual-provider
   accounting) closing the lesson gap for specs 33/35/36.
 
+## Real-LLM Gate Status (opened 2026-06-01)
+
+Owner authorized opening the real-LLM gates. Audit of what was already built vs.
+newly opened (full treatment record: spec 21 "Real-LLM, Analyst & Local-Model
+Gate Opening"):
+
+- [x] **Anthropic triage (real LLM)** — `ClaudeTriageProvider` built + wired
+  (`get_provider("anthropic_claude")`), config + spend cap present. Gate **open**.
+  Data egress mitigated by Stage-1 tokenization (I1). Pre-flight: verify pinned
+  `anthropic` SDK usage-attribute names before a paid run.
+- [x] **OpenAI analyst** — `MockAnalyst` built + metered (`metered_evaluate`,
+  fail-closed). Gate **open**. **New egress guard shipped:**
+  `tests/test_analyst_egress.py` locks "analyst prompt carries Stage-1 tokens,
+  never raw PHI/secrets" (OT-L10). Pre-flight: verify pinned `openai` usage
+  attributes.
+- [x] **Local semantic firewall (Prompt Guard 2)** — built (spec 32), now active
+  as a **detector** (review/quarantine bands); deterministic firewall + Slice G
+  remain the hard gate (OT-L11c). Pin `SEMANTIC_FIREWALL_MODEL_REVISION` before
+  production (OT-L11b, owner sign-off pending).
+- [x] **Cost policy** — per-run spend cap `llm_max_cost_usd_per_run` ($5 default),
+  per-call metering, fail-closed on breach (specs 35/36). Owner confirmed in place.
+- [x] **Threat-treatment gate** — spec 21 updated: L1/L5/L7 re-opened with current
+  evidence; OT-L10/OT-L11a/b/c added; residual risks logged with owner-signature
+  placeholders; pre-flight checklist recorded.
+- [ ] **Still gated (NOT opened):** tool/function-calling (L8), memory write-back
+  (OT-L8), production multi-tenancy (OT-L9), fine-tuning (L4), non-demo data, real
+  PHI.
+
 ## Security / Reliability Hardening Backlog
 
 - [x] **In-memory SQLite (`:memory:`) returns 500 under concurrent requests — FIXED
@@ -1207,13 +1235,14 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-271 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+272 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
 Baseline moved `266 -> 267` on 2026-06-01 with the in-memory SQLite concurrency
 fix (`tests/test_persistence_concurrency.py`), then `267 -> 271` with the shared
-secret-pattern catalog refactor (`tests/test_secret_catalog.py`).
+secret-pattern catalog refactor (`tests/test_secret_catalog.py`), then `271 -> 272`
+with the real-LLM analyst data-egress guard (`tests/test_analyst_egress.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

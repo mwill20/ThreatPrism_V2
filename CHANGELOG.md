@@ -4,6 +4,17 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Opened the real-LLM gates (owner-authorized 2026-06-01): live Anthropic triage,
+  OpenAI independent analyst, and the local Prompt Guard 2 semantic firewall. Spec
+  21 threat-treatment register updated — re-opened L1/RR-L1, L5/OT-L3, L7/OT-L7
+  with current-mitigation evidence; added new trust-boundary threats OT-L10
+  (analyst data egress), OT-L11a/b/c (triage egress, local-model supply chain,
+  detector-not-gate); logged residual-risk acceptances with owner-signature
+  placeholders and a pre-flight checklist. Added `tests/test_analyst_egress.py`
+  guarding that the OpenAI analyst prompt carries only Stage-1 tokens, never raw
+  PHI/secrets. Tools/function-calling, memory write-back, multi-tenancy,
+  fine-tuning, non-demo data, and real PHI remain Avoid/Gated. Baseline
+  `271 -> 272 passed`.
 - Unified secret-pattern detection into a single shared catalog
   (`src/threatprism/guardrails/secret_catalog.py`, spec 34 §3). The product
   detectors (`healthcare.py` `SECRET_RULES`, `tokenization.py` `secret_like`,

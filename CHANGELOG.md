@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Confirming live A/B (~$0.10): enum fix verified + anchoring confirmed at full N.**
+  Re-ran blind + anchored on the adversarial set with both fixes in place. Both graded
+  **8/8 with zero schema failures** (prior corrected blind run lost 2/8 to an
+  out-of-enum disposition) — the enum-contract fix is verified on real data. Clean A/B:
+  anchored 1.0 agreement / flat 0.0 confidence delta vs **true blind 0.875, 1
+  determination split (adv-0004), uniform 0.05 delta** — anchoring is material at full
+  N, and the disagreement signal (adv-0004) reproduces across runs. The tamper-evident
+  failure log stayed empty (0 failures = correct). Docs only; see
+  `docs/LIVE_BACKTEST_FINDINGS.md`.
 - **Tamper-evident failure log + sanitized offending-value capture** (owner
   requirement). Every LLM/analyst validation failure is now inspectable AND immutable.
   Audit finding first: all model output is already gated by Pydantic closed-vocabulary

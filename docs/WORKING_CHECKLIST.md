@@ -1221,7 +1221,12 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     required enum vocabularies (determination/severity/disposition) from the schema
     enums via `_vocab()` so the prompt can't drift, + "use exactly one of the listed
     values". TDD: `test_analyst_prompt_enumerates_all_required_enum_vocabularies`
-    (283 -> 284). **Pending paid confirmation:** a blind re-run showing 8/8 graded.
+    (283 -> 284). **Confirmed live 2026-06-02 (~$0.10):** blind + anchored both graded
+    **8/8 with zero schema failures** (was 6/8). Clean full-N A/B: anchored 1.0 / flat
+    0.0 confidence delta vs **true blind 0.875, 1 determination split (adv-0004),
+    uniform 0.05 delta** — anchoring confirmed material at full N; the disagreement
+    signal (adv-0004) is reproducible across runs. Failure log stayed empty (0 failures
+    = correct). Findings: `docs/LIVE_BACKTEST_FINDINGS.md`.
   - [x] **Tamper-evident failure log + sanitized offending-value capture 2026-06-02
     (non-paid).** Owner requirement: every LLM/analyst validation failure must be
     inspectable AND immutable. Audit finding: all model output is already gated by

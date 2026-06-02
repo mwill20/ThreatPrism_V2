@@ -3,6 +3,33 @@
 Real-LLM two-model backtest: ThreatPrism (Claude) triage vs. an independent
 OpenAI analyst, over the curated synthetic SOC dataset. No real-world data.
 
+## CONFIRMING run — enum fix verified + clean A/B at full N — 2026-06-02 (both fixes in place)
+
+Re-ran the blind + anchored A/B after two fixes shipped: the blind report-leak fix
+**and** the analyst enum-contract fix (`analyst_final_disposition` vocabulary). ~$0.10.
+
+| Mode (both fixes) | Agreement | Det mismatch | Sev mismatch | Confidence delta | Graded |
+|-------------------|-----------|--------------|--------------|------------------|--------|
+| Anchored          | 1.0       | 0            | 0            | flat **0.0**     | **8/8** |
+| **True blind**    | **0.875** | **1** (adv-0004) | 2        | uniform **0.05** | **8/8** |
+
+**Two results, both decisive:**
+
+1. **Enum fix verified live.** Both runs graded **8/8 with zero `schema_validation_failure`**
+   (the prior corrected blind run lost 2/8 to an out-of-enum `analyst_final_disposition`).
+   Deriving the closed vocabulary into the prompt closed the gap on real data.
+2. **Anchoring is material — confirmed at full N (not 6/8).** Anchored agrees 100% and
+   parrots ThreatPrism's confidence to the decimal (delta 0.0 on every case); true blind
+   produces its *own* confidence (delta 0.05 everywhere) and splits on **adv-0004**
+   (`benign` vs `suspicious`) — the **same** case that split in the 6/8 corrected run, so
+   the disagreement signal is robust, not noise.
+
+**Honest caveats:** the confidence delta is uniformly 0.05 — a coarse-grid artifact (both
+models round confidence to ~0.05 steps; `count_over_threshold≥0.2 = 0`), so it is a
+real-but-weak soft signal. The **determination split (adv-0004)** is the stronger,
+reproducible finding. The tamper-evident failure log stayed empty (0 grading failures) —
+the correct outcome, and it confirms the live path runs clean end-to-end.
+
 ## CORRECTION — blind mode was not blind; anchoring is NOT ruled out — 2026-06-02 (post-fix A/B)
 
 > **This supersedes the "Blind-vs-anchored" section below.** That comparison used a

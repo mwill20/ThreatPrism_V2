@@ -76,6 +76,14 @@ deterministic backtest --dataset adversarial -> agreement 0.5  (4/8 mismatches)
 vs. `1.0` on the curated set. The test asserts `determination_mismatches >= 1` and
 `agreement_rate < 1.0`.
 
+**Per-axis resolution.** A single agreement number hides *which* ambiguity is hard.
+`BacktestReport.agreement_by_axis` (keyed on `ambiguity_axis`, carried through
+`payload.source_metadata`) breaks it down: deterministically `disposition_edge`
+agrees (0/1) while `dual_use_behavior`, `conflicting_evidence`, `severity_edge`, and
+`benign_mimicking_malicious` each split. On a *live* run this is the real payoff —
+you learn that two real models converge on, say, dual-use but diverge on
+severity-edge, which is a concrete tuning signal, not just a score.
+
 The important nuance: this keyword/odd-index trick makes the *deterministic pair*
 diverge for CI, but the cases are **also** authored as genuine ambiguity for the live
 models — we didn't fit the cases to the demo grader's quirk and call it a day. The
@@ -139,6 +147,7 @@ crack that lets real data in.
 | Run | `python -m threatprism.demo.backtest --dataset adversarial [--live]` |
 | Axes | dual-use, conflicting-evidence, severity-edge, disposition-edge, benign-mimicking |
 | Deterministic result | agreement **0.5** (4/8 mismatches) vs 1.0 on curated |
+| Per-axis breakdown | `agreement_by_axis` (axis → graded/mismatches); `disposition_edge` agrees, other 4 split |
 | Divergence trick | odd-indexed cases carry a high-tier keyword → grader clears → mismatch |
 | Safety | RFC 5737 IPs, `.test` domains, manifest review gate, demo-safety clean |
 | Tests | `tests/test_adversarial_dataset.py` (loads / divergence-capable / queue) |

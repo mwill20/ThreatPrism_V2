@@ -31,6 +31,23 @@ def test_adversarial_set_is_divergence_capable() -> None:
     assert report.agreement_rate < 1.0
 
 
+def test_agreement_breakdown_by_ambiguity_axis() -> None:
+    # Per-axis resolution (spec 37 Q4): which kinds of ambiguity drive divergence.
+    report = run_backtest(_adversarial_service(), HeuristicDemoAnalyst())
+    axes = report.agreement_by_axis
+    assert set(axes) == {
+        "dual_use_behavior",
+        "conflicting_evidence",
+        "severity_edge",
+        "disposition_edge",
+        "benign_mimicking_malicious",
+    }
+    assert sum(a["graded"] for a in axes.values()) == report.graded_total
+    # disposition_edge case (even-indexed) agrees; benign-mimicking (odd) diverges.
+    assert axes["disposition_edge"]["determination_mismatches"] == 0
+    assert axes["benign_mimicking_malicious"]["determination_mismatches"] >= 1
+
+
 def test_adversarial_disagreement_surfaces_in_manager_review_queue() -> None:
     service = _adversarial_service()
     run_backtest(service, HeuristicDemoAnalyst())  # submits analyst feedback -> disagreements

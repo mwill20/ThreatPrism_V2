@@ -290,7 +290,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-279 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+280 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -594,7 +594,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-279 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+280 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

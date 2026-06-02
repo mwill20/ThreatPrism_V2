@@ -12,7 +12,11 @@ All notable repository-level changes should be recorded here.
   detection that a clear-cut corpus cannot: deterministic baseline is **agreement
   0.5** (4/8 mismatches, 4 flagged-then-cleared) vs. 1.0 on the curated set.
   Synthetic only (RFC 5737 IPs, `.test` domains), manifest review gate, demo-safety
-  clean. Tests: `tests/test_adversarial_dataset.py`. Baseline `276 -> 279 passed`.
+  clean. Tests: `tests/test_adversarial_dataset.py`. Also added a **per-axis
+  agreement breakdown** (`BacktestReport.agreement_by_axis`, spec 37 Q4) keyed on
+  `ambiguity_axis` (carried in `payload.source_metadata`), so a run shows *which*
+  kinds of ambiguity drive divergence (deterministic: `disposition_edge` agrees;
+  the other four axes split). Baseline `276 -> 280 passed`.
 - Ran the first live two-model backtest (real Claude triage + independent OpenAI
   analyst) over the curated synthetic SOC corpus: 27 graded, 0 failures, 100%
   determination/severity agreement, ~$0.17. A cents-scale smoke run first caught a

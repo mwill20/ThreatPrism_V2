@@ -64,6 +64,9 @@ class BacktestReport(BaseModel):
     grading_failure_types: dict[str, int] = Field(default_factory=dict)  # failure_type -> count
     no_report_total: int = 0  # cases with no gradeable report (blocked/failed/not-yet-run)
     no_report_reasons: dict[str, int] = Field(default_factory=dict)  # triage_status -> count
+    # ambiguity_axis -> {graded, determination_mismatches} (spec 37 Q4): which kinds
+    # of ambiguity drive divergence. Empty for cases with no ambiguity_axis metadata.
+    agreement_by_axis: dict[str, dict[str, int]] = Field(default_factory=dict)
     agreement_rate: float = 1.0  # 1 - determination_mismatch / graded
     determination_mismatches: int = 0
     severity_mismatches: int = 0
@@ -91,6 +94,7 @@ def run_backtest(
     grading_failure_types: dict[str, int] = {}
     no_report_total = 0
     no_report_reasons: dict[str, int] = {}
+    axis_tally: dict[str, dict[str, int]] = {}
     by_det: dict[str, int] = {}
     analyst_ledger = SpendLedger()
     analyst_cost_model = cost_model or CostModel()
@@ -122,6 +126,11 @@ def run_backtest(
 
         response = service.submit_feedback(item.case_id, feedback)
         disagreement = response.disagreement
+        axis = (case.source_metadata or {}).get("ambiguity_axis")
+        if isinstance(axis, str) and axis:
+            tally = axis_tally.setdefault(axis, {"graded": 0, "determination_mismatches": 0})
+            tally["graded"] += 1
+            tally["determination_mismatches"] += int(disagreement.determination_mismatch)
         tp_det = report.determination.value
         an_det = feedback.analyst_determination.value
         by_det[tp_det] = by_det.get(tp_det, 0) + 1
@@ -148,6 +157,7 @@ def run_backtest(
         grading_failure_types=dict(sorted(grading_failure_types.items())),
         no_report_total=no_report_total,
         no_report_reasons=dict(sorted(no_report_reasons.items())),
+        agreement_by_axis=dict(sorted(axis_tally.items())),
         agreement_rate=round(1 - det_mismatches / graded, 3) if graded else 1.0,
         determination_mismatches=det_mismatches,
         severity_mismatches=sum(r.severity_mismatch for r in results),

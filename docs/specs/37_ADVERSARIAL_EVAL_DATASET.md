@@ -139,5 +139,10 @@ quarantine path governs it unchanged.
 3. Should the deterministic `HeuristicDemoAnalyst` be tuned to diverge on these axes,
    or do the cases need to be authored so *any* reasonable grader diverges? (Prefer
    the latter — author genuine ambiguity rather than fitting the demo grader.)
-4. Do we want a per-axis agreement breakdown in `BacktestReport` (which axes converge
-   vs. diverge)? Likely yes — pairs well with the no-report-reason counting follow-up.
+4. ~~Do we want a per-axis agreement breakdown in `BacktestReport`?~~ **Resolved
+   2026-06-02 — yes, implemented.** `BacktestReport.agreement_by_axis` maps each
+   `ambiguity_axis` (carried in `payload.source_metadata`) to `{graded,
+   determination_mismatches}`. Deterministic baseline: `disposition_edge` agrees
+   (0/1); `dual_use_behavior`, `conflicting_evidence`, `severity_edge` each split
+   1/2; `benign_mimicking_malicious` splits 1/1. Test:
+   `test_agreement_breakdown_by_ambiguity_axis`.

@@ -1262,7 +1262,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 Current known result:
 
 ```text
-279 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
+280 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -1273,7 +1273,9 @@ with the real-LLM analyst data-egress guard (`tests/test_analyst_egress.py`), th
 `272 -> 275` with the cost-minimal `--limit` smoke support + grading-failure
 diagnosability (`tests/test_backtest.py`), then `275 -> 276` with no-report-reason
 counting (`test_no_report_cases_are_counted_with_reason`), then `276 -> 279` with
-the adversarial/ambiguous eval dataset (spec 37, `tests/test_adversarial_dataset.py`).
+the adversarial/ambiguous eval dataset (spec 37, `tests/test_adversarial_dataset.py`),
+then `279 -> 280` with the per-axis agreement breakdown (`agreement_by_axis`,
+spec 37 Q4).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

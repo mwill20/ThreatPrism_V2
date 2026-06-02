@@ -498,7 +498,7 @@ non-demo data, or real PHI — those remain **Avoid/Gated**.
 |----|--------|-----------|--------------------------|-------|
 | OT-L10 | **Data egress to OpenAI (analyst).** Case + report sent to a third party could leak raw PHI/PII/secrets. | **Mitigated** | The analyst grades the **stored, Stage-1-tokenized** case (`run_backtest` → `service.get_case()`, `demo/backtest.py:96`); Stage-1 tokens (`[POTENTIAL_PHI:...]`, `[SECRET:...]`) are never rehydrated. Guarded by `tests/test_analyst_egress.py`. Spend-capped + metered + fail-closed (specs 35/36). | Project owner, 2026-06-01 |
 | OT-L11a | **Data egress to Anthropic (triage).** Raw sensitive data could reach the triage provider. | **Mitigated** (covered by I1) | Stage-1 tokenization runs before `_prepare_case_for_model()`; the provider never sees raw PHI/PII/secrets. Now applies to a *live* provider. | Project owner, 2026-06-01 |
-| OT-L11b | **Local model supply chain.** A tampered/poisoned Prompt Guard 2 weight set could mis-score injection. | **Mitigated for current scope** | Model is **revision-pinnable** (`SEMANTIC_FIREWALL_MODEL_REVISION`); loaded locally (no per-request network). Owner must pin a verified revision before production. | `TODO: owner sign-off on pinned revision` |
+| OT-L11b | **Local model supply chain.** A tampered/poisoned Prompt Guard 2 weight set could mis-score injection. | **Mitigated** | Model **revision pinned** in `.env.example` to verified SHA `a8ded8e697ce7c355e395a0df51f94adb4a2fd27` (HF main as of 2025-04-29); a moving tag is rejected at enable; loaded locally (no per-request network). | Project owner, 2026-06-01 |
 | OT-L11c | **Probabilistic firewall trusted as a gate.** A semantic detector could be evaded or could over-block. | **Mitigated by design** | Detector-not-gate (Lesson 30): the deterministic prompt firewall + Slice G quarantine enforcement remain the hard gate; the semantic layer only adds review/quarantine *bands*. Fails toward the deterministic layers. | Project owner, 2026-06-01 |
 
 ### Residual risks accepted (owner sign-off)
@@ -506,13 +506,13 @@ non-demo data, or real PHI — those remain **Avoid/Gated**.
 - **RR-L1 (novel semantic prompt-injection bypass):** a payload neither the
   deterministic firewall nor Prompt Guard 2 detects could still reach the live
   triage model. Downstream output policy + evidence validation + action safety
-  remain. Accepted for POC live-eval scope. `Accepted by: <owner>, 2026-06-01`.
+  remain. Accepted for POC live-eval scope. `Accepted by: Project owner, 2026-06-01`.
 - **L7 residual (no output entity-extraction):** the output scan catches known
   credential *shapes* (shared catalog) but not arbitrary data regurgitation.
-  Accepted for POC scope. `Accepted by: <owner>, 2026-06-01`.
+  Accepted for POC scope. `Accepted by: Project owner, 2026-06-01`.
 - **Live spend:** real paid calls on both Anthropic and OpenAI. Bounded by
   `llm_max_cost_usd_per_run` (default $5, fail-closed). Owner confirmed cost
-  policy is in place. `Accepted by: <owner>, 2026-06-01`.
+  policy is in place. `Accepted by: Project owner, 2026-06-01`.
 
 ### Pre-flight before any paid run (owner)
 

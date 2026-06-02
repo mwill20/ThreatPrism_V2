@@ -1030,13 +1030,13 @@ Gate Opening"):
   attributes.
 - [x] **Local semantic firewall (Prompt Guard 2)** — built (spec 32), now active
   as a **detector** (review/quarantine bands); deterministic firewall + Slice G
-  remain the hard gate (OT-L11c). Pin `SEMANTIC_FIREWALL_MODEL_REVISION` before
-  production (OT-L11b, owner sign-off pending).
+  remain the hard gate (OT-L11c). `SEMANTIC_FIREWALL_MODEL_REVISION` **pinned** to
+  verified SHA `a8ded8e6…` (OT-L11b signed off 2026-06-01).
 - [x] **Cost policy** — per-run spend cap `llm_max_cost_usd_per_run` ($5 default),
   per-call metering, fail-closed on breach (specs 35/36). Owner confirmed in place.
 - [x] **Threat-treatment gate** — spec 21 updated: L1/L5/L7 re-opened with current
-  evidence; OT-L10/OT-L11a/b/c added; residual risks logged with owner-signature
-  placeholders; pre-flight checklist recorded.
+  evidence; OT-L10/OT-L11a/b/c added; residual risks (RR-L1, L7-residual, live
+  spend) **accepted by Project owner 2026-06-01**; pre-flight checklist recorded.
 - [ ] **Still gated (NOT opened):** tool/function-calling (L8), memory write-back
   (OT-L8), production multi-tenancy (OT-L9), fine-tuning (L4), non-demo data, real
   PHI.

@@ -1165,10 +1165,16 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
   `tests/test_auto_close_delta.py` (5 tests: crafted catch/safe/escalate + corpus
   invariants + no-leak). Runbook + roadmap §5 updated. Live auto-close rate over a
   benign feed remains the owner's `--live` run.
-- [ ] Evolution 2 — Batch over analyst-handled cases (backtest + tuning): replay
+- [x] Evolution 2 — Batch over analyst-handled cases (backtest + tuning): replay
   cases with analyst ground truth (mock-analyst via a *different, independent* LLM
   emitting `AnalystFeedbackCreate`); aggregate `DisagreementRecord`s where ThreatPrism
-  said suspicious/malicious vs the analyst. Reuses the existing feedback loop at scale.
+  said suspicious/malicious vs the analyst. **Live two-model run done 2026-06-01**
+  (real Claude triage + real OpenAI analyst): 27 graded, **100% agreement** (0
+  determination/severity mismatches), $0.171. Findings + analysis:
+  `docs/LIVE_BACKTEST_FINDINGS.md`. Two follow-ups surfaced: (a) the corpus is too
+  clear-cut to exercise disagreement detection — need ambiguous/adversarial cases;
+  (b) 27 vs 31 graded — add no-report-reason (blocked vs failed) counting to
+  `run_backtest` (cheap, non-paid).
 - [~] Evolution 3 — Single event-driven live co-pilot: analyst self-assigns a case,
   pulls the triage report, works it human-in-the-loop, submits feedback; same tuning
   loop as Evolution 2 at live cadence.

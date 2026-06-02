@@ -1243,6 +1243,26 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     `test_failure_from_validation_error_captures_sanitized_offending_values`,
     `test_backtest_records_failures_in_tamper_evident_log` (284 -> 291). Partially
     addresses the gated OT-8 (append-only audit) — see threat-model traceability.
+  - [x] **Tamper-evident audit-trail mirror 2026-06-02 (non-paid) — closes OT-1 / rest
+    of OT-8.** Every persisted `AuditEvent` (authz allow/deny, guardrail blocks,
+    rehydration, role-view access) is mirrored to an append-only hash-chained log with
+    `verify()`, alongside the rewritable case blob. Extracted the hash-chain primitive
+    into generic `src/threatprism/persistence/hash_chain.py` (`HashChainedLog`) and
+    refactored `FailureLog` to delegate (one impl, two consumers; `test_failure_log.py`
+    is the regression net). Wired at `SQLiteRepository.save_case` (single chokepoint,
+    complete-by-construction), deduped by `audit_event_id`. Config: `AUDIT_LOG_PATH`
+    (gitignored, empty by default → test posture unchanged). TDD:
+    `tests/test_audit_log_integrity.py` (verifiable chain, dedup-across-saves,
+    disabled-by-default). 291 -> 294.
+  - [ ] **DEFERRED (next/later if recommended) — harder / human-labeled adversarial
+    cases to push divergence past 1/8.** The engineered rule-ambiguity set + coarse
+    4-bucket determinations still under-exercise divergence (true-blind agreement
+    0.875–0.833 across runs; only adv-0004 splits). A richer signal needs either
+    human-labeled ground-truth cases or a finer-grained confidence prompt. Cost:
+    authoring effort (non-paid) + another paid live run (~$0.05–0.10) for **diminishing
+    marginal insight** — the methodology is now sound and the core finding (modest real
+    divergence; anchoring is material) is established. Pick up only if deeper
+    divergence analysis becomes a priority.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1345,7 +1365,8 @@ with the analyst enum-contract hardening
 (`test_analyst_prompt_enumerates_all_required_enum_vocabularies`), then `284 -> 291`
 with the tamper-evident failure log + sanitized offending-value capture
 (`tests/test_failure_log.py`, `test_failure_from_validation_error_*`,
-`test_backtest_records_failures_in_tamper_evident_log`).
+`test_backtest_records_failures_in_tamper_evident_log`), then `291 -> 294`
+with the tamper-evident audit-trail mirror (`tests/test_audit_log_integrity.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

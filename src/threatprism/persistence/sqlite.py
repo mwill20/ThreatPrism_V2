@@ -15,6 +15,7 @@ from threatprism.cases.schemas import (
     TriageStatus,
     utc_now,
 )
+from threatprism.persistence.hash_chain import HashChainedLog
 
 
 def sqlite_path_from_url(database_url: str) -> str:
@@ -26,9 +27,16 @@ def sqlite_path_from_url(database_url: str) -> str:
 
 
 class SQLiteRepository:
-    def __init__(self, database_url: str) -> None:
+    def __init__(self, database_url: str, audit_log: HashChainedLog | None = None) -> None:
         self.db_path = sqlite_path_from_url(database_url)
         self._memory_conn: sqlite3.Connection | None = None
+        # Optional tamper-evident mirror of the case audit trail. The case blob is
+        # rewritable (OT-1); this append-only hash chain is not. `save_case` is the
+        # single chokepoint every persisted AuditEvent flows through, so mirroring here
+        # is complete-by-construction. `_audit_seen` dedups by audit_event_id across the
+        # many save_case calls per case (lazily seeded from the log for restart safety).
+        self.audit_log = audit_log
+        self._audit_seen: set[str] | None = None
         # Serializes access to the shared in-memory connection. FastAPI runs
         # sync route handlers in a threadpool, so concurrent requests would
         # otherwise race the single :memory: connection's cursor/transaction.
@@ -96,6 +104,20 @@ class SQLiteRepository:
                     case.updated_at.isoformat(),
                 ),
             )
+        self._mirror_audit_trail(case)
+
+    def _mirror_audit_trail(self, case: CaseRecord) -> None:
+        """Append any not-yet-logged audit events to the tamper-evident mirror."""
+        if self.audit_log is None:
+            return
+        if self._audit_seen is None:
+            # Lazy seed from the existing log so restarts don't re-append history.
+            self._audit_seen = self.audit_log.payload_ids("audit_event_id")
+        for event in case.audit_trail:
+            if event.audit_event_id in self._audit_seen:
+                continue
+            self.audit_log.append_payload(event.model_dump(mode="json"))
+            self._audit_seen.add(event.audit_event_id)
 
     def get_case(self, case_id: str) -> CaseRecord | None:
         with self._transaction() as conn:

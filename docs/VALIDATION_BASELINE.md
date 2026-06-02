@@ -8,7 +8,7 @@ the count is edited in exactly one place per slice.
 ## Current baseline
 
 ```text
-291 passed, 3 skipped
+294 passed, 3 skipped
 eval harness dry-run: 15 passed / 0 failed
 ```
 

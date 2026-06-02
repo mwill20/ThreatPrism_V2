@@ -58,6 +58,10 @@ class Settings:
     # Tamper-evident append-only sink for LLM/analyst validation failures (what failed,
     # why, + sanitized offending value). Under the gitignored data/ tree; empty disables.
     failure_log_path: str = "./data/audit/llm_validation_failures.jsonl"
+    # Tamper-evident mirror of the case audit trail (authz decisions, guardrail blocks,
+    # rehydration, role-view access). Empty disables (default keeps the test posture
+    # clean since every case write emits audit events); set in .env for demo/prod.
+    audit_log_path: str = ""
     summary_max_chars: int = 1200
     batch_max_events: int = 50
     batch_max_input_tokens: int = 150_000
@@ -129,6 +133,7 @@ class Settings:
             llm_max_cost_usd_per_run=float(os.getenv("LLM_MAX_COST_USD_PER_RUN", "5") or "5"),
             llm_max_total_tokens_per_run=_parse_int(os.getenv("LLM_MAX_TOTAL_TOKENS_PER_RUN"), default=2_000_000),
             failure_log_path=os.getenv("FAILURE_LOG_PATH", "./data/audit/llm_validation_failures.jsonl"),
+            audit_log_path=os.getenv("AUDIT_LOG_PATH", ""),
             summary_max_chars=_parse_int(os.getenv("SUMMARY_MAX_CHARS"), default=1200),
             batch_max_events=_parse_int(os.getenv("BATCH_MAX_EVENTS"), default=50),
             batch_max_input_tokens=_parse_int(os.getenv("BATCH_MAX_INPUT_TOKENS"), default=150_000),

@@ -4,12 +4,10 @@ Owner requirement (2026-06-02): when a model emits output outside our closed
 vocabulary (or any other fail-closed condition), we must be able to see *what*
 failed and *why*, immutably — for debugging, tuning, feedback, and forensics.
 
-Design: an append-only JSONL hash chain. Each line is
-``{"payload": <sanitized TriageFailureReport>, "prev_hash": <hex>, "record_hash": <hex>}``
-where ``record_hash = sha256(prev_hash + canonical(payload))`` and the first record's
-``prev_hash`` is ``GENESIS_HASH``. Any later edit or deletion breaks the chain and is
-caught by ``verify()`` — that is the "immutable" guarantee (tamper-evident, not merely
-append-by-convention).
+Design: a thin ``TriageFailureReport`` adapter over the shared, generic
+``HashChainedLog`` (`persistence/hash_chain.py`) — one append-only JSONL hash chain
+whose ``verify()`` catches any later edit, deletion, or reorder. That is the
+"immutable" guarantee (tamper-evident, not merely append-by-convention).
 
 Safety: this sink stores only what is already in a ``TriageFailureReport`` — field
 paths, codes, and SANITIZED offending values (PHI/secrets tokenized upstream before
@@ -18,15 +16,14 @@ they reach the report). It never receives a raw payload. Lives under the gitigno
 """
 from __future__ import annotations
 
-import hashlib
-import json
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from threatprism.llm.failures import TriageFailureReport
+from threatprism.persistence.hash_chain import GENESIS_HASH, HashChainedLog
 
-GENESIS_HASH = "0" * 64
+__all__ = ["GENESIS_HASH", "FailureLog", "build_failure_log", "offending_value_sanitizer"]
 
 
 def offending_value_sanitizer() -> Callable[[str], str]:
@@ -48,63 +45,21 @@ def build_failure_log(settings: object) -> FailureLog | None:
     return FailureLog(Path(path)) if path else None
 
 
-def _canonical(payload: dict) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
-
-
-def _record_hash(prev_hash: str, payload: dict) -> str:
-    return hashlib.sha256((prev_hash + _canonical(payload)).encode("utf-8")).hexdigest()
-
-
 @dataclass
 class FailureLog:
     """Append-only, hash-chained sink for ``TriageFailureReport`` records."""
 
     path: Path
+    _log: HashChainedLog = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.path = Path(self.path)
-
-    def _last_hash(self) -> str:
-        if not self.path.exists():
-            return GENESIS_HASH
-        last = GENESIS_HASH
-        with self.path.open("r", encoding="utf-8") as handle:
-            for line in handle:
-                line = line.strip()
-                if not line:
-                    continue
-                last = json.loads(line).get("record_hash", last)
-        return last
+        self._log = HashChainedLog(self.path)
 
     def append(self, report: TriageFailureReport) -> dict:
         """Append one failure record, linking it to the prior record's hash."""
-        payload = report.model_dump(mode="json")
-        prev_hash = self._last_hash()
-        record = {
-            "payload": payload,
-            "prev_hash": prev_hash,
-            "record_hash": _record_hash(prev_hash, payload),
-        }
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(record, sort_keys=True) + "\n")
-        return record
+        return self._log.append_payload(report.model_dump(mode="json"))
 
     def verify(self) -> bool:
         """Recompute the chain; return False on any edit, deletion, or reorder."""
-        if not self.path.exists():
-            return True
-        prev_hash = GENESIS_HASH
-        with self.path.open("r", encoding="utf-8") as handle:
-            for line in handle:
-                line = line.strip()
-                if not line:
-                    continue
-                record = json.loads(line)
-                if record.get("prev_hash") != prev_hash:
-                    return False
-                if record.get("record_hash") != _record_hash(prev_hash, record.get("payload", {})):
-                    return False
-                prev_hash = record["record_hash"]
-        return True
+        return self._log.verify()

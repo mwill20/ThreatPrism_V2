@@ -4,6 +4,20 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Tamper-evident mirror of the case audit trail (closes OT-1 / rest of OT-8).** The
+  case `audit_trail` lived only in a rewritable SQLite blob; every persisted
+  `AuditEvent` (authz allow/deny, guardrail blocks, rehydration, role-view access) is
+  now also mirrored to an append-only, hash-chained log with `verify()`. Extracted the
+  hash-chain primitive shipped last slice into a generic
+  `src/threatprism/persistence/hash_chain.py` (`HashChainedLog`) and refactored
+  `FailureLog` to delegate to it — one implementation, two consumers (the existing
+  `test_failure_log.py` is the regression net). Mirroring is wired at
+  `SQLiteRepository.save_case` (the single chokepoint every persisted event flows
+  through, so it's complete-by-construction) and deduped by `audit_event_id` across the
+  many save_case calls per case. Config: `AUDIT_LOG_PATH` (gitignored `data/audit/`,
+  **empty by default** so the test posture is unchanged; set in `.env` for demo/prod).
+  TDD: `tests/test_audit_log_integrity.py` (verifiable chain, dedup-across-saves,
+  disabled-by-default). Baseline `291 -> 294 passed`.
 - **Confirming live A/B (~$0.10): enum fix verified + anchoring confirmed at full N.**
   Re-ran blind + anchored on the adversarial set with both fixes in place. Both graded
   **8/8 with zero schema failures** (prior corrected blind run lost 2/8 to an

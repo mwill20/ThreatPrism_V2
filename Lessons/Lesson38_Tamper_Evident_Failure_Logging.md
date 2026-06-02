@@ -1,11 +1,13 @@
 # Lesson 38 — Tamper-Evident Failure Logging (Observing the Fail-Closed Path) 🔒🧾
 
-> Files: `src/threatprism/llm/failure_log.py`,
+> Files: `src/threatprism/persistence/hash_chain.py` (`HashChainedLog`),
+> `src/threatprism/llm/failure_log.py`,
 > `src/threatprism/llm/failures.py` (`TriageFailureReport.offending_values`,
 > `failure_from_validation_error`), `src/threatprism/cases/service.py` (`run_triage`),
+> `src/threatprism/persistence/sqlite.py` (`save_case` audit mirror),
 > `src/threatprism/demo/backtest.py` (`run_backtest`),
-> `tests/test_failure_log.py`, `tests/test_real_llm_provider.py`,
-> `tests/test_backtest.py`. Baseline: see
+> `tests/test_failure_log.py`, `tests/test_audit_log_integrity.py`,
+> `tests/test_real_llm_provider.py`, `tests/test_backtest.py`. Baseline: see
 > [../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ## 1. 🎯 The gap this closes
@@ -96,7 +98,34 @@ disabled), keeping the demo/test posture unchanged unless a real failure occurs.
 - Without a sanitizer, `offending_values` is empty (purity / no accidental leak).
 - The backtest writes one verifiable record per failure instead of discarding.
 
-## 7. 🎤 Interview talk track
+## 7. 🔁 Generalizing: the case audit trail gets the same treatment
+
+The failure log proved the pattern; the next slice extended it to the **case audit
+trail** (every authz allow/deny, guardrail block, rehydration, role-view access),
+which also lived only in a rewritable SQLite blob (threat OT-1).
+
+Two design choices worth keeping:
+
+1. **One primitive, two consumers.** Rather than copy the hash chain, it was extracted
+   into a generic `HashChainedLog` (`persistence/hash_chain.py`); `FailureLog` was
+   refactored to delegate to it. The existing `test_failure_log.py` suite was the
+   regression net that made the refactor safe — change the shared code, the locked
+   behavior either still holds or fails loudly. (Same DRY-without-coupling lesson as the
+   shared secret catalog, Lesson 35.)
+2. **Log at the chokepoint, not the call sites.** Audit events are appended to the case
+   in ~15 places (and some on the pre-tokenization `safeguarded` object that *becomes*
+   the case). Hooking each is error-prone and would miss the safeguarded ones. Instead
+   the mirror lives at `SQLiteRepository.save_case` — the single point every *persisted*
+   event flows through — so it is **complete-by-construction**. Because `save_case`
+   re-persists the whole growing trail on every status change, the mirror **dedups by
+   `audit_event_id`** (a seen-set lazily seeded from the log for restart safety) so each
+   event is logged exactly once.
+
+The trade-off mirrors a database normalization decision: completeness at the persistence
+boundary (one site, dedup) vs. correctness at creation (many sites, no dedup). Here
+"can't miss an event" won.
+
+## 8. 🎤 Interview talk track
 
 > "A live run failed silently — counted, not captured — so I couldn't debug it. I built
 > a tamper-evident failure log: an append-only JSONL hash chain where each record hashes

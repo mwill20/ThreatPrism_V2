@@ -4,6 +4,7 @@ import hashlib
 import json
 from copy import deepcopy
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from threatprism.cases.read_models import (
@@ -54,6 +55,7 @@ from threatprism.llm.failure_log import build_failure_log
 from threatprism.llm.failures import TriageFailureReport
 from threatprism.llm.governance import CostModel, SpendLedger, metered_generate
 from threatprism.llm.providers import get_provider
+from threatprism.persistence.hash_chain import HashChainedLog
 from threatprism.persistence.sqlite import SQLiteRepository
 from threatprism.reports.render import render_report
 from threatprism.soar.generic import normalize_soar_payload
@@ -62,7 +64,10 @@ from threatprism.soar.generic import normalize_soar_payload
 class CaseService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        self.repository = SQLiteRepository(settings.database_url)
+        audit_log = (
+            HashChainedLog(Path(settings.audit_log_path)) if settings.audit_log_path else None
+        )
+        self.repository = SQLiteRepository(settings.database_url, audit_log=audit_log)
         self.provider = get_provider(settings.llm_provider, settings)
         self._spend_ledger = SpendLedger()
         self._cost_model = CostModel(

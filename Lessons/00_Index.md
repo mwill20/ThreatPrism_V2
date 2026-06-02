@@ -220,7 +220,9 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\fixtures\curated_adversarial\*` -> Lesson 37
 - `C:\Projects\ThreatPrismV2\tests\test_adversarial_dataset.py` -> Lesson 37
 - `C:\Projects\ThreatPrismV2\src\threatprism\llm\failure_log.py` -> Lesson 38
+- `C:\Projects\ThreatPrismV2\src\threatprism\persistence\hash_chain.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\tests\test_failure_log.py` -> Lesson 38
+- `C:\Projects\ThreatPrismV2\tests\test_audit_log_integrity.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
 - `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34

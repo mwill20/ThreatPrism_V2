@@ -58,7 +58,14 @@ Current status: demo-safe proof-of-concept backend with a local hardened
 dashboard surface.
 
 ThreatPrism is not production-ready. It does not process real organization
-data, run live LLM/SOAR/cloud providers, or execute remediation.
+data, run live SOAR/cloud providers, or execute remediation.
+
+The real-LLM gate (Claude triage + an independent OpenAI analyst) has been
+owner-opened and **live-validated** with a two-model backtest on 2026-06-01 (27
+graded, 100% agreement, ~$0.17; see
+[docs/LIVE_BACKTEST_FINDINGS.md](docs/LIVE_BACKTEST_FINDINGS.md)). Defaults remain
+demo-safe — live providers run only under explicit gated config, and
+`ALLOW_REAL_ACTIONS=false` still blocks all real actions.
 
 The current repository contains the V2 spec pack plus the first backend slice:
 generic SOAR case intake, case normalization, guardrails, deterministic demo
@@ -207,6 +214,7 @@ docker-compose.yml Local demo backend service
 | **What the tool produces + roadmap** | [docs/PRODUCT_VALUE_AND_ROADMAP.md](docs/PRODUCT_VALUE_AND_ROADMAP.md) |
 | Run end-to-end on a SOC dataset | [docs/runbooks/RUN_AGAINST_SOC_DATASET.md](docs/runbooks/RUN_AGAINST_SOC_DATASET.md) |
 | Open the real-LLM gate (Claude/OpenAI) | [docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md](docs/specs/33_REAL_LLM_PROVIDER_AND_EXECUTIVE_SUMMARY.md), [docs/runbooks/OPEN_REAL_LLM_GATE.md](docs/runbooks/OPEN_REAL_LLM_GATE.md) |
+| Live two-model backtest results + analysis | [docs/LIVE_BACKTEST_FINDINGS.md](docs/LIVE_BACKTEST_FINDINGS.md) |
 | AI governance posture (Control/Audit/Safety) | [docs/AI_GOVERNANCE_ASSESSMENT.md](docs/AI_GOVERNANCE_ASSESSMENT.md) |
 | Dev-workflow AI governance hooks (audit + secret-block + dashboard) | [docs/runbooks/DEV_WORKFLOW_HOOKS.md](docs/runbooks/DEV_WORKFLOW_HOOKS.md) (operate/disable/dashboard), [docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md](docs/specs/34_DEV_WORKFLOW_AI_GOVERNANCE_HOOKS.md) (design) |
 | Setup | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
@@ -281,7 +289,7 @@ The wrapper runs:
 Current known result:
 
 ```text
-272 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+275 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 
@@ -585,7 +593,7 @@ Current local validation evidence is documented in
 [docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
 
 ```text
-272 passed (3 skipped: opt-in live Prompt Guard 2 tests)
+275 passed (3 skipped: opt-in live Prompt Guard 2 tests)
 eval harness dry-run: 15 passed / 0 failed
 ```
 

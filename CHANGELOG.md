@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- Ran the first live two-model backtest (real Claude triage + independent OpenAI
+  analyst) over the curated synthetic SOC corpus: 27 graded, 0 failures, 100%
+  determination/severity agreement, ~$0.17. A cents-scale smoke run first caught a
+  real bug (the analyst lacked OpenAI JSON mode → every grading failed
+  unparseable); fixed with `response_format=json_object`, and `BacktestReport`
+  gained `grading_failure_types` so failures are no longer silent. Added a
+  `--limit`/seed-`limit` flag for cost-minimal smoke runs. Findings + honest
+  caveats (corpus too clear-cut to exercise disagreement detection; 27-vs-31 graded
+  gap) in `docs/LIVE_BACKTEST_FINDINGS.md`. Baseline `272 -> 275 passed`.
 - Opened the real-LLM gates (owner-authorized 2026-06-01): live Anthropic triage,
   OpenAI independent analyst, and the local Prompt Guard 2 semantic firewall. Spec
   21 threat-treatment register updated — re-opened L1/RR-L1, L5/OT-L3, L7/OT-L7

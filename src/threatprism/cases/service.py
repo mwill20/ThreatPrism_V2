@@ -50,6 +50,7 @@ from threatprism.guardrails.semantic_firewall import (
 from threatprism.guardrails.tokenization import TokenVault, rehydrate_text, tokenize_text
 from threatprism.guardrails.views import RoleViewResult, ViewRole, render_role_view
 from threatprism.ids import new_id
+from threatprism.llm.failure_log import build_failure_log
 from threatprism.llm.failures import TriageFailureReport
 from threatprism.llm.governance import CostModel, SpendLedger, metered_generate
 from threatprism.llm.providers import get_provider
@@ -224,6 +225,9 @@ class CaseService:
                     metadata=generation.model_dump(mode="json"),
                 )
             )
+            failure_log = build_failure_log(self.settings)
+            if failure_log is not None:
+                failure_log.append(generation)  # tamper-evident: what failed + why (sanitized)
             case.updated_at = utc_now()
             self.repository.save_case(case)
             return

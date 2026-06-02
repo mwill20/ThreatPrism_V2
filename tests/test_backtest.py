@@ -57,6 +57,50 @@ class _RaiseAnalyst:
         raise ProviderTimeout("analyst unreachable")
 
 
+class _BadDispositionAnalyst:
+    """Emits an out-of-enum disposition -> ValidationError -> schema_validation_failure."""
+
+    provider_name = "bad_disposition"
+
+    def __init__(self):
+        self.last_usage = None
+        self.last_prompt = ""
+        self.last_response = ""
+
+    def evaluate(self, case, report):
+        return AnalystFeedbackCreate.model_validate(
+            {
+                "analyst_id": "bad",
+                "analyst_determination": "suspicious",
+                "analyst_severity": "medium",
+                "analyst_confidence": 0.5,
+                "analyst_final_disposition": "investigate-further",  # not in the enum
+            }
+        )
+
+
+def test_backtest_records_failures_in_tamper_evident_log(tmp_path) -> None:
+    # Owner requirement: grading failures must be inspectable AND immutable, not
+    # counted-and-discarded. Each out-of-vocabulary output becomes an appended,
+    # hash-chained record carrying the (sanitized) offending value.
+    from threatprism.llm.failure_log import FailureLog
+
+    path = tmp_path / "failures.jsonl"
+    log = FailureLog(path)
+    report = run_backtest(_seeded_service(), _BadDispositionAnalyst(), failure_log=log)
+
+    assert report.grading_failures == 31
+    assert report.grading_failure_types.get("schema_validation_failure") == 31
+
+    lines = path.read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) == 31          # every failure recorded, none discarded
+    assert log.verify() is True      # tamper-evident chain intact
+
+    blob = path.read_text(encoding="utf-8")
+    assert "analyst_final_disposition" in blob  # WHICH field
+    assert "investigate-further" in blob        # WHAT the model emitted
+
+
 def test_full_agreement_when_analyst_mirrors_threatprism() -> None:
     report = run_backtest(_seeded_service(), _AgreeAnalyst())
 

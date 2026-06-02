@@ -55,6 +55,9 @@ class Settings:
     llm_output_price_per_mtok: float = 0.0
     llm_max_cost_usd_per_run: float = 5.0
     llm_max_total_tokens_per_run: int = 2_000_000
+    # Tamper-evident append-only sink for LLM/analyst validation failures (what failed,
+    # why, + sanitized offending value). Under the gitignored data/ tree; empty disables.
+    failure_log_path: str = "./data/audit/llm_validation_failures.jsonl"
     summary_max_chars: int = 1200
     batch_max_events: int = 50
     batch_max_input_tokens: int = 150_000
@@ -125,6 +128,7 @@ class Settings:
             llm_output_price_per_mtok=float(os.getenv("LLM_OUTPUT_PRICE_PER_MTOK", "0") or "0"),
             llm_max_cost_usd_per_run=float(os.getenv("LLM_MAX_COST_USD_PER_RUN", "5") or "5"),
             llm_max_total_tokens_per_run=_parse_int(os.getenv("LLM_MAX_TOTAL_TOKENS_PER_RUN"), default=2_000_000),
+            failure_log_path=os.getenv("FAILURE_LOG_PATH", "./data/audit/llm_validation_failures.jsonl"),
             summary_max_chars=_parse_int(os.getenv("SUMMARY_MAX_CHARS"), default=1200),
             batch_max_events=_parse_int(os.getenv("BATCH_MAX_EVENTS"), default=50),
             batch_max_input_tokens=_parse_int(os.getenv("BATCH_MAX_INPUT_TOKENS"), default=150_000),

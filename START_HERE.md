@@ -75,12 +75,8 @@ git status -sb
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
-Current known validation baseline:
-
-```text
-284 passed (3 skipped: opt-in live Prompt Guard 2 tests)
-eval harness dry-run: 15 passed / 0 failed
-```
+Current known validation baseline: see
+[docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md) (canonical).
 
 ## Generate Compact Handoff
 

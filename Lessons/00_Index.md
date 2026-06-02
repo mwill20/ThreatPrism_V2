@@ -3,7 +3,8 @@
 ## Assumptions And Missing Context
 
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
-- The current validated baseline is `284 passed` (3 skipped: opt-in live Prompt Guard 2 tests).
+- The current validated baseline is canonical in
+  [../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 - Lessons use emojis because the lesson brief requested visual scanning markers.
 - Line references are based on the live files at lesson creation time.
 - This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
@@ -93,6 +94,7 @@ Fake SOAR payload
 | ✅ | [Lesson 35](Lesson35_Shared_Secret_Pattern_Catalog.md) | One Secret-Pattern Catalog, Many Consumers (DRY Without Coupling) | `src/threatprism/guardrails/secret_catalog.py`, `guardrails/{healthcare,tokenization,policy}.py`, `tools/hooks/_common.py`, `tests/test_secret_catalog.py` |
 | ✅ | [Lesson 36](Lesson36_Live_Two_Model_Backtest.md) | The Live Two-Model Backtest (Reading "100% Agreement" Honestly) | `src/threatprism/demo/backtest.py`, `src/threatprism/llm/mock_analyst.py`, `src/threatprism/demo/seeding.py`, `tests/test_backtest.py`, `docs/LIVE_BACKTEST_FINDINGS.md` |
 | ✅ | [Lesson 37](Lesson37_Adversarial_Ambiguous_Eval_Dataset.md) | Designing an Adversarial Dataset (An Eval Must Be Able to Fail) | `fixtures/curated_adversarial/*`, `src/threatprism/demo/seeding.py` (`AdversarialCuratedSource`), `src/threatprism/demo/backtest.py` (`--dataset`), `tests/test_adversarial_dataset.py`, `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md` |
+| ✅ | [Lesson 38](Lesson38_Tamper_Evident_Failure_Logging.md) | Tamper-Evident Failure Logging (Observing the Fail-Closed Path) | `src/threatprism/llm/failure_log.py`, `src/threatprism/llm/failures.py`, `src/threatprism/cases/service.py` (`run_triage`), `src/threatprism/demo/backtest.py` (`run_backtest`), `tests/test_failure_log.py` |
 
 ## File Coverage Map
 
@@ -217,6 +219,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_backtest.py` -> Lesson 36
 - `C:\Projects\ThreatPrismV2\fixtures\curated_adversarial\*` -> Lesson 37
 - `C:\Projects\ThreatPrismV2\tests\test_adversarial_dataset.py` -> Lesson 37
+- `C:\Projects\ThreatPrismV2\src\threatprism\llm\failure_log.py` -> Lesson 38
+- `C:\Projects\ThreatPrismV2\tests\test_failure_log.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
 - `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34
@@ -245,11 +249,8 @@ cd /c/Projects/ThreatPrismV2
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lessons
 ```
 
-Expected output:
-
-```text
-284 passed
-```
+Expected output: the canonical count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ## What To Study Next
 

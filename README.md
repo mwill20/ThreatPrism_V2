@@ -287,12 +287,8 @@ The wrapper runs:
 - The dry-run eval harness against fake fixtures.
 - Eval artifact hygiene checks.
 
-Current known result:
-
-```text
-284 passed (3 skipped: opt-in live Prompt Guard 2 tests)
-eval harness dry-run: 15 passed / 0 failed
-```
+Current known result: see [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md)
+(canonical pass/skip count + eval result).
 
 The underlying pytest command remains:
 
@@ -591,12 +587,8 @@ previews only.
 ## Evaluation
 
 Current local validation evidence is documented in
-[docs/EVALUATION.md](docs/EVALUATION.md). The current baseline is:
-
-```text
-284 passed (3 skipped: opt-in live Prompt Guard 2 tests)
-eval harness dry-run: 15 passed / 0 failed
-```
+[docs/EVALUATION.md](docs/EVALUATION.md). The canonical baseline (pass/skip count +
+eval result) is [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md).
 
 This is deterministic fake-data regression evidence only. It is not a live LLM
 safety proof, production-readiness claim, HIPAA compliance claim, HITRUST

@@ -35,6 +35,7 @@ from threatprism.cases.read_models import LlmUsageMetrics
 from threatprism.cases.service import CaseService
 from threatprism.config import Settings
 from threatprism.demo.seeding import AdversarialCuratedSource, CuratedDatasetSource, DemoSeeder
+from threatprism.llm.failure_log import FailureLog, build_failure_log
 from threatprism.llm.failures import TriageFailureReport
 from threatprism.llm.governance import CostModel, SpendLedger, metered_evaluate
 
@@ -93,6 +94,7 @@ def run_backtest(
     cost_model: CostModel | None = None,
     max_total_tokens: int = 0,
     max_cost_usd: float = 0.0,
+    failure_log: FailureLog | None = None,
 ) -> BacktestReport:
     """Grade triaged cases against the independent analyst, governing the analyst's
     spend with its own ledger + cost model + cap (Evolution 2). The demo heuristic
@@ -130,6 +132,8 @@ def run_backtest(
             grading_failures += 1  # provider/parse/schema failure OR spend cap — fail closed
             ftype = outcome.failure_type.value if hasattr(outcome.failure_type, "value") else str(outcome.failure_type)
             grading_failure_types[ftype] = grading_failure_types.get(ftype, 0) + 1
+            if failure_log is not None:
+                failure_log.append(outcome)  # immutable: what failed + why, no longer discarded
             continue
         feedback = outcome
 
@@ -327,6 +331,7 @@ def main() -> int:
             cost_model=analyst_cost_model,
             max_total_tokens=settings.llm_max_total_tokens_per_run,
             max_cost_usd=settings.llm_max_cost_usd_per_run,
+            failure_log=build_failure_log(settings),  # immutable record of any grading failure
         )
     else:
         analyst = HeuristicDemoAnalyst()

@@ -219,6 +219,47 @@ def test_mock_analyst_is_independent_and_fails_closed() -> None:
         analyst.evaluate(case, _report(case))
 
 
+def test_failure_from_validation_error_captures_sanitized_offending_values() -> None:
+    # Owner requirement: when an output falls outside our listed options we must be
+    # able to SEE what the model actually emitted -- but never leak raw PHI/secrets.
+    from threatprism.cases.schemas import AnalystFeedbackCreate
+    from threatprism.guardrails.healthcare import safeguard_text
+
+    raw_secret = "sk-" + "A" * 40  # fake provider-key shape, assembled at runtime
+    try:
+        AnalystFeedbackCreate.model_validate(
+            {
+                "analyst_id": "a",
+                "analyst_determination": "suspicious",
+                "analyst_severity": "medium",
+                "analyst_confidence": 0.5,
+                # Out-of-enum disposition that also smuggles a secret-shaped value.
+                "analyst_final_disposition": "investigate-" + raw_secret,
+            }
+        )
+        raise AssertionError("expected a ValidationError")
+    except ValidationError as exc:
+        report = failure_from_validation_error(exc, sanitizer=lambda s: safeguard_text(s).value)
+
+    blob = json.dumps(report.offending_values)
+    assert "analyst_final_disposition" in blob  # we know WHICH field was out-of-vocabulary
+    assert "investigate" in blob                # and WHAT the model emitted
+    assert raw_secret not in blob               # but the raw secret is tokenized away
+
+
+def test_failure_from_validation_error_without_sanitizer_captures_nothing() -> None:
+    # Default stays pure/back-compatible: no sanitizer -> no offending values captured,
+    # so existing call sites can't accidentally log unsanitized input.
+    from threatprism.cases.schemas import AnalystFeedbackCreate
+
+    try:
+        AnalystFeedbackCreate.model_validate({"analyst_id": "a"})
+        raise AssertionError("expected a ValidationError")
+    except ValidationError as exc:
+        report = failure_from_validation_error(exc)
+    assert report.offending_values == {}
+
+
 def test_analyst_prompt_enumerates_all_required_enum_vocabularies() -> None:
     # A blind analyst has no ThreatPrism report to copy valid enum values from, so the
     # system prompt must itself state the closed vocabulary for EVERY required enum

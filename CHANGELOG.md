@@ -4,6 +4,27 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Tamper-evident failure log + sanitized offending-value capture** (owner
+  requirement). Every LLM/analyst validation failure is now inspectable AND immutable.
+  Audit finding first: all model output is already gated by Pydantic closed-vocabulary
+  validation and fails closed — no arbitrary output slips through — but the offending
+  value wasn't captured and the backtest *discarded* analyst failures. New
+  `src/threatprism/llm/failure_log.py`: `FailureLog`, an append-only JSONL **hash
+  chain** (`record_hash = sha256(prev_hash + canonical(payload))`) with `verify()`
+  that detects edits, deletions, and reorders. `TriageFailureReport.offending_values`
+  captures `field_path -> SANITIZED value` (PHI/secrets tokenized via the existing
+  safeguard before they reach the log; only populated when a sanitizer is injected, so
+  pure call sites leak nothing). Sanitizer threaded into both
+  `failure_from_validation_error` call sites (analyst + triage); the log is wired into
+  `run_backtest` (no longer discards) and `run_triage`. Config: `FAILURE_LOG_PATH`
+  (gitignored `data/audit/`, empty disables). TDD: `tests/test_failure_log.py` +
+  offending-value + backtest-integration tests. Baseline `284 -> 291 passed`.
+  Partially addresses the gated OT-8 (append-only audit) — see
+  `docs/threat-models/mitigations-traceability.md`.
+- **Single source of truth for the validation baseline** (cleanup). The pass/skip
+  count lived hand-maintained in ~6 files and drifted each slice; it now lives once in
+  `docs/VALIDATION_BASELINE.md`, and README / RUNBOOK / START_HERE / Lessons index /
+  WORKING_CHECKLIST reference it instead of restating the number.
 - **Hardened the analyst prompt's enum contract** (`mock_analyst.py`) to fix the 2/8
   blind-mode `schema_validation_failure`s from the corrected A/B. The system prompt
   named `analyst_final_disposition` but never stated its allowed values; a blind

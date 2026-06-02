@@ -1222,6 +1222,22 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     enums via `_vocab()` so the prompt can't drift, + "use exactly one of the listed
     values". TDD: `test_analyst_prompt_enumerates_all_required_enum_vocabularies`
     (283 -> 284). **Pending paid confirmation:** a blind re-run showing 8/8 graded.
+  - [x] **Tamper-evident failure log + sanitized offending-value capture 2026-06-02
+    (non-paid).** Owner requirement: every LLM/analyst validation failure must be
+    inspectable AND immutable. Audit finding: all model output is already gated by
+    Pydantic closed-vocabulary validation and fails closed (no arbitrary output slips
+    through), but the offending value wasn't captured and analyst failures were
+    counted-and-discarded by the backtest. Added `src/threatprism/llm/failure_log.py`
+    (`FailureLog`: append-only JSONL hash chain + `verify()`; `build_failure_log`;
+    `offending_value_sanitizer`); `TriageFailureReport.offending_values` (field_path ->
+    sanitized value via injected sanitizer, PHI/secrets tokenized first); threaded the
+    sanitizer into both `failure_from_validation_error` call sites (`governance.py`
+    analyst, `runner.py` triage); wired the log into `run_backtest` (no longer discards)
+    and `run_triage`. Config: `failure_log_path` (gitignored `data/audit/`). TDD:
+    `tests/test_failure_log.py` (chain/tamper/deletion/append-only),
+    `test_failure_from_validation_error_captures_sanitized_offending_values`,
+    `test_backtest_records_failures_in_tamper_evident_log` (284 -> 291). Partially
+    addresses the gated OT-8 (append-only audit) — see threat-model traceability.
   - [x] (b) 27 vs 31 graded — **done 2026-06-02 (non-paid):** `run_backtest` now
     records `no_report_total` + `no_report_reasons` (keyed on `triage_status`), so
     the gap is categorized (blocked vs failed) instead of silently skipped.
@@ -1302,12 +1318,9 @@ Use safe local validation first:
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
-Current known result:
-
-```text
-284 passed (3 skipped: opt-in live Prompt Guard 2 recall + false-positive + review-mode tests)
-eval harness dry-run: 15 passed / 0 failed
-```
+Current known result: canonical in
+[VALIDATION_BASELINE.md](VALIDATION_BASELINE.md) (single source of truth for the
+pass/skip count + eval result).
 
 Baseline moved `266 -> 267` on 2026-06-01 with the in-memory SQLite concurrency
 fix (`tests/test_persistence_concurrency.py`), then `267 -> 271` with the shared
@@ -1324,7 +1337,10 @@ confidence-delta capture (`test_confidence_deltas_are_captured`), then `282 -> 2
 with the blind-analyst report-leak fix
 (`test_blind_analyst_does_not_leak_report_via_case_triage_report`), then `283 -> 284`
 with the analyst enum-contract hardening
-(`test_analyst_prompt_enumerates_all_required_enum_vocabularies`).
+(`test_analyst_prompt_enumerates_all_required_enum_vocabularies`), then `284 -> 291`
+with the tamper-evident failure log + sanitized offending-value capture
+(`tests/test_failure_log.py`, `test_failure_from_validation_error_*`,
+`test_backtest_records_failures_in_tamper_evident_log`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from threatprism.cases.schemas import AnalystFeedbackCreate, AuditEvent, CaseRecord, TriageReport
 from threatprism.llm.batching import estimate_tokens
+from threatprism.llm.failure_log import offending_value_sanitizer
 from threatprism.llm.failures import (
     LLMProviderError,
     TriageFailureReport,
@@ -331,7 +332,7 @@ def metered_evaluate(
     except LLMProviderError as exc:
         result = failure_from_exception(exc, **meta)
     except ValidationError as exc:
-        result = failure_from_validation_error(exc, **meta)
+        result = failure_from_validation_error(exc, sanitizer=offending_value_sanitizer(), **meta)
 
     usage = getattr(analyst, "last_usage", None)
     if isinstance(usage, UsageRecord):

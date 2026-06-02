@@ -114,7 +114,9 @@ def safe_generate_report(
     except LLMProviderError as exc:
         return failure_from_exception(exc, **meta)
     except ValidationError as exc:
-        return failure_from_validation_error(exc, **meta)
+        from threatprism.llm.failure_log import offending_value_sanitizer
+
+        return failure_from_validation_error(exc, sanitizer=offending_value_sanitizer(), **meta)
 
     if not validate_guardrails:
         return report

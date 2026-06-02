@@ -14,6 +14,7 @@ the builders map exceptions / validation errors / guardrail issues to reports.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from enum import Enum
 from typing import Literal
 
@@ -61,6 +62,10 @@ class TriageFailureReport(BaseModel):
     why: str
     pydantic_triggered: bool = False
     pydantic_errors: list[str] = Field(default_factory=list)  # field paths only
+    # field_path -> SANITIZED offending value, so an operator can see WHAT the model
+    # emitted outside our closed vocabulary. Only populated when a sanitizer is
+    # injected (PHI/secrets tokenized first); empty otherwise to keep this pure.
+    offending_values: dict[str, str] = Field(default_factory=dict)
     guardrail: str | None = None
     provider: str | None = None
     model_id: str | None = None
@@ -172,6 +177,8 @@ def failure_from_exception(
 def failure_from_validation_error(
     exc: ValidationError,
     *,
+    sanitizer: Callable[[str], str] | None = None,
+    max_value_chars: int = 200,
     case_id: str | None = None,
     batch_id: str | None = None,
     provider: str | None = None,
@@ -179,11 +186,20 @@ def failure_from_validation_error(
     model_revision: str | None = None,
     attempt: int = 1,
 ) -> TriageFailureReport:
-    # Field paths + error type only — never the offending input value (no PHI/secret leak).
+    # Field paths + error type always. The offending VALUE is captured only when a
+    # sanitizer is injected, so PHI/secrets are tokenized before they reach the
+    # record (and pure call sites that omit the sanitizer leak nothing).
     paths = [
         f"{'.'.join(str(part) for part in err.get('loc', ()))}:{err.get('type', 'invalid')}"
         for err in exc.errors()
     ]
+    offending_values: dict[str, str] = {}
+    if sanitizer is not None:
+        for err in exc.errors():
+            if "input" not in err:
+                continue
+            loc = ".".join(str(part) for part in err.get("loc", ())) or "<root>"
+            offending_values[loc] = sanitizer(str(err["input"])[:max_value_chars])
     ft = FailureType.schema_validation_failure
     return TriageFailureReport(
         failure_type=ft,
@@ -192,6 +208,7 @@ def failure_from_validation_error(
         why=f"{len(paths)} field(s) failed Pydantic validation.",
         pydantic_triggered=True,
         pydantic_errors=sorted(paths),
+        offending_values=offending_values,
         terminal_status=_terminal_status(ft),
         **_meta(case_id, batch_id, provider, model_id, model_revision, attempt),
     )

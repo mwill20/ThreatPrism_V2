@@ -230,6 +230,17 @@ Dockerfile        Local demo backend image
 docker-compose.yml Local demo backend service
 ```
 
+## Architecture
+
+![ThreatPrism architecture](assets/diagrams/architecture.png)
+
+Request lifecycle and trust boundaries. Source + design decisions:
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Threat-model diagrams (trust-boundary
+data flow + OWASP-LLM-style applied overlay):
+[docs/threat-models/system-context.md](docs/threat-models/system-context.md). Rendered
+assets live in [`assets/diagrams/`](assets/diagrams/) (SVG + PNG); regenerate with
+`python tools/render_diagrams.py` then `npx @mermaid-js/mermaid-cli`.
+
 ## Documentation Map
 
 | Need | Start Here |

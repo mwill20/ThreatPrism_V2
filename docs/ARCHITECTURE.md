@@ -80,6 +80,9 @@ flowchart TB
     db -. "every AuditEvent mirrored (dedup by id)" .-> logs
 ```
 
+**Rendered image:** [SVG](../assets/diagrams/architecture.svg) · [PNG](../assets/diagrams/architecture.png)
+(regenerate with `python tools/render_diagrams.py` then mermaid-cli).
+
 ---
 
 ## Component Architecture

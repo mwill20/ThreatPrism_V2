@@ -202,6 +202,8 @@ flowchart TB
     db -. "every AuditEvent mirrored, hash-chained" .-> logs
 ```
 
+**Rendered image:** [SVG](../../assets/diagrams/threat-model-dfd.svg) · [PNG](../../assets/diagrams/threat-model-dfd.png)
+
 > **Reading it:** the spine `src to routes to ... to db to rv` is the request path; the
 > dashed edges to **logs** are the tamper-evident observability added for OT-1/OT-8. The
 > two UNTRUSTED nodes (inbound client and LLM output) are exactly the two surfaces the
@@ -292,6 +294,8 @@ flowchart TB
     tI2["I2 / DI3 Disclosure + minimum-necessary"]:::threat -. threatens .-> rv
     tL10["OT-L10 Dataset supply chain"]:::threat -. threatens .-> dset
 ```
+
+**Rendered image:** [SVG](../../assets/diagrams/threat-model-overlay.svg) · [PNG](../../assets/diagrams/threat-model-overlay.png)
 
 > **How to read the overlay:** follow the solid edges for the request/data path; each
 > blue square is a threat pinned to the asset or process it endangers, and the matching

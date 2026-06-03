@@ -4,6 +4,14 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Rendered diagram image files (docs/assets).** Rendered the three Mermaid diagrams
+  to committed SVG + PNG under `assets/diagrams/` (architecture, threat-model trust-
+  boundary DFD, OWASP-LLM-style applied overlay) so they display in any viewer, not just
+  GitHub's Mermaid renderer. Added `tools/render_diagrams.py` (extracts the inline
+  Mermaid blocks to `assets/diagrams/src/*.mmd` — markdown stays the single source of
+  truth) and a regen note; rendered via `@mermaid-js/mermaid-cli`. Embedded the
+  architecture image in the README and linked SVG/PNG under each Mermaid block. Closes
+  the audit's "visual demo/assets" item.
 - **Applied threat-model overlay diagram (docs).** Added an OWASP-LLM-style Mermaid
   overlay to `docs/threat-models/system-context.md`: actors, processes, data stores,
   trust boundaries, and data flow, with each threat drawn as a callout node pinned to

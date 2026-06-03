@@ -1,0 +1,66 @@
+flowchart TB
+    classDef actor fill:#ffffff,stroke:#555,color:#000;
+    classDef proc fill:#1b3a4b,stroke:#0b1f2a,color:#fff;
+    classDef store fill:#eaf2fb,stroke:#2471a3,color:#000;
+    classDef threat fill:#2e86de,stroke:#1b4f72,color:#fff;
+    classDef untrusted fill:#fdecea,stroke:#c0392b,color:#000;
+
+    %% ---- Actors / external (untrusted producers in red) ----
+    analyst["SOC analyst / engineer"]:::actor
+    mgr["Manager-GRC / legal / audit-debug"]:::actor
+    soar["SOAR / SIEM / webhook + ?role= (UNTRUSTED)"]:::untrusted
+    llm["LLM provider output (UNTRUSTED)"]:::untrusted
+    dset["External datasets (gitignored, reviewed)"]:::untrusted
+
+    subgraph TP["ThreatPrism — service trust boundary (api/app.py)"]
+        direction TB
+        subgraph Z1["Ingress + auth"]
+            routes["FastAPI routes + Pydantic"]:::proc
+            authz["auth/demo.py role authorization"]:::proc
+        end
+        subgraph Z2["Intake + Stage-1"]
+            norm["SOAR normalize + sha256 source hash"]:::proc
+            hc["healthcare Stage-1 tokenize (permanent)"]:::proc
+        end
+        subgraph Z3["Pre-model"]
+            fw["prompt firewall + Stage-2 TokenVault"]:::proc
+            sem["semantic firewall (detector, default-off)"]:::proc
+        end
+        prov["TriageProvider (demo / real Claude)"]:::proc
+        subgraph Z4["Output guardrails"]
+            og["output policy + evidence + action safety"]:::proc
+        end
+        subgraph Z5["Role-view"]
+            rv["render_role_view + audit"]:::proc
+        end
+        cstore[("SQLite case store")]:::store
+        vault[("TokenVault (in-memory)")]:::store
+        logs[("Tamper-evident integrity logs")]:::store
+    end
+
+    %% ---- Data flow ----
+    soar --> routes --> norm --> hc --> cstore
+    cstore --> fw --> sem --> prov --> llm --> og --> cstore
+    fw --- vault
+    cstore --> rv --> analyst
+    rv --> mgr
+    dset -. "sanitized replay (seed)" .-> norm
+    og -. "validation failures" .-> logs
+    cstore -. "every AuditEvent (hash-chained)" .-> logs
+
+    %% ---- Threats (blue callouts) ----
+    tS["S1/S2 Spoofing"]:::threat -. threatens .-> authz
+    tD["D DoS / OT-L3 model DoS"]:::threat -. threatens .-> routes
+    tT2["T2 Source provenance"]:::threat -. threatens .-> norm
+    tDI2["DI2 PHI / PII disclosure"]:::threat -. threatens .-> hc
+    tL01["L01 Prompt injection"]:::threat -. threatens .-> fw
+    tOTL11["OT-7 / OT-L11 Semantic evasion + FP-DoS"]:::threat -. threatens .-> sem
+    tL02["L02 Insecure output handling"]:::threat -. threatens .-> og
+    tL13["L13 Hallucinated evidence"]:::threat -. threatens .-> og
+    tE2["E2 Excessive agency (ALLOW_REAL_ACTIONS=false)"]:::threat -. threatens .-> og
+    tL09["L09 Overreliance"]:::threat -. threatens .-> analyst
+    tT1["T1 / OT-1 Store tampering"]:::threat -. threatens .-> cstore
+    tI3["I3 Token-vault exposure"]:::threat -. threatens .-> vault
+    tR1["R1 / OT-8 Repudiation (append-only)"]:::threat -. threatens .-> logs
+    tI2["I2 / DI3 Disclosure + minimum-necessary"]:::threat -. threatens .-> rv
+    tL10["OT-L10 Dataset supply chain"]:::threat -. threatens .-> dset

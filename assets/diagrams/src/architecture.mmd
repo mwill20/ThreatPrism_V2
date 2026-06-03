@@ -1,0 +1,32 @@
+flowchart TB
+    classDef untrusted fill:#fdecea,stroke:#c0392b,color:#000;
+    classDef control fill:#eafaf1,stroke:#1e8449,color:#000;
+    classDef store fill:#eaf2fb,stroke:#2471a3,color:#000;
+
+    soar["SOAR / SIEM / webhook (UNTRUSTED)<br/>Sentinel, Defender, Swimlane, generic"]:::untrusted
+    consumer["API consumers / local dashboard"]:::untrusted
+
+    subgraph svc["FastAPI service (api/app.py)"]
+        direction TB
+        adapt["SOAR adapters<br/>soar/generic.py"]:::control
+        hc["Stage 1: healthcare safeguards<br/>guardrails/healthcare.py<br/>PHI / PII / secret tokenize (permanent)"]:::control
+        roleview["Role-view layer<br/>auth/demo.py to guardrails/views.py<br/>identity to role, mask, audit"]:::control
+
+        subgraph bg["Background task: run_triage (cases/service.py)"]
+            direction TB
+            prep["Stage 2: prompt firewall + TokenVault<br/>prompt_firewall.py + tokenization.py"]:::control
+            sem["Semantic firewall (detector, default-off)<br/>guardrails/semantic_firewall.py"]:::control
+            prov["TriageProvider Protocol<br/>llm/providers.py (demo OR real Claude)<br/>+ spend governance llm/governance.py"]:::control
+            val["Output guardrails<br/>policy + evidence + action safety"]:::control
+            rehy["Rehydrate Stage 2 tokens only<br/>Stage 1 stays redacted"]:::control
+        end
+    end
+
+    db[("SQLite repository<br/>persistence/sqlite.py (JSON blobs)")]:::store
+    logs[("Tamper-evident integrity logs<br/>persistence/hash_chain.py<br/>FailureLog + audit-trail mirror")]:::store
+
+    soar --> adapt --> hc --> db
+    db --> prep --> sem --> prov --> val --> rehy --> db
+    db --> roleview --> consumer
+    val -. "on failure: what failed + why (sanitized)" .-> logs
+    db -. "every AuditEvent mirrored (dedup by id)" .-> logs

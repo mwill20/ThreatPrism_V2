@@ -4,6 +4,18 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Evolution 3 — single-event live co-pilot driver (headless).** Added
+  `src/threatprism/demo/run_copilot_demo.py`: walks ONE case through the full analyst
+  loop at single-event cadence — create -> triage -> self-assign -> analyst feedback ->
+  disagreement record — the headless analogue of the dashboard co-pilot panel, so the
+  live owner-run is repeatable, cost-capped (one case), and regression-tested. The
+  analyst's verdict is an explicit `AnalystVerdict` input (parameterized), not an LLM,
+  so it demonstrates the loop mechanics and the tuning signal (disagreement -> manager
+  review) without conflating with the Evolution-2 independent grader. `--live` swaps in
+  the real provider (paid, ~$0.01-0.02/case); deterministic otherwise. TDD:
+  `tests/test_copilot_demo.py` (full loop, divergence -> manager review, no leakage).
+  Baseline `299 -> 302 passed`. The live owner-run with a real provider remains the
+  remaining gated step.
 - **Operator verify / inspect / export for the integrity logs (export half of OT-8).**
   `python -m threatprism.persistence.verify_logs` runs the hash-chain `verify()` on every
   configured log (failure log + audit trail), summarizes record counts by category

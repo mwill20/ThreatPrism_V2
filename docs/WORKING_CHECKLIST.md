@@ -1302,7 +1302,16 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     my-cases filter → owned case only, submit feedback → status
     `analyst_feedback_submitted`; only console noise is a favicon 404. +1 static test in
     `tests/test_dashboard_ui.py`. 266 passed.
-  - [ ] Owner-run — live cadence with a real provider.
+  - [x] **Sub-slice 3 — headless single-event co-pilot driver 2026-06-02 (non-paid).**
+    `src/threatprism/demo/run_copilot_demo.py` walks ONE case through the full loop
+    (create -> triage -> self-assign -> analyst feedback -> disagreement record), the
+    headless analogue of the dashboard panel — repeatable, cost-capped, regression-tested.
+    Analyst verdict is a parameterized `AnalystVerdict` input (not an LLM); default mirrors
+    triage (agreement), an override forces a disagreement -> manager review. `--live` swaps
+    in the real provider. TDD: `tests/test_copilot_demo.py`. 299 -> 302. Runbook updated.
+  - [ ] Owner-run — live cadence with a real provider (paid, ~$0.01-0.02/case): run
+    `PYTHONPATH=src python -m threatprism.demo.run_copilot_demo --live` (loads `.env`).
+    Pending explicit go-ahead per the ask-before-paid rule.
 
 Other gated work:
 
@@ -1374,7 +1383,9 @@ with the tamper-evident failure log + sanitized offending-value capture
 (`tests/test_failure_log.py`, `test_failure_from_validation_error_*`,
 `test_backtest_records_failures_in_tamper_evident_log`), then `291 -> 294`
 with the tamper-evident audit-trail mirror (`tests/test_audit_log_integrity.py`), then
-`294 -> 299` with the verify/inspect/export CLI (`tests/test_verify_logs.py`).
+`294 -> 299` with the verify/inspect/export CLI (`tests/test_verify_logs.py`), then
+`299 -> 302` with the Evolution 3 single-event co-pilot driver
+(`tests/test_copilot_demo.py`).
 
 CI follow-up on 2026-05-24: GitHub Actions failed on Ubuntu because the eval
 fixture path traversal guard did not normalize Windows-style backslash paths

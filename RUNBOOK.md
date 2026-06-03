@@ -78,6 +78,29 @@ Exit code is non-zero if any configured, existing log fails its hash-chain check
 this is safe to use as a CI/integrity gate. Absent logs are treated as trivially valid.
 The audit-trail mirror is enabled by setting `AUDIT_LOG_PATH` (see `.env.example`).
 
+## Run The Single-Event Co-Pilot Demo (Evolution 3)
+
+Walk ONE case through the full analyst loop (create -> triage -> self-assign ->
+analyst feedback -> disagreement record) at single-event cadence:
+
+```powershell
+Set-Location C:\Projects\ThreatPrismV2
+$env:PYTHONPATH='src'
+python -m threatprism.demo.run_copilot_demo                              # deterministic
+python -m threatprism.demo.run_copilot_demo --analyst-determination malicious  # force a disagreement
+python -m threatprism.demo.run_copilot_demo --json
+```
+
+The analyst's verdict is an explicit input (defaults to mirroring the triage report =
+agreement); override `--analyst-determination/-severity/-disposition/-confidence` to
+simulate the analyst diverging, which fires a disagreement record -> manager review.
+
+Live (real provider, **paid**, ~$0.01-0.02 for one case) loads `.env`:
+
+```powershell
+python -m threatprism.demo.run_copilot_demo --live
+```
+
 ## Run Demo Scenario And Contract Checks
 
 Use this focused check when changing routes, response models, demo payloads, or

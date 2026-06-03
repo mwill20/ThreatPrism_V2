@@ -4,6 +4,14 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Applied threat-model overlay diagram (docs).** Added an OWASP-LLM-style Mermaid
+  overlay to `docs/threat-models/system-context.md`: actors, processes, data stores,
+  trust boundaries, and data flow, with each threat drawn as a callout node pinned to
+  the asset/process it endangers — using ThreatPrism's own IDs (STRIDE `S/T/R/I/D/E`,
+  OWASP-LLM `L01/L02/L09/L13` + `OT-L*`, LINDDUN `DI*`, open `OT-*`). Complements the
+  boundary-crossing data-flow diagram already in that file. Docs only.
+- **Rendered Mermaid architecture + threat-model trust-boundary diagrams (docs).** Added
+  to `docs/ARCHITECTURE.md` and `docs/threat-models/system-context.md`.
 - **README "Future Enhancements (Tracked, Deferred)" section (docs).** Surfaced the
   tracked-but-deferred work in the README and synced detailed entries into
   `docs/FUTURE_ENHANCEMENTS.md`: harder/human-labeled adversarial cases, case-payload-blob

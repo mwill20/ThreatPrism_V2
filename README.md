@@ -256,6 +256,16 @@ data flow + OWASP-LLM-style applied overlay):
 assets live in [`assets/diagrams/`](assets/diagrams/) (SVG + PNG); regenerate with
 `python tools/render_diagrams.py` then `npx @mermaid-js/mermaid-cli`.
 
+### Local dashboard
+
+![ThreatPrism local dashboard cycling personas](assets/dashboard.gif)
+
+The local same-origin dashboard (`GET /dashboard`, fake demo credentials) cycling the
+Analyst → Manager/GRC → CSI/RGOI personas: operational metrics, role-filtered case
+queues, the per-case triage detail with the **Analyst co-pilot** panel (assign / feedback),
+and governance review signals. Static still: [`assets/dashboard.png`](assets/dashboard.png).
+Launch it via [docs/runbooks/DASHBOARD_READINESS.md](docs/runbooks/DASHBOARD_READINESS.md).
+
 ## Documentation Map
 
 | Need | Start Here |

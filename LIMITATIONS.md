@@ -314,8 +314,8 @@ Known repository-readiness gaps:
 
 - Licensed under Apache-2.0 (`LICENSE`); usage rights are clear.
 - Rendered architecture + threat-model diagrams (SVG/PNG) are tracked in
-  `assets/diagrams/` and embedded in the README. A dashboard screenshot/GIF is still
-  optional polish, not tracked.
+  `assets/diagrams/`, and a dashboard screenshot + persona-cycling GIF in `assets/`
+  (`dashboard.png`, `dashboard.gif`) — all embedded in the README.
 - Production deployment, live provider operation, live production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.

@@ -4,6 +4,13 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Dashboard screenshot + persona-cycling GIF; working-tree cleanup.** Captured the
+  live local dashboard (seeded, 36 demo cases) with Playwright across the Analyst,
+  Manager/GRC, and CSI/RGOI personas → committed `assets/dashboard.png` (hero) and
+  `assets/dashboard.gif` (cycling), embedded in the README Architecture section. Removed
+  stray `pytest-cache-files-*` / `.pytest_tmp_*` dirs from the working tree (already
+  gitignored) and added `.playwright-mcp/` to `.gitignore`. Closes the audit's last two
+  optional-polish items; REPO_AUDIT + LIMITATIONS updated.
 - **Licensed under Apache-2.0 (owner-selected, 2026-06-03).** Added the `LICENSE` file
   (full Apache License 2.0) and a `license = "Apache-2.0"` field in `pyproject.toml`.
   Flipped every license-status reference from "unclear / TODO" to Apache-2.0 (README

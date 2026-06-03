@@ -40,7 +40,7 @@ enforced by a test. Validation is single-sourced at **314 passed / 3 skipped**, 
 | Limitations and trade-offs | PASS | High | LIMITATIONS.md explicit on demo-only / no-remediation / gated scope. |
 | License and usage rights | PASS | High | **Apache-2.0** (`LICENSE`, added 2026-06-03); README License section + Project Status updated. Permissive + patent grant. |
 | Support/contact | PASS | Medium | README → issues; SECURITY.md for vulnerabilities. |
-| Visual demo/assets | PASS | Medium | Committed rendered images (SVG + PNG) in `assets/diagrams/` (architecture, threat-model DFD, applied overlay), embedded in README; local dashboard at `/dashboard`. A dashboard screenshot/GIF remains optional polish. |
+| Visual demo/assets | PASS | Medium | Committed rendered diagrams (SVG + PNG) in `assets/diagrams/` (architecture, threat-model DFD, applied overlay) + a **dashboard screenshot (`assets/dashboard.png`) and persona-cycling GIF (`assets/dashboard.gif`)**, all embedded in README; live dashboard at `/dashboard`. |
 | Examples | PASS | Medium | examples/ (soar_payloads, demo_scenarios, csi, dashboard_contract); curated fixtures; eval fixtures. |
 | CI/tests | PASS | High | .github/workflows/safe-validation.yml (Ubuntu, py3.12, fake-data env); 305 collected tests; demo-safety gate. |
 
@@ -75,17 +75,18 @@ enforced by a test. Validation is single-sourced at **314 passed / 3 skipped**, 
 
 ## Minor Hygiene
 
-- Stray `pytest-cache-files-*` directories sit at the repo root (untracked, not committed). A `.gitignore` entry would keep the working tree clean.
+- (Resolved 2026-06-03) Stray `pytest-cache-files-*` and `.pytest_tmp_*` dirs removed from
+  the working tree (they were already gitignored); `.playwright-mcp/` added to `.gitignore`.
 
 ## Priority Fix Order (closeout)
 
 No blockers remain. Optional polish only:
 
 1. *(Optional)* Add `CITATION.cff` for portfolio citeability.
-2. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
 
 All prior gaps are resolved: **Apache-2.0 license added**, MODEL_CARD refreshed, diagrams
-rendered to committed images, baseline single-sourced and current.
+rendered to committed images, **dashboard screenshot + GIF tracked and embedded**, stray
+pytest dirs cleaned, baseline single-sourced and current.
 
 ## Validation Reference
 

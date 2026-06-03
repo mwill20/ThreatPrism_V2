@@ -4,6 +4,17 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Spec 38: RGOI Learning Loop & Triage-Context Integration (design-only, gated).**
+  Authored `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` designing the two
+  halves of the CSI/RGOI vision that spec 23 left out of scope: (A) wiring governed
+  retrieval into the **triage LLM** prompt (not just the analyst's manual `/csi/*`
+  reads — `cases/service.py` currently has zero CSI references), and (B) a
+  human-approved **write-back/learning loop** (AI proposes non-authoritative cognition;
+  only a human promotes to the approved tier). Both remain **Avoid** decisions
+  (OT-L1 RAG, OT-L8 memory) — the spec enumerates the "Before RAG"/"Before Memory"
+  control gates and requires re-opening spec 21 + re-reviewing the LLM threat model
+  before any code. No implementation. Added forward-references from spec 21's gated
+  table and the system-context future-boundary row. Docs only.
 - **Rendered diagram image files (docs/assets).** Rendered the three Mermaid diagrams
   to committed SVG + PNG under `assets/diagrams/` (architecture, threat-model trust-
   boundary DFD, OWASP-LLM-style applied overlay) so they display in any viewer, not just

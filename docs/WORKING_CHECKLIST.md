@@ -1320,6 +1320,14 @@ SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
 
 Other gated work:
 
+- [x] **Spec 38 authored (design-only, gated) 2026-06-03** —
+  `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` designs (A) retrieval-into-
+  triage and (B) the human-approved KB write-back/learning loop (the two halves spec 23
+  left out of scope). No code. Implementing either requires re-opening spec 21's
+  **Avoid** decisions (OT-L1 RAG, OT-L8 memory write-back) and satisfying the LLM threat
+  model "Before RAG"/"Before Memory" gates. Forward-referenced from spec 21 + system-context.
+- [ ] RGOI retrieval-into-triage + write-back implementation (spec 38) only after the
+  OT-L1/OT-L8 Avoid decisions are re-opened with owner sign-off.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
   a gated future enhancement; it is not needed for the current build and must

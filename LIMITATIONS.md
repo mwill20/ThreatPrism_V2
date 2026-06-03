@@ -312,11 +312,10 @@ ready.
 
 Known repository-readiness gaps:
 
-- No `LICENSE` file has been selected. Usage rights are unclear until the user
-  chooses and adds a license.
-- No tracked screenshot, GIF, or rendered architecture image exists yet. Text
-  diagrams are available in docs, and local dashboard hardening is implemented,
-  but permanent visual assets are not tracked.
+- Licensed under Apache-2.0 (`LICENSE`); usage rights are clear.
+- Rendered architecture + threat-model diagrams (SVG/PNG) are tracked in
+  `assets/diagrams/` and embedded in the README. A dashboard screenshot/GIF is still
+  optional polish, not tracked.
 - Production deployment, live provider operation, live production identity,
   monitoring, and remediation remain gated future work.
 - Performance, latency, throughput, and load behavior are not yet measured.

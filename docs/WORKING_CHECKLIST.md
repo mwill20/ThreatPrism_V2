@@ -42,8 +42,8 @@ scope, internally consistent, and green.
 - **Threat posture:** 3-lens threat model + traceability + owner-signed treatment
   register; OT-8/OT-1 (integrity) largely mitigated; OT-L8 (write-back) implemented for
   demo scope; OT-L1 (RAG-into-triage) intentionally Avoid, enforced by test.
-- **The one open publication item:** **no `LICENSE`** — owner must select one; usage
-  rights are intentionally unclear until then (flagged in README + SECURITY + REPO_AUDIT).
+- **License:** **Apache-2.0** (`LICENSE`, added 2026-06-03, owner-selected). No
+  publication blockers remain.
 - **Gated / out of scope** (each with a re-open trigger): RAG-into-triage wiring,
   write-back persistence/HTTP-routes/multi-tenancy, tools/function-calling, fine-tuning,
   live JWKS/IdP, production deployment, non-demo data, real PHI, real remediation.
@@ -392,7 +392,7 @@ Repo Standards Readiness Pass v0.1:
 - [x] Keep the pass documentation-only; no app-code changes, live providers,
   real credentials, real data, or remediation work.
 - [x] Leave license selection explicit and unresolved until the user chooses a
-  license.
+  license. **(Resolved 2026-06-03: Apache-2.0 selected; `LICENSE` added.)**
 - [x] Validate with
   `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
   -BaseTemp .pytest_tmp_repo_standards_final_fresh`.

@@ -18,10 +18,9 @@ loop — with retrieval-into-triage deliberately built-but-not-wired and that di
 enforced by a test. Validation is single-sourced at **314 passed / 3 skipped**, eval
 15/15, demo safety passing.
 
-**The one remaining High-priority blocker is the absence of a `LICENSE` file** — usage
-rights are unclear until the owner selects one. This is the only item standing between
-the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-by-design
-(production deployment/monitoring intentionally gated).
+**As of 2026-06-03 the license blocker is resolved** — the project is licensed under
+**Apache-2.0** (`LICENSE`). All scorecard rows are now PASS or PARTIAL-by-design
+(production deployment/monitoring intentionally gated). No publication blockers remain.
 
 ## Scorecard
 
@@ -39,7 +38,7 @@ the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-b
 | Deployment documentation | PARTIAL | Medium | docs/DEPLOYMENT.md covers local/Docker only; production deployment intentionally out of scope. |
 | Monitoring/maintenance | PARTIAL | Medium | docs/MONITORING.md + new tamper-evident logs & verify CLI; production monitoring still gated. |
 | Limitations and trade-offs | PASS | High | LIMITATIONS.md explicit on demo-only / no-remediation / gated scope. |
-| License and usage rights | FAIL | High | **No LICENSE file.** README flags usage rights as unclear. The one real blocker. |
+| License and usage rights | PASS | High | **Apache-2.0** (`LICENSE`, added 2026-06-03); README License section + Project Status updated. Permissive + patent grant. |
 | Support/contact | PASS | Medium | README → issues; SECURITY.md for vulnerabilities. |
 | Visual demo/assets | PASS | Medium | Committed rendered images (SVG + PNG) in `assets/diagrams/` (architecture, threat-model DFD, applied overlay), embedded in README; local dashboard at `/dashboard`. A dashboard screenshot/GIF remains optional polish. |
 | Examples | PASS | Medium | examples/ (soar_payloads, demo_scenarios, csi, dashboard_contract); curated fixtures; eval fixtures. |
@@ -58,7 +57,6 @@ the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-b
 
 ## Missing Files
 
-- `LICENSE` — **High.** Absent; usage rights unclear (owner must choose).
 - `CITATION.cff` — Optional. The repo has portfolio/educational intent; a citation file would aid reuse/citeability.
 - `assets/` screenshot or GIF — Optional polish. Rendered Mermaid + ASCII diagrams already exceed the minimum visual requirement.
 
@@ -73,7 +71,7 @@ the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-b
 
 ## Security and Licensing Gaps
 
-- **LICENSE absent** (the one High gap). No secrets committed — verified by the demo-safety scanner (`--include-untracked`) and placeholder-only `.env.example`.
+- **Licensed Apache-2.0** (`LICENSE`, 2026-06-03) — license gap closed. No secrets committed — verified by the demo-safety scanner (`--include-untracked`) and placeholder-only `.env.example`.
 
 ## Minor Hygiene
 
@@ -81,13 +79,13 @@ the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-b
 
 ## Priority Fix Order (closeout)
 
-1. **Add a `LICENSE`** (requires the owner's choice) — the **only** blocker to presenting
-   the repo as reusable/publishable. ⬅ the single open closeout item.
-2. *(Optional)* Add `CITATION.cff` for portfolio citeability.
-3. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
+No blockers remain. Optional polish only:
 
-Everything else from the prior pass is resolved (MODEL_CARD refreshed; diagrams rendered
-to committed images; baseline single-sourced and current).
+1. *(Optional)* Add `CITATION.cff` for portfolio citeability.
+2. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
+
+All prior gaps are resolved: **Apache-2.0 license added**, MODEL_CARD refreshed, diagrams
+rendered to committed images, baseline single-sourced and current.
 
 ## Validation Reference
 
@@ -99,10 +97,12 @@ env, no live keys).
 
 ## Closeout Verdict
 
-**Ready for publication except for license selection.** The project is internally
-consistent, fully documented (41 lessons, complete spec/threat-model/runbook set),
-reproducible offline, demo-safe, and green. The sole gating item is choosing and adding a
-`LICENSE`; until then usage rights are intentionally unclear (flagged in README + SECURITY).
+**Publication-ready (demo/POC scope).** The project is internally consistent, fully
+documented (41 lessons, complete spec/threat-model/runbook set), reproducible offline,
+demo-safe, green (314/3, eval 15/15), and **Apache-2.0 licensed**. No publication
+blockers remain — optional polish (CITATION.cff, a screenshot) aside. Production
+capabilities (live deployment, RAG-into-triage, write-back persistence, multi-tenancy,
+real data) remain intentionally gated with documented re-open triggers.
 
 ---
 

@@ -2,6 +2,7 @@
 name = "threatprism"
 version = "0.1.0"
 description = "ThreatPrism SOC migration accelerator backend"
+license = "Apache-2.0"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi==0.115.12",

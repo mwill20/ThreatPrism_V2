@@ -4,6 +4,12 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Licensed under Apache-2.0 (owner-selected, 2026-06-03).** Added the `LICENSE` file
+  (full Apache License 2.0) and a `license = "Apache-2.0"` field in `pyproject.toml`.
+  Flipped every license-status reference from "unclear / TODO" to Apache-2.0 (README
+  License section + Project Status, REPO_AUDIT scorecard/verdict, WORKING_CHECKLIST
+  closeout, LIMITATIONS). This closes the **only** open publication blocker — the repo
+  is now publication-ready for its demo/POC scope.
 - **Project closeout doc pass (2026-06-03).** Brought all reviewer-facing docs to the
   closeout state: refreshed `REPO_AUDIT.md` to a closeout review (baseline 314, RGOI +
   rendered-image diagrams reflected, verdict = "publishable except license selection");

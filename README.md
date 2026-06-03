@@ -59,8 +59,8 @@ documented closeout milestone.** It includes the full triage pipeline + four-lay
 guardrails, a local hardened dashboard, all three runtime evolutions (batch auto-close,
 two-model backtest, live co-pilot — the latter two live-verified), a tamper-evident
 integrity subsystem, and a governed (demo-only, human-gated) RGOI knowledge write-back
-loop. Validation: see [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md). The
-one open publication item is **license selection** (see [License](#license)).
+loop. Validation: see [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md). Licensed
+under **Apache-2.0** (see [License](#license)).
 
 ThreatPrism is not production-ready. It does not process real organization
 data, run live SOAR/cloud providers, or execute remediation. Real-LLM calls run only
@@ -736,8 +736,9 @@ Docker Compose & Local Demo Packaging v0.1 is implemented. See
 
 ## License
 
-TODO: Add a license. Until a license is selected and a `LICENSE` file is added,
-usage rights are unclear.
+Licensed under the **Apache License 2.0** — see [LICENSE](LICENSE). Permissive use,
+modification, and distribution with an explicit patent grant; provided "AS IS" without
+warranty.
 
 ## Support
 

@@ -1,157 +1,114 @@
 # Repository Audit
 
+**Date:** 2026-06-03 · **Mode:** Audit Only (report; no file changes beyond this report)
+
+**Project type:** Security tool (SOC triage co-pilot) + AI/ML-assisted (LLM triage,
+gate now open) + lightly agentic (human-in-the-loop co-pilot; no autonomous tools) +
+educational (Lessons 1–40). Stage: demo / POC with synthetic data only.
+
 ## Summary
 
-ThreatPrism is a security-focused, AI-assisted SOC migration accelerator. The
-repository is strong on architecture, guardrails, validation, fake-data safety,
-implementation traceability, and now a hardened local same-origin dashboard
-surface. The remaining readiness gaps are mostly reviewer-facing: license
-status is not yet selected, production deployment remains out of scope, and
-permanent visual demo assets are still not tracked.
+The repository is publication-strong on nearly every axis: layered guardrails, a mature
+three-lens threat model with treatment register, fake-data-only safety enforced in CI,
+exact dependency pins with a lock file, an extensive lesson curriculum, rendered
+architecture + threat-model diagrams, and a tamper-evident integrity subsystem. Since
+the prior audit, the real-LLM gate has been opened and live-verified, all three runtime
+evolutions have been demonstrated, and the validation baseline is single-sourced.
 
-Mode used: repo-standards Documentation Fix, audit-first.
+**The one High-priority blocker remains: no `LICENSE` file** — usage rights are unclear
+until the owner selects one. One doc-accuracy follow-up (model card vs. now-open real-LLM
+gate) and a couple of optional polish items round out the gaps.
 
 ## Scorecard
 
 | Area | Status | Priority | Notes |
-|---|---|---|---|
-| Purpose and audience | PASS | High | README and North Star describe the SOC migration use case and demo-safe scope. |
-| Installation and quickstart | PASS | High | README and docs/INSTALLATION.md include PowerShell setup, validation, API, and Docker commands. |
-| Usage examples | PASS | High | README, RUNBOOK.md, and docs/USAGE.md cover API, dashboard, eval, scenario, and fixture workflows. |
-| Architecture documentation | PASS | High | docs/ARCHITECTURE.md, docs/ARCHITECTURAL_NORTH_STAR.md, and specs cover system design and trust boundaries. |
-| Dependencies and environment | PASS | High | requirements.txt uses exact pins; .env.example uses fake or empty values; requirements-lock.txt exists. |
-| Evaluation and results | PASS | High | docs/EVALUATION.md and validation wrapper document the current fake-data regression evidence. |
-| Dataset documentation | PASS | Medium | docs/DATASET.md clarifies that public datasets are reviewed source material only, not runtime dependencies. |
-| Model documentation | PASS | Medium | docs/MODEL_CARD.md documents the deterministic demo provider and absence of live model use. |
-| Security documentation | PASS | High | SECURITY.md and docs/threat-models/ cover guardrails, reporting, and threat model treatment. |
-| Deployment documentation | PARTIAL | Medium | docs/DEPLOYMENT.md covers local demo, dashboard, and Docker Compose only; production deployment remains out of scope. |
-| Monitoring/maintenance | PARTIAL | Medium | docs/MONITORING.md covers current logs, audit events, and future production monitoring gaps. |
-| Limitations and trade-offs | PASS | High | LIMITATIONS.md is explicit about demo-only, no-remediation, no-live-provider, and dataset boundaries. |
-| License and usage rights | FAIL | High | No LICENSE file exists. README now says usage rights are unclear until a license is selected. |
-| Support/contact | PASS | Medium | README points to issues for non-security support and SECURITY.md for vulnerability handling. |
-| Visual demo/assets | PARTIAL | Medium | A hardened local dashboard is available at `GET /dashboard`, but no permanent screenshot, GIF, or rendered architecture asset is tracked. |
-| Examples | PASS | Medium | Fake SOAR payloads, demo scenarios, eval fixtures, and fixture-factory examples exist. |
-| CI/tests | PASS | High | Fake-data-only GitHub Actions workflow and safe local validation wrapper are present. |
+|------|--------|----------|-------|
+| Purpose and audience | PASS | High | README purpose/audience/status; START_HERE + North Star reinforce. |
+| Installation and quickstart | PASS | High | README + docs/INSTALLATION.md: PowerShell setup, validation, API, Docker. |
+| Usage examples | PASS | High | README, RUNBOOK.md, docs/USAGE.md: API, dashboard, eval, scenario, fixtures, co-pilot, verify-logs. |
+| Architecture documentation | PASS | High | docs/ARCHITECTURE.md now has a rendered **Mermaid** diagram + ASCII + component layers; North Star + specs. |
+| Dependencies and environment | PASS | High | requirements.txt exact pins; requirements-lock.txt; requirements-llm.txt (gated); .env.example placeholders only. |
+| Evaluation and results | PASS | High | docs/EVALUATION.md + docs/VALIDATION_BASELINE.md (single source: 302 passed / 3 skipped, eval 15/15); live findings in LIVE_BACKTEST_FINDINGS.md. |
+| Dataset documentation | PASS | Medium | docs/DATASET.md: third-party datasets are reviewed source material, not runtime deps. |
+| Model documentation | PARTIAL | Medium | docs/MODEL_CARD.md exists but predates the open real-LLM gate — should reflect that real Claude/OpenAI now run under `--live`. |
+| Security documentation | PASS | High | SECURITY.md + three-lens threat model + mitigations-traceability + treatment register + new rendered threat-model DFD. |
+| Deployment documentation | PARTIAL | Medium | docs/DEPLOYMENT.md covers local/Docker only; production deployment intentionally out of scope. |
+| Monitoring/maintenance | PARTIAL | Medium | docs/MONITORING.md + new tamper-evident logs & verify CLI; production monitoring still gated. |
+| Limitations and trade-offs | PASS | High | LIMITATIONS.md explicit on demo-only / no-remediation / gated scope. |
+| License and usage rights | FAIL | High | **No LICENSE file.** README flags usage rights as unclear. The one real blocker. |
+| Support/contact | PASS | Medium | README → issues; SECURITY.md for vulnerabilities. |
+| Visual demo/assets | PASS | Medium | Rendered Mermaid architecture + threat-model diagrams + ASCII; local dashboard at `/dashboard`. Tracked screenshot/GIF still optional. |
+| Examples | PASS | Medium | examples/ (soar_payloads, demo_scenarios, csi, dashboard_contract); curated fixtures; eval fixtures. |
+| CI/tests | PASS | High | .github/workflows/safe-validation.yml (Ubuntu, py3.12, fake-data env); 305 collected tests; demo-safety gate. |
 
 ## Strengths
 
-- Clear source-of-truth files: START_HERE.md, AGENTS.md, docs/THREATPRISM_V2_CODEX_HANDOFF.md, and docs/WORKING_CHECKLIST.md.
-- Strong fake-data-only safety posture with explicit no-live-provider and no-real-remediation boundaries.
-- Layered guardrails for prompt injection, healthcare-adjacent contamination, sensitive-data tokenization, evidence grounding, and compliance-language overclaiming.
-- Role-aware demo authentication and authorization are covered by tests.
-- Eval harness, scenario pack, Docker packaging, fixture factory, hardened local dashboard, and local validation wrapper make the project reproducible without live credentials.
-- Threat model and treatment register are unusually mature for a demo-stage repository.
+- **Safety posture:** fake-data-only (RFC 5737 IPs, `.test` domains), `ALLOW_REAL_ACTIONS=false`, demo-safety scanner gating CI and every commit.
+- **Guardrails:** four-layer pipeline (prompt firewall → healthcare → output policy → evidence) + a semantic firewall (detector, default-off, live-verified 4/6 RR-L1).
+- **Two-stage tokenization:** permanent Stage-1 (PHI/PII/secrets) vs. rehydratable Stage-2 (telemetry) — a genuinely well-reasoned privacy boundary.
+- **Real-LLM seam:** gate opened + live-verified; spend governance (per-run cap, metering, hashed-only call audits); independent OpenAI analyst with an egress guard.
+- **Three runtime evolutions** all demonstrated (Evolutions 2 and 3 live).
+- **Tamper-evident integrity subsystem:** hash-chained `FailureLog` + case audit-trail mirror + operator `verify_logs` CLI (closes much of OT-1/OT-8).
+- **Threat modeling** unusually mature for demo stage: STRIDE + MITRE ATLAS/OWASP-LLM + LINDDUN, traceability matrix, owner-signed treatment register, now a rendered DFD.
+- **Reproducibility & docs:** single-source validation baseline, lessons 1–40 incl. a capstone, durable handoff files.
 
-## Gaps Found
+## Missing Files
 
-1. No `LICENSE` file exists, so usage rights are unclear.
-2. Standard reviewer entry points for usage, evaluation, deployment, monitoring, dataset handling, model/provider behavior, and troubleshooting were either missing or distributed across longer docs.
-3. `docs/INSTALLATION.md` had stale validation counts from an earlier slice.
-4. No permanent visual screenshot or rendered diagram asset is tracked. Text
-   diagrams exist and the local dashboard can be inspected at `/dashboard`,
-   but screenshot/GIF assets are not committed.
-5. Production-readiness boundaries needed a central deployment and monitoring summary.
+- `LICENSE` — **High.** Absent; usage rights unclear (owner must choose).
+- `CITATION.cff` — Optional. The repo has portfolio/educational intent; a citation file would aid reuse/citeability.
+- `assets/` screenshot or GIF — Optional polish. Rendered Mermaid + ASCII diagrams already exceed the minimum visual requirement.
 
-## Changes Applied In This Pass
+## Weak / Partial Areas
 
-- Added this audit file.
-- Added focused standalone docs:
-  - `docs/USAGE.md`
-  - `docs/EVALUATION.md`
-  - `docs/DATASET.md`
-  - `docs/MODEL_CARD.md`
-  - `docs/DEPLOYMENT.md`
-  - `docs/MONITORING.md`
-  - `docs/TROUBLESHOOTING.md`
-- Added root-level reviewer files:
-  - `CONTRIBUTING.md`
-  - `CHANGELOG.md`
-- Updated README links, reviewer status, requirements, evaluation, license, and support sections.
-- Updated installation validation counts and current direct pytest guidance.
-- Updated working checklist, handoff, limitations, and lesson index for this readiness pass.
-- Validated with `powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_repo_standards_final_fresh`.
+- **docs/MODEL_CARD.md** likely still describes only the deterministic demo provider; the real-LLM gate is now open and live-run, so the card should note real Claude/OpenAI usage under `--live` (and that the default remains the demo provider).
+- **Deployment / Monitoring** are PARTIAL by design — production deployment, IdP, and production monitoring are explicitly gated, which is honest and correct for this stage (not a defect).
 
-## Dashboard UI Follow-Up Pass
+## Reproducibility Gaps
 
-Dashboard UI Implementation v0.1 added a local fake-data-only dashboard served
-from the existing FastAPI backend:
+- None material. `pip install -r requirements.txt` + `tools/validate-threatprism.ps1` reproduces the baseline; the Windows pytest-temp `WinError 5` workaround (fresh `-BaseTemp`) is documented.
 
-- `GET /dashboard`
-- `src/threatprism/dashboard/static/`
-- `docs/DASHBOARD_UI_IMPLEMENTATION.md`
-- `docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md`
-- `tests/test_dashboard_ui.py`
+## Security and Licensing Gaps
 
-Repo-standards review notes for this follow-up:
+- **LICENSE absent** (the one High gap). No secrets committed — verified by the demo-safety scanner (`--include-untracked`) and placeholder-only `.env.example`.
 
-- README, RUNBOOK, docs/USAGE, limitations, handoff, checklist, evaluation,
-  and lessons now point to the dashboard route and implementation docs.
-- The dashboard uses same-origin API calls and fake demo credentials only.
-- The dashboard is not documented as production-ready.
-- The main remaining dashboard readiness gap is a permanent screenshot or
-  short demo recording asset, which should be added only when the user wants
-  tracked visual assets.
-- The license gap remains open.
+## Minor Hygiene
 
-Validated after the dashboard UI slice with:
+- Stray `pytest-cache-files-*` directories sit at the repo root (untracked, not committed). A `.gitignore` entry would keep the working tree clean.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_ui_final_validation2
-```
+## Priority Fix Order
 
-Result:
+1. **Add a `LICENSE`** (requires the owner's choice) — the only blocker to presenting the repo as reusable/publishable.
+2. **Refresh `docs/MODEL_CARD.md`** to reflect the now-open real-LLM gate (real providers under `--live`; demo default).
+3. *(Optional)* Add `CITATION.cff` for portfolio citeability.
+4. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
 
-```text
-87 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+## Validation Reference
 
-## Production Dashboard Hardening Follow-Up
+Canonical baseline is single-sourced in
+[docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md): **302 passed / 3 skipped**,
+eval harness dry-run **15 passed / 0 failed**, demo safety passed. CI:
+`.github/workflows/safe-validation.yml` (Ubuntu, Python 3.12, fake-data env, no live keys).
 
-Production Dashboard Hardening v0.1 added production-style controls to the
-local fake-data dashboard without adding production IdP, live providers, real
-data, external telemetry, frontend dependencies, or remediation:
+---
 
-- dashboard-specific CSP, frame blocking, no-sniff, referrer, permissions,
-  same-origin resource, and no-store cache headers
-- browser-side same-origin request enforcement
-- timeout-bounded dashboard API calls
-- keyboard persona navigation markers and visible focus state
-- focused regression tests in `tests/test_dashboard_ui.py`
-- threat-model and traceability updates for the now-implemented dashboard
-  surface
+## Audit History (superseded — see current audit above)
 
-Validated after the dashboard hardening slice with:
+The sections below are dated records from earlier readiness passes; their validation
+counts (73 / 87 / 89 passed) reflect those points in time and are superseded by the
+current baseline above.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_dashboard_hardening_final
-```
+### Dashboard UI Follow-Up Pass
 
-Result:
+Dashboard UI Implementation v0.1 added a local fake-data-only dashboard served from the
+existing FastAPI backend (`GET /dashboard`, `src/threatprism/dashboard/static/`,
+`docs/DASHBOARD_UI_IMPLEMENTATION.md`, `docs/specs/25_DASHBOARD_UI_IMPLEMENTATION.md`,
+`tests/test_dashboard_ui.py`). Same-origin API calls, fake demo credentials only, not
+documented as production-ready. Result at the time: `87 passed`, eval 15/15.
 
-```text
-89 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+### Production Dashboard Hardening Follow-Up
 
-## Validation Performed
-
-Successful result:
-
-```text
-73 passed
-eval harness dry-run: 15 passed / 0 failed
-```
-
-An earlier run using the reused `.pytest_tmp_repo_standards_final` directory hit
-the known Windows pytest temp cleanup failure (`WinError 5`) while deleting a
-locked file. The fresh base temp rerun passed.
-
-## Remaining Recommended Fixes
-
-1. Select and add a real `LICENSE` file before presenting the repository as reusable open source.
-2. Add a static architecture diagram image, dashboard screenshot, or short demo
-   recording if tracked visual evidence becomes desirable.
-3. Keep validation counts current after each slice.
-4. Do not promote generated fixtures until the user manually reviews license, safety, and content.
-5. Keep production deployment, live provider, RAG, memory/write-back, production IdP, non-demo data, and remediation work gated behind explicit future approval.
+Production Dashboard Hardening v0.1 added dashboard-specific CSP, frame blocking,
+no-sniff/referrer/permissions headers, same-origin request enforcement, timeout-bounded
+fetches, keyboard persona navigation, and regression tests — without production IdP,
+live providers, real data, external telemetry, or remediation. Result at the time:
+`89 passed`, eval 15/15.

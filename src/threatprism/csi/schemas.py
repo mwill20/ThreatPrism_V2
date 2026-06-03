@@ -351,5 +351,63 @@ class AIVsHumanDivergenceEnvelope(BaseModel):
     total: int
 
 
+class KnowledgeProposal(BaseModel):
+    """A candidate knowledge record awaiting human approval (spec 38, half B).
+
+    Created non-authoritative. The AI may *propose*; only a human may *promote* it into
+    the approved_knowledge tier. Stage-1 tokenization is applied to its text before it
+    is ever stored, so no raw PHI/PII/secrets enter the KB.
+    """
+
+    id: str
+    tenant_id: str
+    title: str
+    summary: str
+    author: str
+    author_type: AuthorType
+    proposed_by: str  # ai_triage | ai_divergence | analyst
+    proposal_reason: str = ""
+    source_case_id: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+    claims_text: list[str] = Field(default_factory=list)
+    review_status: ReviewStatus = ReviewStatus.proposed
+    created_at: datetime
+    deletion_owner: str = "human_review_required"
+    decision_reason: str | None = None
+    approver: str | None = None
+
+    @field_validator("id", "tenant_id")
+    @classmethod
+    def reject_unsafe_identifier(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("identifier cannot be empty")
+        if any(fragment in value for fragment in ["..", "\\", "/"]):
+            raise ValueError("identifier cannot contain path separators or traversal")
+        return value
+
+
+class TriageContextItem(BaseModel):
+    """One sanitized, evidence-cited snippet eligible to inform triage (spec 38, half A)."""
+
+    object_id: str
+    snippet: str  # already sanitized (Stage-1) before construction
+    evidence_ids: list[str] = Field(default_factory=list)
+    trust_score: float = Field(ge=0.0, le=1.0)
+    retrieval_zone: RetrievalZone
+
+
+class TriageContextBundle(BaseModel):
+    """Approved-tier context ready to inject into a triage prompt.
+
+    NOTE: produced by `csi/triage_context.py` but deliberately NOT consumed by
+    `run_triage` — wiring it into the model is gated (threat OT-L1, spec 38 §7).
+    """
+
+    tenant_id: str
+    purpose: RetrievalPurpose
+    items: list[TriageContextItem] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 def fixed_utc(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)

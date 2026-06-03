@@ -4,6 +4,22 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **RGOI learning loop + triage-context builder — BUILT (demo-only, NOT wired to triage;
+  owner-authorized 2026-06-03).** Implemented spec 38's two halves as governed,
+  demo-safe modules: `src/threatprism/csi/learning_loop.py` (`KnowledgeLearningLoop` —
+  reverse-deny default, Stage-1 tokenization before any write, the AI proposes / only a
+  human promotes via a deterministic role-gated action that fails closed for AI, audit
+  per action) and `src/threatprism/csi/triage_context.py` (`build_triage_context` —
+  approved-tier, sanitized, evidence-cited context). The context builder is **not
+  consumed by `run_triage`** — a regression test
+  (`test_triage_pipeline_does_not_consume_rgoi_context`) enforces the disconnection, so
+  feeding retrieved cognition to the model (OT-L1) stays Avoid. This converts spec 21's
+  **OT-L8** (write-back) Avoid into an implemented Gated Mitigation for demo scope.
+  Demoed via `python -m threatprism.demo.run_rgoi_learning_demo`. New schemas
+  (`KnowledgeProposal`, `TriageContextBundle`); no HTTP write routes, no provider calls,
+  no new deps. Tests: `tests/test_rgoi_learning_loop.py`, `tests/test_rgoi_triage_context.py`
+  (baseline `302 -> 314`). Threat-model + traceability + README future-enhancements +
+  Lesson 41 updated.
 - **Spec 38: RGOI Learning Loop & Triage-Context Integration (design-only, gated).**
   Authored `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` designing the two
   halves of the CSI/RGOI vision that spec 23 left out of scope: (A) wiring governed

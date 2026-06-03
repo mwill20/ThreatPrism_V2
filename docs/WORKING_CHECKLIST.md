@@ -1326,8 +1326,17 @@ Other gated work:
   left out of scope). No code. Implementing either requires re-opening spec 21's
   **Avoid** decisions (OT-L1 RAG, OT-L8 memory write-back) and satisfying the LLM threat
   model "Before RAG"/"Before Memory" gates. Forward-referenced from spec 21 + system-context.
-- [ ] RGOI retrieval-into-triage + write-back implementation (spec 38) only after the
-  OT-L1/OT-L8 Avoid decisions are re-opened with owner sign-off.
+- [x] **RGOI write-back loop + triage-context builder BUILT 2026-06-03 (demo-only, NOT
+  wired to triage; owner-authorized).** `csi/learning_loop.py` (reverse-deny, Stage-1
+  tokenize, deterministic human-only promotion, audit) + `csi/triage_context.py`
+  (approved-tier sanitized cited context) + `demo/run_rgoi_learning_demo.py`. OT-L8
+  converted to implemented Gated Mitigation (spec 21); OT-L1 (RAG-into-triage) stays
+  Avoid, enforced by `test_triage_pipeline_does_not_consume_rgoi_context`. Tests:
+  `tests/test_rgoi_learning_loop.py`, `tests/test_rgoi_triage_context.py` (302 -> 314).
+- [ ] RGOI retrieval-into-triage **wiring** (connect `build_triage_context` into
+  `run_triage`) only after the OT-L1 Avoid is re-opened with owner sign-off + the
+  "Before RAG" controls; production write-back (persistence, HTTP routes, multi-tenancy)
+  separately gated.
 - [ ] Live-provider preparation only after re-opening gated threat treatments.
 - [ ] Optional external research provider feasibility, such as Exa.ai, only as
   a gated future enhancement; it is not needed for the current build and must

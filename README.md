@@ -176,6 +176,14 @@ each requires explicit approval before implementation.
   chain to the full case record, not just its audit events (already mirrored).
 - **Audit-log retention/rotation (OT-8 remainder)** — chain-sealed rotation plus a
   retention policy for the append-only integrity logs.
+- **RGOI learning loop + triage-context (spec 38) — built, deliberately not connected.**
+  A governed knowledge-base write-back loop (`csi/learning_loop.py`: AI proposes,
+  reverse-deny default, Stage-1 tokenization, **deterministic human-only promotion**) and
+  an approved-tier retrieval-context builder (`csi/triage_context.py`) are implemented and
+  demoed (`python -m threatprism.demo.run_rgoi_learning_demo`), but the context is **not
+  fed to the triage LLM** — wiring it in is gated (indirect prompt injection, OT-L1). The
+  future enhancement is to open OT-L1, connect retrieval into the prompt, and (for
+  production) add persistence + HTTP write routes + multi-tenancy.
 - Plus the previously documented gated options: external research provider adapter,
   additional curated-fixture promotion, production dashboard deployment, and live
   JWKS/IdP integration (see the linked doc).

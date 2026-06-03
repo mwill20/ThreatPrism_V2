@@ -97,6 +97,7 @@ Fake SOAR payload
 | ✅ | [Lesson 38](Lesson38_Tamper_Evident_Failure_Logging.md) | Tamper-Evident Failure Logging (Observing the Fail-Closed Path) | `src/threatprism/llm/failure_log.py`, `src/threatprism/persistence/hash_chain.py`, `src/threatprism/persistence/verify_logs.py`, `src/threatprism/cases/service.py` (`run_triage`, audit mirror), `tests/test_failure_log.py`, `tests/test_audit_log_integrity.py`, `tests/test_verify_logs.py` |
 | ✅ | [Lesson 39](Lesson39_Single_Event_Live_CoPilot.md) | The Single-Event Live Co-Pilot Cadence (Evolution 3) | `src/threatprism/demo/run_copilot_demo.py`, `src/threatprism/cases/service.py` (`assign_case`, `submit_feedback`), `tests/test_copilot_demo.py` |
 | ✅ | [Lesson 40](Lesson40_Capstone_Recap.md) | Capstone Recap: ThreatPrism End to End | whole-system synthesis (lifecycle, guardrails, evolutions, integrity subsystem, principles) |
+| ✅ | [Lesson 41](Lesson41_RGOI_Learning_Loop_And_Gated_Wiring.md) | The RGOI Learning Loop & "Build It, Don't Connect It" | `src/threatprism/csi/learning_loop.py`, `src/threatprism/csi/triage_context.py`, `src/threatprism/demo/run_rgoi_learning_demo.py`, `tests/test_rgoi_learning_loop.py`, `tests/test_rgoi_triage_context.py`, `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` |
 
 ## File Coverage Map
 
@@ -229,6 +230,10 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_verify_logs.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\src\threatprism\demo\run_copilot_demo.py` -> Lesson 39
 - `C:\Projects\ThreatPrismV2\tests\test_copilot_demo.py` -> Lesson 39
+- `C:\Projects\ThreatPrismV2\src\threatprism\csi\learning_loop.py` -> Lesson 41
+- `C:\Projects\ThreatPrismV2\src\threatprism\csi\triage_context.py` -> Lesson 41
+- `C:\Projects\ThreatPrismV2\tests\test_rgoi_learning_loop.py` -> Lesson 41
+- `C:\Projects\ThreatPrismV2\tests\test_rgoi_triage_context.py` -> Lesson 41
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
 - `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34
@@ -262,8 +267,9 @@ Expected output: the canonical count in
 
 ## What To Study Next
 
-Lesson 40 is the capstone recap (whole-system synthesis). After it, use the working
-checklist to choose the next requested slice:
+Lesson 40 is the whole-system capstone; Lesson 41 covers the post-capstone RGOI
+learning-loop feature. After these, use the working checklist to choose the next
+requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

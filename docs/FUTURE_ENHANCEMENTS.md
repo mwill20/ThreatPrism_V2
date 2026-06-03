@@ -51,6 +51,27 @@ append-only hash chain requires **segment sealing** (carry the last record hash 
 into the next segment, or sign each sealed segment) so verifiability survives rotation —
 plus a documented retention window. Low urgency for a demo/POC.
 
+## RGOI Learning Loop & Triage-Context Wiring
+
+Status: **partially built (demo-only), wiring gated.**
+
+The governed write-back loop (`src/threatprism/csi/learning_loop.py`) and the
+approved-tier retrieval-context builder (`src/threatprism/csi/triage_context.py`) are
+implemented and demoed (`python -m threatprism.demo.run_rgoi_learning_demo`), per
+[spec 38](specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md). The write-back surface is
+governed (reverse-deny default, Stage-1 tokenization, deterministic human-only
+promotion, audit) and the OT-L8 Avoid is now an implemented Gated Mitigation for demo
+scope.
+
+The future enhancement (still gated):
+
+- **Wire `build_triage_context` into `run_triage`** (RAG-into-triage). Requires
+  re-opening the OT-L1 Avoid in [spec 21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)
+  and satisfying the LLM threat model "Before RAG" controls. Enforced-disconnected today
+  by `tests/test_rgoi_triage_context.py::test_triage_pipeline_does_not_consume_rgoi_context`.
+- **Productionize write-back:** durable persistence, HTTP write routes (new ingress
+  surface), multi-tenancy, and non-demo data — each separately gated.
+
 ## Optional External Research Provider Adapter
 
 Status: deferred option.

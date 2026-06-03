@@ -2,9 +2,25 @@
 
 ## Status
 
-**DESIGN-ONLY. NOT IMPLEMENTED. GATED.** No code, no routes, no provider calls, no
-dependencies are added by this spec. It designs the two halves of the original CSI/RGOI
-vision that [spec 23](23_CSI_RGOI_FOUNDATION.md) deliberately left out of scope:
+**PARTIALLY IMPLEMENTED (demo-only, NOT wired to triage) — owner-authorized 2026-06-03.**
+
+- **Half B (write-back / learning loop): BUILT.** `src/threatprism/csi/learning_loop.py`
+  (`KnowledgeLearningLoop`) — reverse-deny default, Stage-1 tokenization before any write,
+  the AI proposes / only a human promotes (deterministic gate, fail-closed), audit per
+  action. Tests: `tests/test_rgoi_learning_loop.py`. This converts the **OT-L8** Avoid
+  decision in [spec 21](21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) to an implemented
+  Gated Mitigation (the write-back layer now exists, with controls).
+- **Half A (retrieval context builder): BUILT but NOT WIRED.**
+  `src/threatprism/csi/triage_context.py` (`build_triage_context`) produces approved-tier,
+  sanitized, cited context — but `run_triage` never calls it. **OT-L1 (RAG-into-triage)
+  remains an Avoid decision**; feeding retrieved cognition to the model stays gated. A
+  regression test enforces the disconnection.
+- **No HTTP write routes, no provider calls, no new dependencies.** Demonstrated via
+  `python -m threatprism.demo.run_rgoi_learning_demo`.
+
+Originally authored design-only; this spec now also records the implemented subset. It
+designs the two halves of the original CSI/RGOI vision that
+[spec 23](23_CSI_RGOI_FOUNDATION.md) deliberately left out of scope:
 
 - **(A) Retrieval-into-triage** — let governed CSI/RGOI cognition provide context to
   *both* the analyst (already possible via `/csi/*`) and the **ThreatPrism triage LLM**

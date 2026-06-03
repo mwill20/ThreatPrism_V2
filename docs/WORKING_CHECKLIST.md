@@ -1309,9 +1309,13 @@ dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` 
     Analyst verdict is a parameterized `AnalystVerdict` input (not an LLM); default mirrors
     triage (agreement), an override forces a disagreement -> manager review. `--live` swaps
     in the real provider. TDD: `tests/test_copilot_demo.py`. 299 -> 302. Runbook updated.
-  - [ ] Owner-run — live cadence with a real provider (paid, ~$0.01-0.02/case): run
-    `PYTHONPATH=src python -m threatprism.demo.run_copilot_demo --live` (loads `.env`).
-    Pending explicit go-ahead per the ask-before-paid rule.
+  - [x] **Owner-run — live cadence with a real provider DONE 2026-06-02 (~$0.005).**
+    `run_copilot_demo --live` ran one case end-to-end through real Claude triage ->
+    self-assign -> feedback -> disagreement record (1 call, 696 tok, $0.005052). Real
+    Claude rated the deepset injection fixture **suspicious/low/conf 0.95** where the
+    deterministic demo provider rated it benign/0.64 — the real model's security
+    judgment showing through the same pipeline. Failure log empty (valid report).
+    **Evolution 3 complete** — all three runtime evolutions now demonstrated.
 
 Other gated work:
 

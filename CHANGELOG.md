@@ -14,8 +14,13 @@ All notable repository-level changes should be recorded here.
   review) without conflating with the Evolution-2 independent grader. `--live` swaps in
   the real provider (paid, ~$0.01-0.02/case); deterministic otherwise. TDD:
   `tests/test_copilot_demo.py` (full loop, divergence -> manager review, no leakage).
-  Baseline `299 -> 302 passed`. The live owner-run with a real provider remains the
-  remaining gated step.
+  Baseline `299 -> 302 passed`.
+- **Evolution 3 live owner-run done (~$0.005).** `run_copilot_demo --live` exercised one
+  case end-to-end through real Claude triage -> self-assign -> feedback -> disagreement
+  record (1 call, 696 tok, $0.005052). Real Claude rated the deepset injection fixture
+  `suspicious/low/conf 0.95` where the deterministic demo provider rated it `benign/0.64`
+  — the real model's security judgment through the same pipeline. **All three runtime
+  evolutions are now demonstrated.** Docs only.
 - **Operator verify / inspect / export for the integrity logs (export half of OT-8).**
   `python -m threatprism.persistence.verify_logs` runs the hash-chain `verify()` on every
   configured log (failure log + audit trail), summarizes record counts by category

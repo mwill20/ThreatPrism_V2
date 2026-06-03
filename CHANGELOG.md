@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Lessons 39 + 40 and roadmap consolidation (docs).** Added `Lessons/Lesson39_...`
+  (Evolution 3 single-event live co-pilot — the conflation trap of analyst-input vs.
+  LLM-grader, verify-before-spend, the live provider-gap finding) and
+  `Lessons/Lesson40_Capstone_Recap.md` (whole-system synthesis: lifecycle, four-layer
+  guardrails, two-stage tokenization, the three evolutions, the integrity subsystem,
+  and the recurring engineering principles). Updated `docs/PRODUCT_VALUE_AND_ROADMAP.md`
+  and the README: the real-LLM gate is **open** and **all three runtime evolutions are
+  live-demonstrated** (was described as gated/design-targets). Lessons index + coverage
+  map updated. No code change (baseline unchanged).
 - **Evolution 3 — single-event live co-pilot driver (headless).** Added
   `src/threatprism/demo/run_copilot_demo.py`: walks ONE case through the full analyst
   loop at single-event cadence — create -> triage -> self-assign -> analyst feedback ->

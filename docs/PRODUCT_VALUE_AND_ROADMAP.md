@@ -122,10 +122,11 @@ against the deterministic provider.
 
 ## 5. The three runtime evolutions (roadmap)
 
-> **All three are gated on opening the real-LLM gate** (a real `TriageProvider`
-> implementation + the semantic firewall in
-> [specs/32](specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), per the threat-model
-> re-review). Until then they are design targets. Each "pretends" a curated SOC
+> **The real-LLM gate is now OPEN** (owner-authorized 2026-06-01): real Claude triage +
+> the independent OpenAI analyst + the local Prompt Guard 2 firewall are wired and
+> live-verified. **All three evolutions have been demonstrated** — Evolution 1
+> deterministically, Evolutions 2 and 3 with real models (see
+> [LIVE_BACKTEST_FINDINGS.md](LIVE_BACKTEST_FINDINGS.md)). Each "pretends" a curated SOC
 > dataset is the SOAR feed — no live SOAR integration is required to prove value.
 
 ### Evolution 1 — Batched benign (SOAR catch-all auto-close)
@@ -158,11 +159,14 @@ analyst worked longer or decided differently. This is the **tuning/feedback loop
 at batch scale**.
 **Reuses today:** the entire feedback loop in §4 (`submit_feedback` →
 `DisagreementRecord` → disagreement metrics).
-**Status:** the harness is **built and runnable now** —
-`python -m threatprism.demo.backtest` (`src/threatprism/demo/backtest.py`) grades a
-batch with a deterministic stand-in analyst and emits a `BacktestReport` (agreement
-rate; the `threatprism_flagged_analyst_cleared` divergence set). The OpenAI
-`MockAnalyst` (independent of the Claude triage brain) drops in at the gate.
+**Status — live-verified.** `python -m threatprism.demo.backtest`
+(`src/threatprism/demo/backtest.py`) grades a batch and emits a `BacktestReport`
+(agreement rate; `threatprism_flagged_analyst_cleared`; per-axis + confidence-delta
+diagnostics). Run live with real Claude triage + the independent OpenAI `MockAnalyst`:
+on the adversarial set, anchored = 1.0 agreement while a true-**blind** analyst = 0.875
+(a reproducible determination split on one case) — anchoring is material, and the
+disagreement path fires on real models. Full findings:
+[LIVE_BACKTEST_FINDINGS.md](LIVE_BACKTEST_FINDINGS.md).
 **Independence rule:** the mock-analyst LLM must be a different model/prompt path
 than the triage provider, or the comparison is circular.
 
@@ -184,30 +188,37 @@ cases (keyed on identity, so a caller only ever sees their own queue), and
 `tests/test_case_assignment.py`. **Sub-slice 2 built (dashboard co-pilot UI):** an
 "Analyst co-pilot" panel in the local dashboard with Assign/Release + a feedback form
 and a "My cases only" toggle (`dashboard/static/`, CSP-safe, browser-verified
-end-to-end). **Remaining:** the live cadence with a real provider (owner-run).
+end-to-end). **Sub-slice 3 + live owner-run DONE:** the headless
+`python -m threatprism.demo.run_copilot_demo` (`--live`) walks one case through
+create → real triage → self-assign → feedback → disagreement record; the live run
+($0.005) confirmed the cadence and showed real Claude rating an injection fixture
+`suspicious/0.95` where the demo stub said `benign/0.64`.
 
 ### The common thread
 
 Evolutions 2 and 3 are the **same tuning loop** at different cadences (batch vs.
 live). Evolution 1 is the throughput/safety-net proof. None of them require a live
-SOAR — a curated SOC dataset stands in for the feed. The single missing
-foundation under all three is the **real `TriageProvider`** (and its gated
-semantic-firewall defense), which is why that gate is the next real decision.
+SOAR — a curated SOC dataset stands in for the feed. The shared foundation, the real
+`TriageProvider` (with its semantic-firewall defense), is now **wired and gate-open**,
+so all three have been exercised with real models on synthetic data.
 
 ---
 
 ## 6. Honest scope today
 
-- The active provider is the inert `DeterministicDemoProvider` (keyword-based). The
-  pipeline, guardrails, persistence, observability, and feedback loop are real and
-  proven end-to-end ([run_soc_demo](../src/threatprism/demo/run_soc_demo.py)); the
-  *quality of the verdict* is not, because no real model is wired.
-- The **real-LLM seam is built and tested** with no network (spec 33 deterministic
-  core): the failure taxonomy, batching, untrusted-output validation, the Claude
-  triage provider + narrative skeleton, and the OpenAI mock-analyst. The **live
-  calls are gated** — open them with [runbooks/OPEN_REAL_LLM_GATE.md](runbooks/OPEN_REAL_LLM_GATE.md).
-- Opening the gate also requires the semantic firewall ([spec 32](specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md))
-  and the threat-model re-review staged in [spec 21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)
-  (classifier surface = OT-L11; provider DoS = OT-L3).
-- Until the gate opens, "pretend the dataset is the SOAR feed" is the correct way
-  to demonstrate every evolution without a live integration.
+- The **default** provider is the inert `DeterministicDemoProvider` (keyword-based), so
+  tests/CI/demos run free and offline. The pipeline, guardrails, persistence,
+  observability, and feedback loop are real and proven end-to-end
+  ([run_soc_demo](../src/threatprism/demo/run_soc_demo.py)).
+- The **real-LLM gate is open** (owner-authorized 2026-06-01): under `--live`, real
+  Claude triage + the independent OpenAI analyst run, and the *quality of the verdict*
+  is real — e.g., live Claude flagged an injection fixture `suspicious/0.95` where the
+  stub said `benign`. Open/operate via
+  [runbooks/OPEN_REAL_LLM_GATE.md](runbooks/OPEN_REAL_LLM_GATE.md). Live spend stays
+  under a fail-closed per-run cap; the whole investigation arc cost ~$0.49.
+- The semantic firewall ([spec 32](specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md)) is
+  implemented (default-off, live-verified 4/6 RR-L1 recovery) and the threat-model
+  re-review is recorded in [spec 21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)
+  (OT-L11 classifier surface; OT-L3 provider DoS).
+- "Pretend the dataset is the SOAR feed" remains the right way to demonstrate every
+  evolution without a live SOAR integration.

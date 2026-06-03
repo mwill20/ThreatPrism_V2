@@ -60,12 +60,17 @@ dashboard surface.
 ThreatPrism is not production-ready. It does not process real organization
 data, run live SOAR/cloud providers, or execute remediation.
 
-The real-LLM gate (Claude triage + an independent OpenAI analyst) has been
-owner-opened and **live-validated** with a two-model backtest on 2026-06-01 (27
-graded, 100% agreement, ~$0.17; see
-[docs/LIVE_BACKTEST_FINDINGS.md](docs/LIVE_BACKTEST_FINDINGS.md)). Defaults remain
-demo-safe — live providers run only under explicit gated config, and
-`ALLOW_REAL_ACTIONS=false` still blocks all real actions.
+The real-LLM gate (Claude triage + an independent OpenAI analyst + local Prompt
+Guard 2) is **owner-opened and live-validated**, and **all three runtime evolutions
+have been demonstrated** — Evolution 1 deterministically, Evolutions 2 and 3 with real
+models. Highlights: the two-model backtest reproduces a real determination split on a
+true-**blind** analyst (anchoring shown material, not circular), and the single-event
+co-pilot run had real Claude rate an injection fixture `suspicious/0.95` where the demo
+stub said `benign` — for ~$0.005. Full findings:
+[docs/LIVE_BACKTEST_FINDINGS.md](docs/LIVE_BACKTEST_FINDINGS.md). Defaults remain
+demo-safe — live providers run only under explicit gated config, the whole
+investigation arc cost ~$0.49 under a fail-closed cap, and `ALLOW_REAL_ACTIONS=false`
+still blocks all real actions.
 
 The current repository contains the V2 spec pack plus the first backend slice:
 generic SOAR case intake, case normalization, guardrails, deterministic demo

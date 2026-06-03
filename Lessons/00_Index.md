@@ -94,7 +94,9 @@ Fake SOAR payload
 | ✅ | [Lesson 35](Lesson35_Shared_Secret_Pattern_Catalog.md) | One Secret-Pattern Catalog, Many Consumers (DRY Without Coupling) | `src/threatprism/guardrails/secret_catalog.py`, `guardrails/{healthcare,tokenization,policy}.py`, `tools/hooks/_common.py`, `tests/test_secret_catalog.py` |
 | ✅ | [Lesson 36](Lesson36_Live_Two_Model_Backtest.md) | The Live Two-Model Backtest (Reading "100% Agreement" Honestly) | `src/threatprism/demo/backtest.py`, `src/threatprism/llm/mock_analyst.py`, `src/threatprism/demo/seeding.py`, `tests/test_backtest.py`, `docs/LIVE_BACKTEST_FINDINGS.md` |
 | ✅ | [Lesson 37](Lesson37_Adversarial_Ambiguous_Eval_Dataset.md) | Designing an Adversarial Dataset (An Eval Must Be Able to Fail) | `fixtures/curated_adversarial/*`, `src/threatprism/demo/seeding.py` (`AdversarialCuratedSource`), `src/threatprism/demo/backtest.py` (`--dataset`), `tests/test_adversarial_dataset.py`, `docs/specs/37_ADVERSARIAL_EVAL_DATASET.md` |
-| ✅ | [Lesson 38](Lesson38_Tamper_Evident_Failure_Logging.md) | Tamper-Evident Failure Logging (Observing the Fail-Closed Path) | `src/threatprism/llm/failure_log.py`, `src/threatprism/llm/failures.py`, `src/threatprism/cases/service.py` (`run_triage`), `src/threatprism/demo/backtest.py` (`run_backtest`), `tests/test_failure_log.py` |
+| ✅ | [Lesson 38](Lesson38_Tamper_Evident_Failure_Logging.md) | Tamper-Evident Failure Logging (Observing the Fail-Closed Path) | `src/threatprism/llm/failure_log.py`, `src/threatprism/persistence/hash_chain.py`, `src/threatprism/persistence/verify_logs.py`, `src/threatprism/cases/service.py` (`run_triage`, audit mirror), `tests/test_failure_log.py`, `tests/test_audit_log_integrity.py`, `tests/test_verify_logs.py` |
+| ✅ | [Lesson 39](Lesson39_Single_Event_Live_CoPilot.md) | The Single-Event Live Co-Pilot Cadence (Evolution 3) | `src/threatprism/demo/run_copilot_demo.py`, `src/threatprism/cases/service.py` (`assign_case`, `submit_feedback`), `tests/test_copilot_demo.py` |
+| ✅ | [Lesson 40](Lesson40_Capstone_Recap.md) | Capstone Recap: ThreatPrism End to End | whole-system synthesis (lifecycle, guardrails, evolutions, integrity subsystem, principles) |
 
 ## File Coverage Map
 
@@ -225,6 +227,8 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\tests\test_failure_log.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\tests\test_audit_log_integrity.py` -> Lesson 38
 - `C:\Projects\ThreatPrismV2\tests\test_verify_logs.py` -> Lesson 38
+- `C:\Projects\ThreatPrismV2\src\threatprism\demo\run_copilot_demo.py` -> Lesson 39
+- `C:\Projects\ThreatPrismV2\tests\test_copilot_demo.py` -> Lesson 39
 - `C:\Projects\ThreatPrismV2\tests\test_llm_governance.py` -> Lesson 31
 - `C:\Projects\ThreatPrismV2\tests\test_case_assignment.py` -> Lesson 32
 - `C:\Projects\ThreatPrismV2\tests\test_persistence_concurrency.py` -> Lesson 34
@@ -258,7 +262,8 @@ Expected output: the canonical count in
 
 ## What To Study Next
 
-After Lesson 26, use the working checklist to choose the next requested slice:
+Lesson 40 is the capstone recap (whole-system synthesis). After it, use the working
+checklist to choose the next requested slice:
 
 - `C:\Projects\ThreatPrismV2\docs\WORKING_CHECKLIST.md`
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`

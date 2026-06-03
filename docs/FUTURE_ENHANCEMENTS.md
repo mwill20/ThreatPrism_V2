@@ -9,6 +9,48 @@ data path, or production deployment must also update the relevant specs,
 threat models, treatment register, limitations, checklist, tests, and
 validation notes.
 
+## Harder / Human-Labeled Adversarial Cases
+
+Status: deferred option (lower priority).
+
+The current adversarial set (`fixtures/curated_adversarial/`) is engineered
+rule-ambiguity. Live, two real models diverge only modestly — true-blind agreement
+~0.875 with a single reproducible determination split (`adv-0004`). Pushing divergence
+higher would need either human-labeled ground-truth cases or a finer-grained confidence
+prompt.
+
+Why this is not needed now:
+
+- The methodology is sound (blind mode is genuinely blind; no schema-failure loss) and
+  the core finding is established: modest real divergence, and anchoring is material.
+- It requires authoring effort plus another paid live run for diminishing marginal
+  insight.
+
+Minimum gates: synthetic-only fixtures (RFC 5737 IPs, `.test` domains), manifest review,
+demo-safety clean, and an explicit cost estimate + approval before any paid live run.
+
+## Case-Payload-Blob Integrity (OT-1 remainder)
+
+Status: deferred option.
+
+Every persisted `AuditEvent` is already mirrored to an append-only, hash-chained log
+(`HashChainedLog`, tamper-evident, `verify()`-able). The non-audit case *payload* blob
+itself is still a rewritable SQLite value. A future slice could hash-protect the full
+case record (e.g., a per-case content hash carried in the audit chain) so payload
+tampering is also detectable. More invasive — it touches every case write — for marginal
+benefit over the audit-event coverage already shipped.
+
+## Audit-Log Retention And Rotation (OT-8 remainder)
+
+Status: deferred option.
+
+The integrity logs (failure log + audit-trail mirror) are append-only and verifiable,
+and `python -m threatprism.persistence.verify_logs --export` provides a redaction-safe
+integrity export. Not yet implemented: automated retention/rotation. Rotating an
+append-only hash chain requires **segment sealing** (carry the last record hash forward
+into the next segment, or sign each sealed segment) so verifiability survives rotation —
+plus a documented retention window. Low urgency for a demo/POC.
+
 ## Optional External Research Provider Adapter
 
 Status: deferred option.

@@ -162,6 +162,24 @@ not part of CSI/RGOI memory, live RAG, validation, demos, or fixture promotion.
 - V2 uses a clean architecture with selective V1 concept porting. Do not
   full-copy V1 into this repository.
 
+## Future Enhancements (Tracked, Deferred)
+
+Tracked in [docs/WORKING_CHECKLIST.md](docs/WORKING_CHECKLIST.md) and detailed in
+[docs/FUTURE_ENHANCEMENTS.md](docs/FUTURE_ENHANCEMENTS.md). These are not commitments;
+each requires explicit approval before implementation.
+
+- **Harder / human-labeled adversarial cases** — push two-model divergence past the
+  current ~1/8 split. Needs authoring effort plus another paid live run, for
+  diminishing marginal insight (the methodology is sound and the core finding —
+  modest real divergence, anchoring is material — is established).
+- **Case-payload-blob integrity (OT-1 remainder)** — extend the tamper-evident hash
+  chain to the full case record, not just its audit events (already mirrored).
+- **Audit-log retention/rotation (OT-8 remainder)** — chain-sealed rotation plus a
+  retention policy for the append-only integrity logs.
+- Plus the previously documented gated options: external research provider adapter,
+  additional curated-fixture promotion, production dashboard deployment, and live
+  JWKS/IdP integration (see the linked doc).
+
 ## Requirements
 
 | Requirement | Version / Notes |

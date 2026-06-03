@@ -4,6 +4,11 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **README "Future Enhancements (Tracked, Deferred)" section (docs).** Surfaced the
+  tracked-but-deferred work in the README and synced detailed entries into
+  `docs/FUTURE_ENHANCEMENTS.md`: harder/human-labeled adversarial cases, case-payload-blob
+  integrity (OT-1 remainder), and audit-log retention/rotation (OT-8 remainder, noting the
+  chain-sealing requirement). Not commitments; each requires explicit approval.
 - **Consolidation capstone — doc-set consistency sweep (docs).** Swept the full doc set
   for stale "gated on real-LLM rollout / design target / all three gated / until the
   gate opens" claims now inaccurate after the gate opened and all three evolutions were

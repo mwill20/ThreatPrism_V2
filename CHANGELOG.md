@@ -4,6 +4,15 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Project closeout doc pass (2026-06-03).** Brought all reviewer-facing docs to the
+  closeout state: refreshed `REPO_AUDIT.md` to a closeout review (baseline 314, RGOI +
+  rendered-image diagrams reflected, verdict = "publishable except license selection");
+  rewrote the stale `docs/MODEL_CARD.md` (default demo provider + open real-LLM gate +
+  live-eval performed + demo-only RGOI write-back); updated README Project Status to the
+  closeout milestone; added a "Project Closeout" summary to `docs/WORKING_CHECKLIST.md`;
+  fixed the remaining 1–40→1–41 lesson reference. The single open publication item is
+  **license selection** (no `LICENSE` yet). Validation confirmed green: 314 passed /
+  3 skipped, eval 15/15, demo safety passing.
 - **RGOI learning loop + triage-context builder — BUILT (demo-only, NOT wired to triage;
   owner-authorized 2026-06-03).** Implemented spec 38's two halves as governed,
   demo-safe modules: `src/threatprism/csi/learning_loop.py` (`KnowledgeLearningLoop` —

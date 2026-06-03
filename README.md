@@ -54,11 +54,18 @@ Expected background:
 
 ## Project Status
 
-Current status: demo-safe proof-of-concept backend with a local hardened
-dashboard surface.
+Current status: **demo-safe proof-of-concept, feature-complete for its scope and at a
+documented closeout milestone.** It includes the full triage pipeline + four-layer
+guardrails, a local hardened dashboard, all three runtime evolutions (batch auto-close,
+two-model backtest, live co-pilot — the latter two live-verified), a tamper-evident
+integrity subsystem, and a governed (demo-only, human-gated) RGOI knowledge write-back
+loop. Validation: see [docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md). The
+one open publication item is **license selection** (see [License](#license)).
 
 ThreatPrism is not production-ready. It does not process real organization
-data, run live SOAR/cloud providers, or execute remediation.
+data, run live SOAR/cloud providers, or execute remediation. Real-LLM calls run only
+under explicit `--live` config; production deployment, IdP, RAG-into-triage, write-back
+persistence, and multi-tenancy remain gated.
 
 The real-LLM gate (Claude triage + an independent OpenAI analyst + local Prompt
 Guard 2) is **owner-opened and live-validated**, and **all three runtime evolutions

@@ -24,6 +24,30 @@ Trust files and validation results over older chat summaries.
   handoff, limitations/decisions as needed, lessons, and current validation
   updates.
 
+## Project Closeout (2026-06-03)
+
+ThreatPrism is at a documented **closeout milestone** — feature-complete for its demo/POC
+scope, internally consistent, and green.
+
+- **Validation:** 314 passed / 3 skipped, eval 15/15, demo safety passing (canonical:
+  `docs/VALIDATION_BASELINE.md`). Repo clean and pushed to `origin/main`.
+- **Built & demonstrated:** full triage pipeline + four-layer guardrails; two-stage
+  tokenization; role-based views; SQLite persistence; eval harness; demo scenario pack;
+  Docker packaging; fixture factory + 3 curated dataset families; CSI/RGOI read-only
+  foundation; local hardened dashboard; real-LLM gate (Claude triage + OpenAI analyst +
+  Prompt Guard 2) opened and **live-verified**; all three runtime evolutions (auto-close,
+  backtest, live co-pilot); tamper-evident integrity subsystem (failure log + audit
+  mirror + verify CLI); governed demo-only RGOI write-back loop (NOT wired to triage);
+  rendered architecture + threat-model diagrams (SVG/PNG); 41-lesson curriculum.
+- **Threat posture:** 3-lens threat model + traceability + owner-signed treatment
+  register; OT-8/OT-1 (integrity) largely mitigated; OT-L8 (write-back) implemented for
+  demo scope; OT-L1 (RAG-into-triage) intentionally Avoid, enforced by test.
+- **The one open publication item:** **no `LICENSE`** — owner must select one; usage
+  rights are intentionally unclear until then (flagged in README + SECURITY + REPO_AUDIT).
+- **Gated / out of scope** (each with a re-open trigger): RAG-into-triage wiring,
+  write-back persistence/HTTP-routes/multi-tenancy, tools/function-calling, fine-tuning,
+  live JWKS/IdP, production deployment, non-demo data, real PHI, real remediation.
+
 ## Active Target
 
 The first ThreatPrism backend slice is complete:

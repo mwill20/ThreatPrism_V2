@@ -1,23 +1,27 @@
 # Repository Audit
 
-**Date:** 2026-06-03 · **Mode:** Audit Only (report; no file changes beyond this report)
+**Date:** 2026-06-03 · **Mode:** Closeout Review (report + doc-currency pass)
 
 **Project type:** Security tool (SOC triage co-pilot) + AI/ML-assisted (LLM triage,
-gate now open) + lightly agentic (human-in-the-loop co-pilot; no autonomous tools) +
-educational (Lessons 1–40). Stage: demo / POC with synthetic data only.
+gate open) + lightly agentic (human-in-the-loop co-pilot; no autonomous tools) +
+educational (Lessons 1–41). Stage: demo / POC with synthetic data only.
 
-## Summary
+## Summary (closeout)
 
-The repository is publication-strong on nearly every axis: layered guardrails, a mature
+The repository is publication-strong on every axis but one: layered guardrails, a mature
 three-lens threat model with treatment register, fake-data-only safety enforced in CI,
-exact dependency pins with a lock file, an extensive lesson curriculum, rendered
-architecture + threat-model diagrams, and a tamper-evident integrity subsystem. Since
-the prior audit, the real-LLM gate has been opened and live-verified, all three runtime
-evolutions have been demonstrated, and the validation baseline is single-sourced.
+exact dependency pins with a lock file, a 41-lesson curriculum, **rendered (SVG + PNG)
+architecture + threat-model diagrams**, a tamper-evident integrity subsystem (failure
+log + audit mirror + verify CLI), the real-LLM gate opened and live-verified, all three
+runtime evolutions demonstrated, and a governed (demo-only, human-gated) RGOI write-back
+loop — with retrieval-into-triage deliberately built-but-not-wired and that disconnection
+enforced by a test. Validation is single-sourced at **314 passed / 3 skipped**, eval
+15/15, demo safety passing.
 
-**The one High-priority blocker remains: no `LICENSE` file** — usage rights are unclear
-until the owner selects one. One doc-accuracy follow-up (model card vs. now-open real-LLM
-gate) and a couple of optional polish items round out the gaps.
+**The one remaining High-priority blocker is the absence of a `LICENSE` file** — usage
+rights are unclear until the owner selects one. This is the only item standing between
+the repo and "publishable/reusable." Everything else is either PASS or PARTIAL-by-design
+(production deployment/monitoring intentionally gated).
 
 ## Scorecard
 
@@ -26,18 +30,18 @@ gate) and a couple of optional polish items round out the gaps.
 | Purpose and audience | PASS | High | README purpose/audience/status; START_HERE + North Star reinforce. |
 | Installation and quickstart | PASS | High | README + docs/INSTALLATION.md: PowerShell setup, validation, API, Docker. |
 | Usage examples | PASS | High | README, RUNBOOK.md, docs/USAGE.md: API, dashboard, eval, scenario, fixtures, co-pilot, verify-logs. |
-| Architecture documentation | PASS | High | docs/ARCHITECTURE.md now has a rendered **Mermaid** diagram + ASCII + component layers; North Star + specs. |
+| Architecture documentation | PASS | High | docs/ARCHITECTURE.md (rendered Mermaid + ASCII + components) + two threat-model diagrams (trust-boundary DFD + OWASP-LLM overlay) in system-context.md; rendered SVG/PNG in `assets/diagrams/`; North Star + specs. |
 | Dependencies and environment | PASS | High | requirements.txt exact pins; requirements-lock.txt; requirements-llm.txt (gated); .env.example placeholders only. |
-| Evaluation and results | PASS | High | docs/EVALUATION.md + docs/VALIDATION_BASELINE.md (single source: 302 passed / 3 skipped, eval 15/15); live findings in LIVE_BACKTEST_FINDINGS.md. |
+| Evaluation and results | PASS | High | docs/EVALUATION.md + docs/VALIDATION_BASELINE.md (single source: 314 passed / 3 skipped, eval 15/15); live findings in LIVE_BACKTEST_FINDINGS.md. |
 | Dataset documentation | PASS | Medium | docs/DATASET.md: third-party datasets are reviewed source material, not runtime deps. |
-| Model documentation | PARTIAL | Medium | docs/MODEL_CARD.md exists but predates the open real-LLM gate — should reflect that real Claude/OpenAI now run under `--live`. |
+| Model documentation | PASS | Medium | docs/MODEL_CARD.md refreshed 2026-06-03: documents the default demo provider, the open real-LLM gate (Claude triage + OpenAI analyst + Prompt Guard 2 under `--live`), live-eval performed, and the demo-only RGOI write-back. |
 | Security documentation | PASS | High | SECURITY.md + three-lens threat model + mitigations-traceability + treatment register + new rendered threat-model DFD. |
 | Deployment documentation | PARTIAL | Medium | docs/DEPLOYMENT.md covers local/Docker only; production deployment intentionally out of scope. |
 | Monitoring/maintenance | PARTIAL | Medium | docs/MONITORING.md + new tamper-evident logs & verify CLI; production monitoring still gated. |
 | Limitations and trade-offs | PASS | High | LIMITATIONS.md explicit on demo-only / no-remediation / gated scope. |
 | License and usage rights | FAIL | High | **No LICENSE file.** README flags usage rights as unclear. The one real blocker. |
 | Support/contact | PASS | Medium | README → issues; SECURITY.md for vulnerabilities. |
-| Visual demo/assets | PASS | Medium | Rendered Mermaid architecture + threat-model diagrams + ASCII; local dashboard at `/dashboard`. Tracked screenshot/GIF still optional. |
+| Visual demo/assets | PASS | Medium | Committed rendered images (SVG + PNG) in `assets/diagrams/` (architecture, threat-model DFD, applied overlay), embedded in README; local dashboard at `/dashboard`. A dashboard screenshot/GIF remains optional polish. |
 | Examples | PASS | Medium | examples/ (soar_payloads, demo_scenarios, csi, dashboard_contract); curated fixtures; eval fixtures. |
 | CI/tests | PASS | High | .github/workflows/safe-validation.yml (Ubuntu, py3.12, fake-data env); 305 collected tests; demo-safety gate. |
 
@@ -50,7 +54,7 @@ gate) and a couple of optional polish items round out the gaps.
 - **Three runtime evolutions** all demonstrated (Evolutions 2 and 3 live).
 - **Tamper-evident integrity subsystem:** hash-chained `FailureLog` + case audit-trail mirror + operator `verify_logs` CLI (closes much of OT-1/OT-8).
 - **Threat modeling** unusually mature for demo stage: STRIDE + MITRE ATLAS/OWASP-LLM + LINDDUN, traceability matrix, owner-signed treatment register, now a rendered DFD.
-- **Reproducibility & docs:** single-source validation baseline, lessons 1–40 incl. a capstone, durable handoff files.
+- **Reproducibility & docs:** single-source validation baseline, lessons 1–41 (incl. a capstone), durable handoff files.
 
 ## Missing Files
 
@@ -60,8 +64,8 @@ gate) and a couple of optional polish items round out the gaps.
 
 ## Weak / Partial Areas
 
-- **docs/MODEL_CARD.md** likely still describes only the deterministic demo provider; the real-LLM gate is now open and live-run, so the card should note real Claude/OpenAI usage under `--live` (and that the default remains the demo provider).
 - **Deployment / Monitoring** are PARTIAL by design — production deployment, IdP, and production monitoring are explicitly gated, which is honest and correct for this stage (not a defect).
+- (Resolved this pass) docs/MODEL_CARD.md was stale re: the open real-LLM gate; refreshed 2026-06-03.
 
 ## Reproducibility Gaps
 
@@ -75,19 +79,30 @@ gate) and a couple of optional polish items round out the gaps.
 
 - Stray `pytest-cache-files-*` directories sit at the repo root (untracked, not committed). A `.gitignore` entry would keep the working tree clean.
 
-## Priority Fix Order
+## Priority Fix Order (closeout)
 
-1. **Add a `LICENSE`** (requires the owner's choice) — the only blocker to presenting the repo as reusable/publishable.
-2. **Refresh `docs/MODEL_CARD.md`** to reflect the now-open real-LLM gate (real providers under `--live`; demo default).
-3. *(Optional)* Add `CITATION.cff` for portfolio citeability.
-4. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
+1. **Add a `LICENSE`** (requires the owner's choice) — the **only** blocker to presenting
+   the repo as reusable/publishable. ⬅ the single open closeout item.
+2. *(Optional)* Add `CITATION.cff` for portfolio citeability.
+3. *(Optional)* Track a dashboard screenshot/GIF; gitignore the `pytest-cache-files-*` dirs.
+
+Everything else from the prior pass is resolved (MODEL_CARD refreshed; diagrams rendered
+to committed images; baseline single-sourced and current).
 
 ## Validation Reference
 
 Canonical baseline is single-sourced in
-[docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md): **302 passed / 3 skipped**,
-eval harness dry-run **15 passed / 0 failed**, demo safety passed. CI:
-`.github/workflows/safe-validation.yml` (Ubuntu, Python 3.12, fake-data env, no live keys).
+[docs/VALIDATION_BASELINE.md](docs/VALIDATION_BASELINE.md): **314 passed / 3 skipped**,
+eval harness dry-run **15 passed / 0 failed**, demo safety passed (closeout run
+2026-06-03). CI: `.github/workflows/safe-validation.yml` (Ubuntu, Python 3.12, fake-data
+env, no live keys).
+
+## Closeout Verdict
+
+**Ready for publication except for license selection.** The project is internally
+consistent, fully documented (41 lessons, complete spec/threat-model/runbook set),
+reproducible offline, demo-safe, and green. The sole gating item is choosing and adding a
+`LICENSE`; until then usage rights are intentionally unclear (flagged in README + SECURITY).
 
 ---
 

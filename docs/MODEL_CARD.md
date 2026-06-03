@@ -1,45 +1,56 @@
 # Model And Provider Card
 
-ThreatPrism currently does not use a live, hosted, trained, or fine-tuned model.
-The implemented provider is deterministic demo logic for local validation and
-repeatable tests.
+**Default provider is deterministic** (`deterministic_demo`) so tests, CI, and demos run
+offline with no keys. The **real-LLM gate is open** (owner-authorized 2026-06-01): under
+explicit `--live` configuration, real models run and have been live-validated. No live
+provider is ever used during standard validation.
 
-## Current Provider
+## Providers
 
-| Field | Current Status |
-|---|---|
-| Provider | `deterministic_demo` |
-| Location | `src/threatprism/llm/providers.py` |
-| External network calls | None |
-| API keys required | None |
-| Training or fine-tuning | None |
-| Live LLM evaluation | Not performed |
-| Intended use | Deterministic local triage behavior for fake demos and tests |
-| Out-of-scope use | Production analysis, live incident response, compliance determinations |
+| Provider | Role | Status | Network | Keys |
+|----------|------|--------|---------|------|
+| `deterministic_demo` (`llm/providers.py`) | Triage (default) | Active default | None | None |
+| `anthropic_claude` (`ClaudeTriageProvider`) | Triage (real) | **Gate open**, runs only under `--live` | Anthropic API | `ANTHROPIC_API_KEY` |
+| OpenAI `MockAnalyst` (`llm/mock_analyst.py`) | Independent analyst (Evolution 2) | **Gate open**, runs only under `--live` | OpenAI API | `OPENAI_API_KEY` |
+| `Llama-Prompt-Guard-2-86M` (`guardrails/semantic_firewall.py`) | Prompt-injection detector | Built, default-off, local-only (no egress) | None (local cache) | None |
 
-## Safety Boundary
+Training or fine-tuning: **none** (no fine-tuning pipeline exists — gated).
 
-Even though the current provider is deterministic, ThreatPrism treats provider
-output as untrusted. Output must pass:
+## Live evaluation performed
 
-- schema validation
-- output policy scanning
-- evidence-grounding checks
-- action-safety checks
-- role-aware rendering and authorization checks before display
+The real providers have been exercised on synthetic data under governed spend caps
+(whole investigation arc ~$0.49):
 
-CSI/RGOI also treats AI-authored cognition as non-authoritative unless a human
-approval path approves it. The current CSI/RGOI slice does not call a live
-model, write memory, mutate trust, publish suppressions, or run RAG.
+- Two-model backtest (real Claude triage vs. independent OpenAI analyst) on curated +
+  adversarial sets; a true-**blind** analyst showed real determination divergence
+  (anchoring shown material). See [LIVE_BACKTEST_FINDINGS.md](LIVE_BACKTEST_FINDINGS.md).
+- Single-event live co-pilot run (Evolution 3): real Claude rated an injection fixture
+  `suspicious/0.95` where the demo stub said `benign`.
 
-## Future Live Providers
+Spend is metered with a fail-closed per-run cap; every real call emits a sanitized
+`llm_call` audit (token counts + content **hashes**, never raw text).
 
-Future live LLM provider work must be explicitly approved and must re-open the
-relevant threat-model treatments. It must not bypass tokenization, prompt
-firewall checks, policy scanning, evidence grounding, action safety, or
-controlled role-view rendering.
+## Safety boundary
 
-External research providers such as Exa.ai are also future-only options, not
-current model providers. They must not be used for standard validation, live
-RAG, CSI/RGOI memory write-back, automatic fixture promotion, trust mutation,
-or source-of-truth changes without a separate approved slice.
+Provider output (deterministic or real) is treated as **untrusted** and must pass:
+
+- schema validation, output policy scanning, evidence-grounding checks, action-safety
+  checks, and role-aware rendering/authorization before display;
+- any validation failure becomes a structured `TriageFailureReport` (fail closed) and is
+  recorded in the tamper-evident failure log.
+
+CSI/RGOI treats AI-authored cognition as **non-authoritative**. As of 2026-06-03 a
+governed, demo-only **write-back loop** exists (`csi/learning_loop.py`): the AI may
+propose knowledge, but only a human may promote it (deterministic gate, reverse-deny,
+Stage-1 tokenization, audited). Retrieval-into-triage (feeding cognition to the model) is
+**built but not wired** and remains gated (OT-L1). No live RAG, no autonomous memory
+writes, no trust mutation, no suppression publication.
+
+## Future live providers
+
+Wiring retrieval into the triage prompt, productionizing write-back (persistence, HTTP
+write routes, multi-tenancy), fine-tuning, and external research providers (e.g., Exa.ai)
+all remain gated and require re-opening the relevant threat-model treatments in
+[spec 21](specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md). None may bypass
+tokenization, prompt-firewall checks, policy scanning, evidence grounding, action safety,
+or role-view rendering.

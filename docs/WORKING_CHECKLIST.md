@@ -1154,8 +1154,9 @@ updated to make the catalog the single edit point.
 Gaps 5–6 (append-only audit + compliance export + retention = OT-8; report
 versioning/diff) remain gated to non-demo data / lower priority.
 
-**Three runtime evolutions (all gated on opening the real-LLM gate; a curated SOC
-dataset stands in for the SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
+**Three runtime evolutions (real-LLM gate now OPEN; all three demonstrated — Evolution 1
+deterministically, Evolutions 2 and 3 live; a curated SOC dataset stands in for the
+SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
 
 - [x] Evolution 1 — Batched benign (SOAR catch-all auto-close) — **built (deterministic
   core) 2026-06-01.** `src/threatprism/demo/auto_close_delta.py` + `run_auto_close_delta`:

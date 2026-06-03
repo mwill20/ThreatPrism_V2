@@ -312,8 +312,10 @@ drift instrument and names the independence requirement that keeps it valid.
 The three runtime evolutions — batched benign (SOAR catch-all), batch over
 analyst-handled cases (tuning loop), and single event-driven live co-pilot — are
 documented in [`docs/PRODUCT_VALUE_AND_ROADMAP.md`](../docs/PRODUCT_VALUE_AND_ROADMAP.md).
-All three are gated on opening the real-LLM gate; until then a curated SOC dataset
-stands in for the SOAR feed.
+The real-LLM gate is now open and **all three have been demonstrated** — Evolution 1
+deterministically, Evolutions 2 and 3 with real models (see Lesson 39 and
+[`docs/LIVE_BACKTEST_FINDINGS.md`](../docs/LIVE_BACKTEST_FINDINGS.md)). A curated SOC
+dataset stands in for the SOAR feed throughout.
 
 ### 🔁 Sibling proving grounds (same pipeline, different question)
 

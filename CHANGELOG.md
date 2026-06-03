@@ -4,6 +4,14 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Consolidation capstone — doc-set consistency sweep (docs).** Swept the full doc set
+  for stale "gated on real-LLM rollout / design target / all three gated / until the
+  gate opens" claims now inaccurate after the gate opened and all three evolutions were
+  demonstrated. Updated `Lesson28`, `README.md`, `docs/WORKING_CHECKLIST.md`,
+  `docs/runbooks/RUN_AGAINST_SOC_DATASET.md`, and the LLM-agent threat-model lens (the
+  semantic firewall is built + live-verified, not "build gated"). Left accurate scope
+  statements untouched (the default/eval path genuinely uses no live LLM; real PHI /
+  tools / memory / multi-tenancy remain out of scope).
 - **Lessons 39 + 40 and roadmap consolidation (docs).** Added `Lessons/Lesson39_...`
   (Evolution 3 single-event live co-pilot — the conflation trap of analyst-input vs.
   LLM-grader, verify-before-spend, the live provider-gap finding) and

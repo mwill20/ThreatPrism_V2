@@ -468,7 +468,7 @@ It reports cases seeded per family, the terminal triage outcome (including the o
 deepset injection case the prompt firewall quarantines end-to-end), severity and
 determination distributions, and review-queue counts. This demonstrates pipeline,
 guardrail, persistence, and observability correctness — not LLM reasoning quality,
-which is gated on real-LLM rollout. Full walkthrough:
+which shows under `--live` with the real provider (the real-LLM gate is open). Full walkthrough:
 [`docs/runbooks/RUN_AGAINST_SOC_DATASET.md`](docs/runbooks/RUN_AGAINST_SOC_DATASET.md).
 
 Re-running is idempotent: fixtures whose `source_case_id` already exists are

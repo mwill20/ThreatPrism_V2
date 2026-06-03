@@ -400,9 +400,12 @@ Before any real/non-demo dataset is onboarded into `fixtures/curated_datasets/`:
 - A per-source data-classification + retention decision (ties to the LINDDUN non-demo gates in [healthcare-data-threat-model.md](healthcare-data-threat-model.md))
 - Promote OT-L10 from Accept(demo) to Mitigate in [spec 21](../specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md) and add corpus-integrity regression tests
 
-### Before the Semantic Firewall Ships (addresses OT-L11 / RR-L1)
+### Semantic Firewall — shipped default-off; enabling is gated (addresses OT-L11 / RR-L1)
 
-Per [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), gated on real-LLM rollout:
+Per [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md): **implemented and
+live-verified** (4/6 deepset RR-L1 rows recovered at threshold 0.9, rev `a8ded8e6`),
+wired default-off. The contract below is met; *enabling it by default* stays gated to
+real-LLM rollout:
 
 - Pin the model revision by commit SHA; load in eval mode (deterministic, no sampling); assert no network egress
 - Keep the detector-not-gate contract: deterministic threshold, escalate-only `max(deterministic, semantic)`, deterministic guardrails remain authoritative
@@ -413,7 +416,7 @@ Per [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md), gated on real-LLM
 
 ## Out-of-Scope Improvements
 
-- **Semantic prompt-injection classifier** — no longer merely out-of-scope: it is now a **planned, gated** control (`meta-llama/Llama-Prompt-Guard-2-86M`) specified in [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) and modeled as L1.1 / OT-L11. Build is gated on real-LLM rollout.
+- **Semantic prompt-injection classifier** — no longer out-of-scope and no longer merely planned: **built and live-verified** (`meta-llama/Llama-Prompt-Guard-2-86M`, rev `a8ded8e6`, 4/6 RR-L1 recovery), wired default-off per [spec 32](../specs/32_SEMANTIC_PROMPT_INJECTION_LAYER.md) and modeled as L1.1 / OT-L11. Enabling it by default is gated to real-LLM rollout.
 - **LLM-based output review** as a second-pass check on `scan_output_policy()` — adds dependency on the thing being checked, requires careful design
 - **Prompt template versioning** with hash-chained history — useful for forensic reconstruction; nice-to-have
 - **Token-budget enforcement** at the provider abstraction layer — should live in the `TriageProvider` interface once real providers exist

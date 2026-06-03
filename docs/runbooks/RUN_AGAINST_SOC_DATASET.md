@@ -40,8 +40,9 @@ actual per-case deliverable, not just the aggregate).
 The run also prints a **batch executive summary** — cases ranked most-critical-first
 with per-case provenance (`sha256` source hash) and evidence-ID traceability, so an
 auditor can review quickly. Its `narrative` field (LLM-generated executive prose) is
-intentionally empty (`pending_real_llm_provider`) until the real-LLM gate opens — the
-ranking and provenance are deterministic and usable today; only the prose is gated.
+empty (`pending_real_llm_provider`) when running with the default deterministic
+provider; under `--live` (real-LLM gate open) it is filled with real prose. The ranking
+and provenance are deterministic and usable either way — only the prose needs a model.
 
 ### Expected output
 
@@ -145,5 +146,6 @@ no-leakage check on the summary).
 - `ALLOW_REAL_ACTIONS=false` is unchanged; no remediation is executed.
 - Raw third-party rows are never read here — only the sanitized committed
   derivatives under `fixtures/curated_datasets/`.
-- Demonstrating *LLM triage quality* (vs. pipeline correctness) requires the gated
-  real-LLM rollout and the semantic layer in `docs/specs/32`.
+- Demonstrating *LLM triage quality* (vs. pipeline correctness) requires running under
+  `--live` with the real provider (the real-LLM gate is open) plus the semantic layer in
+  `docs/specs/32`.

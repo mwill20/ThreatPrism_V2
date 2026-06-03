@@ -151,6 +151,64 @@ ROLE_VIEW_POLICY = {
 
 ---
 
+## Trust-Boundary Data-Flow Diagram
+
+This diagram renders the trust boundaries above as a data-flow graph. Each
+boundary-crossing edge is labeled with the **threat class it must resist** (STRIDE
+`S/T/R/I/D/E`, OWASP LLM `L01/L02/L09/L13`, LINDDUN `DI`) and the **control that
+resists it**. Untrusted producers are red; in-boundary controls are green; data stores
+are blue. Threat IDs map to the lens files; controls map to
+[`mitigations-traceability.md`](mitigations-traceability.md).
+
+```mermaid
+flowchart TB
+    classDef untrusted fill:#fdecea,stroke:#c0392b,color:#000;
+    classDef control fill:#eafaf1,stroke:#1e8449,color:#000;
+    classDef store fill:#eaf2fb,stroke:#2471a3,color:#000;
+
+    src["SOAR / webhook / HTTP client + ?role=<br/>(UNTRUSTED)"]:::untrusted
+    model["LLM provider output<br/>(UNTRUSTED)"]:::untrusted
+
+    subgraph b1["1 - API ingress + auth/demo.py"]
+        routes["FastAPI routes + Pydantic"]:::control
+    end
+    subgraph b23["2 SOAR intake + 3 Stage-1 healthcare"]
+        norm["normalize + source hash"]:::control
+        hc["Stage-1 tokenize (permanent)<br/>healthcare.py"]:::control
+    end
+    db[("SQLite case store<br/>persistence/sqlite.py")]:::store
+    subgraph b4["4 - Pre-model"]
+        fw["prompt firewall + Stage-2 vault<br/>+ semantic firewall (detector)"]:::control
+    end
+    subgraph b5["5 - Model output"]
+        og["output policy + evidence + action safety"]:::control
+    end
+    subgraph b6["6 - Role-view"]
+        rv["render_role_view + audit"]:::control
+    end
+    logs[("Tamper-evident logs<br/>hash_chain (OT-1 / OT-8)")]:::store
+
+    src -- "S1/S2 spoof, T tamper, D DoS<br/>to Pydantic, demo auth, body cap, rate limit" --> routes
+    routes -- "T2 provenance<br/>to normalize + sha256 source hash" --> norm
+    norm --> hc
+    hc -- "DI2 PHI/PII disclosure<br/>to Stage-1 tokens (never rehydrated)" --> db
+    db --> fw
+    fw -- "L01 prompt injection, I3 telemetry<br/>to firewall quarantine + Stage-2 vault" --> model
+    model -- "L02 insecure output, L13 hallucinated evidence, L09 overreliance<br/>to schema + output policy + evidence check" --> og
+    og -- "E2 excessive agency<br/>to enforce_action_safety (ALLOW_REAL_ACTIONS=false)" --> db
+    db -- "I2 disclosure, DI3 minimum-necessary<br/>to ?role= never authority + masking" --> rv
+    rv -- "R1 repudiation<br/>to AuditEvent on allow AND deny" --> logs
+    og -. "fail-closed: sanitized what + why" .-> logs
+    db -. "every AuditEvent mirrored, hash-chained" .-> logs
+```
+
+> **Reading it:** the spine `src to routes to ... to db to rv` is the request path; the
+> dashed edges to **logs** are the tamper-evident observability added for OT-1/OT-8. The
+> two UNTRUSTED nodes (inbound client and LLM output) are exactly the two surfaces the
+> guardrail pipeline is built around — everything between them is a control.
+
+---
+
 ## Data Flows
 
 ### Case Intake and Triage

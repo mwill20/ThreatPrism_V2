@@ -17,6 +17,7 @@ CONTRACT_ROUTES = {
     "/queues/manager-review",
     "/queues/healthcare-review",
     "/cases/{case_id}",
+    "/cases/{case_id}/triage-report",
     "/cases/{case_id}/evidence",
     "/cases/{case_id}/timeline",
     "/cases/{case_id}/mitre",
@@ -175,3 +176,13 @@ def test_dashboard_copilot_controls_present_and_assignable_gated() -> None:
     # Feedback form fields exist.
     for field in ("fb-determination", "fb-severity", "fb-disposition", "fb-confidence"):
         assert field in script
+
+
+def test_dashboard_detail_uses_validated_triage_report_for_decision_fields() -> None:
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+
+    assert 'triageReport: "/cases/{case_id}/triage-report"' in script
+    assert "apiGetOptional(casePath(API_ROUTES.triageReport))" in script
+    assert "state.report" in script
+    assert "currentReportSummary" in script
+    assert "selectedCaseReadModel" in script

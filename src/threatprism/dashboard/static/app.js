@@ -55,7 +55,7 @@ const PERSONA_TAB_IDS = {
 const REQUEST_TIMEOUT_MS = 8000;
 
 // Personas that authenticate as a case-working role (their demo key maps to
-// analyst/engineer) — only these see the assign/release/feedback controls. Other
+// analyst/engineer) - only these see the assign/release/feedback controls. Other
 // personas would be denied (403) by the API anyway.
 const ASSIGNABLE_PERSONAS = new Set(["analyst", "engineer"]);
 const isAssignable = () => ASSIGNABLE_PERSONAS.has(state.persona);
@@ -71,6 +71,7 @@ const API_ROUTES = {
   release: "/cases/{case_id}/release",
   feedback: "/cases/{case_id}/analyst-feedback",
   caseDetail: "/cases/{case_id}",
+  triageReport: "/cases/{case_id}/triage-report",
   evidence: "/cases/{case_id}/evidence",
   timeline: "/cases/{case_id}/timeline",
   mitre: "/cases/{case_id}/mitre",
@@ -172,6 +173,7 @@ const state = {
   myCasesOnly: false,
   actionError: null,
   detail: null,
+  report: null,
   evidence: null,
   timeline: null,
   mitre: null,
@@ -305,6 +307,7 @@ async function refreshDashboard() {
 async function refreshDetail() {
   if (!state.selectedCaseId) {
     state.detail = null;
+    state.report = null;
     state.evidence = null;
     state.timeline = null;
     state.mitre = null;
@@ -313,8 +316,9 @@ async function refreshDetail() {
     return;
   }
   const casePath = (route) => route.replace("{case_id}", state.selectedCaseId);
-  const [detail, evidence, timeline, mitre, grc, audit] = await Promise.all([
+  const [detail, report, evidence, timeline, mitre, grc, audit] = await Promise.all([
     apiGet(casePath(API_ROUTES.caseDetail)),
+    apiGetOptional(casePath(API_ROUTES.triageReport)),
     apiGetOptional(casePath(API_ROUTES.evidence)),
     apiGetOptional(casePath(API_ROUTES.timeline)),
     apiGetOptional(casePath(API_ROUTES.mitre)),
@@ -322,11 +326,41 @@ async function refreshDetail() {
     apiGetOptional(casePath(API_ROUTES.audit)),
   ]);
   state.detail = detail;
+  state.report = report;
   state.evidence = evidence;
   state.timeline = timeline;
   state.mitre = mitre;
   state.grc = grc;
   state.audit = audit;
+}
+
+function selectedCaseReadModel() {
+  return [...state.cases, ...state.managerQueue, ...state.healthcareQueue].find(
+    (item) => item.case_id === state.selectedCaseId,
+  );
+}
+
+function hasReportFields(report) {
+  return Boolean(
+    report
+      && (
+        report.determination
+        || report.severity
+        || report.disposition
+        || report.confidence !== undefined
+      ),
+  );
+}
+
+function currentReportSummary() {
+  const readModelReport = selectedCaseReadModel()?.triage || {};
+  const candidates = [
+    state.report,
+    state.detail?.latest_report,
+    state.detail?.report,
+    readModelReport,
+  ];
+  return candidates.find(hasReportFields) || {};
 }
 
 function caseFilters() {
@@ -456,7 +490,7 @@ function renderDetail() {
 
   $("detail-title").textContent = state.detail.title || state.selectedCaseId;
   $("detail-eyebrow").textContent = state.selectedCaseId;
-  const report = state.detail.latest_report || state.detail.report || {};
+  const report = currentReportSummary();
   detail.innerHTML = `
     <article class="detail-card">
       <div class="badge-row">

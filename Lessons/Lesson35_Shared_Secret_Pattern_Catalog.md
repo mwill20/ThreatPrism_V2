@@ -178,8 +178,9 @@ was scoped precisely:
   it's designed to force a paired update when a pattern changes. Updating its key
   is the guard working, not a workaround.
 
-Full suite `267 → 271 passed` (the four new catalog tests), evals 15/15, demo
-safety passed.
+The historical slice added four catalog tests and kept the then-current full suite,
+eval harness, and demo-safety checks passing. The active suite count now lives in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ---
 
@@ -213,4 +214,4 @@ safety passed.
 | Stay-in-sync guard | `tests/test_secret_catalog.py` |
 | Design principle | one catalog, per-consumer named subsets (two threat models) |
 | Behavior | healthcare/tokenization unchanged; policy + hook broadened safely |
-| Validation | 271 passed / 3 skipped, eval 15/15, demo safety passed |
+| Validation | Historical slice pass; current count in [VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md) |

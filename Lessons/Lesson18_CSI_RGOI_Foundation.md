@@ -17,8 +17,10 @@ creating unrestricted AI memory.
 
 ## Mental Model
 
-CSI/RGOI is not a memory write-back system. It is a read-only retrieval layer
-that exposes cognitive objects only after policy checks pass.
+This foundation slice is not a memory write-back system. It is a read-only
+retrieval layer that exposes cognitive objects only after policy checks pass.
+Later demo-only, human-gated write-back is covered separately in Lesson 41 and
+does not wire cognition into triage.
 
 Core principles:
 
@@ -75,9 +77,10 @@ lineage, replay, observability, and divergence behavior.
 
 ## Safe Extension Rules
 
-Future CSI/RGOI work must not add memory write-back, live RAG, trust mutation,
-knowledge approval, suppression publication, or remediation without reopening
-the threat model treatment register.
+Future CSI/RGOI work must not add production write-back, live RAG, trust
+mutation, suppression publication, autonomous knowledge approval, or remediation
+without reopening the threat model treatment register. Demo-only human approval
+work is a separate gated surface.
 
 Any future production path needs production identity, authorization, tenant
 administration, retention, append-only audit storage, and non-demo data

@@ -125,10 +125,13 @@ evident for audit events.
 ## 9. 🧱 Honest scope (what this is *not*)
 
 Demo/POC with synthetic data only (RFC 5737 IPs, `.test` domains). No real remediation
-(`ALLOW_REAL_ACTIONS=false`), no real PHI, no tools/function-calling, no memory
-write-back, no multi-tenancy, no fine-tuning. These are explicitly gated in the threat
-treatment register ([spec 21](../docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)),
-each with a re-open trigger.
+(`ALLOW_REAL_ACTIONS=false`), no real PHI, no tools/function-calling, no production
+RAG-into-triage, no autonomous or persistent memory write-back, no multi-tenancy, and
+no fine-tuning. The demo-only RGOI learning loop in Lesson 41 is human-gated and
+deliberately disconnected from triage. Production RAG/write-back remains gated in the
+threat treatment register
+([spec 21](../docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md)), with a
+re-open trigger.
 
 ## 10. 🎤 Capstone talk track
 

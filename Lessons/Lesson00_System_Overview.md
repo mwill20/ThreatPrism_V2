@@ -172,11 +172,8 @@ cd /c/Projects/ThreatPrismV2
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson00
 ```
 
-Expected output:
-
-```text
-66 passed
-```
+Expected output: the current pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### 🔬 Exercise 2: Inspect Configuration Defaults
 
@@ -242,7 +239,7 @@ Expected output:
 | Main backend entry | `src/threatprism/api/app.py` |
 | CLI runner | `src/threatprism/cli/main.py` |
 | Config defaults | `src/threatprism/config.py` |
-| Current validation | `66 passed` |
+| Current validation | [Canonical baseline](../docs/VALIDATION_BASELINE.md) |
 | Hard safety default | `ALLOW_REAL_ACTIONS=false` |
 
 ## 🚀 Ready For Lesson 01?

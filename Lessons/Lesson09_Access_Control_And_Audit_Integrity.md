@@ -223,11 +223,8 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson09_full
 ```
 
-Expected output:
-
-```text
-66 passed
-```
+Expected output: the current pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ## 📚 Interview Prep
 

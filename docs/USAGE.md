@@ -24,12 +24,8 @@ Set-Location C:\Projects\ThreatPrismV2
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
-Expected current result:
-
-```text
-112 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+Expected current result: see the canonical baseline in
+[`docs/VALIDATION_BASELINE.md`](VALIDATION_BASELINE.md).
 
 ## Start The API
 

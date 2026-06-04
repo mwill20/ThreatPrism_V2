@@ -71,18 +71,9 @@ Current implemented baseline:
   Live JWKS fetch, live IdP calls, real credentials, and production tenant
   administration are not implemented.
 
-Validation command confirmed on 2026-05-26:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_impl_final2
-```
-
-Result after Production Token Verifier Implementation v0.1:
-
-```text
-112 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+The current pass/skip count is single-sourced in
+`docs/VALIDATION_BASELINE.md`. Older slice-specific validation counts are
+historical only and should not be copied forward as the active baseline.
 
 If that exact base temp is locked on Windows, rerun with a fresh ignored base
 temp such as `.pytest_tmp_run_verify`.

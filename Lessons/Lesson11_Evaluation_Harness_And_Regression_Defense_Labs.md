@@ -215,11 +215,8 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson11_full
 ```
 
-Expected output:
-
-```text
-66 passed
-```
+Expected output: the current pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### 🔬 Exercise 3: Run The CLI Harness
 
@@ -286,7 +283,7 @@ Expected output:
 | Output directory | `.eval_runs/` |
 | CLI | `python -m threatprism.evals.cli --fixtures regression_cases.jsonl` |
 | Test file | `tests/test_eval_harness.py` |
-| Validation | `66 passed` |
+| Validation | [Canonical baseline](../docs/VALIDATION_BASELINE.md) |
 
 ## 🚀 Ready For The Next Slice?
 

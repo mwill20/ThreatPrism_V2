@@ -141,8 +141,9 @@ file mode.* That would also serialize... by giving every operation its own datab
 And that is precisely why it's wrong here — **each `:memory:` connection is a
 separate empty DB**, so the case you just `save_case()`'d would vanish on the next
 `get_case()`. It would turn one intermittent 500 into a *total* failure of every
-stateful in-memory test. The full suite passing after the lock fix (267 passed) is
-the proof we preserved the shared-state semantics the tests depend on.
+stateful in-memory test. The then-current full suite passing after the lock fix is
+historical proof we preserved the shared-state semantics the tests depend on; the
+active count now lives in [../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 > Lesson: when two paths both "fix concurrency," the one that changes *correctness
 > semantics* (per-op DB) is not a fix — it's a different, larger bug.
@@ -220,5 +221,5 @@ removes the kind of nondeterministic 500 that hides real errors in the noise.
 | Rejected alt | connection-per-op for `:memory:` (breaks shared in-memory state) |
 | Regression test | `tests/test_persistence_concurrency.py` (8 threads × 50 iters, barrier) |
 | Pre-fix failure | `InterfaceError('bad parameter or other API misuse')` + `None` reads |
-| Validation | 267 passed / 3 skipped, eval 15/15, demo safety passed |
+| Validation | Historical slice pass; current count in [VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md) |
 | Security angle | availability (DoS surface) — the A in CIA |

@@ -270,12 +270,8 @@ Production Token Verifier Implementation validation on 2026-05-26 with:
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_impl_final2
 ```
 
-Result:
-
-```text
-112 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+Result: historical slice-specific result. The active validation count is
+single-sourced in `docs/VALIDATION_BASELINE.md`.
 
 CI follow-up on 2026-05-24: GitHub Actions run `26350740346` failed on Ubuntu
 at `tests/test_eval_harness.py::test_path_traversal_is_rejected_for_fixtures_and_outputs`.

@@ -307,11 +307,8 @@ cd /c/Projects/ThreatPrismV2
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson10_full
 ```
 
-Expected output:
-
-```text
-66 passed
-```
+Expected output: the current pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### 🔬 Exercise 3: Inspect Metrics From The API
 
@@ -384,7 +381,7 @@ Expected output:
 | Filters | `source`, `status`, `triage_status`, `severity`, `determination`, `manager_review_required`, `healthcare_review_required`, `guardrail_blocked`, `authorization_denied` |
 | Auth behavior | `API_AUTH_MODE=demo_key` requires fake demo credentials |
 | Test file | `tests/test_operational_read_models.py` |
-| Validation | `66 passed` |
+| Validation | [Canonical baseline](../docs/VALIDATION_BASELINE.md) |
 
 ## 🚀 Ready For The Next Slice?
 

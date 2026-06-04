@@ -300,10 +300,12 @@ drift instrument and names the independence requirement that keeps it valid.
 - Analyst feedback + disagreement metrics — `submit_feedback()` at [cases/service.py:446](../src/threatprism/cases/service.py)
 - Evidence-grounded, guardrail-validated triage reports — `run_triage()` pipeline
 
-### General Best Practices — Recommended but Not Implemented Here
-- Real `TriageProvider` (LLM-backed) behind the existing `Protocol` — `Recommended (not implemented here; gated)`
-- Analyst-mock harness using a *second, independent* LLM for batch backtesting (Evolution 2) — `Recommended (not implemented here; gated)`
-- Drift dashboards over the disagreement metric — `Recommended (not implemented here)`
+### Current Status And Remaining Recommendations
+- Real `TriageProvider` support now exists behind the existing `Protocol`, but live
+  use remains gated, owner-run, cost-governed, and outside default validation.
+- The independent analyst harness now exists for governed backtesting, but it is a
+  controlled eval surface, not production autonomy.
+- Drift dashboards over disagreement metrics remain recommended but not implemented.
 
 ---
 

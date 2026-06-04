@@ -52,18 +52,10 @@ The wrapper:
 
 ## Current Recorded Result
 
-Validated during the Production Token Verifier Implementation pass with:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1 -BaseTemp .pytest_tmp_token_verifier_impl_final2
-```
-
-Result:
-
-```text
-112 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+The current pass/skip count is single-sourced in
+[`docs/VALIDATION_BASELINE.md`](VALIDATION_BASELINE.md). Older slice-specific
+counts are historical only and should not be copied forward as the active
+baseline.
 
 ## Coverage Summary
 

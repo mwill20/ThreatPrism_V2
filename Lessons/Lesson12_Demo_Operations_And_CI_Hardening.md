@@ -166,10 +166,12 @@ Expected output includes:
 
 ```text
 ThreatPrism demo safety check passed.
-66 passed
 "failed": 0
 ThreatPrism safe validation completed.
 ```
+
+The pytest pass/skip count is canonical in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### 🔬 Exercise 2: Run Only The Safety Checker
 
@@ -258,7 +260,7 @@ does not add production auth, deployment hardening, or live-provider review.
 | CI workflow | `.github/workflows/safe-validation.yml` |
 | Test file | `tests/test_ops_safety.py` |
 | Eval output | `.eval_runs/` |
-| Current validation | `66 passed` |
+| Current validation | [Canonical baseline](../docs/VALIDATION_BASELINE.md) |
 | Out of scope | Live providers, dashboard UI, production IdP, real remediation |
 
 ## 🚀 Ready For The Next Slice?

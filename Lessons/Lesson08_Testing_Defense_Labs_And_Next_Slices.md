@@ -41,11 +41,8 @@ Primary files:
 - `C:\Projects\ThreatPrismV2\docs\specs\17_ACCESS_CONTROL_AND_AUDIT_INTEGRITY.md`
 - `C:\Projects\ThreatPrismV2\docs\specs\16_OPERATIONAL_READ_MODELS_AND_METRICS.md`
 
-Current validated result:
-
-```text
-66 passed
-```
+Current validated result: see the canonical pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### Recommended (not implemented here)
 
@@ -160,11 +157,8 @@ cd /c/Projects/ThreatPrismV2
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_lesson08_full
 ```
 
-Expected output:
-
-```text
-66 passed
-```
+Expected output: the current pass/skip count in
+[../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
 
 ### 🔬 Exercise 2: Run The Defense Labs Only
 

@@ -7,11 +7,11 @@ the API server, and verifying the installation.
 
 ## Prerequisites
 
-- **Python 3.11 or later** — required by `pyproject.toml`
+- **Python 3.11 or later** - required by `pyproject.toml`
   (`requires-python = ">=3.11"`). The codebase uses `StrEnum`, `X | Y` union
   syntax, and other 3.11+ features.
-- **Git** — for cloning the repository.
-- **Windows recommended** — the project was developed on Windows 11. All
+- **Git** - for cloning the repository.
+- **Windows recommended** - the project was developed on Windows 11. All
   documented commands use PowerShell syntax. The code itself is
   platform-independent, but test validation commands and paths reference
   Windows conventions.
@@ -59,7 +59,7 @@ This installs the direct dependencies pinned in `requirements.txt`:
 | `fastapi==0.115.12` | API framework |
 | `pydantic==2.11.2` | Data validation and serialization |
 | `uvicorn==0.34.2` | ASGI server for running FastAPI |
-| `pytest==8.2.0` | Test framework |
+| `pytest==8.3.4` | Test framework |
 | `httpx==0.28.1` | HTTP client used by FastAPI's `TestClient` |
 | `cryptography==44.0.2` | Local fake-JWKS JWT signature verification |
 
@@ -70,7 +70,7 @@ Copy-Item .env.example .env
 ```
 
 The `.env` file is gitignored. The defaults in `.env.example` are safe for
-local development — all credentials are empty or fake demo values.
+local development - all credentials are empty or fake demo values.
 
 ---
 
@@ -84,12 +84,8 @@ Use the project validation wrapper first:
 powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 ```
 
-Expected current result:
-
-```text
-112 passed
-eval harness dry-run: 15 passed / 0 failed
-```
+Expected current result: see the canonical baseline in
+[`docs/VALIDATION_BASELINE.md`](VALIDATION_BASELINE.md).
 
 ### Run the test suite directly
 
@@ -98,7 +94,8 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest -p no:cacheprovider --basetemp .pytest_tmp_run_verify
 ```
 
-Expected current result: **112 passed**.
+Expected current result: see the canonical baseline in
+[`docs/VALIDATION_BASELINE.md`](VALIDATION_BASELINE.md).
 
 If Windows locks a pytest cache directory, use a fresh `--basetemp`:
 

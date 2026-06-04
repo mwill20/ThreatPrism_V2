@@ -2,10 +2,11 @@
 
 ## Goal
 
-Understand how ThreatPrism improves demo and regression data realism without
-crossing into raw third-party datasets, live providers, real PHI/PII, real
-credentials, real workplace data, RAG, memory/write-back, dashboard UI, or
-remediation.
+Understand how this data-strategy slice improved demo and regression data
+realism without crossing into raw third-party datasets, live providers, real
+PHI/PII, real credentials, real workplace data, RAG, memory/write-back,
+dashboard UI, or remediation. Later lessons add separate gated dashboard and
+RGOI surfaces; this lesson remains scoped to fixture strategy.
 
 ## Primary Files
 

@@ -5,9 +5,15 @@
 - These lessons describe the code that exists now in `C:\Projects\ThreatPrismV2`.
 - The current validated baseline is canonical in
   [../docs/VALIDATION_BASELINE.md](../docs/VALIDATION_BASELINE.md).
-- Lessons use emojis because the lesson brief requested visual scanning markers.
-- Line references are based on the live files at lesson creation time.
-- This curriculum teaches implemented behavior first, then labels future guidance as `Recommended (not implemented here)`.
+- Lessons are UTF-8 Markdown and include visual scanning markers. If a terminal
+  renders those markers as mojibake, view the files in a UTF-8-capable editor
+  rather than treating the source as corrupted.
+- Line references and lesson-local command outputs are based on the live files at
+  lesson creation time. When a lesson-local count conflicts with the canonical
+  baseline, the canonical baseline wins.
+- This curriculum teaches implemented behavior first, then labels future guidance
+  as `Recommended (not implemented here)`. That label is scoped to the lesson's
+  original slice; later lessons may supersede it.
 
 ## How To Use These Lessons
 

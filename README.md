@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="ThreatPrism — Triage. Investigate. Protect." width="320">
+</p>
+
 # ThreatPrism
 
 ThreatPrism is a demo-safe SOC migration accelerator for organizations moving

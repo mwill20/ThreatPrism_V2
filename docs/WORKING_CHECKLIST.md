@@ -1344,6 +1344,13 @@ SOAR feed — see `docs/PRODUCT_VALUE_AND_ROADMAP.md` §5):**
 
 Other gated work:
 
+- [ ] **DEFERRED (code cleanup, low priority) — unused status-enum values.** The
+  `/project-diagrams` case-lifecycle state machine (`docs/ARCHITECTURE.md`) surfaced that
+  `CaseStatus.normalized`, `CaseStatus.closed`, `CaseStatus.failed`, and
+  `TriageStatus.failed` are defined in `src/threatprism/cases/schemas.py` but are never set
+  by the service (no transition drives them). Either wire them into the lifecycle (a real
+  `closed`/`failed` terminal path) or remove them as dead code; add a regression test for
+  whichever terminal path is chosen. Surfaced 2026-06-04 by grounding the diagram in code.
 - [x] **Spec 38 authored (design-only, gated) 2026-06-03** —
   `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` designs (A) retrieval-into-
   triage and (B) the human-approved KB write-back/learning loop (the two halves spec 23

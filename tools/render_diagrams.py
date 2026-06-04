@@ -23,6 +23,8 @@ OUT = ROOT / "assets" / "diagrams"
 # (markdown source, 0-based index of the ```mermaid block in that file, output basename)
 DIAGRAMS = [
     ("docs/ARCHITECTURE.md", 0, "architecture"),
+    ("docs/ARCHITECTURE.md", 1, "case-lifecycle"),
+    ("docs/ARCHITECTURE.md", 2, "data-model-er"),
     ("docs/threat-models/system-context.md", 0, "threat-model-dfd"),
     ("docs/threat-models/system-context.md", 1, "threat-model-overlay"),
 ]

@@ -1,0 +1,48 @@
+erDiagram
+    CaseRecord ||--o{ Evidence : contains
+    CaseRecord ||--o| TriageReport : produces
+    CaseRecord ||--o{ AnalystFeedback : receives
+    CaseRecord ||--o{ AuditEvent : logs
+    TriageReport ||--o{ Finding : has
+    Finding }o--o{ Evidence : "cites via evidence_ids"
+    AnalystFeedback ||--o| DisagreementRecord : yields
+    CaseRecord {
+      string case_id PK
+      string source_case_id
+      Source source
+      CaseStatus status
+      TriageStatus triage_status
+      string assigned_to
+    }
+    TriageReport {
+      string report_id PK
+      string case_id FK
+      Determination determination
+      Severity severity
+      Disposition disposition
+      float confidence
+    }
+    Finding {
+      string summary
+      Severity severity
+      list evidence_ids
+    }
+    Evidence {
+      string evidence_id PK
+    }
+    AnalystFeedback {
+      string feedback_id PK
+      string case_id FK
+      string report_id FK
+      Determination analyst_determination
+    }
+    DisagreementRecord {
+      string case_id FK
+      string feedback_id FK
+      bool determination_mismatch
+    }
+    AuditEvent {
+      string audit_event_id PK
+      string case_id FK
+      string event_type
+    }

@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> received
+    received --> queued_for_triage : create_case
+    queued_for_triage --> triage_running : run_triage starts
+    triage_running --> triage_completed : passes all guardrails
+    triage_running --> needs_analyst_review : guardrail block or provider failure
+    triage_completed --> analyst_feedback_submitted : analyst feedback
+    needs_analyst_review --> analyst_feedback_submitted : analyst feedback
+    triage_completed --> [*]
+    needs_analyst_review --> [*]
+    analyst_feedback_submitted --> [*]
+    note right of triage_running
+      Parallel triage_status: queued to running to
+      one of completed, blocked_by_guardrail, needs_review.
+    end note

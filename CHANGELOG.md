@@ -4,6 +4,14 @@ All notable repository-level changes should be recorded here.
 
 ## Unreleased
 
+- **Two new diagrams via the project-diagrams skill: case-lifecycle state machine + core
+  data-model ER.** Live-tested the new `/project-diagrams` skill on this repo: it selected
+  the two genuine gaps beyond the existing architecture/threat diagrams, grounded them in
+  `cases/schemas.py` + the `cases/service.py` status transitions, and honestly surfaced that
+  `CaseStatus.normalized/.closed/.failed` and `TriageStatus.failed` are defined-but-unused
+  (so the state machine omits them). Added to `docs/ARCHITECTURE.md` (Mermaid) + rendered
+  SVG/PNG in `assets/diagrams/` (`case-lifecycle`, `data-model-er`); `tools/render_diagrams.py`
+  extended. Docs/assets only; baseline unchanged.
 - **Dashboard screenshot + persona-cycling GIF; working-tree cleanup.** Captured the
   live local dashboard (seeded, 36 demo cases) with Playwright across the Analyst,
   Manager/GRC, and CSI/RGOI personas → committed `assets/dashboard.png` (hero) and

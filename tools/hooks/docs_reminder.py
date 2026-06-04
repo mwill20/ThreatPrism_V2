@@ -46,10 +46,15 @@ def reminder_for_changes(changed: set[str]) -> str | None:
     shown = src_changed[:5]
     more = "" if len(src_changed) <= 5 else f" (+{len(src_changed) - 5} more)"
     return (
-        "[docs reminder] src/ changed this session but these were not updated: "
-        f"{', '.join(missing)}. "
+        "[build closeout reminder] src/ changed this session but these were not "
+        f"updated: {', '.join(missing)}. "
         f"Changed src files: {', '.join(shown)}{more}. "
-        "Per the project standing rule, update the docs/CHANGELOG/checklist before committing."
+        "Before committing, run the build-closeout checklist: "
+        "(1) update CHANGELOG + WORKING_CHECKLIST (+ lessons/specs if relevant), "
+        "(2) run demo-safety + validation, "
+        "(3) recommend the next slice, "
+        "(4) consider whether a lesson is warranted. "
+        "Steps 1-2 are mechanical; 3-4 are judgment calls for you/the assistant, not this hook."
     )
 
 

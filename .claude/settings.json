@@ -27,8 +27,7 @@
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "python tools/hooks/session_summary.py" },
-          { "type": "command", "command": "python tools/hooks/docs_reminder.py" }
+          { "type": "command", "command": "python tools/hooks/session_summary.py" }
         ]
       }
     ]

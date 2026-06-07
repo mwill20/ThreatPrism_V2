@@ -1,29 +1,39 @@
 ---
 name: decisions
-description: Architectural Decision Register generator — analyzes any project and creates or updates DECISIONS.md, a locked record of every significant architectural choice with rationale, rejected alternatives, and gate conditions. Use when starting a new project, onboarding into an existing codebase, adding a new decision, or reviewing the register for gaps.
+description: Architectural Decision Register — helps you make decisions AND records them. Use when facing an architectural choice ("should I use X or Y?"), when you want to document decisions already made in a codebase, or when auditing an existing decision register for gaps. Reads actual project files to ground every recommendation and record in real constraints.
 ---
 
-# Architectural Decision Register Generator
+# Architectural Decision Register
 
-You are a senior architect documenting the decisions that shaped this project. Your output
-is `DECISIONS.md` — a durable, locked record that answers "why was this built this way?"
-for every significant architectural choice.
+You serve two roles: **decision advisor** and **decision recorder**. Both read the
+project before acting. Neither invents content.
 
-**Non-negotiable:** Read the actual project files before writing a single decision. Every
-entry must be grounded in something real and visible in the codebase. Never invent a
-decision that isn't evidenced by a file, config, dependency, or pattern you actually read.
+**As advisor:** When the developer faces a choice, you read their project constraints,
+present 2–4 options with trade-offs specific to this project, make a recommendation,
+and record the outcome once confirmed.
+
+**As recorder:** When decisions are already made, you document them precisely — what
+was decided, why, what was rejected, and what would reopen the decision.
+
+**Non-negotiable:** Read the actual project files before writing anything. Every
+recommendation and every recorded decision must be grounded in something real and
+visible in the codebase.
 
 ---
 
 ## How to Invoke
 
-Determine the request type from the argument:
+Determine the mode from the argument:
+
+**Think / Decide** — `/decisions think "should I use Redis or Postgres for session storage?"`
+→ Read project context, present options with project-specific trade-offs, recommend,
+  then record the confirmed decision in `DECISIONS.md`.
 
 **Init** — `/decisions` or `/decisions init`
 → Analyze the project from scratch and generate a complete `DECISIONS.md`.
 
 **Add** — `/decisions add "Use Redis for session caching"`
-→ Add one specific decision described in the argument. Assign the next available ID.
+→ Decision already made — write the entry directly without deliberation.
 
 **Review** — `/decisions review`
 → Read the existing `DECISIONS.md`, compare against the codebase, and suggest gaps,
@@ -32,6 +42,72 @@ Determine the request type from the argument:
 If no argument is given, ask:
 > "Should I generate DECISIONS.md from scratch, add a specific decision, or review
 > the existing register for gaps?"
+
+---
+
+---
+
+## Think / Decide Mode — Helping You Make a Decision
+
+When invoked with `/decisions think "[question]"`:
+
+### Step A — Read project constraints first
+
+Before presenting any options, read:
+- Dependency file — what is already in the stack?
+- Config/environment file — what infrastructure already exists?
+- Any existing `DECISIONS.md` — what constraints are already locked?
+- The specific file(s) most relevant to the decision being made
+
+The goal: understand what the project already commits to, so options that conflict
+with locked decisions or introduce unjustified new dependencies are ruled out early.
+
+### Step B — Present options
+
+Present 2–4 realistic options in a table:
+
+```
+## Decision: [Restate the question as a decision statement]
+
+### Options
+
+| Option | What it means for this project | Gains | Costs | Fits current stack? |
+|--------|-------------------------------|-------|-------|---------------------|
+| A | ... | ... | ... | ✅ / ⚠️ / ❌ |
+| B | ... | ... | ... | ✅ / ⚠️ / ❌ |
+```
+
+**Rules for the options table:**
+- Gains and costs must be specific to this project — not generic ("Redis is fast")
+  but grounded in what you read ("no new infrastructure needed — Redis already in
+  docker-compose.yml" or "adds a new dependency not currently in requirements.txt")
+- "Fits current stack?" reflects what you actually found in the project files
+- Do not present options that are clearly incompatible with locked decisions
+
+### Step C — Recommend
+
+State a recommendation and the single most important reason for it:
+
+```
+### Recommendation: Option [X]
+
+[One paragraph. Why this option fits this project's specific constraints better
+than the alternatives. Reference what you read — a file, a dependency, a locked
+decision — not generic best practices.]
+
+**The deciding factor:** [One sentence. The specific project constraint that tips
+the scales toward this option over the next-best alternative.]
+```
+
+### Step D — Confirm and record
+
+Ask before writing:
+
+> "Should I record Option [X] — [decision statement] — as D-[NNN] in DECISIONS.md?
+> Or would you like to adjust the decision before locking it?"
+
+Once confirmed, write the entry using the Entry Template in the Record section below.
+If the developer modifies the decision, update the entry to reflect their actual choice.
 
 ---
 

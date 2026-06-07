@@ -38,7 +38,7 @@ The 41 decisions (D-001 through D-041) fall into six categories:
 | **Identity & Naming** | D-001 to D-003 | Product name, repository, source of truth |
 | **Product & Architecture** | D-004 to D-008, D-015, D-016, D-025 | Product direction, stack, tenancy, SOAR/MS integration, V1 porting, first slice, North Star |
 | **AI & Safety** | D-009, D-010, D-011, D-021, D-022, D-037 | LLM provider strategy, action safety, guardrail requirements, healthcare safeguard framing, compliance language, CSI/RGOI boundary |
-| **Persistence & Configuration** | D-012, D-019, D-033 | SQLite/PostgreSQL path, async strategy, context-light handoff |
+| **Persistence & Configuration** | D-012, D-018, D-019, D-033 | SQLite/PostgreSQL path, workspace path, async strategy, context-light handoff |
 | **Auth & Access Control** | D-017, D-020, D-024, D-026, D-028, D-030, D-038 to D-040 | API security boundary, demo auth modes, metrics/access sequencing, role policy, production identity readiness, token verifier |
 | **Slices & Operations** | D-013, D-014, D-023, D-027, D-029 to D-036, D-041 | GRC language, threat intel stubs, metrics slice ordering, slice closeout documentation, eval harness, CI hardening, scenario pack, dataset strategy, Docker, fixture factory, demo seeder |
 

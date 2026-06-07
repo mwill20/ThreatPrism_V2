@@ -311,3 +311,50 @@ Security telemetry contains [SECURITY_TELEMETRY:IP:masked] and [POTENTIAL_PHI:MR
 Next, study deterministic triage, MITRE/GRC mapping, enrichment stubs, and report rendering.
 
 Remember: context-aware safeguard design reduces exposure without blinding the SOC. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-021 | ThreatPrism treats inbound SOAR data as potentially contaminated; identifiers become PHI/ePHI risk when connected to health context | Explains why the healthcare safeguard uses `HEALTH_CONTEXT_TERMS` co-presence rather than flagging every IP or email |
+| D-022 | Use healthcare safeguard language only; do not claim HIPAA compliance, HITRUST certification, control satisfaction, or audit readiness | The `scan_output_policy()` `PROHIBITED_PATTERNS` list enforces this at output; `render_role_view()` never claims compliance framing |
+
+### Threat Treatment
+
+| Threat ID | Threat | Treatment | Owner Decision |
+|-----------|--------|-----------|----------------|
+| I1 | Raw PHI/PII reaches the LLM | **Mitigated** via Stage 1 tokenization before `_prepare_case_for_model()` | Already implemented |
+| I2 / DI3 | Security telemetry leaks to non-analyst roles (manager, GRC, legal) | **Mitigated** via `render_role_view()` masking security telemetry for all roles except `analyst` and `engineer` | Already implemented |
+| I3 / OT-6 | No test asserted `TokenVault` is never serialized into outward-facing artifacts | **Mitigated** (Slice D) via `tests/test_token_vault_isolation.py` | Project owner (POC), 2026-05-24 |
+
+### What We Explicitly Rejected
+
+- **Classify every IP, email, URL, or username as PHI regardless of context:** This over-redacts normal security telemetry that SOC analysts need for response. D-021 chose context-aware detection using `HEALTH_CONTEXT_TERMS` co-presence — identifiers become PHI/ePHI risk through connection to health context, not through their format alone.
+- **Generic `[REDACTED]` tokens:** Losing the token type loses investigative meaning. An analyst can tell from `[POTENTIAL_PHI:MRN:phi_0001]` that the removed value was a medical record number, not an IP address. The typed token preserves audit semantics without exposing the value.
+- **Single tokenization stage:** Stage 1 (healthcare, `rehydration_allowed=False`, permanent) and Stage 2 (security telemetry, selective rehydration post-validation) serve fundamentally different purposes. Merging them would require complex per-token logic to know when rehydration is ever safe.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| Context-aware detection via `HEALTH_CONTEXT_TERMS` co-presence | Far fewer false positives on normal security telemetry (IPs, hashes, emails that don't appear near health vocabulary) | Can miss PHI when health-context vocabulary is absent from the same payload field |
+| Typed permanent tokens vs. deletion | Audit trail preserves what class of value was present; investigative meaning survives redaction | Token type (e.g., `POTENTIAL_PHI:MRN`) is visible to all roles, even if the value is not |
+| Stage 1 permanent vs Stage 2 rehydratable | Health tokens are guaranteed never to re-appear in role views, reports, or logs | Two-pass tokenization complexity in `CaseService`; the `rehydration_allowed` flag must be explicitly set `False` for every Stage 1 record |
+| `manager_grc` / `legal_privacy` views mask security telemetry | Reduces exposure of IPs, URLs, and hashes to roles that don't need them for response | Analysts and engineers need raw telemetry — one masking policy cannot serve both |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **Real PHI/ePHI flows through the system** → full HIPAA de-identification engineering and legal review required; D-022 re-opens with expanded scope
+- **Production IdP is added** (D-038) → role view rendering becomes an enforceable identity control, not just output formatting on top of demo key auth
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` Healthcare safeguard is a detection-and-tokenization layer, not a HIPAA compliance claim, HITRUST certification, or legal de-identification determination
+- `[Gated Future Work]` Production identity-to-role enforcement for role views requires D-038/D-039/D-040; currently demo_key auth only
+- `[Demo-Safe Boundary]` Context-aware rules may not catch PHI in payloads that contain health-relevant data but do not use standard `HEALTH_CONTEXT_TERMS` vocabulary

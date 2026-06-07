@@ -265,3 +265,54 @@ Expected output: the current pass/skip count in
 Next, study Operational Read Models & Metrics API v0.1 to see how this authorization pattern protects broader read surfaces.
 
 Remember: access control turns role views from helpful formatting into enforceable behavior. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-017 | Demo mode may use unauthenticated localhost access with fake data only | Explains why `API_AUTH_MODE=none` exists at all — it's a local-only, fake-data safety valve, not a deployment posture |
+| D-020 | `API_AUTH_MODE=none` only with localhost-style fake demo data | Startup requires `THREATPRISM_LOCAL_DEV_ACK=true` when `none` is used; prevents accidental use with real data |
+| D-024 | Access Control & Audit Integrity supersedes Operational Read Models as the immediate next slice | Role-rendering without identity-to-role enforcement is not a security boundary; access control had to come first |
+| D-026 | Demo uses API-key auth for role-aware reads; credential format is `key:identity:role` | `ROLE_VIEW_POLICY` and `authorize_role_view()` implement this; `?role=` is a view request, never authority |
+| D-030 | Production-like environments must reject `API_AUTH_MODE=none` and `API_AUTH_MODE=demo_key` | `validate_runtime()` enforces this at startup; demo auth modes cannot accidentally become production auth modes |
+
+### Threat Treatment
+
+| Threat ID | Threat | Treatment | Owner Decision |
+|-----------|--------|-----------|----------------|
+| E1 | `?role=` privilege escalation | **Mitigated** via `ROLE_VIEW_POLICY`; effective role derives from authenticated identity, not from the query parameter | Already implemented |
+| S1 / RR-S1 | Default `demo_api_keys` were public in source | **Mitigated** (Slice A): defaults removed from `Settings`; `demo_key` mode now requires explicit `DEMO_API_KEYS` env var | Project owner (POC), 2026-05-24 |
+| S2 / RR-S2 / OT-4 | `API_AUTH_MODE=none` default with insufficient production guard | **Mitigated** (Slice A): disabled auth now requires explicit local-dev acknowledgement; startup warns; `validate_runtime()` blocks production environments | Project owner (POC), 2026-05-24 |
+
+### What We Explicitly Rejected
+
+- **Treating `?role=` as authority:** Caller-controlled query parameters cannot be trusted as identity claims. D-024 explicitly rejected this pattern before metrics were built — role-rendering without enforcement is formatting, not access control.
+- **Committing demo API keys to source defaults:** Static defaults in source are public to anyone who reads the code. D-026 moved keys to the explicit `DEMO_API_KEYS` env var; the `Settings` defaults were cleared (S1 mitigation, Slice A).
+- **Building operational metrics before access control:** D-024 superseded D-023's original sequencing. A metrics API that any caller with `?role=manager_grc` could access would be useless as an access boundary. Authorization had to come first.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| Demo API-key auth vs. no auth at all | Role policy becomes enforceable and auditable without requiring a real IdP for demo use | Keys are fake static values; not suitable for real or shared data access |
+| Static `ROLE_VIEW_POLICY` dict vs. dynamic RBAC system | Human-readable, version-controlled, auditable role definitions; zero runtime complexity | No dynamic roles; no attribute-based access; adding a new role requires a code change |
+| Audit both allow AND deny decisions | Complete audit trail for SOC governance and forensics; denials are as interesting as grants | Extra write per request; audit storage grows with request volume |
+| Fail-closed for unknown auth modes | Prevents an unrecognized `API_AUTH_MODE` value from accidentally granting access | Requires explicit `THREATPRISM_LOCAL_DEV_ACK=true` for local dev with `none` mode |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **`API_AUTH_MODE=external_oidc` is enabled** → D-038, D-039, D-040 apply; demo API keys are replaced by verified bearer tokens with live OIDC token verification
+- **Production IdP integration is built** → live JWKS fetch gate must be explicitly re-opened (D-039); the local verifier boundary (D-040) is replaced by live verification
+- **Multi-tenancy is added** → D-006 must be re-opened; current `ROLE_VIEW_POLICY` is single-org and has no tenant namespace isolation
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` Demo API keys are fake static values; do not use for real, shared, or production data access
+- `[Gated Future Work]` OAuth/OIDC redirect flows, JWKS download, and Entra ID integration require D-038/D-039/D-040 and a dedicated implementation slice
+- `[Gated Future Work]` Break-glass access governance and production RBAC/ABAC claim mapping are not yet implemented

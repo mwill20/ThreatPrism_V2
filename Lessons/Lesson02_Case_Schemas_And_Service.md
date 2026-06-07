@@ -282,3 +282,45 @@ Expected output:
 Next, study the SOAR intake translator. That is where provider-specific JSON becomes a ThreatPrism case.
 
 Remember: structured cases are what make evidence-first analysis possible. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-010 | V2 permits recommended/simulated actions only; `ALLOW_REAL_ACTIONS=false` by default | `enforce_action_safety()` is the last check before `save_report()`; the schema's `real_action_executed` field exists precisely to be blocked |
+| D-011 | V2 must use layered guardrails with fail-closed behavior | `CaseService.run_triage()` applies healthcare, prompt firewall, tokenization, output policy, evidence, and action-safety in a fixed order; any failure sets `blocked_by_guardrail` |
+| D-012 | Demo mode uses SQLite; designed so PostgreSQL can be added later | `SQLiteRepository` stores full Pydantic blobs; `CaseService` depends on the repository interface, not the SQLite implementation directly |
+| D-015 | V2 preserves V1 concepts: Pydantic-style structured validation, deterministic report rendering, SQLite demo persistence | `CaseRecord` and `TriageReport` use Pydantic; reports render deterministically from schema fields, not from LLM prose |
+| D-016 | First vertical slice: Generic SOAR → normalize → async triage → structured report → feedback | The entire `CaseService` lifecycle was shaped by this decision; the class implements exactly this flow |
+| D-019 | Current demo uses FastAPI in-process background tasks for triage execution | `run_triage()` runs as a `BackgroundTask`; this is why `POST /cases` returns 202 and tests can immediately read results via `TestClient` |
+
+### What We Explicitly Rejected
+
+- **SQLAlchemy ORM:** An ORM generates SQL schema from model classes, requiring migration tooling when Pydantic models change. The JSON-blob approach lets `CaseRecord` evolve without SQL migrations — Pydantic is the schema boundary, not the database.
+- **Synchronous triage in the request handler:** Blocking the HTTP response on triage execution would make `POST /cases` appear to hang for large payloads. D-019 chose in-process background tasks so the 202 Accepted response is immediate.
+- **Normalized SQL columns for every case field:** Individual columns for `severity`, `disposition`, `findings`, etc. would require a migration on every schema addition. The denormalized index columns (`case_id`, `source`, `status`, `triage_status`, `created_at`, `updated_at`) provide query anchors; the blob provides the full record.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| JSON blob in SQLite | Schema evolution without migrations; Pydantic stays the single schema truth | No SQL-level queries on payload fields; all filtering happens in Python after deserialization |
+| In-process `BackgroundTask` for triage | No infra deps; `TestClient` executes triage synchronously before returning, so tests require no polling | No worker isolation; no retry/backoff on triage failure; a hung triage occupies that thread |
+| Single `CaseService` orchestrator | All pipeline stages visible and sequenced in one class; the full flow is traceable in one file | Monolithic for POC scope; harder to scale individual pipeline stages independently |
+| `StrEnum` for status fields | Self-documenting API; serializes as plain string in JSON; exhaustiveness checks at schema level | Enum additions require code changes; unused values accumulate until explicitly removed |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **A dedicated queue/worker is added** → re-opens D-019; `run_triage()` becomes a worker entrypoint and the in-process `BackgroundTask` pattern is retired
+- **PostgreSQL is added** → re-opens D-012; `SQLiteRepository` must implement a shared interface; the JSON-blob strategy needs reconsideration for query performance on large case volumes
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` In-process background tasks are sufficient for single-org fake-data demo; a separate worker and queue should be considered after API, persistence, guardrails, and demo workflow are stable (D-019)
+- `[Gated Future Work]` PostgreSQL or other production-grade persistence requires its own implementation slice with migration tooling

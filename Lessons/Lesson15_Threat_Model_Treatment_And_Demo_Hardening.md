@@ -219,3 +219,57 @@ powershell -ExecutionPolicy Bypass -File .\tools\validate-threatprism.ps1
 - Current scope: fake-data POC only.
 - Current action boundary: `ALLOW_REAL_ACTIONS=false`.
 - Full validation command: `tools/validate-threatprism.ps1`.
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-010 | V2 permits recommended/simulated actions only; `ALLOW_REAL_ACTIONS=false` by default | The "Avoid" treatment for real-action threats is the simplest possible treatment: not building the surface means the threat doesn't apply |
+| D-011 | V2 must use layered guardrails with fail-closed behavior | Each implementation slice in this lesson (Slice A–G) closes a specific D-011 requirement; the treatment register maps every slice to the guardrail layer it implements |
+| D-021 | ThreatPrism treats inbound SOAR data as potentially contaminated | Drives healthcare safeguard slice and the quarantine-enforcement requirement |
+| D-025 | `docs/ARCHITECTURAL_NORTH_STAR.md` is the directional architecture guide | The North Star's 10-question decision rubric (see Lesson 42) is the pre-implementation checklist that keeps all future treatments aligned |
+
+### Treatment Pattern: Why Gated Mitigations Exist
+
+The treatment register uses "Gated Mitigation" for controls that are needed but whose trigger surface doesn't exist yet. Building the control before the surface is wasteful; skipping it entirely is unowned risk. The gate makes the commitment explicit: the control must land before the feature lands.
+
+Key gated rows and their triggers:
+
+| Threat ID | Threat | Treatment | Opens When |
+|-----------|--------|-----------|------------|
+| T1 / OT-1 | SQLite blob tampering not detectable | Gated Mitigation | Non-demo persistence is introduced |
+| R1 / RR-R1 / OT-8 | Audit log not tamper-evident; no retention | Gated Mitigation | Non-demo data flows through the system |
+| L2 / OT-L1 | Indirect prompt injection via RAG | Gated Mitigation | Live RAG / external retrieval corpus is added |
+| L4 / OT-L2 | Training data poisoning | Avoid → Gated Mitigation | Fine-tuning pipeline is added |
+| I4 / OT-7 | Prompt firewall bypassable | Mitigated (detector built); gate enablement | Real LLM provider integration is enabled |
+
+### What We Explicitly Rejected
+
+- **Documenting threats without treatment decisions:** "TODO: needs owner" is unowned risk. The treatment register forces every finding to receive one of Mitigate, Accept, Transfer, or Avoid — with a named owner. An undecided threat is not a managed risk.
+- **Implementing all mitigations simultaneously:** Gated mitigations are sequenced deliberately. Building a tamper-evident audit log for SQLite makes no sense if the system will switch to PostgreSQL before non-demo data arrives. Sequencing avoids premature controls for surfaces that don't yet exist.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| Mitigate for POC-scope risks, Accept for low-blast-radius demo risks | Cheap foundational controls land now; full production controls wait for explicit gates | Some threats have residual risk at POC scope with owner sign-off |
+| Avoid for real actions (D-010) vs. gated mitigation | Simplest possible treatment for action safety; no surface = no threat | Product must eventually implement real actions with appropriate controls when the surface is built |
+| Detector-not-gate for semantic firewall (I4/OT-7) | Semantic classifier adds detection signal without adding a probabilistic block path; byte-identical when disabled | Novel semantic bypasses that neither layer detects remain a residual risk; accepted with owner sign-off |
+
+### Future Gate Conditions
+
+This component's design would change if any of the following trigger conditions are met:
+
+- **Real LLM integration** → re-opens I4/OT-7 (semantic gate enablement), L2/OT-L1 (RAG), L5/OT-L3 (cost/DoS), L6/OT-L4 (output safety framing)
+- **Non-demo persistence** → re-opens T1/OT-1 (SQLite tampering), R1/RR-R1/OT-8 (audit retention and tamper-evidence)
+- **Real PHI handling** → re-opens the full healthcare and LINDDUN threat set; legal review required before treatment decisions
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` All current POC treatment decisions are scoped to fake-data demo; every Gated Mitigation row requires explicit re-opening before its trigger feature ships
+- `[Accepted Risk]` Pattern-based prompt firewall has residual bypassability risk; accepted for POC scope with owner sign-off (I4, 2026-05-24)
+- `[Accepted Risk]` Unsalted SHA-256 hash chain tokens are acceptable for demo scope; require salting before non-demo use (T1, 2026-05-24)

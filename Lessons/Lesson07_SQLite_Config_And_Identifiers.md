@@ -261,3 +261,43 @@ queued
 Next, study testing, defense labs, and the next implementation slices.
 
 Remember: simple persistence is acceptable when the architecture leaves room to harden later. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-012 | Demo mode uses SQLite; persistence designed so PostgreSQL can be added later | `SQLiteRepository` is the concrete implementation; the pattern of passing `database_url` through `Settings` was chosen specifically to allow swapping the backend |
+| D-015 | V2 preserves V1 concepts: SQLite demo persistence, Pydantic-style structured validation | SQLite + Pydantic JSON blobs is a V1 concept deliberately carried forward |
+| D-019 | Demo backend uses FastAPI in-process background tasks | Affects SQLite connection management: in-process background tasks share the same process, so `threading.Lock` is required for the `:memory:` connection |
+
+### What We Explicitly Rejected
+
+- **SQLAlchemy (or any ORM):** An ORM would add a migration framework dependency and requires generated schema classes synchronized with Pydantic models. The JSON-blob pattern keeps Pydantic as the single source of schema truth with no secondary representation.
+- **File-backed SQLite in tests:** Test isolation requires a fresh database per test run. File-backed SQLite would leave state on disk between runs and require explicit cleanup. `:memory:` gives perfect isolation at zero cost.
+- **Shared `:memory:` connection without a lock:** FastAPI runs synchronous route handlers in a thread pool. Without `threading.Lock`, concurrent requests would race the shared `:memory:` SQLite connection, causing `ProgrammingError: recursive use of cursors not allowed`. The lock serializes access correctly.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| JSON blob in SQLite vs. normalized schema | Schema evolution without SQL migrations; Pydantic remains the single schema truth; no ORM to synchronize | No SQL-level queries on payload fields; all filtering and aggregation happen in Python after deserialization |
+| `:memory:` SQLite for tests | Perfect isolation per test class; no disk I/O; no teardown required | No cross-process persistence; state disappears when the connection closes |
+| `threading.Lock` for `:memory:` access | Correct concurrent access from FastAPI's thread pool without SQLite corruption | Request handling is serialized (not parallelized) while accessing the `:memory:` connection |
+| Typed ID prefix (`case_`, `report_`, `feedback_`) | Self-documenting identifiers; easy to distinguish entity types in logs and audit events | Slightly longer ID strings than raw UUID hex |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **PostgreSQL is added** → re-opens D-012; `SQLiteRepository` must implement a shared `RepositoryProtocol`; the JSON-blob strategy needs reconsideration for indexed query fields
+- **Multi-tenancy is introduced** → D-006 must be re-opened first; single-org SQLite does not support tenant-level isolation
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` SQLite is single-process; not suitable for horizontal scaling or multi-server deployments
+- `[Demo-Safe Boundary]` JSON-blob strategy means no SQL-level queries on case content fields; all filtering is in Python post-deserialization
+- `[Accepted Risk]` In-memory SQLite uses unsalted SHA-256 for the hash chain; acceptable for demo scope with owner sign-off (POC 2026-05-24); requires salting before non-demo use

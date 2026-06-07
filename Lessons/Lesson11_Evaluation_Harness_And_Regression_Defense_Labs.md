@@ -296,3 +296,48 @@ Hands-on challenges:
 - Add runbook steps for API, metrics, and eval workflows.
 
 Remember: a safety claim is only useful when it keeps passing after the next change. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-029 | Eval harness reads fake JSONL from `tests/evals/` only; writes sanitized artifacts to `.eval_runs/` only; path traversal rejected; not a live-LLM safety proof | Every architectural choice in `EvalRunner` traces back here: sandboxed paths, sanitized previews, explicit fixture paths, no raw sensitive data in artifacts |
+| D-031 | Demo Operations & CI hardening; CI must not require repository secrets; generated validation artifacts must remain gitignored | The safe validation wrapper (`tools/validate-threatprism.ps1`) and `safe-validation.yml` both implement this contract; eval artifacts go to `.eval_runs/` and are gitignored |
+
+### Threat Treatment
+
+| Threat ID | Threat | Treatment | Owner Decision |
+|-----------|--------|-----------|----------------|
+| D3 | Eval fixture path traversal (reading arbitrary local files via `../../` in fixture paths) | **Mitigated** via `_resolve_under_approved_dir()`: paths that escape `tests/evals/` or `.eval_runs/` raise `ValueError` | Already implemented |
+
+### What We Explicitly Rejected
+
+- **Storing raw payload content in eval result artifacts:** Eval artifacts are written to `.eval_runs/` and could be read by anyone with repo access. D-029 requires sanitized previews only — storing the raw injection payload that was tested would leak the very content the product is supposed to block.
+- **Auto-scanning all directories for eval fixtures:** D-029 requires explicit fixture file paths. Auto-scanning would risk accidentally including generated fixtures (which may contain sensitive sanitized content) or raw external dataset samples.
+- **Implementing the eval harness as a pytest test class:** Blurring the boundary between pytest regression tests and JSONL safety scenarios would make it harder to add new attack categories without touching test infrastructure. A separate runner with explicit `EvalCategory` enum values keeps each purpose explicit.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| JSONL fixtures vs. code-defined test cases | Human-readable, versionable attack scenarios; non-developer editors can contribute new cases | Requires valid JSON on every line; no IDE-level debugging of individual fixture cases |
+| Sanitized previews in artifacts vs. raw payloads | Safe to commit, store, and audit; artifacts don't leak sensitive test inputs | Some debugging context is lost when a fixture fails — the preview truncates at 500 chars |
+| Path sandboxing for fixtures and output | Prevents directory traversal in eval tooling; eval cannot read or write outside approved dirs | Requires explicit fixture file paths; cannot reference fixtures from ad-hoc locations |
+| Separate `EvalCategory` enum per attack type | Adding a new attack category requires a deliberate code change, not just a new fixture file | Category list in `evals/schemas.py` must be kept in sync with `_evaluate_by_category()` in `runner.py` |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **Real LLM integration is enabled** → a live shadow evaluation layer becomes the next step, distinct from this deterministic regression harness; the shadow layer would use real provider calls against the same JSONL scenarios
+- **New attack categories emerge** → add a new `EvalCategory` enum value, implement the handler in `_evaluate_by_category()`, and add regression fixtures; no existing eval behavior changes
+
+### Limitations in Scope
+
+- `[Demo-Safe Boundary]` This harness proves deterministic fake-provider regression checks keep working; it does not prove live-LLM safety, production readiness, HIPAA compliance, or audit readiness (D-029)
+- `[Demo-Safe Boundary]` Raw prompt-injection and jailbreak samples must not appear in public-facing artifacts or committed eval output files
+- `[Accepted Risk]` In-process eval execution (no sandboxed subprocess) is acceptable for fake-data regression; not acceptable for running live attacker payloads against real providers

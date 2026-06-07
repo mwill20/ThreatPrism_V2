@@ -104,6 +104,9 @@ Fake SOAR payload
 | ✅ | [Lesson 39](Lesson39_Single_Event_Live_CoPilot.md) | The Single-Event Live Co-Pilot Cadence (Evolution 3) | `src/threatprism/demo/run_copilot_demo.py`, `src/threatprism/cases/service.py` (`assign_case`, `submit_feedback`), `tests/test_copilot_demo.py` |
 | ✅ | [Lesson 40](Lesson40_Capstone_Recap.md) | Capstone Recap: ThreatPrism End to End | whole-system synthesis (lifecycle, guardrails, evolutions, integrity subsystem, principles) |
 | ✅ | [Lesson 41](Lesson41_RGOI_Learning_Loop_And_Gated_Wiring.md) | The RGOI Learning Loop & "Build It, Don't Connect It" | `src/threatprism/csi/learning_loop.py`, `src/threatprism/csi/triage_context.py`, `src/threatprism/demo/run_rgoi_learning_demo.py`, `tests/test_rgoi_learning_loop.py`, `tests/test_rgoi_triage_context.py`, `docs/specs/38_RGOI_LEARNING_LOOP_AND_TRIAGE_CONTEXT.md` |
+| ✅ | [Lesson 42](Lesson42_Decision_Architecture_And_Governance.md) | Decision Architecture & Governance — Reading DECISIONS.md as a Curriculum | `DECISIONS.md`, `docs/ARCHITECTURAL_NORTH_STAR.md`, `LIMITATIONS.md`, `AGENTS.md` |
+| ✅ | [Lesson 43](Lesson43_Limitation_Register_And_Gate_Conditions.md) | The Limitation Register & Gate Conditions | `LIMITATIONS.md`, `docs/FUTURE_ENHANCEMENTS.md`, `docs/specs/21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md` |
+| ✅ | [Lesson 44](Lesson44_Trade_Off_Patterns_Across_The_System.md) | Trade-off Patterns Across the System | `DECISIONS.md`, `LIMITATIONS.md`, `docs/ARCHITECTURAL_NORTH_STAR.md`, cross-system synthesis |
 
 ## File Coverage Map
 
@@ -190,8 +193,16 @@ Fake SOAR payload
 ### Threat Model And Security Docs
 
 - `C:\Projects\ThreatPrismV2\docs\threat-models\*.md` -> Lesson 15
-- `C:\Projects\ThreatPrismV2\docs\specs\21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md` -> Lesson 15
+- `C:\Projects\ThreatPrismV2\docs\specs\21_THREAT_MODEL_TREATMENT_AND_RISK_REGISTER.md` -> Lessons 15 and 43
 - `C:\Projects\ThreatPrismV2\docs\runbooks\PATTERN_REFRESH.md` -> Lesson 15
+
+### Governance And Decision Docs
+
+- `C:\Projects\ThreatPrismV2\DECISIONS.md` -> Lessons 42 and 44
+- `C:\Projects\ThreatPrismV2\LIMITATIONS.md` -> Lessons 43 and 44
+- `C:\Projects\ThreatPrismV2\AGENTS.md` -> Lesson 42
+- `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md` -> Lessons 00 and 42
+- `C:\Projects\ThreatPrismV2\docs\FUTURE_ENHANCEMENTS.md` -> Lesson 43
 
 ### Tests And Fixtures
 
@@ -252,6 +263,43 @@ Fake SOAR payload
 - `C:\Projects\ThreatPrismV2\examples\soar_payloads\*.json` -> Lesson 03
 - `C:\Projects\ThreatPrismV2\examples\demo_scenarios\*.json` -> Lesson 13
 
+## Decision-to-Lesson Cross-Reference
+
+Key locked decisions and which lessons cover them in depth. Use this to jump directly
+to the lesson that explains a decision's implementation and rationale.
+
+| Decision | Statement (summary) | Lessons |
+|----------|---------------------|---------|
+| D-004 | FastAPI + Python CLI stack | 00, 01, 42 |
+| D-006 | Single-org POC scope (no multi-tenancy) | 07, 42, 43 |
+| D-007 | SOAR adapter strategy | 03, 42, 44 |
+| D-008 | Microsoft-first integrations through adapters | 42, 44 |
+| D-009 | LLM layer is provider-agnostic (TriageProvider Protocol) | 06, 42, 44 |
+| D-010 | `ALLOW_REAL_ACTIONS=false`; real remediation is Avoided | 02, 04, 15, 42, 43, 44 |
+| D-011 | Four-layer guardrail pipeline with fail-closed behavior | 04, 15, 42 |
+| D-012 | SQLite for demo; PostgreSQL-ready design | 07, 42, 43, 44 |
+| D-019 | In-process BackgroundTask (not a queue) | 02, 42, 44 |
+| D-021 | Inbound SOAR data treated as potentially contaminated | 05, 15, 42 |
+| D-022 | No compliance claims; all outputs are advisory | 04, 05, 42, 43 |
+| D-025 | ARCHITECTURAL_NORTH_STAR.md is the directional guide | 00, 15, 42, 43 |
+| D-026 | `?role=` is a view request, not authority | 09, 42, 44 |
+| D-030 | ROLE_VIEW_POLICY is a static dict, not database-backed RBAC | 09, 42 |
+| D-037 | CSI/RGOI is read-only; humans own truth | 18, 41, 42, 44 |
+| D-038/D-039/D-040 | External OIDC gate for production identity | 09, 23, 24, 25, 42, 43 |
+
+## Trade-off Pattern Index
+
+Five recurring design patterns that appear across multiple ThreatPrism components.
+Lesson 44 is the master reference; lessons below show each pattern in context.
+
+| Pattern | What It Solves | First Introduced | Best Example Lessons |
+|---------|---------------|-----------------|----------------------|
+| Demo-Safe Boundary | Avoids over-engineering for POC scope while keeping the production path open | 00 | 07 (SQLite), 42 (register), 44 (synthesis) |
+| Detector-not-Gate | Adds detection signal without creating a block path that could DoS on false positives | 04 | 30 (semantic firewall), 44 (synthesis) |
+| Deterministic over Probabilistic | Ensures hard safety guarantees at every trust boundary | 04 | 09 (ROLE_VIEW_POLICY), 41 (human gate), 44 (synthesis) |
+| Provider-Agnostic Adapter | Prevents vendor lock-in; enables Microsoft-first without making core Microsoft-only | 03 | 06 (TriageProvider), 09 (auth modes), 44 (synthesis) |
+| Reverse-Deny Default | Prevents accidental activation of dangerous features; disabled = byte-identical to absent | 04 | 09 (auth safety), 41 (learning loop), 44 (synthesis) |
+
 ## Fast Validation Commands
 
 PowerShell:
@@ -281,3 +329,17 @@ requested slice:
 - `C:\Projects\ThreatPrismV2\docs\ARCHITECTURAL_NORTH_STAR.md`
 - `C:\Projects\ThreatPrismV2\docs\DATA_STRATEGY_AND_FIXTURE_FACTORY.md`
   when the next request involves datasets, synthetic fixtures, or data realism
+
+### Decisions & Trade-offs Track (Lessons 42–44)
+
+For architectural reasoning, interview prep, or evaluating a proposed change:
+
+| Lesson | Focus | Start Here If… |
+|--------|-------|----------------|
+| [Lesson 42](Lesson42_Decision_Architecture_And_Governance.md) | How to navigate DECISIONS.md; the North Star rubric; how to re-open a decision | You want to understand *why* ThreatPrism was built the way it was |
+| [Lesson 43](Lesson43_Limitation_Register_And_Gate_Conditions.md) | LIMITATIONS.md; gate triggers; operator readiness checklist | You are evaluating ThreatPrism for deployment or asking "why wasn't X built?" |
+| [Lesson 44](Lesson44_Trade_Off_Patterns_Across_The_System.md) | Five recurring trade-off patterns across all components | You want a cross-system mental model of the design language |
+
+These three lessons can be studied in any order after Lesson 00. They reference
+decisions and limitations from real governance files — they are accurate as of the
+last slice close-out and should be re-read after any major architectural change.

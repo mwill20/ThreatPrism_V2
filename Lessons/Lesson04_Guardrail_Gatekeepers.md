@@ -261,3 +261,52 @@ True
 Next, study healthcare safeguard guardrails and role views, where ThreatPrism handles possible PHI/ePHI exposure without over-redacting normal security telemetry.
 
 Remember: guardrails are not polish; they are the safety boundary. 🛡️
+
+---
+
+## ⚖️ Decisions & Trade-offs
+
+### Decisions Touched
+
+| Decision | Statement | Why It Matters Here |
+|----------|-----------|---------------------|
+| D-010 | V2 permits recommended/simulated actions only; `ALLOW_REAL_ACTIONS=false` by default | `enforce_action_safety()` is a hard block — any report containing `real_action_executed: true` is rejected regardless of what the provider returned |
+| D-011 | V2 must use layered guardrails: deterministic prompt firewall, input sanitization, schema validation, semantic classifier interface, output policy, evidence grounding, no autonomous action, audit logging, fail-closed | Each layer in the four-layer pipeline maps directly to a D-011 requirement; the ordering (input → model → output → post-output) is deliberate |
+
+### Threat Treatment
+
+| Threat ID | Threat | Treatment | Owner Decision |
+|-----------|--------|-----------|----------------|
+| I4 / OT-7 | Prompt firewall is pattern-based and bypassable | Mitigation implemented (default-off semantic classifier), live-verified 4/6 deepset rows at threshold 0.9; deterministic firewall + quarantine remain the hard gate | Project owner (POC), 2026-05-24; control selection 2026-05-30 |
+| L1 / OT-L5 | Quarantine flag did not abort service-layer triage | **Mitigated** (Slice G): `run_triage()` now blocks on `operation="quarantine"` before provider execution | Codex; Project owner, 2026-06-01 |
+| L3 | Insecure output handling | **Mitigated** via three-layer output validation (`scan_output_policy`, `validate_report_evidence`, `enforce_action_safety`) | Already implemented |
+| T2 | LLM provider returns report with unsupported evidence IDs | **Mitigated** via `validate_report_evidence()` | Already implemented |
+| E2 | `real_action_executed: true` bypass | **Mitigated** via `enforce_action_safety()` | Already implemented |
+
+### What We Explicitly Rejected
+
+- **LLM-as-judge as the primary guardrail:** Probabilistic, adds API cost per request, and can itself be manipulated. The deterministic regex/schema layer is reproducible and zero-cost. The semantic classifier (spec 32) is built and live-verified, but intentionally default-off — it is a detector, not a replacement gate.
+- **A single combined guardrail function:** One monolithic check would hide which layer triggered and in what order. The layered design makes failures attributable to a specific stage, which matters for debugging and audit.
+- **Rehydrating `secret_like` tokens after validation passes:** The `REHYDRATABLE_TYPES` set in `tokenization.py` explicitly excludes `secret_like`. Validation passing does not grant permission to expose secrets.
+
+### Trade-off Log
+
+| Choice Made | What We Gained | What We Gave Up |
+|-------------|----------------|-----------------|
+| Deterministic regex over semantic-only classifier | Reproducible, zero API cost, no false-positive DoS risk | Cannot catch creatively paraphrased injection attempts that don't match a known pattern |
+| Quarantine vs. redact distinction | Quarantine stops triage entirely for highest-risk patterns; redact allows triage to proceed with sanitized input | Quarantined cases require analyst intervention to recover; there is no automatic retry path |
+| Output policy scanned on serialized JSON | Fast single-pass scan of the entire report as a string | Cannot catch semantic overclaiming — only lexical matches against `PROHIBITED_PATTERNS` |
+| Fail-closed on any guardrail issue | No unsafe reports reach storage or role views | A single false-positive guardrail hit blocks the entire triage; analyst must re-submit |
+
+### Future Gate Conditions
+
+This component's design would change if:
+
+- **Real LLM is enabled** → semantic firewall (spec 32, `guardrails/semantic_firewall.py`) can be promoted from detector-only to gate; re-opens I4/OT-7
+- **Analyst review UI exists** → quarantine queue can be surfaced and managed; until then, quarantined cases require manual investigation
+
+### Limitations in Scope
+
+- `[Gated Future Work]` Semantic prompt-injection classifier (Prompt Guard 2, spec 32) is built and live-verified but default-off; enablement requires the real-LLM gate to open and re-opens OT-L11 (model evasion / FP-DoS)
+- `[Gated Future Work]` Quarantine queue with analyst review UI is not yet built
+- `[Demo-Safe Boundary]` Output policy patterns are regex-based; novel phrasing may bypass them; the pattern refresh process (D-031, `docs/runbooks/PATTERN_REFRESH.md`) addresses this with quarterly reviews and fixture-first additions
